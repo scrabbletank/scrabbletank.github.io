@@ -152,7 +152,7 @@ export class CombatScene extends SceneUIBase {
             this.combatActive = false;
         } else {
             this.restButton.setText("Rest");
-            this.combatActive = true;
+            this.initFight(this.tileRef);
         }
     }
 

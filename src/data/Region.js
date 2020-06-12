@@ -128,14 +128,16 @@ class TileData {
         this.amountExplored += delta / this.exploreSpeed;
     }
     incInvasionPower(baseline) {
-        var defense = baseline + this.defense;
-        var powerMulti = Math.max(0.1, 1 + (this.difficulty - defense) * 0.1);
-        this.invasionPower += Statics.TIME_PER_DAY * powerMulti;
+        if (this.getInvasionMulti() < 5) {
+            var defense = baseline + this.defense;
+            var powerMulti = Math.max(0.1, 1 + (this.difficulty - defense) * 0.1);
+            this.invasionPower += Statics.TIME_PER_DAY * powerMulti;
+        }
     }
 
     //should be called after killing invasion monsters
     decreaseInvasionPower() {
-        this.invasionPower = this.invasionPower / 2;
+        this.invasionPower = this.invasionPower / Statics.SIGHTING_BATTLE_MULTI;
         if (this.getInvasionMulti() <= 0) {
             this.isInvaded = false;
             this.invasionPower = 0;
@@ -385,7 +387,9 @@ export class Region {
     }
 
     _addSighting() {
-        this.sightingsDelay = Common.randint(180, 600) * 1000;
+        var a = Math.min(Statics.MIN_SIGHTING_SECONDS * (1 + this.sightings.length * Statics.SIGHTING_MULTI_PER_SIGHTING), Statics.MAX_SIGHTING_SECONDS);
+        var b = Math.min(a * 2, Statics.MAX_SIGHTING_SECONDS);
+        this.sightingsDelay = Common.randint(a, b) * 1000;
         var invadeList = [];
         for (var y = 1; y < this.height - 1; y++) {
             for (var x = 1; x < this.width - 1; x++) {

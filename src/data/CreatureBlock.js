@@ -239,7 +239,11 @@ export class CreatureBlock {
 
         this.currentHealth = this.MaxHealth();
         this.name = level < 1 ? "Weak " + name : name;
-        this.xpReward = shadeBase + (shadeBase / 2) * rLvl;
+        if (rLvl < 0) {
+            this.xpReward = shadeBase * 0.75;
+        } else {
+            this.xpReward = shadeBase + (shadeBase / 2) * rLvl;
+        }
         this.drops = rewards;
         this.icon = icon;
     }

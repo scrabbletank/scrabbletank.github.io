@@ -39,7 +39,7 @@ export class GameScene extends SceneUIBase {
         this.saveTimer = Statics.AUTOSAVE_TIMER;
 
         //try loading save data if it exists
-        // this.load();
+        this.load();
     }
 
     preload() {
