@@ -170,6 +170,6 @@ export class TownData {
         this.baseIncome = saveObj.bi;
         this.buildings = saveObj.bld;
         this.upgrades = saveObj.up;
-        this.goldCapBonus = saveObj.goldCapBonus;
+        this.goldCapBonus = saveObj.gc;
     }
 }
