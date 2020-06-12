@@ -92,7 +92,7 @@ export class TooltipRegistry {
                 return "Increases the Town's economy by " + (tier * 5) + "-" + (tier * 20) + "%, based on distance to " +
                     "the Town and other Trade Houses.";
             case "Tavern":
-                return "Increases the Town's economy by" + (tier * 10) + "% and increases max population by 5.";
+                return "Increases the Town's economy by " + (tier * 10) + "% and increases max population by 5.";
         }
     }
 

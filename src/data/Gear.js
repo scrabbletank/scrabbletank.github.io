@@ -44,4 +44,18 @@ export class Gear {
         }
         this.level = level;
     }
+
+    save() {
+        var saveObj = {
+            lv: this.level,
+            mote: this.motesFused
+        }
+
+        return saveObj;
+    }
+
+    load(saveObj) {
+        this.bringToLevel(saveObj.lv);
+        this.motesFused = saveObj.mote;
+    }
 }

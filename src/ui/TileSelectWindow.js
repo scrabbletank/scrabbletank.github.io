@@ -103,7 +103,7 @@ export class TileSelectWindow {
                     txt += "Gold: " + tile.building.goldCost;
                     this.buildingCosts = scene.add.bitmapText(x + 295, y + 25, "courier16", txt);
                     this.upgradeButton = new TextButton(scene, x + 140, y + 175, 120, 20, "Upgrade")
-                        .onClickHandler(() => { this._onAction("upgrade"); });
+                        .onClickHandler(() => { this._onAction("upgrade", {tile: tile}); });
                 }
             }
         }

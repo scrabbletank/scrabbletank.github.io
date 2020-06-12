@@ -145,7 +145,7 @@ export class RegionScene extends SceneUIBase {
                 var player = new PlayerData();
                 var tier = Math.floor(this.region.difficultyRange[0] / 20);
                 if (Common.canCraft(blob.building.resourceCosts, player.resources[tier]) === true &&
-                    blob.building.goldCost <= player.gold) {
+                blob.building.goldCost <= player.gold) {
                     player.spendResource(blob.building.resourceCosts, tier);
                     player.addGold(-blob.building.goldCost);
                     this.region.placeBuilding(blob.tile.x, blob.tile.y, blob.building);
@@ -154,6 +154,14 @@ export class RegionScene extends SceneUIBase {
                 }
                 break;
             case "upgrade":
+                var player = new PlayerData();
+                var tier = Math.floor(this.region.difficultyRange[0] / 20);
+                if (Common.canCraft(blob.tile.building.resourceCosts, player.resources[tier]) === true &&
+                    blob.tile.building.goldCost <= player.gold) {
+                    player.spendResource(blob.tile.building.resourceCosts, tier);
+                    player.addGold(-blob.tile.building.goldCost);
+                    this.region.upgradeBuilding(blob.tile.x, blob.tile.y);
+                }
                 break;
         }
         this.tileSelectWindow.destroy();

@@ -226,7 +226,7 @@ creatureDefs['whale'] = {
         hit: 1,
         evasion: 1
     },
-    attackSpeed: 2200,
+    attackSpeed: 2400,
     critChance: 0.05,
     shadeBase: 32,
     rewards: [

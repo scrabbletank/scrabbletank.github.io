@@ -92,7 +92,7 @@ class TileData {
 
     init(tileType, difficulty, baseDifficulty) {
         this.difficulty = difficulty;
-        this.exploreSpeed = 1 + (difficulty - baseDifficulty) * Statics.EXPLORE_MULTIPLIER;
+        this.exploreSpeed = 1 + difficulty * Statics.EXPLORE_MULTIPLIER;
         this.color = tileType.clr;
         this.name = tileType.name;
         this.enemies = tileType.enemies;
@@ -474,7 +474,7 @@ export class Region {
                 break;
             case "Watch Tower":
                 for (var y = Math.max(0, tile.y - 2); y < Math.min(this.height, tile.y + 3); y++) {
-                    for (var x = Math.max(0, tile.x - 2); y < Math.min(this.width, tile.x + 3); x++) {
+                    for (var x = Math.max(0, tile.x - 2); x < Math.min(this.width, tile.x + 3); x++) {
                         if (Math.abs(x - tile.x) + Math.abs(y - tile.y) <= 2) {
                             this.map[y][x].defense += 2 * tile.building.tier;
                         }
@@ -529,7 +529,7 @@ export class Region {
                 break;
             case "Watch Tower":
                 for (var y = Math.max(0, tile.y - 2); y < Math.min(this.height, tile.y + 3); y++) {
-                    for (var x = Math.max(0, tile.x - 2); y < Math.min(this.width, tile.x + 3); x++) {
+                    for (var x = Math.max(0, tile.x - 2); x < Math.min(this.width, tile.x + 3); x++) {
                         if (Math.abs(x - tile.x) + Math.abs(y - tile.y) <= 2) {
                             this.map[y][x].defense -= 2 * tile.building.tier;
                         }

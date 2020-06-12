@@ -183,7 +183,6 @@ export class GearScene extends SceneUIBase {
         }
         this._setupView();
         this._setupGearDisplays();
-        this._changeFilter(-1);
     }
 
     _setupView() {
@@ -204,6 +203,7 @@ export class GearScene extends SceneUIBase {
     rebirth() {
         this._updateTierButtons();
         this._setupGearDisplays();
+        this._changeFilter(-1);
     }
 
     update(__time, __delta) {

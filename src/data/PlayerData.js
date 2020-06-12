@@ -16,7 +16,6 @@ export class PlayerData {
             this.talentLevel = 1;
             this.nextStatCost = Statics.STAT_COST_BASE;
             this.nextTalentCost = Statics.TALENT_COST_BASE;
-            // this.resources = [100, 100, 100, 100, 100, 100];
             this.resources = [[0, 0, 0, 0, 0, 0], [0, 0, 0, 0, 0, 0], [0, 0, 0, 0, 0, 0], [0, 0, 0, 0, 0, 0],
             [0, 0, 0, 0, 0, 0], [0, 0, 0, 0, 0, 0], [0, 0, 0, 0, 0, 0], [0, 0, 0, 0, 0, 0]];
             this.statChangedHandlers = [];
@@ -202,9 +201,11 @@ export class PlayerData {
     addGold(amount) {
         var worldData = new WorldData();
         this.gold = Math.min(worldData.getGoldCap(), this.gold + amount);
+        this._onResourcesChanged();
     }
     addMote(amount) {
         this.motes += amount;
+        this._onResourcesChanged();
     }
 
     equip(gear) {

@@ -14,6 +14,10 @@ export class GearData {
     }
 
     save() {
+        var gearList = [];
+        for (var i = 0; i < this.gear.length; i++) {
+            gearList.push(this.gear[i].save());
+        }
         var saveObj = {
             gear: this.gear,
             ta: this.tiersAvailable,
