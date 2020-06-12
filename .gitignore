@@ -1,0 +1,5 @@
+node_modules
+*.xlsx
+aseprite
+*.txt
+dist
