@@ -111,6 +111,7 @@ export class PlayerBlock extends CreatureBlock {
     CritDamage() {
         var ret = this.stats.critDamage + this.statBonuses.critDamage + this.Accuracy() * Statics.CRITDMG_PER_ACCURACY;
         ret += this.Accuracy() * this.player.talents.acc.level * 0.005;
+        ret = Math.pow(ret, Statics.CRITDMG_DIMINISHING_POWER);
         return Math.floor(ret * 100) / 100;
     }
     DamageMin() {
