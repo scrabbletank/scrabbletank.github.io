@@ -72,7 +72,8 @@ export class PlayerData {
         this.talentLevel = 1;
         this.nextStatCost = Statics.STAT_COST_BASE;
         this.nextTalentCost = Statics.TALENT_COST_BASE;
-        this.resources = [0, 0, 0, 0, 0, 0];
+        this.resources = [[0, 0, 0, 0, 0, 0], [0, 0, 0, 0, 0, 0], [0, 0, 0, 0, 0, 0], [0, 0, 0, 0, 0, 0],
+        [0, 0, 0, 0, 0, 0], [0, 0, 0, 0, 0, 0], [0, 0, 0, 0, 0, 0], [0, 0, 0, 0, 0, 0]];
         this.craftingCosts = [1, 1, 1, 1, 1, 1, 1, 1];
         this.gold = 0;
         this.motes = 0;
@@ -166,6 +167,10 @@ export class PlayerData {
         }
     }
 
+    earnableMoonlight(gateReached) {
+        return MoonlightData.getMoonlightEarned(this.statLevel + this.talentLevel * 3, gateReached);
+    }
+
     buyStat() {
         this.statPoints += Statics.STAT_POINTS_PER_BUY;
         this.shade -= this.nextStatCost;
@@ -181,9 +186,11 @@ export class PlayerData {
     }
 
     levelTalent(talent) {
-        talent.level += 1;
-        this.talentPoints -= 1;
-        this._onTalentChanged();
+        if (talent.level < talent.maxLevel || talent.maxLevel === -1) {
+            talent.level += 1;
+            this.talentPoints -= 1;
+            this._onTalentChanged();
+        }
     }
 
     addResource(list, tier) {

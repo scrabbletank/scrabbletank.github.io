@@ -320,7 +320,8 @@ export class CombatScene extends SceneUIBase {
                     var numRewards = 1 + (lvl / 10) + ((lvl % 10) / 10 > Math.random() ? 1 : 0);
                     for (var t = 0; t < numRewards; t++) {
                         var idx = Common.randint(0, this.monsters[i].drops.length);
-                        rewards[this.monsters[i].drops[idx].type] += this.monsters[i].drops[idx].amount * Math.max(1, this.monsters[i].level);
+                        var dropMulti = Math.max(1, this.monsters[i].level) - Math.max(0, Math.min(8, Math.floor(this.monsters[i].level / 20)) * 20);
+                        rewards[this.monsters[i].drops[idx].type] += this.monsters[i].drops[idx].amount * dropMulti;
                     }
                 }
                 this.player.statBlock.encounterCounter -= 1;
@@ -330,12 +331,12 @@ export class CombatScene extends SceneUIBase {
                 if (this.tileRef.isInvaded === true) {
                     if (this.progression.unlocks.motes === false) {
                         this.progression.registerFeatureUnlocked(Statics.UNLOCK_MOTES_UI,
-                            "You came here because some villagers had said monsters were gathering near their lands and it " +
-                            "seems they were right. The monsters you fought were more powerful than they were before, and more " +
-                            "organized, attacking in groups.\n After defeating the leader of the pack you noticed they left behind " +
-                            "something more than shade, it's solid... like a core? Putting it in your pack for later you decide to " +
-                            "call them Motes of Darkness. Yeah, that ought to impress those villagers. Who knows, maybe I can " +
-                            "attach this to my gear, makes about as much sense as anything else here.");
+                            "Well it happened. Some big bad monsters came back to spew their horrible mists all over the " +
+                            "place again, but fortunately for you you had prepared for this. After killing the " +
+                            "great misty one in the back it dropped something you haven't seen before... sort of like Shade, but like, " +
+                            "more solid. You should probably just call them Motes of Darkness. I'm sure the townsfolk " +
+                            "will be super impressed if you bring this dumb stone back and call it that.\n\n" +
+                            "Oh, you can probably try putting it on your weapon if you really wanted to. It's up to you.");
                     }
                     var moonData = new MoonlightData();
                     this.player.addMote(1 + moonData.moonperks.heartofdarkness.level);

@@ -172,10 +172,8 @@ export class RegionScene extends SceneUIBase {
         this.rebirthDialog = undefined;
 
         var player = new PlayerData();
-        var worldData = new WorldData();
         var moonData = new MoonlightData();
-        var moonlightEarned = MoonlightData.getMoonlightEarned(player.statLevel,
-            Math.floor(worldData.getCurrentRegion().difficultyRange[1] / 20));
+        var moonlightEarned = player.earnableMoonlight(Math.floor(this.region.difficultyRange[1] / 20));
 
         moonData.moonlight += moonlightEarned;
 

@@ -577,7 +577,7 @@ export class Region {
         }
         player.addResource(resource, Math.floor(this.difficultyRange[0] / 20));
 
-        if (this.tilesExplored >= 10) {
+        if (this.tilesExplored >= 11) {
             this.sightingsDelay -= Statics.TIME_PER_DAY;
             if (this.sightingsDelay <= 0) {
                 this._addSighting();

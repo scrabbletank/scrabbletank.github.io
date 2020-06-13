@@ -273,7 +273,7 @@ export class GameScene extends SceneUIBase {
                 }
                 break;
             case Statics.UNLOCK_EXPLORE:
-                if (count === 10) {
+                if (count === 5) {
                     this.progression.registerFeatureUnlocked(Statics.UNLOCK_BUILDING_UI);
                 }
                 break;

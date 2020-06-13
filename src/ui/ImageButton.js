@@ -26,6 +26,10 @@ export class ImageButton {
         this.enabled = enabled;
     }
 
+    setBorderTint(clr) {
+        this.backgroundRect.strokeColor = clr;
+    }
+
     _onClick(callback) {
         if (this.enabled === true) {
             callback();

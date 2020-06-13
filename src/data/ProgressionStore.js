@@ -27,12 +27,20 @@ export class ProgressionStore {
                         "You think you saw a town in the distance towards the north, but you could be seeing things."
                 },
                 {
-                    count: 10,
+                    count: 5,
                     text: "You've seen a lot of what this world has to offer by now, and most of it wants " +
                         "to kill you. The people in the town seem nice though, and many of them have been wanting " +
                         "some way to help out. With the lands sort of safe to walk again they can get back to working.\n\n" +
                         "The only problem is they don't have anything to build with so they want you to bring them some " +
                         "from the monsters you've been killing."
+                },
+                {
+                    count: 10,
+                    text: "Your surprised at how easy this has been going. Sure, every day is a new battle for your life " +
+                        "against horrible shadow monsters, but the tile's you've cleared seem way more vibrant and full of life.\n\n" +
+                        "Some of the townsfolk have been worried that the mists will return but the odds of that happening have " +
+                        "got to be astronomically low. Just to get them off your back you told them to give you some kind of " +
+                        "alert on the Region tab if something goes wrong. Hah! Like that will ever happen."
                 },
                 {
                     count: 30,

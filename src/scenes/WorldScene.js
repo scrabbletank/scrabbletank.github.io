@@ -34,14 +34,14 @@ export class WorldScene extends SceneUIBase {
     _setupRegionTile(x, y, region, index) {
         var diff = region.difficultyRange[0] + "-" + region.difficultyRange[1];
         var explorePercent = Math.floor(region.getExplorePercent() * 100) + "%";
-        this.regionIcons.push(new ImageButton(this, x, y, 64, 64, { sprite: "icons", tile: 0 })
+        this.regionIcons.push(new ImageButton(this, x, y, 64, 64, { sprite: "icons", tile: 48 })
             .onClickHandler(() => { this._selectRegion(index); })
             .onPointerOverHandler(() => { this._createTooltip(x, y, diff, explorePercent, region.type); })
             .onPointerOutHandler(() => { this._disableTooltip(); }));
     }
     _setupPotentialRegionTile(x, y, type, index) {
         var diff = (this.worldData.regionList.length * 20) + "-" + (this.worldData.regionList.length * 20 + 20);
-        this.regionIcons.push(new ImageButton(this, x, y, 64, 64, { sprite: "icons", tile: 0 })
+        this.regionIcons.push(new ImageButton(this, x, y, 64, 64, { sprite: "icons", tile: 48 })
             .onClickHandler(() => { this._chooseNewRegion(index); })
             .onPointerOverHandler(() => { this._createTooltip(x, y, diff, undefined, type); })
             .onPointerOutHandler(() => { this._disableTooltip(); }));

@@ -34,22 +34,31 @@ export class TalentScene extends SceneUIBase {
         for (const prop in this.player.talents) {
             var x = this.relativeX(standardArray[idx][0] + 18);
             var y = this.relativeY(standardArray[idx][1] + 20);
-            this._setupTalentButton(this.player.talents[prop], x, y);
+            this._setupTalentButton(this.player.talents[prop], x, y, idx);
             idx++;
         }
 
         this.player.registerEvent("onTalentChanged", () => { this._onTalentChanged(); });
     }
 
-    _setupTalentButton(talent, x, y) {
+    _setupTalentButton(talent, x, y, index) {
         this.talentButtons.push(new ImageButton(this, x, y, 48, 48, talent.texture)
             .onClickHandler(() => {
                 this._levelUpTalent(talent);
                 this._disableTooltip();
                 this._setTooltip(talent, x, y);
+                this._updateTalentButton(talent, index);
             })
             .onPointerOverHandler(() => { this._setTooltip(talent, x, y); })
             .onPointerOutHandler(() => { this._disableTooltip(); }));
+    }
+
+    _updateTalentButton(talent, index) {
+        if (talent.level >= talent.maxLevel && talent.maxLevel !== -1) {
+            this.talentButtons[index].setBorderTint(Phaser.Display.Color.GetColor(0, 220, 0));
+        } else if (talent.level > 0) {
+            this.talentButtons[index].setBorderTint(Phaser.Display.Color.GetColor(212, 175, 55));
+        }
     }
 
     _onTalentChanged() {

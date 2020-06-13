@@ -176,7 +176,7 @@ creatureDefs['goblin'] = {
         { type: Statics.RESOURCE_METAL, amount: 1.4 },
         { type: Statics.RESOURCE_CRYSTAL, amount: 0.6 }
     ],
-    icon: { sprite: "enemyicons", tile: 9 }
+    icon: { sprite: "enemyicons", tile: 12 }
 };
 creatureDefs['formation'] = {
     name: "Formation",
@@ -205,7 +205,7 @@ creatureDefs['formation'] = {
         { type: Statics.RESOURCE_STONE, amount: 1.8 },
         { type: Statics.RESOURCE_CRYSTAL, amount: 2.2 }
     ],
-    icon: { sprite: "enemyicons", tile: 9 }
+    icon: { sprite: "enemyicons", tile: 10 }
 };
 creatureDefs['whale'] = {
     name: "Whale",
@@ -292,7 +292,7 @@ creatureDefs['lizard'] = {
         { type: Statics.RESOURCE_FIBER, amount: 1.6 },
         { type: Statics.RESOURCE_STONE, amount: 1 }
     ],
-    icon: { sprite: "enemyicons", tile: 9 }
+    icon: { sprite: "enemyicons", tile: 13 }
 };
 creatureDefs['gateguardian'] = {
     name: "Gate Guardian",
@@ -411,7 +411,7 @@ creatureDefs['cactus'] = {
         { type: Statics.RESOURCE_FIBER, amount: 1.6 },
         { type: Statics.RESOURCE_STONE, amount: 1 }
     ],
-    icon: { sprite: "enemyicons", tile: 9 }
+    icon: { sprite: "enemyicons", tile: 11 }
 };
 creatureDefs['moss'] = {
     name: "Moss",
