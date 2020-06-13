@@ -2,6 +2,7 @@ import { Statics } from "./Statics";
 import { PlayerBlock } from "./PlayerBlock";
 import { WorldData } from "./WorldData";
 import { GearData } from "./GearData";
+import { MoonlightData } from "./MoonlightData";
 
 
 
@@ -168,7 +169,7 @@ export class PlayerData {
     }
 
     earnableMoonlight(gateReached) {
-        return MoonlightData.getMoonlightEarned(this.statLevel + this.talentLevel * 3, gateReached);
+        return MoonlightData.getMoonlightEarned((this.statLevel - 1) + (this.talentLevel - 1) * 3, gateReached);
     }
 
     buyStat() {

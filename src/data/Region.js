@@ -22,8 +22,8 @@ class TileData {
 
     constructor(color = 0x00ff00, x = 0, y = 0) {
         this.color = color;
-        this.explored = false;
-        this.revealed = false;
+        this.explored = true;
+        this.revealed = true;
         this.difficulty = 0;
         this.name = "";
         this.enemies = [];
@@ -138,10 +138,6 @@ class TileData {
     //should be called after killing invasion monsters
     decreaseInvasionPower() {
         this.invasionPower = this.invasionPower / Statics.SIGHTING_BATTLE_MULTI;
-        if (this.getInvasionMulti() <= 0) {
-            this.isInvaded = false;
-            this.invasionPower = 0;
-        }
     }
 
     generateMonsters() {
@@ -431,7 +427,7 @@ export class Region {
 
         //we start at 1 as we include the towns position for distance calculations while the town itself provides no bonus
         for (var i = 1; i < this.tradeHouseLocations.length; i++) {
-            var closest = Common.nearestPointInList(this.tradeHouseLocations[0], this.tradeHouseLocations[1], this.tradeHouseLocations, true);
+            var closest = Common.nearestPointInList(this.tradeHouseLocations[i][0], this.tradeHouseLocations[i][1], this.tradeHouseLocations, true);
             this.tradeHouseBonus += Math.max(5, Math.min(20, (closest[1] / Statics.TRADE_HOUSE_MAX_DISTANCE) * 20)) * tier / 100;
         }
         this.townData.economyMulti += this.tradeHouseBonus;
@@ -505,7 +501,7 @@ export class Region {
         var moonData = new MoonlightData();
         tile.defense -= Statics.BUILDING_BASE_DEFENSE + moonData.moonperks.hardenedvillagers.level;
         var prodBonus = 1 + (tile.defense * moonData.moonperks.moonlightworkers.level * 0.01);
-        switch (building.name) {
+        switch (tile.building.name) {
             case "Lumberyard":
                 this.resourcesPerDay[Statics.RESOURCE_WOOD] -= tile.building.tier * yieldHelper(Statics.RESOURCE_WOOD, tile.yields) * prodBonus;
                 break;

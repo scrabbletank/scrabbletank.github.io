@@ -145,7 +145,7 @@ export class RegionScene extends SceneUIBase {
                 var player = new PlayerData();
                 var tier = Math.floor(this.region.difficultyRange[0] / 20);
                 if (Common.canCraft(blob.building.resourceCosts, player.resources[tier]) === true &&
-                blob.building.goldCost <= player.gold) {
+                    blob.building.goldCost <= player.gold) {
                     player.spendResource(blob.building.resourceCosts, tier);
                     player.addGold(-blob.building.goldCost);
                     this.region.placeBuilding(blob.tile.x, blob.tile.y, blob.building);
@@ -161,6 +161,8 @@ export class RegionScene extends SceneUIBase {
                     player.spendResource(blob.tile.building.resourceCosts, tier);
                     player.addGold(-blob.tile.building.goldCost);
                     this.region.upgradeBuilding(blob.tile.x, blob.tile.y);
+                    this.tileElements[blob.tile.y][blob.tile.x].building.setTexture(blob.tile.building.texture.sprite,
+                        blob.tile.building.texture.tile + 8 * (blob.tile.building.tier - 1));
                 }
                 break;
         }
@@ -217,12 +219,13 @@ export class RegionScene extends SceneUIBase {
     _updateBuildings() {
         for (var i = 0; i < this.region.height; i++) {
             for (var t = 0; t < this.region.width; t++) {
-                if (this.tileElements[i][t].building === undefined && this.region.map[i][t].building !== undefined) {
+                var bld = this.region.map[i][t].building;
+                if (this.tileElements[i][t].building === undefined && bld !== undefined) {
 
                     this.tileElements[i][t].building = this.add.image(this.relativeX(t * this.WIDTH + this.offsetX + 20),
-                        this.relativeY(i * this.HEIGHT + this.offsetY + 20), this.region.map[i][t].building.texture.sprite,
-                        this.region.map[i][t].building.texture.tile).setOrigin(0.5);
-                } else if (this.tileElements[i][t].building !== undefined && this.region.map[i][t].building === undefined) {
+                        this.relativeY(i * this.HEIGHT + this.offsetY + 20), bld.texture.sprite,
+                        bld.texture.tile + 8 * (bld.tier - 1)).setOrigin(0.5);
+                } else if (this.tileElements[i][t].building !== undefined && bld === undefined) {
                     this.tileElements[i][t].building.destroy();
                     this.tileElements[i][t].building = undefined;
                 }

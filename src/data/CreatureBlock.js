@@ -110,6 +110,7 @@ export class CreatureBlock {
     }
     CritDamage() {
         var ret = this.stats.critDamage + this.statBonuses.critDamage + this.Accuracy() * Statics.CRITDMG_PER_ACCURACY;
+        ret = Math.pow(ret, Statics.CRITDMG_DIMINISHING_POWER);
         return Math.floor(ret * 100) / 100;
     }
     DamageMin() {
