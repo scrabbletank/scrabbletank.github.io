@@ -17,6 +17,7 @@ import { TownData } from './TownData';
 import { PlayerData } from './PlayerData';
 import { MoonlightData } from './MoonlightData';
 import { RegionRegistry } from './RegionRegistry';
+import { Building } from './Building';
 
 class TileData {
 
@@ -56,7 +57,7 @@ class TileData {
             in: this.isInvaded,
             ip: this.invasionPower,
             yld: this.yields,
-            bld: this.building,
+            bld: this.building === undefined ? "" : this.building.save(),
             def: this.defense,
             fcd: this.fightCooldown,
             x: this.x,
@@ -81,7 +82,7 @@ class TileData {
         tile.isInvaded = saveObj.in;
         tile.invasionPower = saveObj.ip;
         tile.yields = saveObj.yld;
-        tile.building = saveObj.bld;
+        tile.building = saveObj.bld === "" ? undefined : Building.loadFromFile(saveObj.bld);
         tile.defense = saveObj.def;
         tile.fightCooldown = saveObj.fcd;
         tile.x = saveObj.x;
