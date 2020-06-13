@@ -22,8 +22,8 @@ class TileData {
 
     constructor(color = 0x00ff00, x = 0, y = 0) {
         this.color = color;
-        this.explored = true;
-        this.revealed = true;
+        this.explored = false;
+        this.revealed = false;
         this.difficulty = 0;
         this.name = "";
         this.enemies = [];
