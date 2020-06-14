@@ -119,19 +119,19 @@ export class ProgressionStore {
                         "but at least you found one use for it."
                 },
                 {
-                    count: 10,
+                    count: 25,
                     text: "You're not entirely sure what this shade is doing, but boy do you feel strong!"
                 },
                 {
-                    count: 25,
+                    count: 50,
                     text: "You've been infusing a lot of shade lately, is there a limit to how much your body can take?"
                 },
                 {
-                    count: 50,
-                    text: "doesn't seem like it. At least 50 isn't the limit."
+                    count: 100,
+                    text: "doesn't seem like it. At least 100 isn't the limit."
                 },
                 {
-                    count: 100,
+                    count: 300,
                     text: "I've lost count. By all measures my abilities shouldn't be humanly possible, yet I'm still finding " +
                         "monsters stronger than me."
                 }
