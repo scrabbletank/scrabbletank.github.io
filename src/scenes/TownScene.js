@@ -89,10 +89,15 @@ export class TownScene extends SceneUIBase {
             "T" + region.townData.tier + " Crafting Cost: " + (Math.floor(player.craftingCosts[region.townData.tier - 1] * 10000) / 100) + "%\n" +
             "Economy: " + Math.floor(region.townData.economyMulti * 100 * govBonus) + "%\n" +
             "Production: " + Math.floor(region.townData.productionMulti * 100) + "%\n" +
-            "Bounty Gold: " + Math.floor(region.townData.bountyMulti * 100) + "%";
+            "Bounty Gold: " + Math.floor(region.townData.bountyMulti * 100) + "%\n" +
+            "Daily Production:\n";
+
+        var govBonus = 1 + player.talents.governance.level * 0.03;
+        for (var i = 0; i < region.resourcesPerDay.length; i++) {
+            txt += "  " + Statics.RESOURCE_NAMES[i] + ": " + (Math.floor(region.resourcesPerDay[i] * this.productionMulti * govBonus * 100) / 100) + "\n";
+        }
 
         this.statsLabel.setText(txt);
-        var region = new WorldData().getCurrentRegion();
 
         for (var i = 0; i < this.buildingDisplays.length; i++) {
             this.buildingDisplays[i].destroy();

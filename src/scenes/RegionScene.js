@@ -151,6 +151,7 @@ export class RegionScene extends SceneUIBase {
                     this.region.placeBuilding(blob.tile.x, blob.tile.y, blob.building);
                     blob.tile.building = blob.building;
                     this._updateBuildings();
+                    this.scene.get("TownScene")._updateStatus();
                 }
                 break;
             case "upgrade":

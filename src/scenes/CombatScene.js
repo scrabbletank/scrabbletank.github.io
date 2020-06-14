@@ -341,8 +341,9 @@ export class CombatScene extends SceneUIBase {
                     var moonData = new MoonlightData();
                     this.player.addMote(1 + moonData.moonperks.heartofdarkness.level);
                     this.tileRef.decreaseInvasionPower();
-                    if (this.tileRef.invasionPower <= Statics.SIGHTING_DIVIDER / 2) {
+                    if (this.tileRef.invasionPower <= Statics.SIGHTING_DIVIDER * 0.8) {
                         var region = new WorldData().getCurrentRegion().endSighting(this.tileRef.x, this.tileRef.y);
+                        this.scene.get("RegionScene")._updateColors();
                     }
                 }
                 this.restButton.setVisible(true);

@@ -51,6 +51,7 @@ export class TalentScene extends SceneUIBase {
             })
             .onPointerOverHandler(() => { this._setTooltip(talent, x, y); })
             .onPointerOutHandler(() => { this._disableTooltip(); }));
+        this._updateTalentButton(talent, index);
     }
 
     _updateTalentButton(talent, index) {

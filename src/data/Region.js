@@ -187,7 +187,7 @@ export class Region {
         this.invasionCounter = 0;
         this.resourcesPerDay = [0, 0, 0, 0, 0, 0];
         // the town counts as a trade house for calculating bonuses
-        this.tradeHouseLocations = [[Math.floor(this.width / 2), this.height - 4]];
+        this.tradeHouseLocations = [{ x: Math.floor(this.width / 2), y: this.height - 4 }];
         this.tradeHouseBonus = 0;
         this.worldHeight = 350;
         this.type = regionType;
@@ -428,7 +428,7 @@ export class Region {
 
         //we start at 1 as we include the towns position for distance calculations while the town itself provides no bonus
         for (var i = 1; i < this.tradeHouseLocations.length; i++) {
-            var closest = Common.nearestPointInList(this.tradeHouseLocations[i][0], this.tradeHouseLocations[i][1], this.tradeHouseLocations, true);
+            var closest = Common.nearestPointInList(this.tradeHouseLocations[i].x, this.tradeHouseLocations[i].y, this.tradeHouseLocations, true);
             this.tradeHouseBonus += Math.max(5, Math.min(20, (closest[1] / Statics.TRADE_HOUSE_MAX_DISTANCE) * 20)) * tier / 100;
         }
         this.townData.economyMulti += this.tradeHouseBonus;
@@ -447,24 +447,25 @@ export class Region {
         };
         var moonData = new MoonlightData();
         tile.defense += Statics.BUILDING_BASE_DEFENSE + moonData.moonperks.hardenedvillagers.level;
+        var prodBonus = 1 + (tile.defense * moonData.moonperks.moonlightworkers.level * 0.01);
         switch (tile.building.name) {
             case "Lumberyard":
-                this.resourcesPerDay[Statics.RESOURCE_WOOD] += tile.building.tier * yieldHelper(Statics.RESOURCE_WOOD, tile.yields);
+                this.resourcesPerDay[Statics.RESOURCE_WOOD] += tile.building.tier * yieldHelper(Statics.RESOURCE_WOOD, tile.yields) * prodBonus;
                 break;
             case "Hunter's Lodge":
-                this.resourcesPerDay[Statics.RESOURCE_LEATHER] += tile.building.tier * yieldHelper(Statics.RESOURCE_LEATHER, tile.yields);
+                this.resourcesPerDay[Statics.RESOURCE_LEATHER] += tile.building.tier * yieldHelper(Statics.RESOURCE_LEATHER, tile.yields) * prodBonus;
                 break;
             case "Mine":
-                this.resourcesPerDay[Statics.RESOURCE_METAL] += tile.building.tier * yieldHelper(Statics.RESOURCE_METAL, tile.yields);
+                this.resourcesPerDay[Statics.RESOURCE_METAL] += tile.building.tier * yieldHelper(Statics.RESOURCE_METAL, tile.yields) * prodBonus;
                 break;
             case "Herbalist's Hut":
-                this.resourcesPerDay[Statics.RESOURCE_FIBER] += tile.building.tier * yieldHelper(Statics.RESOURCE_FIBER, tile.yields);
+                this.resourcesPerDay[Statics.RESOURCE_FIBER] += tile.building.tier * yieldHelper(Statics.RESOURCE_FIBER, tile.yields) * prodBonus;
                 break;
             case "Quarry":
-                this.resourcesPerDay[Statics.RESOURCE_STONE] += tile.building.tier * yieldHelper(Statics.RESOURCE_STONE, tile.yields);
+                this.resourcesPerDay[Statics.RESOURCE_STONE] += tile.building.tier * yieldHelper(Statics.RESOURCE_STONE, tile.yields) * prodBonus;
                 break;
             case "Crystal Loom":
-                this.resourcesPerDay[Statics.RESOURCE_CRYSTAL] += tile.building.tier * yieldHelper(Statics.RESOURCE_CRYSTAL, tile.yields);
+                this.resourcesPerDay[Statics.RESOURCE_CRYSTAL] += tile.building.tier * yieldHelper(Statics.RESOURCE_CRYSTAL, tile.yields) * prodBonus;
                 break;
             case "Town House":
                 this.townData.increaseMaxPop(5 * tile.building.tier);
@@ -479,7 +480,7 @@ export class Region {
                 }
                 break;
             case "Trade House":
-                this.tradeHouseLocations.push([tile.x, tile.y]);
+                this.tradeHouseLocations.push({ x: tile.x, y: tile.y });
                 this._calculateTradeHouseBonus(tile.building.tier);
                 break;
             case "Tavern":
@@ -534,7 +535,7 @@ export class Region {
                 }
                 break;
             case "Town House":
-                this.tradeHouseLocations = this.tradeHouseLocations.filter(item => item[0] !== tile.x && item[1] !== tile.y);
+                this.tradeHouseLocations = this.tradeHouseLocations.filter(item => item.x !== tile.x && item.y !== tile.y);
                 this._calculateTradeHouseBonus();
                 break;
             case "Tavern":

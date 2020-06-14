@@ -499,8 +499,8 @@ export class GameScene extends SceneUIBase {
             }
             if (this.worldData.regionList.length - 1 === this.worldData.currentRegion &&
                 this.worldData.nextRegions.length === 0) {
-                    this.worldData.generateRegionChoices();
-                    this.worldScene._refreshRegions();
+                this.worldData.generateRegionChoices();
+                this.worldScene._refreshRegions();
             }
         }
         if (tile.explored === false) {
