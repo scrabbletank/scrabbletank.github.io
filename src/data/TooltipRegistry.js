@@ -115,7 +115,7 @@ export class TooltipRegistry {
                 return "Every man's home is a castle, but more literal. Increases the defense of all buildings by 1.";
             case "Banking":
                 return "Learn how to make money from nothing! Each level increases tax income by 5% and increases your base gold " +
-                    "cap by 250.";
+                    "cap by 50.";
             case "Map Making":
                 return "Instead of wandering aimlessly, get some villagers to make some maps. Increases exploration speed by 10%.";
         }

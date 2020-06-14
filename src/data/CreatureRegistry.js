@@ -212,8 +212,8 @@ creatureDefs['whale'] = {
     scaleBlock:
     {
         strength: 1.5,
-        dexterity: 0.8,
-        agility: 0.5,
+        dexterity: 0.85,
+        agility: 0.55,
         endurance: 1.5,
         recovery: 1.5,
         defense: 0.8,

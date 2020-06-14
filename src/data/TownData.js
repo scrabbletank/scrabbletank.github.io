@@ -42,22 +42,22 @@ export class TownData {
         this.buildings = [
             {
                 name: "Forge", level: 0, maxLevel: -1, requires: [],
-                goldCosts: [50, 25, 15], resources: [[0, 0, 0], [0, 0, 0], [5, 5, 3], [0, 0, 0], [5, 5, 3], [0, 0, 0]]
+                goldCosts: [50, 25, 15], resources: [[0, 0, 0], [0, 0, 0], [10, 10, 5], [0, 0, 0], [10, 10, 5], [0, 0, 0]]
             },
             {
                 name: "Guilds", level: 0, maxLevel: -1, requires: [],
-                goldCosts: [100, 50, 25], resources: [[0, 0, 0], [5, 5, 2], [0, 0, 0], [5, 5, 2], [0, 0, 0], [5, 5, 2]]
+                goldCosts: [100, 50, 25], resources: [[0, 0, 0], [10, 10, 5], [0, 0, 0], [10, 10, 5], [0, 0, 0], [10, 10, 5]]
             },
             {
                 name: "Town Hall", level: 0, maxLevel: -1, requires: [],
-                goldCosts: [75, 50, 15], resources: [[10, 5, 5], [0, 0, 0], [0, 0, 0], [0, 0, 0], [5, 5, 3], [0, 0, 0]]
+                goldCosts: [75, 50, 15], resources: [[15, 10, 8], [0, 0, 0], [0, 0, 0], [0, 0, 0], [10, 10, 5], [0, 0, 0]]
             }
         ];
 
         this.upgrades = [
             {
                 name: "Trade House", level: 0, maxLevel: 1, requires: [],
-                goldCosts: [250, 250, 0], resources: [[75, 75, 0], [25, 25, 0], [0, 0, 0], [25, 25, 0], [50, 50, 0], [25, 25, 0]]
+                goldCosts: [400, 250, 0], resources: [[150, 150, 0], [75, 75, 0], [0, 0, 0], [75, 75, 0], [100, 100, 0], [75, 75, 0]]
             },
             // {
             //     name: "Alchemy Lab", level: 0, maxLevel: 1, requires: [],
@@ -65,19 +65,19 @@ export class TownData {
             // },
             {
                 name: "Tavern", level: 0, maxLevel: 1, requires: [],
-                goldCosts: [150, 150, 0], resources: [[100, 100, 0], [0, 0, 0], [0, 0, 0], [0, 0, 0], [50, 50, 0], [0, 0, 0]]
+                goldCosts: [250, 150, 0], resources: [[150, 150, 0], [0, 0, 0], [0, 0, 0], [0, 0, 0], [100, 100, 0], [0, 0, 0]]
             },
             {
                 name: "Reinforced Houses", level: 0, maxLevel: 5, requires: [],
-                goldCosts: [75, 75, 30], resources: [[0, 0, 0], [0, 0, 0], [10, 10, 5], [0, 0, 0], [15, 15, 10], [0, 0, 0]]
+                goldCosts: [75, 75, 30], resources: [[0, 0, 0], [0, 0, 0], [20, 20, 8], [0, 0, 0], [40, 40, 15], [0, 0, 0]]
             },
             {
                 name: "Banking", level: 0, maxLevel: -1, requires: [],
-                goldCosts: [20, 20, 15], resources: [[0, 0, 0], [0, 0, 0], [0, 0, 0], [0, 0, 0], [10, 10, 5], [5, 5, 3]]
+                goldCosts: [20, 20, 15], resources: [[0, 0, 0], [0, 0, 0], [0, 0, 0], [0, 0, 0], [15, 15, 8], [10, 10, 5]]
             },
             {
                 name: "Map Making", level: 0, maxLevel: -1, requires: [],
-                goldCosts: [25, 25, 15], resources: [[0, 0, 0], [8, 8, 5], [0, 0, 0], [3, 3, 3], [0, 0, 0], [0, 0, 0]]
+                goldCosts: [25, 25, 15], resources: [[0, 0, 0], [10, 10, 5], [0, 0, 0], [5, 5, 5], [0, 0, 0], [0, 0, 0]]
             }
         ];
     }
@@ -101,7 +101,7 @@ export class TownData {
                 break;
             case "Banking":
                 this.economyMulti += 0.05;
-                this.goldCapBonus += 250;
+                this.goldCapBonus += 50;
                 break;
             case "Map Making":
                 this.exploreMulti += 0.1;

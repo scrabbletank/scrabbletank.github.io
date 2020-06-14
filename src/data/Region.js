@@ -379,6 +379,9 @@ export class Region {
         this.invasionCounter = 0;
         var tile = this.sightings[Common.randint(0, this.sightings.length)];
         this.map[tile[0]][tile[1]].invade();
+        if (this.map[tile[0]][tile[1]].building != undefined) {
+            this.destroyBuilding(tile[1], tile[0]);
+        }
         this.townData.currentPopulation = this.townData.currentPopulation * Statics.POP_MULTI_AFTER_INVASION;
         this.tilesExplored -= 1;
     }
