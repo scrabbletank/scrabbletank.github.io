@@ -164,6 +164,7 @@ export class RegionScene extends SceneUIBase {
                     this.region.upgradeBuilding(blob.tile.x, blob.tile.y);
                     this.tileElements[blob.tile.y][blob.tile.x].building.setTexture(blob.tile.building.texture.sprite,
                         blob.tile.building.texture.tile + 8 * (blob.tile.building.tier - 1));
+                    this.scene.get("TownScene")._updateStatus();
                 }
                 break;
         }

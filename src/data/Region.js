@@ -416,7 +416,7 @@ export class Region {
     }
 
     endSighting(x, y) {
-        this.sightings = this.sightings.filter(item => item[0] !== y && item[1] !== x);
+        this.sightings = this.sightings.filter(item => (item[0] === y && item[1] === x) === false);
         this.map[y][x].isInvaded = false;
         this.map[y][x].invasionPower = 0;
         this.invasionCounter = Math.max(0, this.invasionCounter - Statics.INVASION_REDUCTION_FROM_SIGHTING);
