@@ -390,7 +390,7 @@ export class Region {
         var invadeList = [];
         for (var y = 1; y < this.height - 1; y++) {
             for (var x = 1; x < this.width - 1; x++) {
-                if (this.map[y][x].explored === false) {
+                if (this.map[y][x].explored === false || this.map[y][x].name === "Town" || this.map[y][x].name === "Mystic Gate") {
                     continue;
                 }
                 var canInvade = false;

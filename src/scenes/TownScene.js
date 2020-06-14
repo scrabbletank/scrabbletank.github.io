@@ -92,9 +92,8 @@ export class TownScene extends SceneUIBase {
             "Bounty Gold: " + Math.floor(region.townData.bountyMulti * 100) + "%\n" +
             "Daily Production:\n";
 
-        var govBonus = 1 + player.talents.governance.level * 0.03;
         for (var i = 0; i < region.resourcesPerDay.length; i++) {
-            txt += "  " + Statics.RESOURCE_NAMES[i] + ": " + (Math.floor(region.resourcesPerDay[i] * this.productionMulti * govBonus * 100) / 100) + "\n";
+            txt += "  " + Statics.RESOURCE_NAMES[i] + ": " + (Math.floor(region.resourcesPerDay[i] * region.townData.productionMulti * govBonus * 100) / 100) + "\n";
         }
 
         this.statsLabel.setText(txt);
