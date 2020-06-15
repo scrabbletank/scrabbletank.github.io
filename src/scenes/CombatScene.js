@@ -320,8 +320,8 @@ export class CombatScene extends SceneUIBase {
                     var numRewards = 1 + (lvl / 10) + ((lvl % 10) / 10 > Math.random() ? 1 : 0);
                     for (var t = 0; t < numRewards; t++) {
                         var idx = Common.randint(0, this.monsters[i].drops.length);
-                        var dropMulti = Math.max(1, this.monsters[i].level) - Math.max(0, Math.min(8, Math.floor(this.monsters[i].level / 20)) * 20);
-                        rewards[this.monsters[i].drops[idx].type] += this.monsters[i].drops[idx].amount * dropMulti;
+                        var dropMulti = Math.max(1, this.monsters[i].level - Math.max(0, Math.min(8, Math.floor(this.monsters[i].level / 20)) * 20));
+                        rewards[this.monsters[i].drops[idx].type] += Math.max(0, this.monsters[i].drops[idx].amount * dropMulti);
                     }
                 }
                 this.player.statBlock.encounterCounter -= 1;

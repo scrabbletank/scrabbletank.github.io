@@ -19,7 +19,7 @@ creatureDefs['wolf'] = {
         health: 1,
         healthRegen: 1,
         damageMin: 1.3,
-        damageMax: 1.3,
+        damageMax: 1.33,
         hit: 1,
         evasion: 1.3
     },
@@ -47,8 +47,8 @@ creatureDefs['bear'] = {
         armor: 1.7,
         health: 1.2,
         healthRegen: 1,
-        damageMin: 0.85,
-        damageMax: 1.4,
+        damageMin: 0.9,
+        damageMax: 1.35,
         hit: 1,
         evasion: 1
     },
@@ -77,7 +77,7 @@ creatureDefs['plant'] = {
         health: 0.8,
         healthRegen: 1.3,
         damageMin: 1,
-        damageMax: 1,
+        damageMax: 1.125,
         hit: 1.2,
         evasion: 1
     },
@@ -105,8 +105,8 @@ creatureDefs['slime'] = {
         armor: 1.2,
         health: 1,
         healthRegen: 2,
-        damageMin: 0.9,
-        damageMax: 0.9,
+        damageMin: 1,
+        damageMax: 1.05,
         hit: 1,
         evasion: 1.2
     },
@@ -153,7 +153,7 @@ creatureDefs['goblin'] = {
     name: "Goblin",
     scaleBlock:
     {
-        strength: 0.65,
+        strength: 0.72,
         dexterity: 1.2,
         agility: 1.6,
         endurance: 0.8,
@@ -221,12 +221,12 @@ creatureDefs['whale'] = {
         armor: 1.4,
         health: 1.5,
         healthRegen: 1.5,
-        damageMin: 1.6,
-        damageMax: 1.6,
+        damageMin: 1.5,
+        damageMax: 1.55,
         hit: 1,
         evasion: 1
     },
-    attackSpeed: 2400,
+    attackSpeed: 2300,
     critChance: 0.1,
     shadeBase: 32,
     rewards: [
@@ -251,7 +251,7 @@ creatureDefs['fish'] = {
         health: 1,
         healthRegen: 1,
         damageMin: 1,
-        damageMax: 1,
+        damageMax: 1.1,
         hit: 1,
         evasion: 1.3
     },
@@ -298,7 +298,7 @@ creatureDefs['gateguardian'] = {
     name: "Gate Guardian",
     scaleBlock:
     {
-        strength: 1.7,
+        strength: 1.65,
         dexterity: 1.1,
         agility: 0.8,
         endurance: 1.5,
@@ -313,7 +313,7 @@ creatureDefs['gateguardian'] = {
         hit: 1,
         evasion: 1
     },
-    attackSpeed: 1800,
+    attackSpeed: 1900,
     critChance: 0.19,
     shadeBase: 40,
     rewards: [
@@ -369,8 +369,8 @@ creatureDefs['drake'] = {
         armor: 1.8,
         health: 1,
         healthRegen: 1,
-        damageMin: 1.3,
-        damageMax: 1.4,
+        damageMin: 1.25,
+        damageMax: 1.35,
         hit: 1,
         evasion: 1.2
     },
@@ -399,7 +399,7 @@ creatureDefs['cactus'] = {
         health: 1.2,
         healthRegen: 1.5,
         damageMin: 0.9,
-        damageMax: 1,
+        damageMax: 1.05,
         hit: 1,
         evasion: 0.9
     },
@@ -514,7 +514,7 @@ creatureDefs['coyote'] = {
         armor: 1.3,
         health: 1.1,
         healthRegen: 1,
-        damageMin: 1.2,
+        damageMin: 1.15,
         damageMax: 1.2,
         hit: 1.1,
         evasion: 1
@@ -543,7 +543,7 @@ creatureDefs['catfish'] = {
         armor: 1.2,
         health: 1,
         healthRegen: 1,
-        damageMin: 0.9,
+        damageMin: 0.95,
         damageMax: 1.2,
         hit: 1.2,
         evasion: 1

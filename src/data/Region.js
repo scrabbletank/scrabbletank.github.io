@@ -130,8 +130,8 @@ class TileData {
     }
     incInvasionPower(baseline) {
         if (this.getInvasionMulti() < 5) {
-            var defense = baseline + this.defense;
-            var powerMulti = Math.max(0.1, 1 + (this.difficulty - defense) * 0.1);
+            var def = baseline + this.defense;
+            var powerMulti = Math.max(0.1, 1 + (this.difficulty - def) * 0.1);
             this.invasionPower += Statics.TIME_PER_DAY * powerMulti;
         }
     }
@@ -329,13 +329,14 @@ export class Region {
         var max = 0;
         var maxPos = [0, 0];
         for (var i = 0; i < this.height; i++) {
-            for (var t = 0; t < this.height; t++) {
+            for (var t = 0; t < this.width; t++) {
                 if (this.map[i][t].difficulty >= this.difficultyRange[1]) {
                     mysticGateSpots.push([i, t]);
                 }
                 if (this.map[i][t].difficulty > max) {
                     maxPos[0] = i;
                     maxPos[1] = t;
+                    max = this.map[i][t].difficulty;
                 }
             }
         }
@@ -574,7 +575,7 @@ export class Region {
         var resource = [];
         var govBonus = 1 + player.talents.governance.level * 0.03;
         for (var i = 0; i < this.resourcesPerDay.length; i++) {
-            resource.push(this.resourcesPerDay[i] * this.townData.productionMulti * govBonus);
+            resource.push(Math.max(0, this.resourcesPerDay[i] * this.townData.productionMulti * govBonus));
         }
         player.addResource(resource, Math.floor(this.difficultyRange[0] / 20));
 

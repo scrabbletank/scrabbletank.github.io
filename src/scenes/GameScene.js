@@ -473,14 +473,15 @@ export class GameScene extends SceneUIBase {
 
     _onKillCallback(tile, shade, rewards, gold) {
         var region = new WorldData().getCurrentRegion();
+        var tier = Math.floor(tile.difficulty / 20)
         if (this.progression.unlocks.craftingUI === true) {
             var gearData = new GearData();
-            gearData.tiersAvailable = Math.max(gearData.tiersAvailable, region.townData.tier);
+            gearData.tiersAvailable = Math.max(gearData.tiersAvailable, tier + 1);
             this.gearScene._updateTierButtons();
         }
         shade = shade * (1 + this.moonlight.moonperks.shadow.level * 0.1);
         this.player.shade += shade;
-        this.player.addResource(rewards, Math.floor(region.difficultyRange[0] / 20));
+        this.player.addResource(rewards, tier);
         this._updateShade();
         this.progression.registerMonsterKill();
         this.progression.registerShadeGain(shade);

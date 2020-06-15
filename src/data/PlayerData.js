@@ -202,7 +202,7 @@ export class PlayerData {
     }
     spendResource(list, tier) {
         for (var i = 0; i < list.length; i++) {
-            this.resources[tier][i] -= list[i];
+            this.resources[tier][i] = Math.max(0, this.resources[tier][i] - list[i]);
         }
         this._onResourcesChanged();
     }

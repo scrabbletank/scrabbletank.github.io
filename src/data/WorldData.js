@@ -60,6 +60,7 @@ export class WorldData {
         var difficulty = this.regionList.length * 20;
         this.regionList.push(new Region(12, 12, [difficulty, difficulty + 20], this.nextRegions[index]));
         this.regionList[this.regionList.length - 1].worldHeight = Math.floor((index + 1) * (700 / (this.nextRegions.length + 1)));
+        this.nextRegions = [];
     }
 
 
