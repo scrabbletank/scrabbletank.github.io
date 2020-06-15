@@ -263,6 +263,9 @@ export class GameScene extends SceneUIBase {
             case Statics.UNLOCK_TALENTS_TAB:
                 this.talentButton.setVisible(true);
                 break;
+            case Statics.UNLOCK_WORLD_TAB:
+                this.worldButton.setVisible(true);
+                break;
             case Statics.UNLOCK_INFUSE_UI:
             case Statics.UNLOCK_RESOURCE_UI:
                 this._layoutStats();
