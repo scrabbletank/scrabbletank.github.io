@@ -309,6 +309,9 @@ export class ProgressionStore {
             case Statics.UNLOCK_MOTES_UI:
                 this.unlocks.motes = true;
                 break;
+            case Statics.UNLOCK_WORLD_TAB:
+                this.unlocks.worldTab = true;
+                break;
         }
 
         this._onUnlock(feature, 0, text);

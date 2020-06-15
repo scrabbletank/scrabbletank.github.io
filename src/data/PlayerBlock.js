@@ -115,12 +115,14 @@ export class PlayerBlock extends CreatureBlock {
         return Math.floor(ret * 100) / 100;
     }
     DamageMin() {
-        var ret = this.statBonuses.damageMin * (1 + this.Strength() * Statics.SCALING_DAMAGE_PER_STRENGTH) + this.Strength() * Statics.STRENGTH_DMG_MIN;
+        var ret = this.statBonuses.damageMin * (1 + Math.pow(this.Strength(), Statics.SCALING_DIMINISHING_POWER) * Statics.SCALING_DAMAGE_PER_STRENGTH) +
+            this.Strength() * Statics.STRENGTH_DMG_MIN;
         ret += this.Strength() * this.player.talents.str.level * 0.02;
         return Math.floor(Math.max(1, ret));
     }
     DamageMax() {
-        var ret = this.statBonuses.damageMax * (1 + this.Strength() * Statics.SCALING_DAMAGE_PER_STRENGTH) + this.Strength() * Statics.STRENGTH_DMG_MAX;
+        var ret = this.statBonuses.damageMax * (1 + Math.pow(this.Strength(), Statics.SCALING_DIMINISHING_POWER) * Statics.SCALING_DAMAGE_PER_STRENGTH) +
+            this.Strength() * Statics.STRENGTH_DMG_MAX;
         ret += this.Strength() * this.player.talents.str.level * 0.05;
         return Math.floor(Math.max(1, ret));
     }
@@ -130,7 +132,8 @@ export class PlayerBlock extends CreatureBlock {
         return Math.floor(ret * 10) / 10;
     }
     Armor() {
-        var ret = this.Defense() * Statics.ARMOR_PER_DEFENSE + this.statBonuses.armor * (1 + this.Defense() * Statics.SCALING_ARMOR_PER_DEFENSE);
+        var ret = this.Defense() * Statics.ARMOR_PER_DEFENSE + this.statBonuses.armor *
+            (1 + Math.pow(this.Defense(), Statics.SCALING_DIMINISHING_POWER) * Statics.SCALING_ARMOR_PER_DEFENSE);
         ret += this.Defense() * this.player.talents.def.level * 0.01;
         return Math.floor(ret);
     }

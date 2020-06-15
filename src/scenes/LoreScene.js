@@ -9,9 +9,7 @@ export class LoreScene extends SceneUIBase {
         super(position, name);
 
         this.labels = [];
-        this.internalScroll = 0;
-        this.scrollDirection = 0;
-        this.maxScroll = 0;
+        this.labelIndex = 0;
         this.loreStore = new LoreStore();
     }
 
@@ -20,10 +18,7 @@ export class LoreScene extends SceneUIBase {
     }
 
     rebirth() {
-        this.cameras.getCamera("loreBox").scrollY = this.relativeY(0) + this.internalScroll;
-        this.internalScroll = 0;
-        this.scrollDirection = 0;
-        this.maxScroll = 0;
+        this.cameras.getCamera("loreBox").scrollY = this.relativeY(0);
         for (var i = 0; i < this.labels.length; i++) {
             this.labels[i].destroy();
         }
@@ -44,12 +39,8 @@ export class LoreScene extends SceneUIBase {
 
         this.upButton = new TextButton(this, super.relativeX(20), this.relativeY(5), 60, 20, 'up');
         this.upButton.onClickHandler(() => { this._scrollUp(); });
-        this.upButton.onPointerOutHandler(() => { this._endScrolling(); });
-        this.upButton.onPointerUpHandler(() => { this._endScrolling(); });
         this.downButton = new TextButton(this, super.relativeX(80), this.relativeY(5), 60, 20, 'down');
         this.downButton.onClickHandler(() => { this._scrollDown(); });
-        this.downButton.onPointerOutHandler(() => { this._endScrolling(); });
-        this.downButton.onPointerUpHandler(() => { this._endScrolling(); });
 
         for (var i = 0; i < this.loreStore.lore.length; i++) {
             this.addText(this.loreStore.lore[i], false);
@@ -57,15 +48,25 @@ export class LoreScene extends SceneUIBase {
     }
 
     _scrollUp() {
-        this.scrollDirection = -1;
-    }
-
-    _endScrolling() {
-        this.scrollDirection = 0;
+        if (this.labelIndex > 0) {
+            this.labelIndex -= 1;
+        }
+        this._scrollTo(this.labelIndex);
     }
 
     _scrollDown() {
-        this.scrollDirection = 1;
+        if (this.labelIndex < this.labels.length - 1) {
+            this.labelIndex += 1;
+        }
+        this._scrollTo(this.labelIndex);
+    }
+
+    _scrollTo(index) {
+        if (index < 0 || index >= this.labels.length) {
+            return;
+        }
+        this.labelIndex = index;
+        this.cameras.getCamera("loreBox").scrollY = this.labels[this.labelIndex].getPosY() - 10;
     }
 
     _handleProgressionEvents(_type, _count, text) {
@@ -86,12 +87,5 @@ export class LoreScene extends SceneUIBase {
             y = this.labels[this.labels.length - 1].getHeight();
         }
         this.labels.push(new LoreLabel(this, x, y, text, 85, "courier20", 20));
-        this.maxScroll = Math.max(0, this.labels[this.labels.length - 1].getHeight() - this.relativeY(30) - 500);
-    }
-
-    update(__time, delta) {
-        var change = delta * this.scrollDirection * 0.3;
-        this.internalScroll = Math.min(this.maxScroll, Math.max(this.internalScroll + change, 0));
-        this.cameras.getCamera("loreBox").scrollY = this.relativeY(0) + this.internalScroll;
     }
 }

@@ -494,7 +494,7 @@ export class GameScene extends SceneUIBase {
             if (this.progression.unlocks.worldTab === false) {
                 this.progression.registerFeatureUnlocked(Statics.UNLOCK_WORLD_TAB,
                     "You did it, you've reached the edge of the world. This is all there is...\n\n" +
-                    "Oh wait, it looks like there's a trail over there leading to a new region! It looks like there's" +
+                    "Oh wait, it looks like there's a trail over there leading to a new region! there's " +
                     "a whole world out there. I was wondering what that last tab was going to be.");
             }
             if (this.worldData.regionList.length - 1 === this.worldData.currentRegion &&
