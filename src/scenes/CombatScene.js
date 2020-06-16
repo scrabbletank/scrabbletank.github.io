@@ -299,7 +299,7 @@ export class CombatScene extends SceneUIBase {
                     }
                     if (newTarget !== this.target) {
                         crit = this.player.statBlock.CritChance() > Math.random();
-                        dmg = this.player.statBlock.attack(this.monsters[newTarget], crit);
+                        dmg = this.player.statBlock.cleave(this.monsters[newTarget], crit);
                         this._setupMonsterAnim(newTarget, crit);
                     }
                 }
@@ -340,8 +340,8 @@ export class CombatScene extends SceneUIBase {
                     }
                     var moonData = new MoonlightData();
                     this.player.addMote(1 + moonData.moonperks.heartofdarkness.level);
-                    this.tileRef.decreaseInvasionPower();
-                    if (this.tileRef.invasionPower <= Statics.SIGHTING_DIVIDER * 0.8) {
+                    this.tileRef.invasionFights -= 1;
+                    if (this.tileRef.invasionFights <= 0) {
                         var region = new WorldData().getCurrentRegion().endSighting(this.tileRef.x, this.tileRef.y);
                         this.scene.get("RegionScene")._updateColors();
                     }

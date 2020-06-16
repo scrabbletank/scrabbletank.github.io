@@ -97,13 +97,13 @@ export class WorldData {
 
         return saveObj;
     }
-    load(saveObj) {
+    load(saveObj, ver) {
         this.regionList = [];
         for (var i = 0; i < saveObj.rl.length; i++) {
-            this.regionList.push(Region.loadFromSave(saveObj.rl[i]));
+            this.regionList.push(Region.loadFromSave(saveObj.rl[i], ver));
         }
         this.currentRegion = saveObj.cr;
         this.nextRegions = saveObj.nr;
-        this.time.load(saveObj.time);
+        this.time.load(saveObj.time, ver);
     }
 }

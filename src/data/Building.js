@@ -27,7 +27,7 @@ export class Building {
         return saveObj;
     }
 
-    static loadFromFile(saveObj) {
+    static loadFromFile(saveObj, ver) {
         var bld = BuildingRegistry.getBuildingByName(saveObj.reg);
         for (var i = bld.tier; i <= saveObj.t; i++) {
             bld.increaseCosts();

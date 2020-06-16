@@ -54,7 +54,7 @@ export class Gear {
         return saveObj;
     }
 
-    load(saveObj) {
+    load(saveObj, ver) {
         this.bringToLevel(saveObj.lv);
         this.motesFused = saveObj.mote;
     }

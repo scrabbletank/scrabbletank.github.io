@@ -309,8 +309,8 @@ export class PlayerData {
         return saveObj;
     }
 
-    load(saveObj) {
-        this.statBlock.load(saveObj.stats);
+    load(saveObj, ver) {
+        this.statBlock.load(saveObj.stats, ver);
         this.shade = saveObj.shade;
         this.statPoints = saveObj.sp;
         this.talentPoints = saveObj.tp;

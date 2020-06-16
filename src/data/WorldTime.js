@@ -55,7 +55,7 @@ export class WorldTime {
         return saveObj;
     }
 
-    load(saveObj) {
+    load(saveObj, ver) {
         this.time = saveObj.time;
     }
 }

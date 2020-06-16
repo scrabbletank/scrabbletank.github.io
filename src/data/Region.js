@@ -33,6 +33,7 @@ class TileData {
         this.exploreSpeed = 1;
         this.isInvaded = false;
         this.invasionPower = 0;
+        this.invasionFights = 0;
         this.yields = [];
         this.building = undefined;
         this.defense = 0;
@@ -56,6 +57,7 @@ class TileData {
             es: this.exploreSpeed,
             in: this.isInvaded,
             ip: this.invasionPower,
+            if: this.invasionFights,
             yld: this.yields,
             bld: this.building === undefined ? "" : this.building.save(),
             def: this.defense,
@@ -66,7 +68,7 @@ class TileData {
 
         return saveObj;
     }
-    static loadFromSave(saveObj) {
+    static loadFromSave(saveObj, ver) {
         var tile = new TileData();
 
         tile.color = saveObj.clr;
@@ -82,11 +84,16 @@ class TileData {
         tile.isInvaded = saveObj.in;
         tile.invasionPower = saveObj.ip;
         tile.yields = saveObj.yld;
-        tile.building = saveObj.bld === "" ? undefined : Building.loadFromFile(saveObj.bld);
+        tile.building = saveObj.bld === "" ? undefined : Building.loadFromFile(saveObj.bld, ver);
         tile.defense = saveObj.def;
         tile.fightCooldown = saveObj.fcd;
         tile.x = saveObj.x;
         tile.y = saveObj.y;
+        if (ver <= 3) {
+            tile.invasionFights = tile.isInvaded ? 5 : 0;
+        } else {
+            tile.invasionFights = saveObj.if;
+        }
 
         return tile;
     }
@@ -113,12 +120,14 @@ class TileData {
     sighting() {
         this.isInvaded = true;
         this.invasionPower = 0;
+        this.invasionFights = 5;
     }
 
     invade() {
         this.isInvaded = false;
         this.invasionPower = 0;
         this.amountExplored = 0;
+        this.invasionFights = 0;
         this.explored = false;
         this.revealed = true;
     }
@@ -134,11 +143,6 @@ class TileData {
             var powerMulti = Math.max(0.1, 1 + (this.difficulty - def) * 0.1);
             this.invasionPower += Statics.TIME_PER_DAY * powerMulti;
         }
-    }
-
-    //should be called after killing invasion monsters
-    decreaseInvasionPower() {
-        this.invasionPower -= Math.max(30000, this.invasionPower - (this.invasionPower / Statics.SIGHTING_BATTLE_MULTI));
     }
 
     generateMonsters() {
@@ -241,7 +245,7 @@ export class Region {
         return saveObj;
     }
 
-    static loadFromSave(saveObj) {
+    static loadFromSave(saveObj, ver) {
         var region = new Region(0, 0, [0, 0], "temperate", true);
 
         region.width = saveObj.w;
@@ -254,7 +258,7 @@ export class Region {
         for (var i = 0; i < saveObj.map.length; i++) {
             var row = [];
             for (var t = 0; t < saveObj.map[i].length; t++) {
-                row.push(TileData.loadFromSave(saveObj.map[i][t]));
+                row.push(TileData.loadFromSave(saveObj.map[i][t], ver));
             }
             region.map.push(row);
         }
@@ -556,8 +560,8 @@ export class Region {
             for (var x = 0; x < this.width; x++) {
                 if (this.map[y][x].explored === false && this.map[y][x].revealed === true &&
                     this.map[y][x].difficulty < min) {
-                        pos = [x, y];
-                        min = this.map[y][x].difficulty;
+                    pos = [x, y];
+                    min = this.map[y][x].difficulty;
                 }
             }
         }

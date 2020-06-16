@@ -199,6 +199,19 @@ export class PlayerBlock extends CreatureBlock {
         this._onAttackCooldownChanged();
         return dmg;
     }
+    cleave(creature, isCrit = false) {
+        if (Math.random() < this.player.talents.stun.level * 0.05) {
+            creature.stunTimer = 500;
+        }
+        var rawDmg = this.Strength() * this.player.talents.cleave.level * 0.2;
+        if (isCrit === true) {
+            rawDmg = rawDmg * this.CritDamage();
+            if (Math.random() < (this.player.talents.doublecrit.level * 0.01 * this.CritChance())) {
+                rawDmg = rawDmg * 2;
+            }
+        }
+        return dmg = creature.takeDamage(rawDmg, isCrit);
+    }
 
     save() {
         var saveObj = {
@@ -212,7 +225,7 @@ export class PlayerBlock extends CreatureBlock {
         return saveObj;
     }
 
-    load(saveObj) {
+    load(saveObj, ver) {
         this.stats = saveObj.stat;
         this.hitAnim = saveObj.ha;
         this.critAnim = saveObj.ca;

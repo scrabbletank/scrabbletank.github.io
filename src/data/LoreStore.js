@@ -24,7 +24,7 @@ export class LoreStore {
 
         return saveObj;
     }
-    load(saveObj) {
+    load(saveObj, ver) {
         this.lore = saveObj.lore;
     }
 }

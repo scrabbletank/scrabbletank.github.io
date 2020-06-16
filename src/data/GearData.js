@@ -27,9 +27,9 @@ export class GearData {
         return saveObj;
     }
 
-    load(saveObj) {
+    load(saveObj, ver) {
         for (var i = 0; i < saveObj.gear.length; i++) {
-            this.gear[i].load(saveObj.gear[i]);
+            this.gear[i].load(saveObj.gear[i], ver);
         }
         this.tiersAvailable = saveObj.ta;
         this.moteSoftCap = saveObj.msc;

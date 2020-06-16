@@ -99,7 +99,7 @@ export class MoonlightData {
         return saveObj;
     }
 
-    load(saveObj) {
+    load(saveObj, ver) {
         this.moonlight = saveObj.ml;
         this.moonperks = saveObj.mp;
     }

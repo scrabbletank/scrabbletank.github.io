@@ -358,7 +358,7 @@ export class ProgressionStore {
         return saveObj;
     }
 
-    load(saveObj) {
+    load(saveObj, ver) {
         this.unlocks = saveObj.un;
         this.exploresUnlocked = saveObj.eun;
         this.killsUnlocked = saveObj.kun;

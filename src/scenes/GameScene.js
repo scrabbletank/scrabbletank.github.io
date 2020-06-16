@@ -604,12 +604,12 @@ export class GameScene extends SceneUIBase {
         var gearData = new GearData();
         var lore = new LoreStore();
 
-        gearData.load(saveObj.gear);
+        gearData.load(saveObj.gear, saveObj.version);
         //player needs to load after gear
-        this.player.load(saveObj.player);
-        this.worldData.load(saveObj.world);
-        this.progression.load(saveObj.progression);
-        this.moonlight.load(saveObj.moon);
-        lore.load(saveObj.lore);
+        this.player.load(saveObj.player, saveObj.version);
+        this.worldData.load(saveObj.world, saveObj.version);
+        this.progression.load(saveObj.progression, saveObj.version);
+        this.moonlight.load(saveObj.moon, saveObj.version);
+        lore.load(saveObj.lore, saveObj.version);
     }
 }
