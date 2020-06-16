@@ -20,6 +20,7 @@ import { MoonlightScene } from "./MoonlightScene";
 import { MoonlightData } from "../data/MoonlightData";
 import { LoreStore } from "../data/LoreStore";
 import { WorldScene } from "./WorldScene";
+import { Common } from "../utils/Common";
 
 export class GameScene extends SceneUIBase {
     constructor(position, name) {
@@ -37,6 +38,9 @@ export class GameScene extends SceneUIBase {
         this.resourceStart = 0;
         this.resourceTierSelected = 0;
         this.saveTimer = Statics.AUTOSAVE_TIMER;
+        this.buyAmount = 1;
+        this.talentCost = 0;
+        this.statCost = 0;
 
         //try loading save data if it exists
         this.load();
@@ -66,34 +70,34 @@ export class GameScene extends SceneUIBase {
         this.statIncButtons = [];
         this.statIcons.push(new TooltipImage(this, 20, 50, 16, 16, { sprite: "icons", tile: 0 },
             "Strength determines how hard you hit. Each point increases your min Damage by 0.4, max Damage by 1, and increases damage " +
-            "from gear by 1%."));
+            "from gear by ~1% (diminishing returns)."));
         this.statIcons.push(new TooltipImage(this, 20, 70, 16, 16, { sprite: "icons", tile: 1 },
             "Dexterity determines your ability to hit enemies. Each point increases your Hit by 7."));
         this.statIcons.push(new TooltipImage(this, 20, 90, 16, 16, { sprite: "icons", tile: 2 },
-            "Agility determines how hard you are to hit. Each point increases your Evasion by 7."));
+            "Agility determines how hard you are to hit. Each point increases your Evasion by 7 and gives a small boost to explore speed."));
         this.statIcons.push(new TooltipImage(this, 20, 110, 16, 16, { sprite: "icons", tile: 3 },
             "Endurance determines your health. Each point increases your max Health by 5"));
         this.statIcons.push(new TooltipImage(this, 20, 130, 16, 16, { sprite: "icons", tile: 4 },
             "Recovery determines how easily you heal your wounds. Each point increases your Health Regen by 0.1/s."));
         this.statIcons.push(new TooltipImage(this, 20, 150, 16, 16, { sprite: "icons", tile: 5 },
-            "Defense determines how durable your body is. Each point increases your armor by 0.2 and increases armor from gear by 1%."));
+            "Defense determines how durable your body is. Each point increases your armor by 0.2 and increases armor from gear by ~1% (diminishing returns)."));
         this.statIcons.push(new TooltipImage(this, 20, 170, 16, 16, { sprite: "icons", tile: 6 },
             "Accuracy determines your ability to strike weak points. Each point increases your Crit damage by 2.5%."));
 
         this.statIncButtons.push(new TextButton(this, 150, 50, 16, 16, '+')
-            .onClickHandler(() => { this._increaseStat('str', 1); }));
+            .onClickHandler(() => { this._increaseStat('str'); }));
         this.statIncButtons.push(new TextButton(this, 150, 70, 16, 16, '+')
-            .onClickHandler(() => { this._increaseStat('dex', 1); }));
+            .onClickHandler(() => { this._increaseStat('dex'); }));
         this.statIncButtons.push(new TextButton(this, 150, 90, 16, 16, '+')
-            .onClickHandler(() => { this._increaseStat('agi', 1); }));
+            .onClickHandler(() => { this._increaseStat('agi'); }));
         this.statIncButtons.push(new TextButton(this, 150, 110, 16, 16, '+')
-            .onClickHandler(() => { this._increaseStat('end', 1); }));
+            .onClickHandler(() => { this._increaseStat('end'); }));
         this.statIncButtons.push(new TextButton(this, 150, 130, 16, 16, '+')
-            .onClickHandler(() => { this._increaseStat('rec', 1); }));
+            .onClickHandler(() => { this._increaseStat('rec'); }));
         this.statIncButtons.push(new TextButton(this, 150, 150, 16, 16, '+')
-            .onClickHandler(() => { this._increaseStat('def', 1); }));
+            .onClickHandler(() => { this._increaseStat('def'); }));
         this.statIncButtons.push(new TextButton(this, 150, 170, 16, 16, '+')
-            .onClickHandler(() => { this._increaseStat('acc', 1); }));
+            .onClickHandler(() => { this._increaseStat('acc'); }));
 
         this.detailsLabels = [];
         this.detailsIcons = [];
@@ -104,15 +108,15 @@ export class GameScene extends SceneUIBase {
         this.detailsIcons.push(new TooltipImage(this, 20, 170, 16, 16, { sprite: "icons", tile: 26 },
             "Armor. Each point reduces damage from enemy attacks by 1."));
         this.detailsIcons.push(new TooltipImage(this, 20, 170, 16, 16, { sprite: "icons", tile: 27 },
-            "Hit Chance. This increases your attack speed, while enemy evasion lowers your attack speed."));
+            "Hit Chance. Hit increases your attack speed, while enemy Evasion lowers your attack speed."));
         this.detailsIcons.push(new TooltipImage(this, 20, 170, 16, 16, { sprite: "icons", tile: 28 },
-            "Evasion. Slows enemy attack speed."));
+            "Evasion. Slows enemy attack speed if you have more Evasion then their Hit."));
         this.detailsIcons.push(new TooltipImage(this, 20, 170, 16, 16, { sprite: "icons", tile: 29 },
             "Health Regen. You restore this much Health every second. Works in combat."));
         this.detailsIcons.push(new TooltipImage(this, 20, 170, 16, 16, { sprite: "icons", tile: 31 },
             "Crit Chance. The chance any hit is a critical hit, dealing extra damage."));
         this.detailsIcons.push(new TooltipImage(this, 20, 170, 16, 16, { sprite: "icons", tile: 30 },
-            "Crit Damage. Your damage is increased by this when you land a critical hit."));
+            "Crit Damage. Your damage is increased by this when you land a critical hit. All sources have diminishing returns."));
 
         this.gearLabels = this.add.bitmapText(20, 30, "courier16", "").setOrigin(0);
 
@@ -136,21 +140,33 @@ export class GameScene extends SceneUIBase {
             .onClickHandler(() => { this.resourceTierSelected = 7; this._updateResources(); }));
         this.resourceIcons = [];
         this.resourceIcons.push(new TooltipImage(this, 20, 170, 16, 16, { sprite: "icons", tile: 32 },
-            "Wood"));
+            "Wood. Found in forests and wodes, duh."));
         this.resourceIcons.push(new TooltipImage(this, 20, 170, 16, 16, { sprite: "icons", tile: 33 },
-            "Leather"));
+            "Leather. The best leather comes from the plains and forests."));
         this.resourceIcons.push(new TooltipImage(this, 20, 170, 16, 16, { sprite: "icons", tile: 34 },
-            "Metal"));
+            "Metal. Hard to find resource thats available in large quantities in the mountains."));
         this.resourceIcons.push(new TooltipImage(this, 20, 170, 16, 16, { sprite: "icons", tile: 35 },
-            "Fiber"));
+            "Fiber. Found in swamps and forests."));
         this.resourceIcons.push(new TooltipImage(this, 20, 170, 16, 16, { sprite: "icons", tile: 36 },
-            "Stone"));
+            "Stone. Can be found in abundance in the hills."));
         this.resourceIcons.push(new TooltipImage(this, 20, 170, 16, 16, { sprite: "icons", tile: 37 },
-            "Crystal"));
+            "Crystal. Hard to find in large amounts, but can be found in the harder to reach areas."));
         this.resourceIcons.push(new TooltipImage(this, 20, 170, 16, 16, { sprite: "icons", tile: 38 },
-            "Gold"));
+            "Gold. Your current gold cap is equal to (Flat bonuses + population) * Economy Multiplier."));
         this.resourceIcons.push(new TooltipImage(this, 20, 170, 16, 16, { sprite: "icons", tile: 39 },
             "Motes of Darkness. Fuse these onto weapons to improve their power."));
+
+        this.buyButtons = [];
+        this.buyButtons.push(new TextButton(this, 10, 780, 30, 18, "x1")
+            .onClickHandler(() => { this._setBuyAmount(1); }));
+        this.buyButtons.push(new TextButton(this, 45, 780, 30, 18, "x5")
+            .onClickHandler(() => { this._setBuyAmount(5); }));
+        this.buyButtons.push(new TextButton(this, 80, 780, 40, 18, "x10")
+            .onClickHandler(() => { this._setBuyAmount(10); }));
+        this.buyButtons.push(new TextButton(this, 125, 780, 40, 18, "x100")
+            .onClickHandler(() => { this._setBuyAmount(100); }));
+        // this.buyButtons.push(new TextButton(this, 165, 770, 40, 20, "Max")
+        //     .onClickHandler(() => { this._setBuyAmount(-1); }));
 
         this.infuseLabel = this.add.bitmapText(10, 10, "courier20", "Infuse");
         this.shadeLabel = this.add.bitmapText(20, 10, "courier16", "Shade: " + this.player.shade);
@@ -184,8 +200,6 @@ export class GameScene extends SceneUIBase {
             .onClickHandler(() => { this.scene.bringToTop("TownScene"); this.scene.bringToTop("DarkWorld"); });
         this.worldButton = new TextButton(this, 962, 60, 122, 20, "World")
             .onClickHandler(() => { this.scene.bringToTop("WorldScene"); this.scene.bringToTop("DarkWorld"); });
-        this.moonlightButton = new TextButton(this, 40, 870, 120, 20, "Moonlight")
-            .onClickHandler(() => { this.scene.bringToTop("MoonlightScene"); });
         this.worldTimeLabel = this.add.bitmapText(650, 80, "courier20", "").setOrigin(0.5, 0);
 
         this.gearButton.setVisible(this.progression.unlocks.gearTab);
@@ -199,11 +213,10 @@ export class GameScene extends SceneUIBase {
         this.registry.set('disableTooltip', () => { this._disableTooltip(); });
 
         this.regionScene = new RegionScene([200, 100], "RegionScene");
-        this.regionScene.registerEvent("onTileClick", (x, y) => { this._handleTileClick(x, y); });
+        this.regionScene.registerEvent("onTileClick", (x, y, ae) => { this._handleTileClick(x, y, ae); });
 
         this.combatScene = new CombatScene([200, 100], "CombatScene");
         this.combatScene.registerEvent("onKill", (a, b, c, d) => { this._onKillCallback(a, b, c, d); });
-        this.combatScene.registerEvent("onExplore", (a) => { this._onExploredCallback(a); });
 
         this.loreScene = new LoreScene([200, 100], "LoreScene");
         this.gearScene = new GearScene([200, 100], "GearScene");
@@ -240,6 +253,21 @@ export class GameScene extends SceneUIBase {
                 "After putting these on you should go exploring.");
         }
         this._layoutStats();
+        this._setBuyAmount(1);
+    }
+
+    _setBuyAmount(amount) {
+        this.buyAmount = amount;
+        this._updateInfuseCosts();
+    }
+
+    _updateInfuseCosts() {
+        this.statCost = this.player.getStatCost(this.buyAmount);
+        this.talentCost = this.player.getTalentCost(this.buyAmount);
+        this.statProgressBar.setFillPercent(this.player.shade / this.statCost,
+            Common.numberString(Math.floor(Math.min(this.player.shade, this.statCost))) + '/' + Common.numberString(this.statCost));
+        this.talentProgressBar.setFillPercent(this.player.shade / this.talentCost,
+            Common.numberString(Math.floor(Math.min(this.player.shade, this.talentCost))) + '/' + Common.numberString(Math.floor(this.talentCost)));
     }
 
     _handleProgressionEvents(type, count, text) {
@@ -302,13 +330,13 @@ export class GameScene extends SceneUIBase {
         }
         this.statLabels = [];
         this.statLabels.push(this.add.bitmapText(20, 30, "courier16", "Stat Points: " + this.player.statPoints));
-        this.statLabels.push(this.add.bitmapText(40, 50, "courier16", this.player.statBlock.Strength()));
-        this.statLabels.push(this.add.bitmapText(40, 70, "courier16", this.player.statBlock.Dexterity()));
-        this.statLabels.push(this.add.bitmapText(40, 90, "courier16", this.player.statBlock.Agility()));
-        this.statLabels.push(this.add.bitmapText(40, 110, "courier16", this.player.statBlock.Endurance()));
-        this.statLabels.push(this.add.bitmapText(40, 130, "courier16", this.player.statBlock.Recovery()));
-        this.statLabels.push(this.add.bitmapText(40, 150, "courier16", this.player.statBlock.Defense()));
-        this.statLabels.push(this.add.bitmapText(40, 170, "courier16", this.player.statBlock.Accuracy()));
+        this.statLabels.push(this.add.bitmapText(40, 50, "courier16", Common.numberString(this.player.statBlock.Strength())));
+        this.statLabels.push(this.add.bitmapText(40, 70, "courier16", Common.numberString(this.player.statBlock.Dexterity())));
+        this.statLabels.push(this.add.bitmapText(40, 90, "courier16", Common.numberString(this.player.statBlock.Agility())));
+        this.statLabels.push(this.add.bitmapText(40, 110, "courier16", Common.numberString(this.player.statBlock.Endurance())));
+        this.statLabels.push(this.add.bitmapText(40, 130, "courier16", Common.numberString(this.player.statBlock.Recovery())));
+        this.statLabels.push(this.add.bitmapText(40, 150, "courier16", Common.numberString(this.player.statBlock.Defense())));
+        this.statLabels.push(this.add.bitmapText(40, 170, "courier16", Common.numberString(this.player.statBlock.Accuracy())));
 
         this._updateStatButtons();
     }
@@ -323,11 +351,11 @@ export class GameScene extends SceneUIBase {
         this.talentProgressBar.setPosition(20, this.infuseStart + 100);
         this.talentInfuseButton.setPosition(150, this.infuseStart + 100);
 
-        this.shadeLabel.setText("Shade: " + Math.floor(this.player.shade));
-        this.statProgressBar.setFillPercent(this.player.shade / this.player.nextStatCost,
-            Math.floor(Math.min(this.player.shade, this.player.nextStatCost)) + '/' + this.player.nextStatCost);
-        this.talentProgressBar.setFillPercent(this.player.shade / this.player.nextTalentCost,
-            Math.floor(Math.min(this.player.shade, this.player.nextTalentCost)) + '/' + Math.floor(this.player.nextTalentCost));
+        this.shadeLabel.setText("Shade: " + Common.numberString(Math.floor(this.player.shade)));
+        this.statProgressBar.setFillPercent(this.player.shade / this.statCost,
+            Common.numberString(Math.floor(Math.min(this.player.shade, this.statCost))) + '/' + Common.numberString(this.statCost));
+        this.talentProgressBar.setFillPercent(this.player.shade / this.talentCost,
+            Common.numberString(Math.floor(Math.min(this.player.shade, this.talentCost))) + '/' + Common.numberString(Math.floor(this.talentCost)));
         this.statInfuseButton.setEnable(this.player.shade >= this.player.nextStatCost);
         this.talentInfuseButton.setEnable(this.player.shade >= this.player.nextTalentCost);
     }
@@ -352,17 +380,17 @@ export class GameScene extends SceneUIBase {
             this.detailsIcons[i].setPosition(20, this.detailsStart + 20 + (i * 20));
         }
         this.detailsLabels.push(this.add.bitmapText(40, this.detailsStart + 20, "courier16",
-            Math.floor(this.player.statBlock.currentHealth) + '/' + this.player.statBlock.MaxHealth()));
+            Common.numberString(Math.floor(this.player.statBlock.currentHealth)) + '/' + Common.numberString(this.player.statBlock.MaxHealth())));
         this.detailsLabels.push(this.add.bitmapText(40, this.detailsStart + 40, "courier16",
-            this.player.statBlock.DamageMin() + '-' + this.player.statBlock.DamageMax()));
-        this.detailsLabels.push(this.add.bitmapText(40, this.detailsStart + 60, "courier16", this.player.statBlock.Armor()));
-        this.detailsLabels.push(this.add.bitmapText(40, this.detailsStart + 80, "courier16", this.player.statBlock.Hit()));
-        this.detailsLabels.push(this.add.bitmapText(40, this.detailsStart + 100, "courier16", this.player.statBlock.Evasion()));
+            Common.numberString(this.player.statBlock.DamageMin()) + '-' + Common.numberString(this.player.statBlock.DamageMax())));
+        this.detailsLabels.push(this.add.bitmapText(40, this.detailsStart + 60, "courier16", Common.numberString(this.player.statBlock.Armor())));
+        this.detailsLabels.push(this.add.bitmapText(40, this.detailsStart + 80, "courier16", Common.numberString(this.player.statBlock.Hit())));
+        this.detailsLabels.push(this.add.bitmapText(40, this.detailsStart + 100, "courier16", Common.numberString(this.player.statBlock.Evasion())));
         this.detailsLabels.push(this.add.bitmapText(40, this.detailsStart + 120, "courier16", this.player.statBlock.HealthRegen() + "/s"));
         this.detailsLabels.push(this.add.bitmapText(40, this.detailsStart + 140, "courier16",
             Math.floor(this.player.statBlock.CritChance() * 100) + "%"));
         this.detailsLabels.push(this.add.bitmapText(40, this.detailsStart + 160, "courier16",
-            "+" + Math.floor((this.player.statBlock.CritDamage() - 1) * 100) + "%"));
+            "+" + Common.numberString(Math.floor((this.player.statBlock.CritDamage() - 1) * 100)) + "%"));
     }
 
     _updateResources() {
@@ -385,18 +413,18 @@ export class GameScene extends SceneUIBase {
         this.resourceIcons[7].setVisible(this.progression.unlocks.motes);
         if (this.progression.unlocks.resourceUI === true) {
             var res = this.player.resources[this.resourceTierSelected];
-            this.resourceLabels.push(this.add.bitmapText(40, this.resourceStart + 40, "courier16", Math.floor(res[0])));
-            this.resourceLabels.push(this.add.bitmapText(40, this.resourceStart + 60, "courier16", Math.floor(res[1])));
-            this.resourceLabels.push(this.add.bitmapText(40, this.resourceStart + 80, "courier16", Math.floor(res[2])));
-            this.resourceLabels.push(this.add.bitmapText(40, this.resourceStart + 100, "courier16", Math.floor(res[3])));
-            this.resourceLabels.push(this.add.bitmapText(40, this.resourceStart + 120, "courier16", Math.floor(res[4])));
-            this.resourceLabels.push(this.add.bitmapText(40, this.resourceStart + 140, "courier16", Math.floor(res[5])));
+            this.resourceLabels.push(this.add.bitmapText(40, this.resourceStart + 40, "courier16", Common.numberString(Math.floor(res[0]))));
+            this.resourceLabels.push(this.add.bitmapText(40, this.resourceStart + 60, "courier16", Common.numberString(Math.floor(res[1]))));
+            this.resourceLabels.push(this.add.bitmapText(40, this.resourceStart + 80, "courier16", Common.numberString(Math.floor(res[2]))));
+            this.resourceLabels.push(this.add.bitmapText(40, this.resourceStart + 100, "courier16", Common.numberString(Math.floor(res[3]))));
+            this.resourceLabels.push(this.add.bitmapText(40, this.resourceStart + 120, "courier16", Common.numberString(Math.floor(res[4]))));
+            this.resourceLabels.push(this.add.bitmapText(40, this.resourceStart + 140, "courier16", Common.numberString(Math.floor(res[5]))));
             if (this.progression.unlocks.townTab === true) {
                 this.resourceLabels.push(this.add.bitmapText(40, this.resourceStart + 160, "courier16",
-                    Math.floor(this.player.gold) + "/" + Math.floor(this.worldData.getGoldCap())));
+                    Common.numberString(Math.floor(this.player.gold)) + "/" + Common.numberString(Math.floor(this.worldData.getGoldCap()))));
             }
             if (this.progression.unlocks.motes === true) {
-                this.resourceLabels.push(this.add.bitmapText(40, this.resourceStart + 180, "courier16", Math.floor(this.player.motes)));
+                this.resourceLabels.push(this.add.bitmapText(40, this.resourceStart + 180, "courier16", Common.numberString(Math.floor(this.player.motes))));
             }
         }
     }
@@ -441,18 +469,21 @@ export class GameScene extends SceneUIBase {
         }
     }
 
-    _handleTileClick(x, y) {
+    _handleTileClick(x, y, fromAutoExplore = false) {
         var region = this.worldData.getCurrentRegion();
         if (region.isExplorable(x, y)) {
-            this.scene.bringToTop("CombatScene");
-            this.scene.bringToTop("DarkWorld");
+            if (fromAutoExplore === false) {
+                this.scene.bringToTop("CombatScene");
+                this.scene.bringToTop("DarkWorld");
+            }
             this.combatScene.initFight(region.map[y][x]);
         }
     }
 
     _buyStatPoint() {
-        this.progression.registerStatPointGain(1);
-        this.player.buyStat();
+        this.progression.registerStatPointGain(this.buyAmount);
+        this.player.buyStat(this.buyAmount);
+        this._updateInfuseCosts();
         this._updateStats();
         this._updateShade();
     }
@@ -463,12 +494,13 @@ export class GameScene extends SceneUIBase {
                 "in the game. Since they're not you just get 1 measly talent point to spend on the " +
                 "basic bitch talents.");
         }
-        this.player.buyTalent();
+        this.player.buyTalent(this.buyAmount);
+        this._updateInfuseCosts();
         this._updateShade();
     }
 
-    _increaseStat(stat, val) {
-        this.player.increaseStat(stat, val);
+    _increaseStat(stat) {
+        this.player.increaseStat(stat, this.buyAmount);
     }
 
     _onKillCallback(tile, shade, rewards, gold) {
@@ -492,35 +524,14 @@ export class GameScene extends SceneUIBase {
         }
     }
 
-    _onExploredCallback(tile) {
-        if (tile.y === 0) {
-            //setup new world types
-            if (this.progression.unlocks.worldTab === false) {
-                this.progression.registerFeatureUnlocked(Statics.UNLOCK_WORLD_TAB,
-                    "You did it, you've reached the edge of the world. This is all there is...\n\n" +
-                    "Oh wait, it looks like there's a trail over there leading to a new region! there's " +
-                    "a whole world out there. I was wondering what that last tab was going to be.");
-            }
-            if (this.worldData.regionList.length - 1 === this.worldData.currentRegion &&
-                this.worldData.nextRegions.length === 0) {
-                this.worldData.generateRegionChoices();
-                this.worldScene._refreshRegions();
-            }
-        }
-        if (tile.explored === false) {
-            var region = this.worldData.getCurrentRegion();
-            region.exploreTile(tile.x, tile.y);
-            this.regionScene._updateColors();
-            this.progression.registerTileExplored();
-        }
-    }
-
     rebirth() {
         this.player.rebirth();
         var gear = new GearData();
         gear.rebirth();
         this.worldData.rebirth();
         this.progression.rebirth();
+        var lore = new LoreStore();
+        lore.rebirth();
 
         this.gearButton.setVisible(this.progression.unlocks.gearTab);
         this.regionButton.setVisible(this.progression.unlocks.exploreTab);
@@ -572,6 +583,7 @@ export class GameScene extends SceneUIBase {
         var gearData = new GearData();
         var lore = new LoreStore();
         var saveObj = {
+            version: Statics.VERSION_NUMBER,
             player: this.player.save(),
             gear: gearData.save(),
             world: this.worldData.save(),

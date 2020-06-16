@@ -159,7 +159,7 @@ export class CreatureBlock {
         return dmg;
     }
     rollDamage() {
-        return Common.randint(this.DamageMin(), this.DamageMax());
+        return Common.randint(this.DamageMin(), this.DamageMax() + 1);
     }
     tickRegen(delta, inCombat = true) {
         var oldVal = this.currentHealth;

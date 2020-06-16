@@ -172,6 +172,21 @@ export class ProgressionStore {
                 deaths: 0
             };
 
+            this.persistentUnlocks = {
+                challenges: false,
+                autoExplore: false
+            }
+
+            this.totalCounts = {
+                tilesExplored: 0,
+                monsterKills: 0,
+                shadeGained: 0,
+                resourcesGained: 0,
+                statPointsGained: 0,
+                deaths: 0,
+                timesGated: 0
+            }
+
             this.onUnlockHandlers = [];
             ProgressionStore.instance = this;
         }
@@ -210,6 +225,9 @@ export class ProgressionStore {
             statPointsGained: 0,
             deaths: 0
         };
+
+        this.totalCounts.timesGated += 1;
+        this.persistentUnlocks.autoExplore = true;
     }
 
     _onUnlock(type, count, text) {
@@ -224,6 +242,7 @@ export class ProgressionStore {
 
     registerTileExplored() {
         this.counts.tilesExplored += 1;
+        this.totalCounts.tilesExplored += 1;
         for (var i = this.exploresUnlocked; i < this.exploreUnlocks.length; i++) {
             if (this.exploreUnlocks[i].count <= this.counts.tilesExplored) {
                 this._onUnlock(Statics.UNLOCK_EXPLORE, this.exploreUnlocks[i].count, this.exploreUnlocks[i].text);
@@ -233,6 +252,7 @@ export class ProgressionStore {
     }
     registerMonsterKill() {
         this.counts.monsterKills += 1;
+        this.totalCounts.monsterKills += 1;
         for (var i = this.killsUnlocked; i < this.killUnlocks.length; i++) {
             if (this.killUnlocks[i].count <= this.counts.monsterKills) {
                 this._onUnlock(Statics.UNLOCK_KILL, this.killUnlocks[i].count, this.killUnlocks[i].text);
@@ -242,6 +262,7 @@ export class ProgressionStore {
     }
     registerShadeGain(shade) {
         this.counts.shadeGained += shade;
+        this.totalCounts.shadeGained += shade;
         for (var i = this.shadesUnlocked; i < this.shadeUnlocks.length; i++) {
             if (this.shadeUnlocks[i].count <= this.counts.shadeGained) {
                 this._onUnlock(Statics.UNLOCK_SHADE, this.shadeUnlocks[i].count, this.shadeUnlocks[i].text);
@@ -251,6 +272,7 @@ export class ProgressionStore {
     }
     registerResourceGain(resourceList) {
         this.counts.resourcesGained += Common.sumList(resourceList);
+        this.totalCounts.resourcesGained += Common.sumList(resourceList);
         for (var i = this.resourceUnlocked; i < this.resourceUnlocks.length; i++) {
             if (this.resourceUnlocks[i].count <= this.counts.resourcesGained) {
                 this._onUnlock(Statics.UNLOCK_RESOURCE, this.resourceUnlocks[i].count, this.resourceUnlocks[i].text);
@@ -260,6 +282,7 @@ export class ProgressionStore {
     }
     registerStatPointGain(amount) {
         this.counts.statPointsGained += amount;
+        this.totalCounts.statPointsGained += amount;
         for (var i = this.statPointUnlocked; i < this.statPointUnlocks.length; i++) {
             if (this.statPointUnlocks[i].count <= this.counts.statPointsGained) {
                 this._onUnlock(Statics.UNLOCK_STATPOINT, this.statPointUnlocks[i].count, this.statPointUnlocks[i].text);
@@ -269,6 +292,7 @@ export class ProgressionStore {
     }
     registerDeath(amount) {
         this.counts.deaths += amount;
+        this.totalCounts.deaths += amount;
         for (var i = this.deathUnlocked; i < this.deathUnlocks.length; i++) {
             if (this.deathUnlocks[i].count <= this.counts.deaths) {
                 this._onUnlock(Statics.UNLOCK_DEATH, this.deathUnlocks[i].count, this.deathUnlocks[i].text);
@@ -326,7 +350,9 @@ export class ProgressionStore {
             run: this.resourceUnlocked,
             stun: this.statPointUnlocked,
             dun: this.deathUnlocked,
-            count: this.counts
+            count: this.counts,
+            tcount: this.totalCounts,
+            pun: this.persistentUnlocks
         }
 
         return saveObj;
@@ -341,5 +367,7 @@ export class ProgressionStore {
         this.statPointUnlocked = saveObj.stun;
         this.deathUnlocked = saveObj.dun;
         this.counts = saveObj.count;
+        this.totalCounts = saveObj.tcount;
+        this.persistentUnlocks = saveObj.pun;
     }
 }

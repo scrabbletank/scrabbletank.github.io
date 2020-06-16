@@ -196,7 +196,7 @@ export class GearScene extends SceneUIBase {
         }
         this.craftDisplays = [];
         for (var i = this.page * 6; i < Math.min(this.gearList.length, this.page * 6 + 6); i++) {
-            var x = this.relativeX(340 + i % 2 * 280);
+            var x = this.relativeX(320 + i % 2 * 290);
             var y = this.relativeY(40 + Math.floor((i - this.page * 6) / 2) * 215);
             this.craftDisplays.push(new GearCraftDisplay(this, x, y, this.gearList[i])
                 .registerEvents("onEquip", (gear) => { this._onEquipHandler(gear); })

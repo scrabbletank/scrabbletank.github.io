@@ -16,6 +16,16 @@ export class Common {
         return false;
     }
 
+    static numberString(x) {
+        var ret = new Intl.NumberFormat('en-US').format(x);
+        if (ret.length >= 12) {
+            ret = ret.substr(0, ret.length - 8) + "M";
+        } else if (ret.length >= 9) {
+            ret = ret.substr(0, ret.length - 4) + "K";
+        }
+        return ret;
+    }
+
     static nearestPointsInList(x, y, pointList, count) {
         var dists = [];
         for (var i = 0; i < pointList.length; i++) {
@@ -100,17 +110,17 @@ export class Common {
     static getCostText(type, value) {
         switch (type) {
             case 0:
-                return Math.floor(value) + " Wood";
+                return Common.numberString(Math.floor(value)) + " Wood";
             case 1:
-                return Math.floor(value) + " Leather";
+                return Common.numberString(Math.floor(value)) + " Leather";
             case 2:
-                return Math.floor(value) + " Metal";
+                return Common.numberString(Math.floor(value)) + " Metal";
             case 3:
-                return Math.floor(value) + " Fiber";
+                return Common.numberString(Math.floor(value)) + " Fiber";
             case 4:
-                return Math.floor(value) + " Stone";
+                return Common.numberString(Math.floor(value)) + " Stone";
             case 5:
-                return Math.floor(value) + " Crystal";
+                return Common.numberString(Math.floor(value)) + " Crystal";
         }
     }
 

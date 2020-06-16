@@ -11,6 +11,7 @@ export class LoreScene extends SceneUIBase {
         this.labels = [];
         this.labelIndex = 0;
         this.loreStore = new LoreStore();
+        this.labelCount = undefined;
     }
 
     relativeX(val) {
@@ -33,9 +34,9 @@ export class LoreScene extends SceneUIBase {
         this.add.rectangle(super.relativeX(0), this.relativeY(0), 900, 700, 0x000000)
             .setOrigin(0)
             .setInteractive();
-        
+
         this.progresion = new ProgressionStore();
-        this.progresion.addOnUnlockHandler((a, b, c) => { this._handleProgressionEvents(a, b, c)});
+        this.progresion.addOnUnlockHandler((a, b, c) => { this._handleProgressionEvents(a, b, c) });
 
         this.upButton = new TextButton(this, super.relativeX(20), this.relativeY(5), 60, 20, 'up');
         this.upButton.onClickHandler(() => { this._scrollUp(); });
@@ -45,6 +46,9 @@ export class LoreScene extends SceneUIBase {
         for (var i = 0; i < this.loreStore.lore.length; i++) {
             this.addText(this.loreStore.lore[i], false);
         }
+        this._scrollTo(this.labels.length - 1);
+
+        this.labelCount = this.add.bitmapText(super.relativeX(170), this.relativeY(5), "courier20", (this.labelIndex + 1) + "/" + this.labels.length);
     }
 
     _scrollUp() {
@@ -67,6 +71,9 @@ export class LoreScene extends SceneUIBase {
         }
         this.labelIndex = index;
         this.cameras.getCamera("loreBox").scrollY = this.labels[this.labelIndex].getPosY() - 10;
+        if (this.labelCount !== undefined) {
+            this.labelCount.setText((this.labelIndex + 1) + "/" + this.labels.length);
+        }
     }
 
     _handleProgressionEvents(_type, _count, text) {
@@ -87,5 +94,8 @@ export class LoreScene extends SceneUIBase {
             y = this.labels[this.labels.length - 1].getHeight();
         }
         this.labels.push(new LoreLabel(this, x, y, text, 85, "courier20", 20));
+        if (this.labelCount !== undefined) {
+            this.labelCount.setText((this.labelIndex + 1) + "/" + this.labels.length);
+        }
     }
 }

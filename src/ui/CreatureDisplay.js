@@ -1,4 +1,5 @@
 import { ProgressBar } from './ProgressBar';
+import { Common } from '../utils/Common';
 
 export class CreatureDisplay {
     constructor(sceneContext, x, y) {
@@ -33,10 +34,10 @@ export class CreatureDisplay {
 
     initWithCreature(creature) {
         this.nameLabel.setText(creature.name);
-        this.damageLabel.setText("Damage: " + Math.floor(creature.DamageMin()) + "-" + Math.floor(creature.DamageMax()));
-        this.armorLabel.setText("Armor: " + Math.floor(creature.Armor()));
-        this.hitnameLabel.setText("Hit: " + Math.floor(creature.Hit()));
-        this.evasionLabel.setText("Evasion: " + Math.floor(creature.Evasion()));
+        this.damageLabel.setText("Damage: " + Common.numberString(Math.floor(creature.DamageMin())) + "-" + Common.numberString(Math.floor(creature.DamageMax())));
+        this.armorLabel.setText("Armor: " + Common.numberString(Math.floor(creature.Armor())));
+        this.hitnameLabel.setText("Hit: " + Common.numberString(Math.floor(creature.Hit())));
+        this.evasionLabel.setText("Evasion: " + Common.numberString(Math.floor(creature.Evasion())));
 
         this.healthBar.setFillPercent(creature.currentHealth / creature.MaxHealth());
         this.attackBar.setFillPercent(creature.attackCooldown / creature.attackSpeed);

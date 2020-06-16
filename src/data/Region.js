@@ -549,6 +549,21 @@ export class Region {
         }
     }
 
+    nextWeakestTile() {
+        var pos = [-1, -1];
+        var min = this.difficultyRange[1] * 2;
+        for (var y = 0; y < this.height; y++) {
+            for (var x = 0; x < this.width; x++) {
+                if (this.map[y][x].explored === false && this.map[y][x].revealed === true &&
+                    this.map[y][x].difficulty < min) {
+                        pos = [x, y];
+                        min = this.map[y][x].difficulty;
+                }
+            }
+        }
+        return pos;
+    }
+
     placeBuilding(x, y, building) {
         this.map[y][x].building = building;
         this.map[y][x].building.increaseCosts();

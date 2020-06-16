@@ -113,28 +113,29 @@ export class PlayerData {
     }
 
     increaseStat(stat, val) {
-        this.statPoints -= val;
+        var statChange = Math.min(this.statPoints, val);
+        this.statPoints -= statChange;
         switch (stat) {
             case 'str':
-                this.statBlock.stats.strength += val;
+                this.statBlock.stats.strength += statChange;
                 break;
             case 'dex':
-                this.statBlock.stats.dexterity += val;
+                this.statBlock.stats.dexterity += statChange;
                 break;
             case 'agi':
-                this.statBlock.stats.agility += val;
+                this.statBlock.stats.agility += statChange;
                 break;
             case 'end':
-                this.statBlock.stats.endurance += val;
+                this.statBlock.stats.endurance += statChange;
                 break;
             case 'rec':
-                this.statBlock.stats.recovery += val;
+                this.statBlock.stats.recovery += statChange;
                 break;
             case 'def':
-                this.statBlock.stats.defense += val;
+                this.statBlock.stats.defense += statChange;
                 break;
             case 'acc':
-                this.statBlock.stats.accuracy += val;
+                this.statBlock.stats.accuracy += statChange;
                 break;
         }
         this._onStatChanged();
@@ -172,17 +173,36 @@ export class PlayerData {
         return MoonlightData.getMoonlightEarned((this.statLevel - 1) + (this.talentLevel - 1) * 3, gateReached);
     }
 
-    buyStat() {
-        this.statPoints += Statics.STAT_POINTS_PER_BUY;
-        this.shade -= this.nextStatCost;
-        this.nextStatCost = Statics.STAT_COST_BASE + (Statics.STAT_COST_PER_LEVEL * this.statLevel);
-        this.statLevel += 1;
+    getStatCost(buyAmount) {
+        var ret = 0;
+        for (var i = 0; i < buyAmount; i++) {
+            ret += Statics.STAT_COST_BASE + (Statics.STAT_COST_PER_LEVEL * (this.statLevel - 1 + i));
+        }
+        return ret;
     }
-    buyTalent() {
-        this.talentPoints += 1;
-        this.shade -= this.nextTalentCost;
-        this.nextTalentCost = Statics.TALENT_COST_BASE * Math.pow(Statics.TALENT_COST_POWER, this.talentLevel);
-        this.talentLevel += 1;
+    getTalentCost(buyAmount) {
+        var ret = 0;
+        for (var i = 0; i < buyAmount; i++) {
+            ret += Statics.TALENT_COST_BASE * Math.pow(Statics.TALENT_COST_POWER, (this.talentLevel - 1 + i));
+        }
+        return ret;
+    }
+
+    buyStat(buyAmount) {
+        for (var i = 0; i < buyAmount; i++) {
+            this.statPoints += Statics.STAT_POINTS_PER_BUY;
+            this.shade -= this.nextStatCost;
+            this.nextStatCost = Statics.STAT_COST_BASE + (Statics.STAT_COST_PER_LEVEL * this.statLevel);
+            this.statLevel += 1;
+        }
+    }
+    buyTalent(buyAmount) {
+        for (var i = 0; i < buyAmount; i++) {
+            this.talentPoints += 1;
+            this.shade -= this.nextTalentCost;
+            this.nextTalentCost = Statics.TALENT_COST_BASE * Math.pow(Statics.TALENT_COST_POWER, this.talentLevel);
+            this.talentLevel += 1;
+        }
         this._onTalentChanged();
     }
 

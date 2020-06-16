@@ -84,7 +84,7 @@ export class CombatScene extends SceneUIBase {
 
     _playerHealthCallback(health) {
         this.playerDisplay.setHealthBar(health / this.player.statBlock.MaxHealth(),
-            Math.floor(health) + "/" + this.player.statBlock.MaxHealth());
+            Common.numberString(Math.floor(health)) + "/" + Common.numberString(this.player.statBlock.MaxHealth()));
     }
     _playerAttackCooldownCallback(attackCooldown) {
         this.playerDisplay.setAttackBar(attackCooldown / this.player.statBlock.attackSpeed,
@@ -93,7 +93,7 @@ export class CombatScene extends SceneUIBase {
 
     _monsterHealthCallback(health, idx) {
         this.monsterDiplays[idx].setHealthBar(health / this.monsters[idx].MaxHealth(),
-            Math.floor(health) + "/" + this.monsters[idx].MaxHealth());
+            Common.numberString(Math.floor(health)) + "/" + Common.numberString(this.monsters[idx].MaxHealth()));
     }
     _monsterAttackCooldownCallback(attackCooldown, idx) {
         this.monsterDiplays[idx].setAttackBar(attackCooldown / this.monsters[idx].attackSpeed,

@@ -10,6 +10,7 @@ export class TextButton {
         this.width = width;
         this.height = height;
         this.isNotifying = false;
+        this.textClr = 0xffffff;
     }
 
     setNotification() {
@@ -25,16 +26,20 @@ export class TextButton {
     setVisible(visible) {
         this.backgroundRect.setVisible(visible);
         this.text.setVisible(visible);
-        this.text.setTint(visible === true ? 0xffffff : 0x999999);
+        this.text.setTint(visible === true ? this.textClr : 0x999999);
     }
 
     setEnable(enabled) {
         this.enabled = enabled;
-        this.text.setTint(enabled === true ? 0xffffff : 0x999999);
+        this.text.setTint(enabled === true ? this.textClr : 0x999999);
     }
 
     setText(text) {
         this.text.setText(text);
+    }
+    setTextColor(clr) {
+        this.text.setTint(clr);
+        this.textClr = clr;
     }
 
     _onClick(callback) {

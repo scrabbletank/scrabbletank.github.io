@@ -97,13 +97,13 @@ export class TileSelectWindow {
                     var txt = "Upgrade:\n";
                     for (var i = 0; i < tile.building.resourceCosts.length; i++) {
                         if (tile.building.resourceCosts[i] > 0) {
-                            txt += Statics.RESOURCE_NAMES[i] + ": " + tile.building.resourceCosts[i] + "\n";
+                            txt += Statics.RESOURCE_NAMES[i] + ": " + Common.numberString(tile.building.resourceCosts[i]) + "\n";
                         }
                     }
                     txt += "Gold: " + tile.building.goldCost;
                     this.buildingCosts = scene.add.bitmapText(x + 295, y + 25, "courier16", txt);
                     this.upgradeButton = new TextButton(scene, x + 140, y + 175, 120, 20, "Upgrade")
-                        .onClickHandler(() => { this._onAction("upgrade", {tile: tile}); });
+                        .onClickHandler(() => { this._onAction("upgrade", { tile: tile }); });
                 }
             }
         }

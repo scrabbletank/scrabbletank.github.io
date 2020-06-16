@@ -56,7 +56,7 @@ export class MoonlightScene extends SceneUIBase {
     }
 
     _onMoonlightChanged() {
-        this.moonlightLabel.setText("MOONLIGHT\n" + this.moonlight.moonlight);
+        this.moonlightLabel.setText("MOONLIGHT\n" + Common.numberString(this.moonlight.moonlight));
     }
 
     _haveMoonlightRequirements(perk) {
@@ -89,7 +89,7 @@ export class MoonlightScene extends SceneUIBase {
 
         var cost = Math.floor((perk.cost[0] + perk.cost[1] * (perk.level)) * Math.pow(perk.cost[2], perk.level));
 
-        txt += "Costs " + cost + " Moonlight\n";
+        txt += "Costs " + Common.numberString(cost) + " Moonlight\n";
 
         if (perk.requires.length > 0) {
             txt += "Requires: ";

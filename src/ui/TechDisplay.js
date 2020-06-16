@@ -25,7 +25,7 @@ export class TechDisplay {
         var resourceCosts = TownData.getTechResourceCost(tech, townTier);
         for (var i = 0; i < resourceCosts.length; i++) {
             if (resourceCosts[i] > 0) {
-                costText += ", " + resourceCosts[i] + " " + Statics.RESOURCE_NAMES[i];
+                costText += ", " + Common.getCostText(i, resourceCosts[i]);
             }
         }
         costText = Common.processText(costText, 67);

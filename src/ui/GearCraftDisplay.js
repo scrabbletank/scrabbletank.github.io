@@ -13,7 +13,7 @@ export class GearCraftDisplay {
         //keep reference of gear for callbacks
         this.gear = gear;
 
-        this.backingRect = sceneContext.add.rectangle(x + 1, y + 1, 275 - 2, 210 - 2, Phaser.Display.Color.GetColor(0, 0, 0)).setOrigin(0, 0);
+        this.backingRect = sceneContext.add.rectangle(x + 1, y + 1, 285 - 2, 210 - 2, Phaser.Display.Color.GetColor(0, 0, 0)).setOrigin(0, 0);
         this.backingRect.isStroked = true;
         this.backingRect.strokeColor = Phaser.Display.Color.GetColor(255, 255, 255);
         this.backingRect.lineWidth = 1;
@@ -56,22 +56,22 @@ export class GearCraftDisplay {
                     txt += Common.getCostText(i, Math.floor(gear.costs[i] * craftCostMulti)) + '\n';
                 }
             }
-            this.statLabels.push(sceneContext.add.bitmapText(x + 165, y + 45, "courier16", txt));
+            this.statLabels.push(sceneContext.add.bitmapText(x + 175, y + 45, "courier16", txt));
         }
         this.equipBtn = undefined;
         this.upgradeBtn = undefined;
 
         if (gear.level === 0) {
-            this.upgradeBtn = new TextButton(sceneContext, x + 75, y + 185, 130, 20, "Forge");
+            this.upgradeBtn = new TextButton(sceneContext, x + 72, y + 185, 135, 20, "Forge");
             this.upgradeBtn.onClickHandler(() => { this._onUpgrade(); });
         } else {
             if (progression.unlocks.resourceUI === true) {
-                this.equipBtn = new TextButton(sceneContext, x + 5, y + 185, 130, 20, "Equip");
+                this.equipBtn = new TextButton(sceneContext, x + 5, y + 185, 135, 20, "Equip");
                 this.equipBtn.onClickHandler(() => { this._onEquip(); });
-                this.upgradeBtn = new TextButton(sceneContext, x + 140, y + 185, 130, 20, "Upgrade");
+                this.upgradeBtn = new TextButton(sceneContext, x + 145, y + 185, 135, 20, "Upgrade");
                 this.upgradeBtn.onClickHandler(() => { this._onUpgrade(); });
             } else {
-                this.equipBtn = new TextButton(sceneContext, x + 75, y + 185, 130, 20, "Equip");
+                this.equipBtn = new TextButton(sceneContext, x + 72, y + 185, 135, 20, "Equip");
                 this.equipBtn.onClickHandler(() => { this._onEquip(); });
             }
         }
