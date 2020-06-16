@@ -389,6 +389,7 @@ export class Region {
         }
         this.townData.currentPopulation = this.townData.currentPopulation * Statics.POP_MULTI_AFTER_INVASION;
         this.tilesExplored -= 1;
+        this.endSighting(tile[1], tile[0]);
     }
 
     _addSighting() {
@@ -427,10 +428,10 @@ export class Region {
         this.map[y][x].isInvaded = false;
         this.map[y][x].invasionPower = 0;
         this.invasionCounter = Math.max(0, this.invasionCounter - Statics.INVASION_REDUCTION_FROM_SIGHTING);
-        
+
         var newSight = [];
         for (var i = 0; i < this.sightings.length; i++) {
-            if (this.map[this.sightings[0]][this.sightings[1]].isInvaded === true) {
+            if (this.map[this.sightings[i][0]][this.sightings[i][1]].isInvaded === true) {
                 newSight.push(this.sightings[i]);
             }
         }
