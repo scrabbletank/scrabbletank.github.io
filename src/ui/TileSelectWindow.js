@@ -30,9 +30,10 @@ export class TileSelectWindow {
         if (tile.explored === false) {
             txt += "Explored: " + Math.floor(tile.amountExplored / tile.explorationNeeded * 100) + '%\n';
         } else {
-            txt += "Explored\n";
+            txt += "Explored\n" +
+                "Defense: " + Math.floor(tile.defense) + "\n";
         }
-        if (tile.explored === true) {
+        if (tile.explored === true && tile.yields.length > 0) {
             txt += "Yields:\n"
             for (var i = 0; i < tile.yields.length; i++) {
                 if (tile.yields[i].rate > 0) {
@@ -75,13 +76,15 @@ export class TileSelectWindow {
                             break;
                     }
                 }
-                bld.push("house");
-                bld.push("watchtower");
-                if (region.tradeHouseUnlocked === true) {
-                    bld.push("tradehouse");
-                }
-                if (region.tavernUnlocked === true) {
-                    bld.push("tavern");
+                if (tile.yields.length > 0) {
+                    bld.push("house");
+                    bld.push("watchtower");
+                    if (region.tradeHouseUnlocked === true) {
+                        bld.push("tradehouse");
+                    }
+                    if (region.tavernUnlocked === true) {
+                        bld.push("tavern");
+                    }
                 }
                 for (var i = 0; i < bld.length; i++) {
                     var a = x + 180 + (i % 6) * 34;

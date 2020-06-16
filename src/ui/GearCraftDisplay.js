@@ -18,7 +18,8 @@ export class GearCraftDisplay {
         this.backingRect.strokeColor = Phaser.Display.Color.GetColor(255, 255, 255);
         this.backingRect.lineWidth = 1;
 
-        this.nameLabel = sceneContext.add.bitmapText(x + 5, y + 5, "courier20", gear.name + " Lv" + gear.level);
+        var name = gear.name + " Lv" + gear.level;
+        this.nameLabel = sceneContext.add.bitmapText(x + 5, y + 5, name.length > 18 ? "courier16" : "courier20", name);
 
         var types = ["Weapon", "Armor", "Trinket"]
         var subtext = gear.tier === 0 ? "Broken " + types[gear.slotType] : "Tier " + gear.tier + " " + types[gear.slotType];
@@ -31,11 +32,11 @@ export class GearCraftDisplay {
             var gearData = new GearData();
             this.motePower = gearData.getMotePower(gear.motesFused);
             if (gear.motesFused > 0) {
-                this.moteLabel = sceneContext.add.bitmapText(x + 233, y + 21, "courier16",
+                this.moteLabel = sceneContext.add.bitmapText(x + 243, y + 21, "courier16",
                     "+" + Math.floor(this.motePower * 1000) / 10 + "%").setOrigin(1, 0.5);
                 this.moteLabel.setTint(Phaser.Display.Color.GetColor(200, 0, 200));
             }
-            this.moteButton = new ImageButton(sceneContext, x + 238, y + 5, 32, 32, { sprite: "icons", tile: 39 })
+            this.moteButton = new ImageButton(sceneContext, x + 248, y + 5, 32, 32, { sprite: "icons", tile: 39 })
                 .onClickHandler(() => { this._onFuse(); });
         }
 

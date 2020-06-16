@@ -50,7 +50,7 @@ export class TownData {
             },
             {
                 name: "Town Hall", level: 0, maxLevel: -1, requires: [],
-                goldCosts: [75, 50, 15], resources: [[15, 10, 8], [0, 0, 0], [0, 0, 0], [0, 0, 0], [10, 10, 5], [0, 0, 0]]
+                goldCosts: [50, 30, 15], resources: [[15, 10, 8], [0, 0, 0], [0, 0, 0], [0, 0, 0], [10, 10, 5], [0, 0, 0]]
             }
         ];
 

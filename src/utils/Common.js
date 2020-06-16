@@ -18,7 +18,9 @@ export class Common {
 
     static numberString(x) {
         var ret = new Intl.NumberFormat('en-US').format(x);
-        if (ret.length >= 12) {
+        if (ret.length >= 16) {
+            ret = ret.substr(0, ret.length - 12) + "B";
+        } else if (ret.length >= 12) {
             ret = ret.substr(0, ret.length - 8) + "M";
         } else if (ret.length >= 9) {
             ret = ret.substr(0, ret.length - 4) + "K";

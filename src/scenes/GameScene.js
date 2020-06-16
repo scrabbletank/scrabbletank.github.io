@@ -239,9 +239,7 @@ export class GameScene extends SceneUIBase {
 
         this.player.statBlock.registerEvent("onHealthChanged", () => { this._updateDetails(); });
         this.player.registerEvent("onStatChanged", () => {
-            this._updateStats();
-            this._updateDetails();
-            this._updateGear();
+            this._layoutStats();
         });
         this.player.registerEvent("onResourcesChanged", () => { this._updateResources(); });
 
@@ -268,6 +266,8 @@ export class GameScene extends SceneUIBase {
             Common.numberString(Math.floor(Math.min(this.player.shade, this.statCost))) + '/' + Common.numberString(this.statCost));
         this.talentProgressBar.setFillPercent(this.player.shade / this.talentCost,
             Common.numberString(Math.floor(Math.min(this.player.shade, this.talentCost))) + '/' + Common.numberString(Math.floor(this.talentCost)));
+        this.statInfuseButton.setEnable(this.player.shade >= this.statCost);
+        this.talentInfuseButton.setEnable(this.player.shade >= this.talentCost);
     }
 
     _handleProgressionEvents(type, count, text) {
@@ -356,15 +356,15 @@ export class GameScene extends SceneUIBase {
             Common.numberString(Math.floor(Math.min(this.player.shade, this.statCost))) + '/' + Common.numberString(this.statCost));
         this.talentProgressBar.setFillPercent(this.player.shade / this.talentCost,
             Common.numberString(Math.floor(Math.min(this.player.shade, this.talentCost))) + '/' + Common.numberString(Math.floor(this.talentCost)));
-        this.statInfuseButton.setEnable(this.player.shade >= this.player.nextStatCost);
-        this.talentInfuseButton.setEnable(this.player.shade >= this.player.nextTalentCost);
+        this.statInfuseButton.setEnable(this.player.shade >= this.statCost);
+        this.talentInfuseButton.setEnable(this.player.shade >= this.talentCost);
     }
 
     _updateGear() {
         var text = "" +
-            "W: " + (this.player.weapon === undefined ? "None" : this.player.weapon.name + " Lv" + this.player.weapon.level) + "\n" +
-            "A: " + (this.player.armor === undefined ? "None" : this.player.armor.name + " Lv" + this.player.armor.level) + "\n" +
-            "T: " + (this.player.trinket === undefined ? "None" : this.player.trinket.name + " Lv" + this.player.trinket.level);
+        Common.processText("W: " + (this.player.weapon === undefined ? "None" : this.player.weapon.name + " Lv" + this.player.weapon.level), 20) + "\n" +
+            Common.processText("A: " + (this.player.armor === undefined ? "None" : this.player.armor.name + " Lv" + this.player.armor.level), 20) + "\n" +
+            Common.processText("T: " + (this.player.trinket === undefined ? "None" : this.player.trinket.name + " Lv" + this.player.trinket.level), 20);
 
         this.gearLabels.setText(text);
     }
@@ -449,15 +449,15 @@ export class GameScene extends SceneUIBase {
         this.gearStart = h;
         this.gearLabel.setPosition(10, h);
         this.gearLabels.setPosition(20, h + 20);
+        this._updateGear();
 
-        h += 75
+        h += this.gearLabels.getTextBounds().local.height + 5;
         this.detailsStart = h;
         h += 185;
         this.resourceStart = h;
 
         this._updateStats();
         this._updateDetails();
-        this._updateGear();
         this._updateShade();
         this._updateResources();
     }

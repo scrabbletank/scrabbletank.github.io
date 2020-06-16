@@ -52,11 +52,11 @@ export class RegionScene extends SceneUIBase {
 
     _setupTile(x, y) {
         var clr = this.region.map[y][x].color;
-        var rect = this.add.rectangle(this.relativeX(x * this.WIDTH + this.offsetX),
-            this.relativeY(y * this.HEIGHT + this.offsetY), this.WIDTH - 1, this.HEIGHT - 1, clr).setOrigin(0, 0);
+        var rect = this.add.rectangle(this.relativeX((x + 0.5) * this.WIDTH + this.offsetX),
+            this.relativeY((y + 0.5) * this.HEIGHT + this.offsetY), this.WIDTH - 1, this.HEIGHT - 1, clr);
         rect.strokeColor = this.region.map[y][x].borderColor;
         rect.isStroked = true;
-        rect.lineWidth = 1;
+        rect.lineWidth = 1.5;
         rect.setInteractive({ useHandCursor: true })
             .on("pointerdown", () => { this._handleTileClick(x, y); })
             .on('pointerover', () => { this._setTooltip(x, y); })

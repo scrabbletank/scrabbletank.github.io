@@ -177,8 +177,8 @@ export class GearData {
             defense: 0, accuracy: 0, hit: -7, evasion: 0,
             critDamage: 0, critChance: 0, healthRegen: 0, armor: 0
         };
-        var cost = [10, 0, 0, 15, 0, 20];
-        var costlvl = [8, 0, 0, 12, 0, 15];
+        var cost = [10, 15, 0, 0, 0, 20];
+        var costlvl = [8, 12, 0, 0, 0, 15];
         this.gear.push(new Gear("Crystal Hammer", 1, Statics.GEAR_WEAPON, stat, statlvl, cost, costlvl));
 
         var stat = {
@@ -225,8 +225,8 @@ export class GearData {
             defense: 0, accuracy: 0, hit: 0, evasion: -4,
             critDamage: 0, critChance: 0, healthRegen: 0, armor: 1
         };
-        var cost = [0, 0, 30, 10, 0, 5];
-        var costlvl = [0, 20, 0, 8, 0, 5];
+        var cost = [0, 10, 30, 0, 0, 5];
+        var costlvl = [0, 8, 20, 0, 0, 5];
         this.gear.push(new Gear("Half Plate", 1, Statics.GEAR_ARMOR, stat, statlvl, cost, costlvl));
 
         var stat = {
@@ -241,21 +241,21 @@ export class GearData {
             defense: 1, accuracy: 0, hit: 0, evasion: 0,
             critDamage: 0, critChance: 0, healthRegen: 0, armor: 0.25
         };
-        var cost = [30, 0, 0, 10, 5, 0];
-        var costlvl = [15, 0, 0, 10, 5, 3];
+        var cost = [30, 0, 10, 0, 5, 0];
+        var costlvl = [15, 0, 10, 0, 5, 3];
         this.gear.push(new Gear("Wooden Shield", 1, Statics.GEAR_TRINKET, stat, statlvl, cost, costlvl));
 
         var stat = {
             health: 0, damageMin: 0, damageMax: 0, strength: 0,
             dexterity: 0, agility: 0, endurance: 0, recovery: 0,
             defense: 0, accuracy: 0, hit: 0, evasion: 0,
-            critDamage: 0, critChance: 0, healthRegen: 0.5, armor: 0
+            critDamage: 0, critChance: 0, healthRegen: 0.3, armor: 0
         };
         var statlvl = {
             health: 0, damageMin: 0, damageMax: 0, strength: 0,
             dexterity: 0, agility: 0, endurance: 0, recovery: 0,
             defense: 0, accuracy: 0, hit: 0, evasion: 0,
-            critDamage: 0, critChance: 0, healthRegen: 0.25, armor: 0
+            critDamage: 0, critChance: 0, healthRegen: 0.15, armor: 0
         };
         var cost = [0, 0, 10, 0, 25, 5];
         var costlvl = [0, 0, 5, 0, 20, 8];
@@ -280,13 +280,13 @@ export class GearData {
         var stat = {
             health: 0, damageMin: 0, damageMax: 0, strength: 0,
             dexterity: 0, agility: 0, endurance: 0, recovery: 0,
-            defense: 0, accuracy: 1, hit: 10, evasion: 0,
+            defense: 0, accuracy: 1, hit: 15, evasion: 0,
             critDamage: 0, critChance: 0, healthRegen: 0, armor: 0
         };
         var statlvl = {
             health: 0, damageMin: 0, damageMax: 0, strength: 0,
             dexterity: 0, agility: 0, endurance: 0, recovery: 0,
-            defense: 0, accuracy: 1, hit: 5, evasion: 0,
+            defense: 0, accuracy: 1, hit: 8, evasion: 0,
             critDamage: 0, critChance: 0, healthRegen: 0, armor: 0
         };
         var cost = [10, 0, 10, 25, 0, 0];
