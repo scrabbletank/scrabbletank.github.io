@@ -424,10 +424,17 @@ export class Region {
     }
 
     endSighting(x, y) {
-        this.sightings = this.sightings.filter(item => (item[0] === y && item[1] === x) === false);
         this.map[y][x].isInvaded = false;
         this.map[y][x].invasionPower = 0;
         this.invasionCounter = Math.max(0, this.invasionCounter - Statics.INVASION_REDUCTION_FROM_SIGHTING);
+        
+        var newSight = [];
+        for (var i = 0; i < this.sightings.length; i++) {
+            if (this.map[this.sightings[0]][this.sightings[1]].isInvaded === true) {
+                newSight.push(this.sightings[i]);
+            }
+        }
+        this.sightings = newSight;
     }
 
     _calculateTradeHouseBonus(tier) {
