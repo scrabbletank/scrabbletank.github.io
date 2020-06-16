@@ -68,7 +68,7 @@ export class TownScene extends SceneUIBase {
         var player = new PlayerData();
         if (player.gold >= gold && Common.canCraft(resource, player.resources[region.townData.tier - 1]) === true) {
             player.addGold(-gold);
-            player.spendResource(resource, region.townData.tier);
+            player.spendResource(resource, region.townData.tier - 1);
             region.townData.increaseTechLevel(tech);
             this._updateStatus();
         }
