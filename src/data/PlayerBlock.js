@@ -210,7 +210,7 @@ export class PlayerBlock extends CreatureBlock {
                 rawDmg = rawDmg * 2;
             }
         }
-        return dmg = creature.takeDamage(rawDmg, isCrit);
+        return creature.takeDamage(rawDmg, isCrit);
     }
 
     save() {
