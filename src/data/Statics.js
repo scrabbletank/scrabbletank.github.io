@@ -1,5 +1,5 @@
 var Statics = {
-    VERSION_NUMBER: 2,
+    VERSION_NUMBER: 3,
 
     //UNLOCK FEATURE TYPES
     UNLOCK_GEAR_TAB: 100,
