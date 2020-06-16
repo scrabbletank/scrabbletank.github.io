@@ -138,7 +138,7 @@ class TileData {
 
     //should be called after killing invasion monsters
     decreaseInvasionPower() {
-        this.invasionPower -= Math.min(30000, this.invasionPower - (this.invasionPower / Statics.SIGHTING_BATTLE_MULTI));
+        this.invasionPower -= Math.max(30000, this.invasionPower - (this.invasionPower / Statics.SIGHTING_BATTLE_MULTI));
     }
 
     generateMonsters() {
