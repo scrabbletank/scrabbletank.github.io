@@ -40,9 +40,13 @@ export class MoonlightScene extends SceneUIBase {
 
         this.exitButton = new TextButton(this, this.relativeX(950), this.relativeY(730), 120, 40, "BACK")
             .onClickHandler(() => { 
-                this.canLevelPerks = false;
-                var game = this.scene.get("DarkWorld");
-                game.rebirth();
+                if (this.canLevelPerks === true) {
+                    var game = this.scene.get("DarkWorld");
+                    this.canLevelPerks = false;
+                    game.rebirth();
+                } else {
+                    this.scene.sendToBack();
+                }
             });
     }
 
