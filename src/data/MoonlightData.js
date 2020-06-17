@@ -39,7 +39,7 @@ export class MoonlightData {
                     texture: { sprite: "moonicons", tile: 9 }
                 },
                 moonwine: {
-                    name: "Moonwine", level: 0, maxLevel: 5, requires: [], cost: [50, 50, 1.5],
+                    name: "Moonwine", level: 0, maxLevel: 10, requires: [], cost: [50, 50, 1.5],
                     texture: { sprite: "moonicons", tile: 14 }
                 },
                 hardenedvillagers: {

@@ -21,6 +21,7 @@ import { MoonlightData } from "../data/MoonlightData";
 import { LoreStore } from "../data/LoreStore";
 import { WorldScene } from "./WorldScene";
 import { Common } from "../utils/Common";
+import { ImageButton } from "../ui/ImageButton";
 
 export class GameScene extends SceneUIBase {
     constructor(position, name) {
@@ -68,35 +69,35 @@ export class GameScene extends SceneUIBase {
         this.statLabels = [];
         this.statIcons = [];
         this.statIncButtons = [];
-        this.statIcons.push(new TooltipImage(this, 20, 50, 16, 16, { sprite: "icons", tile: 0 },
+        this.statIcons.push(new TooltipImage(this, 20, 20, 16, 16, { sprite: "icons", tile: 0 },
             "Strength determines how hard you hit. Each point increases your min Damage by 0.4, max Damage by 1, and increases damage " +
             "from gear by ~1% (diminishing returns)."));
-        this.statIcons.push(new TooltipImage(this, 20, 70, 16, 16, { sprite: "icons", tile: 1 },
+        this.statIcons.push(new TooltipImage(this, 20, 40, 16, 16, { sprite: "icons", tile: 1 },
             "Dexterity determines your ability to hit enemies. Each point increases your Hit by 7."));
-        this.statIcons.push(new TooltipImage(this, 20, 90, 16, 16, { sprite: "icons", tile: 2 },
+        this.statIcons.push(new TooltipImage(this, 20, 60, 16, 16, { sprite: "icons", tile: 2 },
             "Agility determines how hard you are to hit. Each point increases your Evasion by 7 and gives a small boost to explore speed."));
-        this.statIcons.push(new TooltipImage(this, 20, 110, 16, 16, { sprite: "icons", tile: 3 },
+        this.statIcons.push(new TooltipImage(this, 20, 80, 16, 16, { sprite: "icons", tile: 3 },
             "Endurance determines your health. Each point increases your max Health by 5"));
-        this.statIcons.push(new TooltipImage(this, 20, 130, 16, 16, { sprite: "icons", tile: 4 },
+        this.statIcons.push(new TooltipImage(this, 20, 100, 16, 16, { sprite: "icons", tile: 4 },
             "Recovery determines how easily you heal your wounds. Each point increases your Health Regen by 0.1/s."));
-        this.statIcons.push(new TooltipImage(this, 20, 150, 16, 16, { sprite: "icons", tile: 5 },
+        this.statIcons.push(new TooltipImage(this, 20, 120, 16, 16, { sprite: "icons", tile: 5 },
             "Defense determines how durable your body is. Each point increases your armor by 0.2 and increases armor from gear by ~1% (diminishing returns)."));
-        this.statIcons.push(new TooltipImage(this, 20, 170, 16, 16, { sprite: "icons", tile: 6 },
+        this.statIcons.push(new TooltipImage(this, 20, 140, 16, 16, { sprite: "icons", tile: 6 },
             "Accuracy determines your ability to strike weak points. Each point increases your Crit damage by 2.5%."));
 
-        this.statIncButtons.push(new TextButton(this, 150, 50, 16, 16, '+')
+        this.statIncButtons.push(new TextButton(this, 150, 20, 16, 16, '+')
             .onClickHandler(() => { this._increaseStat('str'); }));
-        this.statIncButtons.push(new TextButton(this, 150, 70, 16, 16, '+')
+        this.statIncButtons.push(new TextButton(this, 150, 40, 16, 16, '+')
             .onClickHandler(() => { this._increaseStat('dex'); }));
-        this.statIncButtons.push(new TextButton(this, 150, 90, 16, 16, '+')
+        this.statIncButtons.push(new TextButton(this, 150, 60, 16, 16, '+')
             .onClickHandler(() => { this._increaseStat('agi'); }));
-        this.statIncButtons.push(new TextButton(this, 150, 110, 16, 16, '+')
+        this.statIncButtons.push(new TextButton(this, 150, 80, 16, 16, '+')
             .onClickHandler(() => { this._increaseStat('end'); }));
-        this.statIncButtons.push(new TextButton(this, 150, 130, 16, 16, '+')
+        this.statIncButtons.push(new TextButton(this, 150, 100, 16, 16, '+')
             .onClickHandler(() => { this._increaseStat('rec'); }));
-        this.statIncButtons.push(new TextButton(this, 150, 150, 16, 16, '+')
+        this.statIncButtons.push(new TextButton(this, 150, 120, 16, 16, '+')
             .onClickHandler(() => { this._increaseStat('def'); }));
-        this.statIncButtons.push(new TextButton(this, 150, 170, 16, 16, '+')
+        this.statIncButtons.push(new TextButton(this, 150, 140, 16, 16, '+')
             .onClickHandler(() => { this._increaseStat('acc'); }));
 
         this.detailsLabels = [];
@@ -165,8 +166,6 @@ export class GameScene extends SceneUIBase {
             .onClickHandler(() => { this._setBuyAmount(10); }));
         this.buyButtons.push(new TextButton(this, 125, 780, 40, 18, "x100")
             .onClickHandler(() => { this._setBuyAmount(100); }));
-        // this.buyButtons.push(new TextButton(this, 165, 770, 40, 20, "Max")
-        //     .onClickHandler(() => { this._setBuyAmount(-1); }));
 
         this.infuseLabel = this.add.bitmapText(10, 10, "courier20", "Infuse");
         this.shadeLabel = this.add.bitmapText(20, 10, "courier16", "Shade: " + this.player.shade);
@@ -201,6 +200,8 @@ export class GameScene extends SceneUIBase {
         this.worldButton = new TextButton(this, 962, 60, 122, 20, "World")
             .onClickHandler(() => { this.scene.bringToTop("WorldScene"); this.scene.bringToTop("DarkWorld"); });
         this.worldTimeLabel = this.add.bitmapText(650, 80, "courier20", "").setOrigin(0.5, 0);
+        this.moonlightButton = new ImageButton(this, 1005, 12, 32, 32, { sprite: "moonicons", tile: 12 })
+            .onClickHandler(() => { this.scene.bringToTop("MoonlightScene"); });
 
         this.gearButton.setVisible(this.progression.unlocks.gearTab);
         this.regionButton.setVisible(this.progression.unlocks.exploreTab);
@@ -208,6 +209,7 @@ export class GameScene extends SceneUIBase {
         this.townButton.setVisible(this.progression.unlocks.townTab);
         this.talentButton.setVisible(this.progression.unlocks.talentsTab);
         this.worldButton.setVisible(this.progression.unlocks.worldTab);
+        this.moonlightButton.setVisible(this.progression.totalCounts.timesGated > 0);
 
         this.registry.set('setTooltip', (x, y, w, h, txt) => { this._setTooltip(x, y, w, h, txt); });
         this.registry.set('disableTooltip', () => { this._disableTooltip(); });
@@ -329,14 +331,14 @@ export class GameScene extends SceneUIBase {
             this.statLabels[i].destroy();
         }
         this.statLabels = [];
-        this.statLabels.push(this.add.bitmapText(20, 30, "courier16", "Stat Points: " + this.player.statPoints));
-        this.statLabels.push(this.add.bitmapText(40, 50, "courier16", Common.numberString(this.player.statBlock.Strength())));
-        this.statLabels.push(this.add.bitmapText(40, 70, "courier16", Common.numberString(this.player.statBlock.Dexterity())));
-        this.statLabels.push(this.add.bitmapText(40, 90, "courier16", Common.numberString(this.player.statBlock.Agility())));
-        this.statLabels.push(this.add.bitmapText(40, 110, "courier16", Common.numberString(this.player.statBlock.Endurance())));
-        this.statLabels.push(this.add.bitmapText(40, 130, "courier16", Common.numberString(this.player.statBlock.Recovery())));
-        this.statLabels.push(this.add.bitmapText(40, 150, "courier16", Common.numberString(this.player.statBlock.Defense())));
-        this.statLabels.push(this.add.bitmapText(40, 170, "courier16", Common.numberString(this.player.statBlock.Accuracy())));
+        this.statLabels.push(this.add.bitmapText(20, 0, "courier16", "Stat Points: " + this.player.statPoints));
+        this.statLabels.push(this.add.bitmapText(40, 20, "courier16", Common.numberString(this.player.statBlock.Strength())));
+        this.statLabels.push(this.add.bitmapText(40, 40, "courier16", Common.numberString(this.player.statBlock.Dexterity())));
+        this.statLabels.push(this.add.bitmapText(40, 60, "courier16", Common.numberString(this.player.statBlock.Agility())));
+        this.statLabels.push(this.add.bitmapText(40, 80, "courier16", Common.numberString(this.player.statBlock.Endurance())));
+        this.statLabels.push(this.add.bitmapText(40, 100, "courier16", Common.numberString(this.player.statBlock.Recovery())));
+        this.statLabels.push(this.add.bitmapText(40, 120, "courier16", Common.numberString(this.player.statBlock.Defense())));
+        this.statLabels.push(this.add.bitmapText(40, 140, "courier16", Common.numberString(this.player.statBlock.Accuracy())));
 
         this._updateStatButtons();
     }
@@ -362,7 +364,7 @@ export class GameScene extends SceneUIBase {
 
     _updateGear() {
         var text = "" +
-        Common.processText("W: " + (this.player.weapon === undefined ? "None" : this.player.weapon.name + " Lv" + this.player.weapon.level), 20) + "\n" +
+            Common.processText("W: " + (this.player.weapon === undefined ? "None" : this.player.weapon.name + " Lv" + this.player.weapon.level), 20) + "\n" +
             Common.processText("A: " + (this.player.armor === undefined ? "None" : this.player.armor.name + " Lv" + this.player.armor.level), 20) + "\n" +
             Common.processText("T: " + (this.player.trinket === undefined ? "None" : this.player.trinket.name + " Lv" + this.player.trinket.level), 20);
 
@@ -430,7 +432,7 @@ export class GameScene extends SceneUIBase {
     }
 
     _layoutStats() {
-        var h = 190;
+        var h = 160;
 
         this.infuseLabel.setVisible(this.progression.unlocks.infuseUI);
         this.shadeLabel.setVisible(this.progression.unlocks.infuseUI);
@@ -443,7 +445,7 @@ export class GameScene extends SceneUIBase {
 
         if (this.progression.unlocks.infuseUI === true) {
             this.infuseStart = h;
-            h += 125;
+            h += 120;
         }
 
         this.gearStart = h;
@@ -451,9 +453,9 @@ export class GameScene extends SceneUIBase {
         this.gearLabels.setPosition(20, h + 20);
         this._updateGear();
 
-        h += this.gearLabels.getTextBounds().local.height + 5;
+        h += this.gearLabels.getTextBounds().local.height + 20;
         this.detailsStart = h;
-        h += 185;
+        h += 180;
         this.resourceStart = h;
 
         this._updateStats();
@@ -539,6 +541,7 @@ export class GameScene extends SceneUIBase {
         this.townButton.setVisible(this.progression.unlocks.townTab);
         this.talentButton.setVisible(this.progression.unlocks.talentsTab);
         this.worldButton.setVisible(this.progression.unlocks.worldTab);
+        this.moonlightButton.setVisible(this.progression.totalCounts.timesGated > 0);
         this._layoutStats();
         this.gearShowTimer = 2000;
 

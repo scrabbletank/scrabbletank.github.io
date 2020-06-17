@@ -292,6 +292,7 @@ export class RegionScene extends SceneUIBase {
             this.tileElements.push(row);
         }
         this._updateColors();
+        this._updateBuildings();
         var invasionPercent = this.region.invasionCounter / Statics.INVASION_THRESHOLD;
         this.invasionLabel.setText("Invasion\n" + Math.floor(invasionPercent * 100) + "%");
         this.invasionLabel.setVisible(this.progression.unlocks.buildings);
@@ -323,8 +324,8 @@ export class RegionScene extends SceneUIBase {
         var invasionPercent = this.region.invasionCounter / Statics.INVASION_THRESHOLD;
         this.invasionLabel.setTint(Phaser.Display.Color.GetColor(40 + invasionPercent * 215, 40 + invasionPercent * 215, 40 + invasionPercent * 215));
 
-        this.autoExploreLabel = this.add.bitmapText(this.relativeX(700), this.relativeY(130), "courier20", "Auto Explore:");
-        this.autoExploreButton = new TextButton(this, this.relativeX(835), this.relativeY(130), 40, 20, "OFF")
+        this.autoExploreLabel = this.add.bitmapText(this.relativeX(700), this.relativeY(140), "courier20", "Auto Explore:");
+        this.autoExploreButton = new TextButton(this, this.relativeX(835), this.relativeY(140), 40, 20, "OFF")
             .onClickHandler(() => { this._toggleAutoExplore() });
         this.autoExploreButton.setTextColor(Phaser.Display.Color.GetColor(175, 0, 140));
 

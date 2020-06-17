@@ -12,6 +12,24 @@ export class TalentScene extends SceneUIBase {
 
     rebirth() {
         this.talentLabel.setText("Talent Points\n" + this.player.talentPoints);
+
+        var standardArray = [[264, 288], [312, 240], [360, 216], [408, 192], [456, 216], [504, 240], [552, 288],
+        [216, 240], [264, 192], [336, 144], [408, 120], [480, 144], [552, 192], [600, 240],
+        [168, 192], [240, 120], [312, 72], [408, 48], [504, 72], [576, 120], [648, 192],
+        [408, 312], [480, 384], [336, 384], [408, 456]];
+
+        for (var i = 0; i < this.talentButtons.length; i++) {
+            this.talentButtons[i].destroy();
+        }
+        
+        this.talentButtons = [];
+        var idx = 0;
+        for (const prop in this.player.talents) {
+            var x = this.relativeX(standardArray[idx][0] + 18);
+            var y = this.relativeY(standardArray[idx][1] + 20);
+            this._setupTalentButton(this.player.talents[prop], x, y, idx);
+            idx++;
+        }
     }
 
     create() {

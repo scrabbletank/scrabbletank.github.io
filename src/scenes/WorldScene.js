@@ -91,6 +91,7 @@ export class WorldScene extends SceneUIBase {
     }
 
     _selectRegion(index) {
+        this._disableTooltip();
         this.worldData.setCurrentRegion(index);
         this.scene.get("RegionScene").changeRegion();
         this.scene.get("TownScene").changeRegion();

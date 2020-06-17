@@ -10,6 +10,8 @@ import { TextButton } from "../ui/TextButton";
 export class MoonlightScene extends SceneUIBase {
     constructor(position, name) {
         super(position, name);
+
+        this.canLevelPerks = false;
     }
 
     create() {
@@ -38,9 +40,14 @@ export class MoonlightScene extends SceneUIBase {
 
         this.exitButton = new TextButton(this, this.relativeX(950), this.relativeY(730), 120, 40, "BACK")
             .onClickHandler(() => { 
+                this.canLevelPerks = false;
                 var game = this.scene.get("DarkWorld");
                 game.rebirth();
             });
+    }
+
+    enableLeveling() {
+        this.canLevelPerks = true;
     }
 
     _setupMoonlightButton(perk, x, y) {
@@ -69,6 +76,9 @@ export class MoonlightScene extends SceneUIBase {
     }
 
     _levelUpPerk(perk) {
+        if (this.canLevelPerks === false) {
+            return;
+        }
         if (perk.level >= perk.maxLevel && perk.maxLevel !== -1) {
             return;
         }

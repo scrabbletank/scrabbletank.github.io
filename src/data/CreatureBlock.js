@@ -58,6 +58,7 @@ export class CreatureBlock {
         this.name = "";
         this.xpReward = 0;
         this.drops = [];
+        this.motes = 0;
         this.icon = { sprite: "enemyicons", tile: 8 };
 
         this.healthChangedHandlers = [];
@@ -243,5 +244,25 @@ export class CreatureBlock {
         this.xpReward = shadeBase + (shadeBase / 4) * rLvl;
         this.drops = rewards;
         this.icon = icon;
+    }
+
+    addTemplate(templateName) {
+        switch (templateName) {
+            case "Dire":
+                this.name = "Dire " + this.name;
+                this.stats.strength = this.stats.strength * 1.2;
+                this.stats.dexterity = this.stats.dexterity * 1.2;
+                this.stats.agility = this.stats.agility * 1.2;
+                this.stats.endurance = this.stats.endurance * 1.2;
+                this.stats.recovery = this.stats.recovery * 1.2;
+                this.stats.defense = this.stats.defense * 1.2;
+                this.stats.accuracy = this.stats.accuracy * 1.2;
+                this.xpReward = this.xpReward * 2;
+                var newDrops = [];
+                for (var i = 0; i < this.drops.length; i++) {
+                    newDrops.push({ type: this.drops[i].type, rate: this.drops[i].rate * 2 });
+                }
+                this.motes += 1 + Math.floor(this.level / 5);
+        }
     }
 }

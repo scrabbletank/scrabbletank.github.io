@@ -214,13 +214,13 @@ export class GearData {
         this.gear.push(new Gear("Hide Armor", 1, Statics.GEAR_ARMOR, stat, statlvl, cost, costlvl));
 
         var stat = {
-            health: 3, damageMin: 0, damageMax: 0, strength: 0,
+            health: 5, damageMin: 0, damageMax: 0, strength: 0,
             dexterity: 0, agility: 0, endurance: 0, recovery: 0,
             defense: 0, accuracy: 0, hit: 0, evasion: -6,
             critDamage: 0, critChance: 0, healthRegen: 0, armor: 3
         };
         var statlvl = {
-            health: 1, damageMin: 0, damageMax: 0, strength: 0,
+            health: 3, damageMin: 0, damageMax: 0, strength: 0,
             dexterity: 0, agility: 0, endurance: 0, recovery: 0,
             defense: 0, accuracy: 0, hit: 0, evasion: -4,
             critDamage: 0, critChance: 0, healthRegen: 0, armor: 1
@@ -269,7 +269,7 @@ export class GearData {
         };
         var statlvl = {
             health: 0, damageMin: 0, damageMax: 0, strength: 0,
-            dexterity: 1, agility: 1, endurance: 0, recovery: 0,
+            dexterity: 0.8, agility: 0.8, endurance: 0, recovery: 0,
             defense: 0, accuracy: 0, hit: 0, evasion: 0,
             critDamage: 0, critChance: 0, healthRegen: 0, armor: 0
         };

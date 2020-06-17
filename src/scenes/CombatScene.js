@@ -72,6 +72,14 @@ export class CombatScene extends SceneUIBase {
     _setupCreatures() {
         this.monsters = this.tileRef.generateMonsters();
 
+        if (MoonlightData.instance.moonperks.direbeasts.level > 0) {
+            for (var i = 0; i < this.monsters.length; i++) {
+                if (Math.random() < 0.05) {
+                    this.monsters[i].addTemplate("Dire");
+                }
+            }
+        }
+
         for (var i = 0; i < this.monsterDiplays.length; i++) {
             this.monsterDiplays[i].setVisible(false);
         }
@@ -312,9 +320,11 @@ export class CombatScene extends SceneUIBase {
                 var rewards = [0, 0, 0, 0, 0, 0];
                 var shade = 0;
                 var gold = 0;
+                var motes = 0;
                 for (var i = 0; i < this.monsters.length; i++) {
                     gold += 1 + Math.floor(Math.max(1, this.monsters[i].level) / 5);
                     shade += this.monsters[i].xpReward;
+                    motes += this.monsters[i].motes;
                     // calculating bonus drops here
                     var lvl = this.player.talents.bounty.level;
                     var numRewards = 1 + (lvl / 10) + ((lvl % 10) / 10 > Math.random() ? 1 : 0);
@@ -326,6 +336,7 @@ export class CombatScene extends SceneUIBase {
                 }
                 this.player.statBlock.encounterCounter -= 1;
                 this._onKill(this.tileRef, shade, rewards, gold);
+                this.player.addMote(motes);
                 this._hideEnemyDisplays();
                 this.tileRef.fightCooldown = Statics.COMBAT_COOLDOWN;
                 if (this.tileRef.isInvaded === true) {
