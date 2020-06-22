@@ -58,37 +58,37 @@ export class PlayerBlock extends CreatureBlock {
     }
     Strength() {
         var ret = this.stats.strength + this.statBonuses.strength;
-        ret = ret * (1 + this.moonData.moonperks.str.level * 0.01);
+        ret = ret * (1 + (this.moonData.moonperks.str.level + MoonlightData.instance.challengePoints) * 0.01);
         return Math.floor(ret);
     }
     Dexterity() {
         var ret = this.stats.dexterity + this.statBonuses.dexterity;
-        ret = ret * (1 + this.moonData.moonperks.dex.level * 0.01);
+        ret = ret * (1 + (this.moonData.moonperks.dex.level + MoonlightData.instance.challengePoints) * 0.01);
         return Math.floor(ret);
     }
     Agility() {
         var ret = this.stats.agility + this.statBonuses.agility;
-        ret = ret * (1 + this.moonData.moonperks.agi.level * 0.01);
+        ret = ret * (1 + (this.moonData.moonperks.agi.level + MoonlightData.instance.challengePoints) * 0.01);
         return Math.floor(ret);
     }
     Endurance() {
         var ret = this.stats.endurance + this.statBonuses.endurance;
-        ret = ret * (1 + this.moonData.moonperks.end.level * 0.01);
+        ret = ret * (1 + (this.moonData.moonperks.end.level + MoonlightData.instance.challengePoints) * 0.01);
         return Math.floor(ret);
     }
     Recovery() {
         var ret = this.stats.recovery + this.statBonuses.recovery;
-        ret = ret * (1 + this.moonData.moonperks.rec.level * 0.01);
+        ret = ret * (1 + (this.moonData.moonperks.rec.level + MoonlightData.instance.challengePoints) * 0.01);
         return Math.floor(ret);
     }
     Defense() {
         var ret = this.stats.defense + this.statBonuses.defense;
-        ret = ret * (1 + this.moonData.moonperks.def.level * 0.01);
+        ret = ret * (1 + (this.moonData.moonperks.def.level + MoonlightData.instance.challengePoints) * 0.01);
         return Math.floor(ret);
     }
     Accuracy() {
         var ret = this.stats.accuracy + this.statBonuses.accuracy;
-        ret = ret * (1 + this.moonData.moonperks.acc.level * 0.01);
+        ret = ret * (1 + (this.moonData.moonperks.acc.level + MoonlightData.instance.challengePoints) * 0.01);
         return Math.floor(ret);
     }
     Hit() {

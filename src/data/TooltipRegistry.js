@@ -1,3 +1,5 @@
+import { WorldTime } from "./WorldTime";
+
 export class TooltipRegistry {
     static getTalentTooltip(talent) {
         switch (talent.name) {
@@ -88,11 +90,17 @@ export class TooltipRegistry {
                 return "Increases the Town's max population by " + (tier * 5) + ".";
             case "Watch Tower":
                 return "Increases the defense of all tiles within 2 tiles of this watch tower by " + (tier * 2) + ".";
-            case "Trade House":
-                return "Increases the Town's economy by " + (tier * 5) + "-" + (tier * 20) + "%, based on distance to " +
-                    "the Town and other Trade Houses.";
+            case "Market":
+                return "Increases the Town's economy by 0" + "-" + (tier * 10) + "%, based on distance to " +
+                    "the Town and other Markets. Reaches max bonus at 4 tiles.";
             case "Tavern":
-                return "Increases the Town's economy by " + (tier * 10) + "% and increases max population by 5.";
+                return "Increases the Town's economy by " + (tier * 2) + "% per house adjacent to them.";
+            case "Road":
+                return "Most buildings must be built adjacent to roads. Production buildings get a boost being adjacent to a road, and " +
+                    "produce nothing when more than " + tier + " tiles away.";
+            case "Docks":
+                return "Docks don't need roads and enables roads to be built beside them. Increases gold earned per week by " +
+                    (tier * 2) + ", applied before any economy bonus.";
         }
     }
 
@@ -105,9 +113,9 @@ export class TooltipRegistry {
             case "Town Hall":
                 return "Each level increases Bounty gold from killing monsters in this region by 10%. The best quest is the " +
                     "one that pays the most.";
-            case "Trade House":
-                return "Unlocks the Trade House. Once built the trade house increases tax income by 5-20% based on distance to " +
-                    "the Town and other Trade Houses.";
+            case "Market":
+                return "Unlocks the Market. Once built the Market increases tax income by 0-10% based on distance to " +
+                    "the Town and other Markets.";
             case "Tavern":
                 return "Everyone Needs a drink. Unlocks the Tavern, combining your two loves, getting more money and people that " +
                     "pay you money.";
@@ -147,7 +155,7 @@ export class TooltipRegistry {
             case "Hero's Vault":
                 return "Increases the base income per villager by " + (moonlight.level * 0.1) + " + (0.1) gold.";
             case "Moonwine":
-                return "Taverns give an additional " + (moonlight.level * 2) + "% + (2%) bonus to economy per level.";
+                return "Taverns count Town Houses within " + (1 + moonlight.level) + " + (1) tiles for their bonus.";
             case "Hardened Villagers":
                 return "Buildings have " + (moonlight.level) + " + (1) more defense.";
             case "Shadow's Blessing":
@@ -168,6 +176,9 @@ export class TooltipRegistry {
                 return "Production buildings generate " + (moonlight.level) + "% + (1%) more resources per defense.";
             case "Hero's Pouch":
                 return "Increases your gold cap by " + (moonlight.level * 100) + " + (100) per town.";
+            case "Night Market":
+                return "Markets increase your economy by 0-" + (10 + moonlight.level) + "% + (1%) based on distance between the Town " +
+                    "and other Markets.";
         }
     }
 
@@ -185,6 +196,57 @@ export class TooltipRegistry {
                 return "A massive forest full of the oldest trees waiting to be cut down, beasts to be hunted and plants to be gathered.";
             case "hills":
                 return "Rolling hills with few plains between them. Full of wild beasts, plants, and the Gnoll's who hunt them.";
+        }
+    }
+
+    static getChallengeDescription(challenge) {
+        switch (challenge.name) {
+            case "A Matter of Years":
+                return "Now that you've reached out into the world and understand the basics why not do it again, but faster. As they " +
+                    "say, practice makes perfect!\n\n" +
+                    "Restrictions: Reach the 2nd Gate within " + (10 - challenge.completions) + " Years.\n\n" +
+                    "On First Completion: Unlock new challenges.\n" +
+                    "On Every Completion: Increases moonlight earned by 10%\n" +
+                    "                     +1 Challenge Point\n\n" +
+                    "It is possible to fail this challenge!\n\n" +
+                    "Completions: " + challenge.completions + "/" + challenge.maxCompletions + "\n" +
+                    "Fastest Time: " + new WorldTime(challenge.fastestTime).getTimespanText();
+            case "Forged Ahead":
+                return "Those forge upgrades sure are useful, especially now that all your gear costs " + (10 + challenge.completions * 5) +
+                    " times as much.\n\n" +
+                    "Restrictions: Gear costs increased by " + (10 + challenge.completions * 5) + " times.\n" +
+                    "              Reach the 2nd Gate.\n\n" +
+                    "On Every Completion: Gear costs are multiplied by x0.95\n" +
+                    "                     +1 Challenge Points\n\n" +
+                    "Completions: " + challenge.completions + "/" + challenge.maxCompletions + "\n" +
+                    "Fastest Time: " + new WorldTime(challenge.fastestTime).getTimespanText();
+            case "Vast Continent":
+                return "A Hero must be able to reach all those in need, even the ones really really really far away.\n\n" +
+                    "Restrictions: Explore speed is reduced by 25\n" +
+                    "              Reach Gate " + (1 + challenge.completions) + ".\n\n" +
+                    "On First Completion: Increases explore speed by 25%\n" +
+                    "On Every Completion: Increases explore speed by 10%\n" +
+                    "                     +2 Challenge Points\n\n" +
+                    "Completions: " + challenge.completions + "/" + challenge.maxCompletions + "\n" +
+                    "Fastest Time: " + new WorldTime(challenge.fastestTime).getTimespanText();;
+            case "Forgotten Labor":
+                return "None of the townsfolk in this realm know how to work. Either that or they're just really lazy.\n\n" +
+                    "Restrictions: Production buildings are unavailable.\n" +
+                    "              Reach Gate " + (1 + challenge.completions) + ".\n\n" +
+                    "On First Completion: Unlock the Warehouse building.\n" +
+                    "On Every Completion: Increases building production by 3%\n" +
+                    "                     +3 Challenge Points\n\n" +
+                    "Completions: " + challenge.completions + "/" + challenge.maxCompletions + "\n" +
+                    "Fastest Time: " + new WorldTime(challenge.fastestTime).getTimespanText();
+            case "Talentless":
+                return "You rely way too much on those talents. Let's see you get through without them.\n\n" +
+                    "Restrictions: Talents are removed.\n" +
+                    "              Reach Gate " + (1 + challenge.completions) + ".\n\n" +
+                    "On First Completion: Talent costs scale slightly slower.\n" +
+                    "On Every Completion: Start with +1 Talent points.\n" +
+                    "                     +3 Challenge Points\n\n" +
+                    "Completions: " + challenge.completions + "/" + challenge.maxCompletions + "\n" +
+                    "Fastest Time: " + new WorldTime(challenge.fastestTime).getTimespanText();
         }
     }
 }

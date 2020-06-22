@@ -166,4 +166,15 @@ export class Common {
             a.g + (b.g - a.g) * lerp,
             a.b + (b.b - a.b) * lerp);
     }
+
+    static yieldHelper(type, yields) {
+        var amount = 0;
+        for (var i = 0; i < yields.length; i++) {
+            if (yields[i].type === type) {
+                amount = yields[i].rate;
+                break;
+            }
+        }
+        return amount;
+    }
 }

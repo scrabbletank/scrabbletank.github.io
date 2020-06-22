@@ -1,5 +1,5 @@
 var Statics = {
-    VERSION_NUMBER: 4,
+    VERSION_NUMBER: 5,
 
     //UNLOCK FEATURE TYPES
     UNLOCK_GEAR_TAB: 100,
@@ -54,8 +54,8 @@ var Statics = {
     CRITDMG_DIMINISHING_POWER: 0.83,
     SCALING_DIMINISHING_POWER: 0.75,
 
-    MONSTER_STAT_PER_LEVEL: 1,
-    MONSTER_STATSCALE_PER_LEVEL: 1.025,
+    MONSTER_STAT_PER_LEVEL: 1.1,
+    MONSTER_STATSCALE_PER_LEVEL: 1.027,
 
     // PLAYER SHADE VARIABLES
     STAT_COST_BASE: 50,
@@ -75,13 +75,14 @@ var Statics = {
 
     // TOWN
     BASE_TAX_INCOME: 0.5,
-    POPULATION_GROWTH: 1.02,
-    EXPLORE_MULTIPLIER: 0.1,
+    POPULATION_GROWTH: 1.03,
+    EXPLORE_MULTIPLIER: 0.15,
     GOLDCAP_PER_POP: 10,
-    TRADE_HOUSE_MAX_DISTANCE: 6,
+    TRADE_HOUSE_MAX_DISTANCE: 4,
     BUILDING_BASE_DEFENSE: 5,
     RESEARCH_TIER_POWER: 1.66,
     RESEARCH_LEVEL_POWER: 1.5,
+    DESTROY_BUILDING_COST: 50,
 
     // INVASION
     SIGHTING_DIVIDER: 60000,
@@ -111,7 +112,26 @@ var Statics = {
     MONTHS_PER_YEAR: 13,
 
     //MISC
-    AUTOSAVE_TIMER: 60000
+    AUTOSAVE_TIMER: 60000,
+
+    //ROADS string LRUD
+    ROADTYPES: {
+        "0001": 0,
+        "0010": 1,
+        "0011": 2,
+        "0100": 3,
+        "0101": 4,
+        "0110": 5,
+        "0111": 6,
+        "1000": 7,
+        "1001": 8,
+        "1010": 9,
+        "1011": 10,
+        "1100": 11,
+        "1101": 12,
+        "1110": 13,
+        "1111": 14,
+    }
 };
 
 export { Statics };

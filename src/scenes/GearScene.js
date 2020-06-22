@@ -181,8 +181,9 @@ export class GearScene extends SceneUIBase {
         if (wasEquipped === true) {
             this.player.unequip(gear.slotType);
         }
-        this.player.addMote(-1);
-        gear.motesFused += 1;
+        var motesFused = Math.min(this.player.motes, this.scene.get("DarkWorld").buyAmount);
+        this.player.addMote(-motesFused);
+        gear.motesFused += motesFused;
         if (wasEquipped === true) {
             this.player.equip(gear);
         }

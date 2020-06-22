@@ -10,6 +10,7 @@ import { ProgressionStore } from "../data/ProgressionStore";
 import { TextButton } from "../ui/TextButton";
 import { WorldData } from "../data/WorldData";
 import { MoonlightData } from "../data/MoonlightData";
+import { DynamicSettings } from "../data/DynamicSettings";
 
 //width 800x600
 
@@ -236,22 +237,24 @@ export class CombatScene extends SceneUIBase {
 
     isInCombat() { return this.combatActive === true && this.globalAttackCooldown <= 0 && this.tileRef.fightCooldown <= 0; }
 
-    update(__time, delta) {
+    update(__time, __delta) {
         //ANIMATIONS
-        this._updateAnimations(delta);
+        var fDelta = WorldData.instance.time.frameDelta;
+        this._updateAnimations(fDelta);
         if (this.combatActive === false) {
             return;
         }
         if (this.globalAttackCooldown > 0) {
-            this.globalAttackCooldown -= delta;
+            this.globalAttackCooldown -= fDelta;
             return;
         }
         if (this.tileRef.fightCooldown > 0) {
-            this.tileRef.fightCooldown -= delta;
+            this.tileRef.fightCooldown -= fDelta;
             var region = new WorldData().getCurrentRegion();
             var exploreMulti = (1 + this.player.talents.explorer.level * 0.1) * region.townData.exploreMulti *
-                (1 + Statics.AGI_EXPLORE_MULTI * Math.pow(this.player.statBlock.Agility(), Statics.AGI_EXPLORE_POWER));
-            this.tileRef.explore(delta * exploreMulti);
+                (1 + Statics.AGI_EXPLORE_MULTI * Math.pow(this.player.statBlock.Agility(), Statics.AGI_EXPLORE_POWER)) *
+                DynamicSettings.instance.exploreSpeed * this.player.challengeExploreMulti;
+            this.tileRef.explore(fDelta * exploreMulti);
             if (this.tileRef.amountExplored >= this.tileRef.explorationNeeded) {
                 this.explorationBar.setFillPercent(this.tileRef.amountExplored / this.tileRef.explorationNeeded,
                     "Explored");
@@ -276,8 +279,8 @@ export class CombatScene extends SceneUIBase {
                 }
                 var multi = Combat.getAttackSpeedMultiplier(this.monsters[i].Hit(), this.player.statBlock.Evasion());
 
-                this.monsters[i].tickAttackCooldown(delta, multi);
-                this.monsters[i].tickRegen(delta);
+                this.monsters[i].tickAttackCooldown(fDelta, multi);
+                this.monsters[i].tickRegen(fDelta);
 
                 if (this.monsters[i].canAttack() === true) {
                     var crit = this.monsters[i].CritChance() > Math.random();
@@ -290,7 +293,7 @@ export class CombatScene extends SceneUIBase {
 
             // player regen is handled elsewhere so we dont tick it here.
             var multi = Combat.getAttackSpeedMultiplier(this.player.statBlock.Hit(), this.monsters[this.target].Evasion());
-            this.player.statBlock.tickAttackCooldown(delta, multi);
+            this.player.statBlock.tickAttackCooldown(fDelta, multi);
 
             if (this.player.statBlock.canAttack() === true) {
                 var crit = this.player.statBlock.CritChance() > Math.random();
@@ -354,7 +357,6 @@ export class CombatScene extends SceneUIBase {
                     this.tileRef.invasionFights -= 1;
                     if (this.tileRef.invasionFights <= 0) {
                         var region = new WorldData().getCurrentRegion().endSighting(this.tileRef.x, this.tileRef.y);
-                        this.scene.get("RegionScene")._updateColors();
                     }
                 }
                 this.restButton.setVisible(true);

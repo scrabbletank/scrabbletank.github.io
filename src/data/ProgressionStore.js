@@ -1,5 +1,6 @@
 import { Statics } from "./Statics";
 import { Common } from "../utils/Common";
+import { MoonlightData } from "./MoonlightData";
 
 export class ProgressionStore {
     constructor() {
@@ -156,6 +157,13 @@ export class ProgressionStore {
                         "how my gear is doing, then suddenly BAM! Ambushed by a literal whale and knocked unconscious."
                 }
             ];
+            // any one off lore that doesnt fit into the above should go here to be tracked better
+            this.loreUnlocks = {
+
+            };
+            this.loreTexts = {
+
+            };
             this.exploresUnlocked = 0;
             this.killsUnlocked = 0;
             this.shadesUnlocked = 0;
@@ -201,7 +209,7 @@ export class ProgressionStore {
             exploreTab: false,
             combatTab: false,
             townTab: false,
-            talentsTab: false,
+            talentsTab: MoonlightData.instance.challenges.talent.completions > 0,
             worldTab: false,
             // Mechanics
             infuseUI: false,

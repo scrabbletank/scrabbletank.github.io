@@ -4,7 +4,7 @@ import { MoonlightData } from "../data/MoonlightData";
 import { TextButton } from "./TextButton";
 
 export class RebirthDialog {
-    constructor(scene, x, y, regionDifficulty) {
+    constructor(scene, x, y, regionLevel) {
         this.backingRect = scene.add.rectangle(x, y, 400, 270, Phaser.Display.Color.GetColor(0, 0, 0))
             .setOrigin(0, 0).setInteractive();
         this.backingRect.isStroked = true;
@@ -30,7 +30,8 @@ export class RebirthDialog {
 
 
         var playerData = new PlayerData();
-        var costTxt = "MOONLIGHT\n" + playerData.earnableMoonlight(Math.floor(regionDifficulty / 20));
+        var costTxt = "MOONLIGHT\n" + (playerData.earnableMoonlight(regionLevel + 1) *
+            (1 + 0.1 * MoonlightData.instance.challenges.time.completions));
         this.moonlightLabel = scene.add.bitmapText(x + 200, y + 190, "courier20", costTxt, 20, 1).setOrigin(0.5, 0);
         this.moonlightLabel.setTint(Phaser.Display.Color.GetColor(206, 238, 240));
 

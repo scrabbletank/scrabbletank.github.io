@@ -16,30 +16,36 @@ export class TextButton {
     setNotification() {
         this.isNotifying = true;
         this.text.setText("!" + this.rawText + "!");
+        return this;
     }
 
     setPosition(x, y) {
         this.backgroundRect.setPosition(x, y);
         this.text.setPosition(x + this.width / 2, y + this.height / 2);
+        return this;
     }
 
     setVisible(visible) {
         this.backgroundRect.setVisible(visible);
         this.text.setVisible(visible);
         this.text.setTint(visible === true ? this.textClr : 0x999999);
+        return this;
     }
 
     setEnable(enabled) {
         this.enabled = enabled;
         this.text.setTint(enabled === true ? this.textClr : 0x999999);
+        return this;
     }
 
     setText(text) {
         this.text.setText(text);
+        return this;
     }
     setTextColor(clr) {
         this.text.setTint(clr);
         this.textClr = clr;
+        return this;
     }
 
     _onClick(callback) {

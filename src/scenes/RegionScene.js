@@ -1,5 +1,4 @@
 import { SceneUIBase } from "./SceneUIBase";
-import { Region } from "../data/Region";
 import { FloatingTooltip } from "../ui/FloatingTooltip";
 import { ProgressionStore } from "../data/ProgressionStore";
 import { Statics } from "../data/Statics";
@@ -10,18 +9,19 @@ import { PlayerData } from "../data/PlayerData";
 import { RebirthDialog } from "../ui/RebirthDialog";
 import { MoonlightData } from "../data/MoonlightData";
 import { TextButton } from "../ui/TextButton";
+import { DynamicSettings } from "../data/DynamicSettings";
 
 
 export class RegionScene extends SceneUIBase {
 
     constructor(position, name) {
         super(position, name);
-        this.WIDTH = 40;
-        this.HEIGHT = 40;
+        this.WIDTH = 50;
+        this.HEIGHT = 50;
         this.tileClickHandlers = [];
         var worldData = new WorldData();
         this.region = worldData.getCurrentRegion();
-        this.offsetX = 450 - this.region.width * this.WIDTH / 2;
+        this.offsetX = 380 - this.region.width * this.WIDTH / 2;
         this.offsetY = 350 - this.region.height * this.HEIGHT / 2;
 
         this.progression = new ProgressionStore();
@@ -32,6 +32,7 @@ export class RegionScene extends SceneUIBase {
         this.rebirthDialog = undefined;
 
         this.autoExploreActive = false;
+        this.updateBuildings = false;
     }
 
     preload() {
@@ -50,19 +51,55 @@ export class RegionScene extends SceneUIBase {
         }
     }
 
+    _nextToConnector(x, y) {
+        return this.region.map[y][x].name === "Town" || (this.region.map[y][x].building !== undefined && this.region.map[y][x].building.name === "Docks");
+    }
+    _getRoadTexture(x, y) {
+        var l = x > 0 && (this.region.map[y][x - 1].roadDist === 0 || this._nextToConnector(x - 1, y)) ? '1' : '0';
+        var r = x < this.region.width - 1 && (this.region.map[y][x + 1].roadDist === 0 || this._nextToConnector(x + 1, y)) ? '1' : '0';
+        var u = y > 0 && (this.region.map[y - 1][x].roadDist === 0 || this._nextToConnector(x, y - 1)) ? '1' : '0';
+        var d = y < this.region.height - 1 && (this.region.map[y + 1][x].roadDist === 0 || this._nextToConnector(x, y + 1)) ? '1' : '0';
+        return { sprite: "roadicons", tile: Statics.ROADTYPES[l + r + u + d] + (this.region.map[y][x].building.tier - 1) * 20 };
+    }
+
+    _getBuildingImage(x, y) {
+        if (this.region.map[y][x].building.name === "Road") {
+            return this._getRoadTexture(x, y);
+        } else {
+            return {
+                sprite: this.region.map[y][x].building.texture.sprite,
+                tile: this.region.map[y][x].building.texture.tile + 8 * (this.region.map[y][x].building.tier - 1)
+            };
+        }
+    }
+
     _setupTile(x, y) {
         var clr = this.region.map[y][x].color;
+        var border = this.region.map[y][x].borderColor;
+        if (this.region.map[y][x].revealed === false) {
+            clr = Phaser.Display.Color.GetColor(0, 0, 0);
+            border = Phaser.Display.Color.GetColor(40, 80, 40);
+        } else if (this.region.map[y][x].explored === false && this.region.map[y][x].revealed === true) {
+            clr = Common.colorLerp(clr, Phaser.Display.Color.GetColor(0, 0, 0), 0.65);
+        }
         var rect = this.add.rectangle(this.relativeX((x + 0.5) * this.WIDTH + this.offsetX),
             this.relativeY((y + 0.5) * this.HEIGHT + this.offsetY), this.WIDTH - 1, this.HEIGHT - 1, clr);
-        rect.strokeColor = this.region.map[y][x].borderColor;
+        rect.strokeColor = Phaser.Display.Color.GetColor(40, 80, 40);
         rect.isStroked = true;
         rect.lineWidth = 1.5;
         rect.setInteractive({ useHandCursor: true })
             .on("pointerdown", () => { this._handleTileClick(x, y); })
             .on('pointerover', () => { this._setTooltip(x, y); })
             .on('pointerout', () => { this._disableTooltip() });
+
+        var bld = undefined;
+        if (this.region.map[y][x].building !== undefined) {
+            var texture = this._getBuildingImage(x, y);
+            bld = this.add.image(this.relativeX((x + 0.5) * this.WIDTH + this.offsetX),
+                this.relativeY((y + 0.5) * this.HEIGHT + this.offsetY), texture.sprite, texture.tile);
+        }
         // this.add.bitmapText(this.relativeX(x * this.WIDTH + 120), this.relativeY(y * this.HEIGHT + 70), "courier16", this.region.map[y][x].difficulty + "").setOrigin(0.5);
-        return { rect: rect, building: undefined };
+        return { rect: rect, building: bld };
     }
 
     _setTooltip(x, y) {
@@ -120,12 +157,11 @@ export class RegionScene extends SceneUIBase {
                     "you more when you're clearing new land for us. What were you trying to ask?\"\n\nYou say it was nothing " +
                     "and ask them to lead the way. You don't know about this hero stuff, but money is money. Besides you were " +
                     "already fighting this monsters anyway, might as well make money while you do it.");
-                this._updateColors();
             }
             return;
         }
         if (this.region.map[y][x].name === "Mystic Gate" && this.region.map[y][x].explored === true) {
-            this.rebirthDialog = new RebirthDialog(this, this.relativeX(250), this.relativeY(215), this.region.difficultyRange[1])
+            this.rebirthDialog = new RebirthDialog(this, this.relativeX(250), this.relativeY(215), this.region.regionLevel)
                 .onRebirthHandler(() => { this._rebirthClickedHandler(); })
                 .onLeaveHandler(() => { this._leaveClickedHandler(); });
             return;
@@ -146,20 +182,19 @@ export class RegionScene extends SceneUIBase {
                 break;
             case "build":
                 var player = new PlayerData();
-                var tier = Math.floor(this.region.difficultyRange[0] / 20);
+                var tier = Math.floor(this.region.regionLevel);
                 if (Common.canCraft(blob.building.resourceCosts, player.resources[tier]) === true &&
                     blob.building.goldCost <= player.gold) {
                     player.spendResource(blob.building.resourceCosts, tier);
                     player.addGold(-blob.building.goldCost);
                     this.region.placeBuilding(blob.tile.x, blob.tile.y, blob.building);
                     blob.tile.building = blob.building;
-                    this._updateBuildings();
                     this.scene.get("TownScene")._updateStatus();
                 }
                 break;
             case "upgrade":
                 var player = new PlayerData();
-                var tier = Math.floor(this.region.difficultyRange[0] / 20);
+                var tier = Math.floor(this.region.regionLevel);
                 if (Common.canCraft(blob.tile.building.resourceCosts, player.resources[tier]) === true &&
                     blob.tile.building.goldCost <= player.gold) {
                     player.spendResource(blob.tile.building.resourceCosts, tier);
@@ -170,6 +205,11 @@ export class RegionScene extends SceneUIBase {
                     this.scene.get("TownScene")._updateStatus();
                 }
                 break;
+            case "destroy":
+                if (PlayerData.instance.gold >= blob.tile.building.tier * Statics.DESTROY_BUILDING_COST) {
+                    PlayerData.instance.addGold(-blob.tile.building.tier * Statics.DESTROY_BUILDING_COST);
+                    this.region.destroyBuilding(blob.tile.x, blob.tile.y);
+                }
         }
         this.tileSelectWindow.destroy();
         this.tileSelectWindow = undefined;
@@ -178,13 +218,36 @@ export class RegionScene extends SceneUIBase {
         this.rebirthDialog.destroy();
         this.rebirthDialog = undefined;
 
-        var player = new PlayerData();
-        var moonData = new MoonlightData();
-        var moonlightEarned = player.earnableMoonlight(Math.floor(this.region.difficultyRange[1] / 20));
+        var moonlightEarned = PlayerData.instance.earnableMoonlight(this.region.regionLevel + 1) *
+            (1 + 0.1 * MoonlightData.instance.challenges.time.completions);
+        MoonlightData.instance.moonlight += moonlightEarned;
 
-        moonData.moonlight += moonlightEarned;
+        if (this.region.regionLevel >= 1) {
+            ProgressionStore.instance.persistentUnlocks.challenge = true;
+        }
+        if (this.region.regionLevel >= 2) {
+            MoonlightData.instance.challenges.buildings.unlocked = true;
+            MoonlightData.instance.challenges.talent.unlocked = true;
+        }
+
+        //handle challenge completion here
+        if (DynamicSettings.instance.maxRunTime !== -1 &&
+            WorldData.instance.time.time - WorldData.instance.timeAtRunStart < DynamicSettings.instance.maxRunTime) {
+            var challenge = MoonlightData.instance.getChallengeFromName(DynamicSettings.instance.challengeName);
+            switch (challenge.name) {
+                case "A Matter of Years":
+                    if (challenge.completions == 0) {
+                        MoonlightData.instance.challenges.forge.unlocked = true;
+                        MoonlightData.instance.challenges.explore.unlocked = true;
+                    }
+            }
+            if (challenge.completions < challenge.maxCompletions) {
+                challenge.completions += 1;
+            }
+        }
 
         var moonScene = this.scene.get("MoonlightScene");
+        moonScene.enableLeveling();
         moonScene._onMoonlightChanged();
         this.scene.bringToTop("MoonlightScene");
     }
@@ -202,7 +265,6 @@ export class RegionScene extends SceneUIBase {
         for (var i = 0; i < this.tileClickHandlers.length; i++) {
             this.tileClickHandlers[i](x, y, fromAutoExplore);
         }
-        this._updateColors();
     }
 
     _onExploredCallback(tile) {
@@ -223,7 +285,6 @@ export class RegionScene extends SceneUIBase {
         }
         if (tile.explored === false) {
             this.region.exploreTile(tile.x, tile.y);
-            this._updateColors();
             this.progression.registerTileExplored();
 
             if (this.autoExploreActive === true) {
@@ -235,35 +296,54 @@ export class RegionScene extends SceneUIBase {
         }
     }
 
-    _updateColors() {
-        for (var i = 0; i < this.region.height; i++) {
-            for (var t = 0; t < this.region.width; t++) {
-                var clr = this.region.map[i][t].color;
-                var border = this.region.map[i][t].borderColor;
-                if (this.region.map[i][t].revealed === false) {
-                    clr = Phaser.Display.Color.GetColor(0, 0, 0);
-                    border = Phaser.Display.Color.GetColor(40, 80, 40);
-                } else if (this.region.map[i][t].explored === false && this.region.map[i][t].revealed === true) {
-                    clr = Common.colorLerp(clr, Phaser.Display.Color.GetColor(0, 0, 0), 0.65);
-                }
-                this.tileElements[i][t].rect.fillColor = clr;
-                this.tileElements[i][t].rect.strokeColor = border;
-            }
+    _updateTile(tile) {
+        var clr = tile.color;
+        var border = tile.borderColor;
+        if (tile.revealed === false) {
+            clr = Phaser.Display.Color.GetColor(0, 0, 0);
+            border = Phaser.Display.Color.GetColor(40, 80, 40);
+        } else if (tile.explored === false && tile.revealed === true) {
+            clr = Common.colorLerp(clr, Phaser.Display.Color.GetColor(0, 0, 0), 0.65);
         }
-    }
-    _updateBuildings() {
-        for (var i = 0; i < this.region.height; i++) {
-            for (var t = 0; t < this.region.width; t++) {
-                var bld = this.region.map[i][t].building;
-                if (this.tileElements[i][t].building === undefined && bld !== undefined) {
+        this.tileElements[tile.y][tile.x].rect.fillColor = clr;
+        // this.tileElements[tile.y][tile.x].rect.strokeColor = border;
+        if (tile.building !== undefined) {
+            this.updateBuildings = true;
+            var texture = this._getBuildingImage(tile.x, tile.y);
+            if (this.tileElements[tile.y][tile.x].building !== undefined) {
+                this.tileElements[tile.y][tile.x].building.setTexture(texture.sprite, texture.tile);
+            } else {
+                this.tileElements[tile.y][tile.x].building = this.add.image(this.relativeX((tile.x + 0.5) * this.WIDTH + this.offsetX),
+                    this.relativeY((tile.y + 0.5) * this.HEIGHT + this.offsetY), texture.sprite, texture.tile);
+            }
 
-                    this.tileElements[i][t].building = this.add.image(this.relativeX(t * this.WIDTH + this.offsetX + 20),
-                        this.relativeY(i * this.HEIGHT + this.offsetY + 20), bld.texture.sprite,
-                        bld.texture.tile + 8 * (bld.tier - 1)).setOrigin(0.5);
-                } else if (this.tileElements[i][t].building !== undefined && bld === undefined) {
-                    this.tileElements[i][t].building.destroy();
-                    this.tileElements[i][t].building = undefined;
+            // if this is a road we need to update neighbouring roads
+            if (tile.building.name === "Road") {
+                if (tile.x > 0 && this.region.map[tile.y][tile.x - 1].building !== undefined &&
+                    this.region.map[tile.y][tile.x - 1].building.name === "Road") {
+                    var rtxt = this._getBuildingImage(tile.x - 1, tile.y);
+                    this.tileElements[tile.y][tile.x - 1].building.setTexture(rtxt.sprite, rtxt.tile);
                 }
+                if (tile.x < this.region.width - 1 && this.region.map[tile.y][tile.x + 1].building !== undefined &&
+                    this.region.map[tile.y][tile.x + 1].building.name === "Road") {
+                    var rtxt = this._getBuildingImage(tile.x + 1, tile.y);
+                    this.tileElements[tile.y][tile.x + 1].building.setTexture(rtxt.sprite, rtxt.tile);
+                }
+                if (tile.y > 0 && this.region.map[tile.y - 1][tile.x].building !== undefined &&
+                    this.region.map[tile.y - 1][tile.x].building.name === "Road") {
+                    var rtxt = this._getBuildingImage(tile.x, tile.y - 1);
+                    this.tileElements[tile.y - 1][tile.x].building.setTexture(rtxt.sprite, rtxt.tile);
+                }
+                if (tile.y < this.region.height - 1 && this.region.map[tile.y + 1][tile.x].building !== undefined &&
+                    this.region.map[tile.y + 1][tile.x].building.name === "Road") {
+                    var rtxt = this._getBuildingImage(tile.x, tile.y + 1);
+                    this.tileElements[tile.y + 1][tile.x].building.setTexture(rtxt.sprite, rtxt.tile);
+                }
+            }
+        } else {
+            if (this.tileElements[tile.y][tile.x].building !== undefined) {
+                this.tileElements[tile.y][tile.x].building.destroy();
+                this.tileElements[tile.y][tile.x].building = undefined;
             }
         }
     }
@@ -273,8 +353,10 @@ export class RegionScene extends SceneUIBase {
     }
 
     rebirth() {
-        var worldData = new WorldData();
-        this.region = worldData.getCurrentRegion();
+        // we need to ensure we're only updating when the current region is changed
+        this.region.removeTileChanged();
+        this.region = WorldData.instance.getCurrentRegion();
+        this.region.onTileChanged((x) => { this._updateTile(x); });
         for (var i = 0; i < this.region.height; i++) {
             for (var t = 0; t < this.region.width; t++) {
                 this.tileElements[i][t].rect.destroy();
@@ -291,8 +373,6 @@ export class RegionScene extends SceneUIBase {
             }
             this.tileElements.push(row);
         }
-        this._updateColors();
-        this._updateBuildings();
         var invasionPercent = this.region.invasionCounter / Statics.INVASION_THRESHOLD;
         this.invasionLabel.setText("Invasion\n" + Math.floor(invasionPercent * 100) + "%");
         this.invasionLabel.setVisible(this.progression.unlocks.buildings);
@@ -319,13 +399,21 @@ export class RegionScene extends SceneUIBase {
             .setOrigin(0)
             .setInteractive();
 
-        this.invasionLabel = this.add.bitmapText(this.relativeX(740), this.relativeY(90), "courier20", "Invasion", 20, 1);
+        this.invasionLabel = this.add.bitmapText(this.relativeX(720), this.relativeY(90), "courier20", "Invasion", 20, 1);
         this.invasionLabel.setVisible(this.progression.unlocks.buildings);
         var invasionPercent = this.region.invasionCounter / Statics.INVASION_THRESHOLD;
         this.invasionLabel.setTint(Phaser.Display.Color.GetColor(40 + invasionPercent * 215, 40 + invasionPercent * 215, 40 + invasionPercent * 215));
 
-        this.autoExploreLabel = this.add.bitmapText(this.relativeX(700), this.relativeY(140), "courier20", "Auto Explore:");
-        this.autoExploreButton = new TextButton(this, this.relativeX(835), this.relativeY(140), 40, 20, "OFF")
+        this.offlineLabel = this.add.bitmapText(this.relativeX(660), this.relativeY(140), "courier20", "Offline Time: " + WorldData.instance.time.getOfflineTimeString());
+        this.speed1xButton = new TextButton(this, this.relativeX(795), this.relativeY(160), 30, 20, "1x")
+            .onClickHandler(() => { WorldData.instance.time.setTimeScale(1); });
+        this.speed2xButton = new TextButton(this, this.relativeX(830), this.relativeY(160), 30, 20, "2x")
+            .onClickHandler(() => { WorldData.instance.time.setTimeScale(2); });
+        this.speed5xButton = new TextButton(this, this.relativeX(865), this.relativeY(160), 30, 20, "5x")
+            .onClickHandler(() => { WorldData.instance.time.setTimeScale(5); });
+
+        this.autoExploreLabel = this.add.bitmapText(this.relativeX(660), this.relativeY(190), "courier20", "Auto Explore:");
+        this.autoExploreButton = new TextButton(this, this.relativeX(795), this.relativeY(190), 40, 20, "OFF")
             .onClickHandler(() => { this._toggleAutoExplore() });
         this.autoExploreButton.setTextColor(Phaser.Display.Color.GetColor(175, 0, 140));
 
@@ -344,19 +432,20 @@ export class RegionScene extends SceneUIBase {
         }
         // X/Y GUIDES
         for (var i = 0; i < this.region.height; i++) {
-            this.add.bitmapText(this.relativeX(this.offsetX - 20), this.relativeY(this.offsetY + 20 + (i * 40)), "courier20", this.letters[i]).setOrigin(0.5);
+            this.add.bitmapText(this.relativeX(this.offsetX - this.WIDTH / 2),
+                this.relativeY(this.offsetY + ((i + 0.5) * this.HEIGHT)), "courier20", this.letters[i]).setOrigin(0.5);
         }
         for (var i = 0; i < this.region.width; i++) {
-            this.add.bitmapText(this.relativeX(this.offsetX + 20 + (i * 40)), this.relativeY(this.offsetY - 20), "courier20", "" + (i + 1)).setOrigin(0.5);
+            this.add.bitmapText(this.relativeX(this.offsetX + ((i + 0.5) * this.WIDTH)),
+                this.relativeY(this.offsetY - this.HEIGHT / 2), "courier20", "" + (i + 1)).setOrigin(0.5);
         }
-        this._updateColors();
-        this._updateBuildings();
-
 
         this.progression.addOnUnlockHandler((a, b, c) => { this._handleProgressionEvent(a, b, c) });
+        this.region.onTileChanged((x) => { this._updateTile(x); });
     }
 
     update(__time, delta) {
+        this.offlineLabel.setText("Offline Time: " + WorldData.instance.time.getOfflineTimeString());
         if (this.region.sightings.length > 0) {
             var invasionPercent = this.region.invasionCounter / Statics.INVASION_THRESHOLD;
             this.invasionLabel.setText("Invasion\n" + Math.floor(invasionPercent * 100) + "%");
@@ -366,8 +455,17 @@ export class RegionScene extends SceneUIBase {
             for (var i = 0; i < this.region.sightings.length; i++) {
                 var s = this.region.sightings[i];
                 if (this.region.map[s[0]][s[1]].isInvaded === true && this.region.map[s[0]][s[1]].invasionPower >= Statics.SIGHTING_THRESHOLD) {
-                    this.tileElements[s[0]][s[1]].rect.strokeColor = Common.colorLerp(this.region.map[s[0]][s[1]].borderColor, Phaser.Display.Color.GetColor(255, 0, 255), lerp);
+                    this.tileElements[s[0]][s[1]].rect.fillColor = Common.colorLerp(this.region.map[s[0]][s[1]].color, Phaser.Display.Color.GetColor(255, 0, 255), lerp);
                 }
+            }
+        }
+
+        if (this.updateBuildings) {
+            this.updateBuildings = false;
+            for (var i = 0; i < this.region.roads.length; i++) {
+                var road = this.region.roads[i];
+                var texture = this._getBuildingImage(road[1], road[0]);
+                this.tileElements[road[0]][road[1]].building.setTexture(texture.sprite, texture.tile);
             }
         }
     }

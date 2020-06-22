@@ -36,50 +36,50 @@ export class TownData {
         this.bountyMulti = 1;
         this.productionMulti = 1;
         this.exploreMulti = 1;
+        this.townDefenseBonus = 0;
         this.goldCapBonus = moonData.moonperks.heropouch.level * 100;
         this.baseIncome = Statics.BASE_TAX_INCOME + moonData.moonperks.vault.level * 0.1;
+        this.buildingIncome = 0;
+        this.townExplored = false;
+        this.researchEnabled = false;
 
-        this.buildings = [
-            {
+        this.buildings = {
+            forge: {
                 name: "Forge", level: 0, maxLevel: -1, requires: [],
                 goldCosts: [50, 25, 15], resources: [[0, 0, 0], [0, 0, 0], [10, 10, 5], [0, 0, 0], [10, 10, 5], [0, 0, 0]]
             },
-            {
+            guilds: {
                 name: "Guilds", level: 0, maxLevel: -1, requires: [],
                 goldCosts: [100, 50, 25], resources: [[0, 0, 0], [10, 10, 5], [0, 0, 0], [10, 10, 5], [0, 0, 0], [10, 10, 5]]
             },
-            {
+            townhall: {
                 name: "Town Hall", level: 0, maxLevel: -1, requires: [],
                 goldCosts: [50, 30, 15], resources: [[15, 10, 8], [0, 0, 0], [0, 0, 0], [0, 0, 0], [10, 10, 5], [0, 0, 0]]
             }
-        ];
+        };
 
-        this.upgrades = [
-            {
-                name: "Trade House", level: 0, maxLevel: 1, requires: [],
-                goldCosts: [400, 250, 0], resources: [[150, 150, 0], [75, 75, 0], [0, 0, 0], [75, 75, 0], [100, 100, 0], [75, 75, 0]]
-            },
-            // {
-            //     name: "Alchemy Lab", level: 0, maxLevel: 1, requires: [],
-            //     goldCosts: [50, 50, 25], resources: [[0, 0, 0], [0, 0, 0], [5, 5, 3], [0, 0, 0], [5, 5, 3], [0, 0, 0]]
-            // },
-            {
-                name: "Tavern", level: 0, maxLevel: 1, requires: [],
-                goldCosts: [250, 150, 0], resources: [[150, 150, 0], [0, 0, 0], [0, 0, 0], [0, 0, 0], [100, 100, 0], [0, 0, 0]]
-            },
-            {
+        this.upgrades = {
+            reinforcedhouses: {
                 name: "Reinforced Houses", level: 0, maxLevel: 5, requires: [],
-                goldCosts: [75, 75, 30], resources: [[0, 0, 0], [0, 0, 0], [20, 20, 8], [0, 0, 0], [40, 40, 15], [0, 0, 0]]
+                goldCosts: [75, 75, 40], resources: [[0, 0, 0], [0, 0, 0], [20, 20, 10], [0, 0, 0], [40, 40, 20], [0, 0, 0]]
             },
-            {
+            banking: {
                 name: "Banking", level: 0, maxLevel: -1, requires: [],
                 goldCosts: [20, 20, 15], resources: [[0, 0, 0], [0, 0, 0], [0, 0, 0], [0, 0, 0], [15, 15, 8], [10, 10, 5]]
             },
-            {
+            mapmaking: {
                 name: "Map Making", level: 0, maxLevel: -1, requires: [],
                 goldCosts: [25, 25, 15], resources: [[0, 0, 0], [10, 10, 5], [0, 0, 0], [5, 5, 5], [0, 0, 0], [0, 0, 0]]
+            },
+            tavern: {
+                name: "Tavern", level: 0, maxLevel: 3, requires: [],
+                goldCosts: [250, 150, 50], resources: [[150, 150, 40], [0, 0, 0], [0, 0, 0], [0, 0, 0], [100, 100, 35], [0, 0, 0]]
+            },
+            market: {
+                name: "Market", level: 0, maxLevel: 3, requires: [],
+                goldCosts: [400, 250, 60], resources: [[150, 150, 30], [75, 75, 30], [0, 0, 0], [75, 75, 30], [100, 100, 35], [75, 75, 30]]
             }
-        ];
+        };
     }
 
     //used for both buildings and upgrades
@@ -99,6 +99,10 @@ export class TownData {
             case "Town Hall":
                 this.bountyMulti += 0.1;
                 break;
+            case "Reinforced Houses":
+                this.townDefenseBonus += 1;
+                WorldData.instance.getCurrentRegion().handleReinforcedHouses();
+                break;
             case "Banking":
                 this.economyMulti += 0.05;
                 this.goldCapBonus += 50;
@@ -106,23 +110,19 @@ export class TownData {
             case "Map Making":
                 this.exploreMulti += 0.1;
                 break;
-            case "Trade House":
-                var region = new WorldData().getCurrentRegion();
-                region.tradeHouseUnlocked = true;
-                break;
-            case "Tavern":
-                var region = new WorldData().getCurrentRegion();
-                region.tavernUnlocked = true;
-                break;
         }
     }
     increaseMaxPop(value) {
         this.maxPopulation += value;
     }
 
+    calculateEconMulti(bonus) {
+        this.economyMulti = 1 + bonus + (this.upgrades.banking.level * 0.05);
+    }
     getTownIncome() {
         var player = new PlayerData();
-        return Math.floor(this.currentPopulation) * this.baseIncome * this.economyMulti * (1 + player.talents.governance.level * 0.03);
+        return (Math.floor(this.currentPopulation) * this.baseIncome + this.buildingIncome) *
+            this.economyMulti * (1 + player.talents.governance.level * 0.03);
     }
     getGoldCap() {
         var player = new PlayerData();
@@ -134,8 +134,7 @@ export class TownData {
     }
 
     endOfWeek() {
-        var progression = new ProgressionStore();
-        if (progression.unlocks.townTab === true) {
+        if (this.townExplored === true) {
             this.currentPopulation = Math.min(this.maxPopulation, this.currentPopulation * Statics.POPULATION_GROWTH);
             var player = new PlayerData();
             player.addGold(this.getTownIncome());
@@ -143,6 +142,14 @@ export class TownData {
     }
 
     save() {
+        var buildings = [];
+        for (const prop in this.buildings) {
+            buildings.push([prop, this.buildings[prop].level]);
+        }
+        var upgrades = [];
+        for (const prop in this.upgrades) {
+            upgrades.push([prop, this.upgrades[prop].level]);
+        }
         var saveObj = {
             cp: this.currentPopulation,
             mp: this.maxPopulation,
@@ -152,14 +159,16 @@ export class TownData {
             pm: this.productionMulti,
             exm: this.exploreMulti,
             bi: this.baseIncome,
-            bld: this.buildings,
-            up: this.upgrades,
-            gc: this.goldCapBonus
+            bld: buildings,
+            up: upgrades,
+            gc: this.goldCapBonus,
+            te: this.townExplored,
+            re: this.researchEnabled
         }
 
         return saveObj;
     }
-    load(saveObj) {
+    load(saveObj, ver) {
         this.currentPopulation = saveObj.cp;
         this.maxPopulation = saveObj.mp;
         this.tier = saveObj.t;
@@ -168,8 +177,14 @@ export class TownData {
         this.productionMulti = saveObj.pm;
         this.exploreMulti = saveObj.exm;
         this.baseIncome = saveObj.bi;
-        this.buildings = saveObj.bld;
-        this.upgrades = saveObj.up;
         this.goldCapBonus = saveObj.gc;
+        this.townExplored = saveObj.te;
+        this.researchEnabled = saveObj.re;
+        for (var i = 0; i < saveObj.bld.length; i++) {
+            this.buildings[saveObj.bld[i][0]].level = saveObj.bld[i][1];
+        }
+        for (var i = 0; i < saveObj.up.length; i++) {
+            this.upgrades[saveObj.up[i][0]].level = saveObj.up[i][1];
+        }
     }
 }

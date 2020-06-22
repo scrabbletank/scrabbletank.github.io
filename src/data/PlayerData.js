@@ -3,6 +3,7 @@ import { PlayerBlock } from "./PlayerBlock";
 import { WorldData } from "./WorldData";
 import { GearData } from "./GearData";
 import { MoonlightData } from "./MoonlightData";
+import { DynamicSettings } from "./DynamicSettings";
 
 
 
@@ -11,7 +12,7 @@ export class PlayerData {
         if (!PlayerData.instance) {
             this.statBlock = new PlayerBlock(this);
             this.shade = 0;
-            this.statPoints = 0;
+            this.statPoints = 3;
             this.talentPoints = 0;
             this.statLevel = 1;
             this.talentLevel = 1;
@@ -19,12 +20,17 @@ export class PlayerData {
             this.nextTalentCost = Statics.TALENT_COST_BASE;
             this.resources = [[0, 0, 0, 0, 0, 0], [0, 0, 0, 0, 0, 0], [0, 0, 0, 0, 0, 0], [0, 0, 0, 0, 0, 0],
             [0, 0, 0, 0, 0, 0], [0, 0, 0, 0, 0, 0], [0, 0, 0, 0, 0, 0], [0, 0, 0, 0, 0, 0]];
+            this.resourceTierReached = 0;
             this.statChangedHandlers = [];
             this.resourceChangedHandlers = [];
             this.talentChangedHandlers = [];
             this.craftingCosts = [1, 1, 1, 1, 1, 1, 1, 1];
             this.gold = 0;
             this.motes = 0;
+            this.challengeExploreMulti = 1;
+            if (MoonlightData.instance.challenges.explore.completions > 0) {
+                this.challengeExploreMulti = 1.25 + (MoonlightData.instance.challenges.explore.completions * 0.1);
+            }
 
             this.weapon = undefined;
             this.armor = undefined;
@@ -67,8 +73,8 @@ export class PlayerData {
     rebirth() {
         this.statBlock.rebirth();
         this.shade = 0;
-        this.statPoints = 0;
-        this.talentPoints = 0;
+        this.statPoints = 3;
+        this.talentPoints = MoonlightData.instance.challenges.talent.completions;
         this.statLevel = 1;
         this.talentLevel = 1;
         this.nextStatCost = Statics.STAT_COST_BASE;
@@ -76,8 +82,17 @@ export class PlayerData {
         this.resources = [[0, 0, 0, 0, 0, 0], [0, 0, 0, 0, 0, 0], [0, 0, 0, 0, 0, 0], [0, 0, 0, 0, 0, 0],
         [0, 0, 0, 0, 0, 0], [0, 0, 0, 0, 0, 0], [0, 0, 0, 0, 0, 0], [0, 0, 0, 0, 0, 0]];
         this.craftingCosts = [1, 1, 1, 1, 1, 1, 1, 1];
+        for (var i = 0; i < this.craftingCosts.length; i++) {
+            this.craftingCosts[i] = this.craftingCosts[i] * DynamicSettings.instance.gearCostMulti;
+            this.craftingCosts[i] = this.craftingCosts[i] * Math.pow(Statics.FORGE_REDUCTION,
+                MoonlightData.instance.challenges.forge.completions);
+        }
         this.gold = 0;
         this.motes = 0;
+        this.challengeExploreMulti = 1;
+        if (MoonlightData.instance.challenges.explore.completions > 0) {
+            this.challengeExploreMulti = 1.25 + (MoonlightData.instance.challenges.explore.completions * 0.1);
+        }
 
         this.weapon = undefined;
         this.armor = undefined;
@@ -182,8 +197,9 @@ export class PlayerData {
     }
     getTalentCost(buyAmount) {
         var ret = 0;
+        var challengeMod = MoonlightData.instance.challenges.talent.completions > 0 ? 0.02 : 0;
         for (var i = 0; i < buyAmount; i++) {
-            ret += Statics.TALENT_COST_BASE * Math.pow(Statics.TALENT_COST_POWER, (this.talentLevel - 1 + i));
+            ret += Statics.TALENT_COST_BASE * Math.pow(Statics.TALENT_COST_POWER - challengeMod, (this.talentLevel - 1 + i));
         }
         return ret;
     }
@@ -197,10 +213,11 @@ export class PlayerData {
         }
     }
     buyTalent(buyAmount) {
+        var challengeMod = MoonlightData.instance.challenges.talent.completions > 0 ? 0.02 : 0;
         for (var i = 0; i < buyAmount; i++) {
             this.talentPoints += 1;
             this.shade -= this.nextTalentCost;
-            this.nextTalentCost = Statics.TALENT_COST_BASE * Math.pow(Statics.TALENT_COST_POWER, this.talentLevel);
+            this.nextTalentCost = Statics.TALENT_COST_BASE * Math.pow(Statics.TALENT_COST_POWER - challengeMod, this.talentLevel);
             this.talentLevel += 1;
         }
         this._onTalentChanged();
@@ -215,6 +232,7 @@ export class PlayerData {
     }
 
     addResource(list, tier) {
+        this.resourceTierReached = Math.max(this.resourceTierReached, tier);
         for (var i = 0; i < list.length; i++) {
             this.resources[tier][i] += list[i];
         }
@@ -297,6 +315,7 @@ export class PlayerData {
             nsp: this.nextStatCost,
             ntp: this.nextTalentCost,
             res: this.resources,
+            rtr: this.resourceTierReached,
             crf: this.craftingCosts,
             gold: this.gold,
             mote: this.motes,
@@ -319,6 +338,7 @@ export class PlayerData {
         this.nextStatCost = saveObj.nsp;
         this.nextTalentCost = saveObj.ntp;
         this.resources = saveObj.res;
+        this.resourceTierReached = saveObj.rtr;
         this.craftingCosts = saveObj.crf;
         this.gold = saveObj.gold;
         this.motes = saveObj.mote;

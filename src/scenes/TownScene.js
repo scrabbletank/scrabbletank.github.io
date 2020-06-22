@@ -23,6 +23,7 @@ export class TownScene extends SceneUIBase {
 
     changeRegion() {
         this._updateStatus();
+        this.upgradesBtn.setVisible(WorldData.instance.getCurrentRegion().townData.researchEnabled);
     }
 
     create() {
@@ -40,7 +41,7 @@ export class TownScene extends SceneUIBase {
             .onClickHandler(() => { this._showBuildings(true); });
         this.upgradesBtn = new TextButton(this, this.relativeX(370), this.relativeY(10), 120, 20, "Research")
             .onClickHandler(() => { this._showBuildings(false); });
-        this.upgradesBtn.setVisible(progression.unlocks.buildings);
+        this.upgradesBtn.setVisible(WorldData.instance.getCurrentRegion().townData.researchEnabled);
 
         this.buildingDisplays = []
 
@@ -62,7 +63,7 @@ export class TownScene extends SceneUIBase {
     }
 
     _handleTechUpgrade(tech) {
-        var region = new WorldData().getCurrentRegion();
+        var region = WorldData.instance.getCurrentRegion();
         var gold = TownData.getTechGoldCost(tech, region.townData.tier);
         var resource = TownData.getTechResourceCost(tech, region.townData.tier);
         var player = new PlayerData();
@@ -80,7 +81,7 @@ export class TownScene extends SceneUIBase {
     }
 
     _updateStatus() {
-        var region = new WorldData().getCurrentRegion();
+        var region = WorldData.instance.getCurrentRegion();
         var player = new PlayerData();
         var govBonus = (1 + player.talents.governance.level * 0.03);
 
@@ -102,14 +103,18 @@ export class TownScene extends SceneUIBase {
             this.buildingDisplays[i].destroy();
         }
         if (this.showBuildings === true) {
-            for (var i = 0; i < region.townData.buildings.length; i++) {
-                this.buildingDisplays.push(this._setupTechDisplay(this.relativeX(240), this.relativeY(50 + i * 120),
-                    region.townData.buildings[i], region.townData.tier));
+            var idx = 0;
+            for (const prop in region.townData.buildings) {
+                this.buildingDisplays.push(this._setupTechDisplay(this.relativeX(240), this.relativeY(50 + idx * 120),
+                    region.townData.buildings[prop], region.townData.tier));
+                idx += 1;
             }
         } else {
-            for (var i = 0; i < region.townData.upgrades.length; i++) {
-                this.buildingDisplays.push(this._setupTechDisplay(this.relativeX(240), this.relativeY(50 + i * 120),
-                    region.townData.upgrades[i], region.townData.tier));
+            var idx = 0;
+            for (const prop in region.townData.upgrades) {
+                this.buildingDisplays.push(this._setupTechDisplay(this.relativeX(240), this.relativeY(50 + idx * 120),
+                    region.townData.upgrades[prop], region.townData.tier));
+                idx += 1;
             }
         }
     }

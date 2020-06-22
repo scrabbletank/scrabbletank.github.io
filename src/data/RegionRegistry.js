@@ -8,10 +8,10 @@ var RegionRegistry = {
             clr: Phaser.Display.Color.GetColor(140, 110, 0),
             explorationNeeded: 35000,
             yields: [
-                { type: Statics.RESOURCE_WOOD, rate: 0.75 },
-                { type: Statics.RESOURCE_METAL, rate: 1.5 },
-                { type: Statics.RESOURCE_STONE, rate: 1 },
-                { type: Statics.RESOURCE_CRYSTAL, rate: 0.6 }
+                { type: Statics.RESOURCE_WOOD, rate: 1.25 },
+                { type: Statics.RESOURCE_METAL, rate: 2.25 },
+                { type: Statics.RESOURCE_STONE, rate: 1.5 },
+                { type: Statics.RESOURCE_CRYSTAL, rate: 1 }
             ]
         },
         drakemountain: {
@@ -20,9 +20,9 @@ var RegionRegistry = {
             clr: Phaser.Display.Color.GetColor(130, 30, 30),
             explorationNeeded: 28000,
             yields: [
-                { type: Statics.RESOURCE_METAL, rate: 1.5 },
-                { type: Statics.RESOURCE_STONE, rate: 1.5 },
-                { type: Statics.RESOURCE_CRYSTAL, rate: 1 }
+                { type: Statics.RESOURCE_METAL, rate: 2.25 },
+                { type: Statics.RESOURCE_STONE, rate: 2.25 },
+                { type: Statics.RESOURCE_CRYSTAL, rate: 1.5 }
             ]
         },
         forest: {
@@ -31,9 +31,9 @@ var RegionRegistry = {
             clr: Phaser.Display.Color.GetColor(0, 160, 0),
             explorationNeeded: 16000,
             yields: [
-                { type: Statics.RESOURCE_WOOD, rate: 1.25 },
-                { type: Statics.RESOURCE_LEATHER, rate: 0.75 },
-                { type: Statics.RESOURCE_FIBER, rate: 1 }
+                { type: Statics.RESOURCE_WOOD, rate: 1.75 },
+                { type: Statics.RESOURCE_LEATHER, rate: 1.25 },
+                { type: Statics.RESOURCE_FIBER, rate: 1.5 }
             ]
         },
         wode: {
@@ -42,10 +42,10 @@ var RegionRegistry = {
             clr: Phaser.Display.Color.GetColor(0, 130, 30),
             explorationNeeded: 20000,
             yields: [
-                { type: Statics.RESOURCE_WOOD, rate: 1.5 },
-                { type: Statics.RESOURCE_LEATHER, rate: 0.75 },
-                { type: Statics.RESOURCE_FIBER, rate: 1 },
-                { type: Statics.RESOURCE_CRYSTAL, rate: 0.35 }
+                { type: Statics.RESOURCE_WOOD, rate: 2.25 },
+                { type: Statics.RESOURCE_LEATHER, rate: 1 },
+                { type: Statics.RESOURCE_FIBER, rate: 1.5 },
+                { type: Statics.RESOURCE_CRYSTAL, rate: 0.6 }
             ]
         },
         ancientforest: {
@@ -54,10 +54,10 @@ var RegionRegistry = {
             clr: Phaser.Display.Color.GetColor(0, 90, 0),
             explorationNeeded: 24000,
             yields: [
-                { type: Statics.RESOURCE_WOOD, rate: 1.5 },
-                { type: Statics.RESOURCE_FIBER, rate: 0.75 },
+                { type: Statics.RESOURCE_WOOD, rate: 2.5 },
+                { type: Statics.RESOURCE_FIBER, rate: 1.25 },
                 { type: Statics.RESOURCE_STONE, rate: 1 },
-                { type: Statics.RESOURCE_CRYSTAL, rate: 0.5 }
+                { type: Statics.RESOURCE_CRYSTAL, rate: 1 }
             ]
         },
         plains: {
@@ -66,10 +66,10 @@ var RegionRegistry = {
             clr: Phaser.Display.Color.GetColor(20, 220, 20),
             explorationNeeded: 10000,
             yields: [
-                { type: Statics.RESOURCE_WOOD, rate: 0.6 },
-                { type: Statics.RESOURCE_LEATHER, rate: 1.5 },
-                { type: Statics.RESOURCE_FIBER, rate: 0.75 },
-                { type: Statics.RESOURCE_STONE, rate: 0.5 }
+                { type: Statics.RESOURCE_WOOD, rate: 0.9 },
+                { type: Statics.RESOURCE_LEATHER, rate: 2.5 },
+                { type: Statics.RESOURCE_FIBER, rate: 1.25 },
+                { type: Statics.RESOURCE_STONE, rate: 0.75 }
             ]
         },
         savanna: {
@@ -78,10 +78,10 @@ var RegionRegistry = {
             clr: Phaser.Display.Color.GetColor(190, 190, 60),
             explorationNeeded: 17500,
             yields: [
-                { type: Statics.RESOURCE_WOOD, rate: 0.5 },
-                { type: Statics.RESOURCE_LEATHER, rate: 1 },
-                { type: Statics.RESOURCE_FIBER, rate: 1.5 },
-                { type: Statics.RESOURCE_STONE, rate: 1 }
+                { type: Statics.RESOURCE_WOOD, rate: 0.75 },
+                { type: Statics.RESOURCE_LEATHER, rate: 1.5 },
+                { type: Statics.RESOURCE_FIBER, rate: 2 },
+                { type: Statics.RESOURCE_STONE, rate: 1.25 }
             ]
         },
         desert: {
@@ -90,9 +90,9 @@ var RegionRegistry = {
             clr: Phaser.Display.Color.GetColor(220, 190, 140),
             explorationNeeded: 16000,
             yields: [
-                { type: Statics.RESOURCE_WOOD, rate: 0.5 },
-                { type: Statics.RESOURCE_STONE, rate: 1.25 },
-                { type: Statics.RESOURCE_CRYSTAL, rate: 1.5 }
+                { type: Statics.RESOURCE_WOOD, rate: 0.75 },
+                { type: Statics.RESOURCE_STONE, rate: 1.75 },
+                { type: Statics.RESOURCE_CRYSTAL, rate: 2 }
             ]
         },
         hills: {
@@ -101,9 +101,9 @@ var RegionRegistry = {
             clr: Phaser.Display.Color.GetColor(130, 190, 50),
             explorationNeeded: 14000,
             yields: [
-                { type: Statics.RESOURCE_LEATHER, rate: 0.5 },
-                { type: Statics.RESOURCE_STONE, rate: 2 },
-                { type: Statics.RESOURCE_CRYSTAL, rate: 0.4 }
+                { type: Statics.RESOURCE_LEATHER, rate: 1 },
+                { type: Statics.RESOURCE_STONE, rate: 2.75 },
+                { type: Statics.RESOURCE_CRYSTAL, rate: 0.75 }
             ]
         },
         plateau: {
@@ -112,9 +112,9 @@ var RegionRegistry = {
             clr: Phaser.Display.Color.GetColor(200, 120, 40),
             explorationNeeded: 15000,
             yields: [
-                { type: Statics.RESOURCE_LEATHER, rate: 2 },
-                { type: Statics.RESOURCE_STONE, rate: 1.5 },
-                { type: Statics.RESOURCE_FIBER, rate: 0.5 }
+                { type: Statics.RESOURCE_LEATHER, rate: 3 },
+                { type: Statics.RESOURCE_STONE, rate: 2 },
+                { type: Statics.RESOURCE_FIBER, rate: 0.75 }
             ]
         },
         lake: {
@@ -129,10 +129,7 @@ var RegionRegistry = {
             enemies: ["catfish", "fish", "coyote", "cactus"],
             clr: Phaser.Display.Color.GetColor(0, 140, 190),
             explorationNeeded: 21000,
-            yields: [
-                { type: Statics.RESOURCE_WOOD, rate: 0.5 },
-                { type: Statics.RESOURCE_FIBER, rate: 1 }
-            ]
+            yields: []
         },
         swamp: {
             name: "Swamp",
@@ -140,10 +137,10 @@ var RegionRegistry = {
             clr: Phaser.Display.Color.GetColor(0, 110, 90),
             explorationNeeded: 25000,
             yields: [
-                { type: Statics.RESOURCE_WOOD, rate: 0.75 },
-                { type: Statics.RESOURCE_LEATHER, rate: 1 },
-                { type: Statics.RESOURCE_FIBER, rate: 1.75 },
-                { type: Statics.RESOURCE_CRYSTAL, rate: 0.4 }
+                { type: Statics.RESOURCE_WOOD, rate: 1 },
+                { type: Statics.RESOURCE_LEATHER, rate: 1.5 },
+                { type: Statics.RESOURCE_FIBER, rate: 2.25 },
+                { type: Statics.RESOURCE_CRYSTAL, rate: 0.7 }
             ]
         },
         town: {

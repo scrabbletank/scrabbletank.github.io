@@ -6,6 +6,11 @@ import { FloatingTooltip } from "../ui/FloatingTooltip";
 import { ImageButton } from "../ui/ImageButton";
 import { MoonlightData } from "../data/MoonlightData";
 import { TextButton } from "../ui/TextButton";
+import { ProgressionStore } from "../data/ProgressionStore";
+import { ChallengeWindow } from "../ui/ChallengeWindow";
+import { DynamicSettings } from "../data/DynamicSettings";
+import { ActiveChallengeDialog } from "../ui/ActiveChallengeDialog";
+import { TooltipImage } from "../ui/TooltipImage";
 
 export class MoonlightScene extends SceneUIBase {
     constructor(position, name) {
@@ -26,7 +31,7 @@ export class MoonlightScene extends SceneUIBase {
 
         var standardArray = [[648, 480], [672, 408], [624, 312], [552, 240], [456, 192], [360, 144], [264, 120],
         [168, 144], [144, 216], [192, 312], [264, 384], [360, 432], [456, 480], [552, 504],
-        [528, 576], [312, 504], [120, 360], [120, 72]];
+        [528, 576], [312, 504], [120, 360], [120, 72], [72, 240]];
         this.moonlight = new MoonlightData();
 
         this.moonlightButtons = [];
@@ -39,7 +44,7 @@ export class MoonlightScene extends SceneUIBase {
         }
 
         this.exitButton = new TextButton(this, this.relativeX(950), this.relativeY(730), 120, 40, "BACK")
-            .onClickHandler(() => { 
+            .onClickHandler(() => {
                 if (this.canLevelPerks === true) {
                     var game = this.scene.get("DarkWorld");
                     this.canLevelPerks = false;
@@ -48,9 +53,65 @@ export class MoonlightScene extends SceneUIBase {
                     this.scene.sendToBack();
                 }
             });
+
+        this.challengeBox = undefined;
+
+        this.challengeBtn = new TextButton(this, 970, 12, 120, 30, "Challenges")
+            .onClickHandler(() => { this._setupChallengeWindow(); });
+        this.challengePointIcon = new TooltipImage(this, 20, 20, 16, 16, { sprite: "moonicons", tile: 7 },
+            "Challenge Points earned from completing challenges. Each point increases your core stats by an additional 1%.");
+        this.challengePointLabel = this.add.bitmapText(40, 20, "courier20", MoonlightData.instance.challengePoints + "");
+        this.challengeBtn.setVisible(ProgressionStore.instance.persistentUnlocks.challenges);
+        this.challengePointIcon.setVisible(ProgressionStore.instance.persistentUnlocks.challenges);
+        this.challengePointLabel.setVisible(ProgressionStore.instance.persistentUnlocks.challenges);
     }
 
     enableLeveling() {
+        this.canLevelPerks = true;
+        this.challengeBtn.setVisible(ProgressionStore.instance.persistentUnlocks.challenges);
+        this.challengePointIcon.setVisible(ProgressionStore.instance.persistentUnlocks.challenges);
+        this.challengePointLabel.setText(MoonlightData.instance.challengePoints + "");
+        this.challengePointLabel.setVisible(ProgressionStore.instance.persistentUnlocks.challenges);
+    }
+
+    _setupChallengeWindow() {
+        if (this.challengeBox !== undefined) {
+            this.challengeBox.destroy();
+            this.challengeBox = undefined;
+        }
+        if (DynamicSettings.instance.challengeName !== "") {
+            this.challengeBox = new ActiveChallengeDialog(this, 200, 150)
+                .onAbandonHandler(() => { this._abandonChallenge(); })
+                .onCancelHandler(() => { this._removeChallengeWindow(); });
+        } else {
+            this.challengeBox = new ChallengeWindow(this, 150, 100)
+                .onAcceptHandler((c) => { this._beginChallenge(c); })
+                .onCancelHandler(() => { this._removeChallengeWindow(); });
+        }
+    }
+    _removeChallengeWindow() {
+        if (this.challengeBox !== undefined) {
+            this.challengeBox.destroy();
+            this.challengeBox = undefined;
+        }
+    }
+    _beginChallenge(challenge) {
+        if (this.canLevelPerks === true) {
+            DynamicSettings.instance.setupChallenge(challenge);
+            var game = this.scene.get("DarkWorld");
+            this.canLevelPerks = false;
+            game.rebirth();
+        }
+        if (this.challengeBox !== undefined) {
+            this.challengeBox.destroy();
+            this.challengeBox = undefined;
+        }
+    }
+    _abandonChallenge() {
+        if (this.challengeBox !== undefined) {
+            this.challengeBox.destroy();
+            this.challengeBox = undefined;
+        }
         this.canLevelPerks = true;
     }
 

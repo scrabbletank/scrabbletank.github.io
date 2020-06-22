@@ -1,17 +1,20 @@
 import { Region } from "./Region";
 import { WorldTime } from "./WorldTime";
 import { Common } from "../utils/Common";
+import { DynamicSettings } from "./DynamicSettings";
 
 export class WorldData {
     constructor() {
         if (!WorldData.instance) {
+            var regSize = DynamicSettings.instance.regionSize;
             this.regionList = [];
-            this.regionList.push(new Region(12, 12, [0, 20], "temperate"));
+            this.regionList.push(new Region(regSize[0], regSize[1], 0, "temperate"));
             this.currentRegion = 0;
             this.nextRegions = [];
+            this.timeAtRunStart = 0;
             this.time = new WorldTime();
-            this.time.registerEvent("onDayEnd", () => {this.updateDay(); });
-            this.time.registerEvent("onWeekEnd", () => {this.updateWeek(); });
+            this.time.registerEvent("onDayEnd", () => { this.updateDay(); });
+            this.time.registerEvent("onWeekEnd", () => { this.updateWeek(); });
             WorldData.instance = this;
         }
 
@@ -19,10 +22,12 @@ export class WorldData {
     }
 
     rebirth() {
+        var regSize = DynamicSettings.instance.regionSize;
         this.regionList = [];
-        this.regionList.push(new Region(12, 12, [0, 20], "temperate"));
+        this.regionList.push(new Region(regSize[0], regSize[1], 0, "temperate"));
         this.currentRegion = 0;
         this.nextRegions = [];
+        this.timeAtRunStart = this.time.time;
     }
 
     getRegion(idx) {
@@ -57,8 +62,8 @@ export class WorldData {
     }
 
     addRegion(index) {
-        var difficulty = this.regionList.length * 20;
-        this.regionList.push(new Region(12, 12, [difficulty, difficulty + 20], this.nextRegions[index]));
+        var regSize = DynamicSettings.instance.regionSize;
+        this.regionList.push(new Region(regSize[0], regSize[1], this.regionList.length, this.nextRegions[index]));
         this.regionList[this.regionList.length - 1].worldHeight = Math.floor((index + 1) * (700 / (this.nextRegions.length + 1)));
         this.nextRegions = [];
     }
@@ -92,18 +97,23 @@ export class WorldData {
             rl: rlObj,
             cr: this.currentRegion,
             nr: this.nextRegions,
+            st: this.timeAtRunStart,
             time: this.time.save()
         }
 
         return saveObj;
     }
     load(saveObj, ver) {
+        if (ver <= 4) {
+            saveObj.st = 0;
+        }
         this.regionList = [];
         for (var i = 0; i < saveObj.rl.length; i++) {
             this.regionList.push(Region.loadFromSave(saveObj.rl[i], ver));
         }
         this.currentRegion = saveObj.cr;
         this.nextRegions = saveObj.nr;
+        this.timeAtRunStart = saveObj.st;
         this.time.load(saveObj.time, ver);
     }
 }

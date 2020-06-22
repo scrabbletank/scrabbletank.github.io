@@ -5,6 +5,7 @@ import { ExtendedFloatingTooltip } from "../ui/ExtendedFloatingTooltip";
 import { RegionRegistry } from "../data/RegionRegistry";
 import { Common } from "../utils/Common";
 import { TooltipRegistry } from "../data/TooltipRegistry";
+import { DynamicSettings } from "../data/DynamicSettings";
 
 export class WorldScene extends SceneUIBase {
     constructor(position, name) {
@@ -32,7 +33,8 @@ export class WorldScene extends SceneUIBase {
     }
 
     _setupRegionTile(x, y, region, index) {
-        var diff = region.difficultyRange[0] + "-" + region.difficultyRange[1];
+        var diff = (region.regionLevel * DynamicSettings.instance.regionDifficultyIncrease) + "-" +
+            ((region.regionLevel + 1) * DynamicSettings.instance.regionDifficultyIncrease);
         var explorePercent = Math.floor(region.getExplorePercent() * 100) + "%";
         this.regionIcons.push(new ImageButton(this, x, y, 64, 64, { sprite: "icons", tile: 40 })
             .onClickHandler(() => { this._selectRegion(index); })
@@ -93,6 +95,7 @@ export class WorldScene extends SceneUIBase {
     _selectRegion(index) {
         this._disableTooltip();
         this.worldData.setCurrentRegion(index);
+        this.scene.get("DarkWorld").changeRegion();
         this.scene.get("RegionScene").changeRegion();
         this.scene.get("TownScene").changeRegion();
         this.scene.bringToTop("RegionScene");
