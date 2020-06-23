@@ -31,6 +31,7 @@ export class TownData {
 
         this.currentPopulation = 50;
         this.maxPopulation = 100;
+        this.tavernPopulation = 0;
         this.tier = tier;
         this.economyMulti = 1;
         this.bountyMulti = 1;
@@ -128,6 +129,12 @@ export class TownData {
         var player = new PlayerData();
         return (this.currentPopulation * Statics.GOLDCAP_PER_POP + this.goldCapBonus) * this.economyMulti * (1 + player.talents.governance.level * 0.03);
     }
+    getMaxPopulation() {
+        return this.maxPopulation + this.tavernPopulation;
+    }
+    setTavernPopulation(pop) {
+        this.tavernPopulation = pop;
+    }
 
     endOfDay() {
 
@@ -135,7 +142,7 @@ export class TownData {
 
     endOfWeek() {
         if (this.townExplored === true) {
-            this.currentPopulation = Math.min(this.maxPopulation, this.currentPopulation * Statics.POPULATION_GROWTH);
+            this.currentPopulation = Math.min(this.getMaxPopulation(), this.currentPopulation * Statics.POPULATION_GROWTH);
             var player = new PlayerData();
             player.addGold(this.getTownIncome());
         }

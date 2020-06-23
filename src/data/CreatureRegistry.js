@@ -104,7 +104,7 @@ creatureDefs['slime'] = {
         accuracy: 0.8,
         armor: 1.2,
         health: 1,
-        healthRegen: 2,
+        healthRegen: 2.3,
         damageMin: 1,
         damageMax: 1.05,
         hit: 1,
@@ -114,6 +114,7 @@ creatureDefs['slime'] = {
     critChance: 0.1,
     shadeBase: 15,
     rewards: [
+        { type: Statics.RESOURCE_WOOD, amount: 1 },
         { type: Statics.RESOURCE_METAL, amount: 1.2 },
         { type: Statics.RESOURCE_STONE, amount: 0.8 },
         { type: Statics.RESOURCE_CRYSTAL, amount: 1.4 }
@@ -172,7 +173,7 @@ creatureDefs['goblin'] = {
     critChance: 0.4,
     shadeBase: 14,
     rewards: [
-        { type: Statics.RESOURCE_LEATHER, amount: 1.2 },
+        { type: Statics.RESOURCE_WOOD, amount: 1.2 },
         { type: Statics.RESOURCE_METAL, amount: 1.4 },
         { type: Statics.RESOURCE_CRYSTAL, amount: 0.6 }
     ],

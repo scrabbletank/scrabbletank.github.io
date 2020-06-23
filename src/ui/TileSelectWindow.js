@@ -85,7 +85,7 @@ export class TileSelectWindow {
                     bld.push("docks");
                 }
                 if (tile.yields.length > 0) {
-                    if (tile.roadDist === 1) {
+                    if (tile.houseBuildable) {
                         bld.push("house");
                         if (region.townData.upgrades.market.level > 0) {
                             bld.push("market");
@@ -118,14 +118,14 @@ export class TileSelectWindow {
                     this.upgradeButton = new TextButton(scene, x + 175, y + 195, 140, 20, "Upgrade")
                         .onClickHandler(() => { this._onAction("upgrade", { tile: tile }); });
                 }
-                this.destroyButton = new ImageButton(scene, x + 475, y + 5, 16, 16, { sprite: "icons", tile: 23 })
+                this.destroyButton = new ImageButton(scene, x + 130, y + 5, 16, 16, { sprite: "icons", tile: 23 })
                     .onClickHandler(() => { this._onAction("destroy", { tile: tile }); })
                     .onPointerOverHandler(() => {
-                        var txt = "Remove the building from this tile, costing " + (tile.building.tier * Statics.DESTROY_BUILDING_COST) + "g.";
-                        var px = x + 475;
+                        var txt = "Remove the building from this tile. Costs " + (tile.building.tier * Statics.DESTROY_BUILDING_COST) + "g.";
+                        var px = x + 130;
                         var py = y + 5;
                         this.floatingText = new FloatingTooltip(scene, Common.processText(txt, 25),
-                            px - 220, py - 0, 220, 60, "courier16", 16);
+                            px + 16, py - 60, 220, 60, "courier16", 16);
                     })
                     .onPointerOutHandler(() => { this._clearTooltip(); });
             }

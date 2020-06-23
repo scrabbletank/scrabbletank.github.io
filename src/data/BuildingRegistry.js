@@ -39,6 +39,9 @@ export class BuildingRegistry {
             case "docks":
                 return new Building("Docks", "docks", 1, { sprite: "bldicons", tile: 34 },
                     [15, 10, 0, 0, 10, 0], 50, 5);
+            case "town":
+                return new Building("Town", "town", 3, { sprite: "roadicons", tile: 38 },
+                    [15, 10, 0, 0, 10, 0], 50, 5);
         }
     }
 }

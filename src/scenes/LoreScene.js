@@ -24,6 +24,7 @@ export class LoreScene extends SceneUIBase {
             this.labels[i].destroy();
         }
         this.labels = [];
+        this.labelIndex = 0;
     }
 
     create() {

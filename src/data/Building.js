@@ -43,44 +43,37 @@ export class Building {
     static getTooltip(tile, name, tier) {
         var region = WorldData.instance.getCurrentRegion();
         var prodBonus = 1 + (tile.defense * MoonlightData.instance.moonperks.moonlightworkers.level * 0.01);
-        var roadBonus = [1.5, 1, 0.5];
         switch (name) {
             case "Lumberyard":
-                var roadp = (tile.roadDist === -1 ? 0 : roadBonus[tile.roadDist - 1])
                 var prod = tier * Common.yieldHelper(Statics.RESOURCE_WOOD, tile.yields) *
-                    prodBonus * roadp * region.townData.productionMulti;
-                return "Produces " + Math.floor(prod * 100) / 100 + " Wood at the end of each day. Production at " + Math.floor(roadp * 100) +
-                    "% based on distance to roads.";
+                    prodBonus * tile.roadBonus * region.townData.productionMulti;
+                return "Produces " + Math.floor(prod * 100) / 100 + " Wood at the end of each day. Production at " +
+                    Math.floor(tile.roadBonus * 100) + "% based on distance to roads.";
             case "Hunter's Lodge":
-                var roadp = (tile.roadDist === -1 ? 0 : roadBonus[tile.roadDist - 1])
                 var prod = tier * Common.yieldHelper(Statics.RESOURCE_LEATHER, tile.yields) *
-                    prodBonus * roadp * region.townData.productionMulti;
-                return "Produces " + Math.floor(prod * 100) / 100 + " Leather at the end of each day. Production at " + Math.floor(roadp * 100) +
-                    "% based on distance to roads.";
+                    prodBonus * tile.roadBonus * region.townData.productionMulti;
+                return "Produces " + Math.floor(prod * 100) / 100 + " Leather at the end of each day. Production at " +
+                    Math.floor(tile.roadBonus * 100) + "% based on distance to roads.";
             case "Mine":
-                var roadp = (tile.roadDist === -1 ? 0 : roadBonus[tile.roadDist - 1])
                 var prod = tier * Common.yieldHelper(Statics.RESOURCE_METAL, tile.yields) *
-                    prodBonus * roadp * region.townData.productionMulti;
-                return "Produces " + Math.floor(prod * 100) / 100 + " Metal at the end of each day. Production at " + Math.floor(roadp * 100) +
-                    "% based on distance to roads.";
+                    prodBonus * tile.roadBonus * region.townData.productionMulti;
+                return "Produces " + Math.floor(prod * 100) / 100 + " Metal at the end of each day. Production at " +
+                    Math.floor(tile.roadBonus * 100) + "% based on distance to roads.";
             case "Herbalist's Hut":
-                var roadp = (tile.roadDist === -1 ? 0 : roadBonus[tile.roadDist - 1])
                 var prod = tier * Common.yieldHelper(Statics.RESOURCE_FIBER, tile.yields) *
-                    prodBonus * roadp * region.townData.productionMulti;
-                return "Produces " + Math.floor(prod * 100) / 100 + " Fiber at the end of each day. Production at " + Math.floor(roadp * 100) +
-                    "% based on distance to roads.";
+                    prodBonus * tile.roadBonus * region.townData.productionMulti;
+                return "Produces " + Math.floor(prod * 100) / 100 + " Fiber at the end of each day. Production at " +
+                    Math.floor(tile.roadBonus * 100) + "% based on distance to roads.";
             case "Quarry":
-                var roadp = (tile.roadDist === -1 ? 0 : roadBonus[tile.roadDist - 1])
                 var prod = tier * Common.yieldHelper(Statics.RESOURCE_STONE, tile.yields) *
-                    prodBonus * roadp * region.townData.productionMulti;
-                return "Produces " + Math.floor(prod * 100) / 100 + " Stone at the end of each day. Production at " + Math.floor(roadp * 100) +
-                    "% based on distance to roads.";
+                    prodBonus * tile.roadBonus * region.townData.productionMulti;
+                return "Produces " + Math.floor(prod * 100) / 100 + " Stone at the end of each day. Production at " +
+                    Math.floor(tile.roadBonus * 100) + "% based on distance to roads.";
             case "Crystal Loom":
-                var roadp = (tile.roadDist === -1 ? 0 : roadBonus[tile.roadDist - 1])
                 var prod = tier * Common.yieldHelper(Statics.RESOURCE_CRYSTAL, tile.yields) *
-                    prodBonus * roadp * region.townData.productionMulti;
-                return "Produces " + Math.floor(prod * 100) / 100 + " Crystal at the end of each day. Production at " + Math.floor(roadp * 100) +
-                    "% based on distance to roads.";
+                    prodBonus * tile.roadBonus * region.townData.productionMulti;
+                return "Produces " + Math.floor(prod * 100) / 100 + " Crystal at the end of each day. Production at " +
+                    Math.floor(tile.roadBonus * 100) + "% based on distance to roads.";
             case "Town House":
                 return "Increases the Town's max population by " + (tier * 5) + ".";
             case "Watch Tower":
@@ -93,15 +86,17 @@ export class Building {
             case "Tavern":
                 var maxDist = 1;
                 var bonus = 0;
+                var pop = 0;
                 for (var y = Math.max(0, tile.y - maxDist); y < Math.min(region.height, tile.y + maxDist + 1); y++) {
                     for (var x = Math.max(0, tile.x - maxDist); x < Math.min(region.width, tile.x + maxDist + 1); x++) {
                         if (Math.abs(y - tile.y) + Math.abs(x - tile.x) <= maxDist &&
                             region.map[y][x].building !== undefined && region.map[y][x].building.name === "Town House") {
                             bonus += 0.02;
+                            pop += 1;
                         }
                     }
                 }
-                return "Increases the Town's economy by " + Math.floor(tier * bonus * 100) + "%, based on nearby Town Houses.";
+                return "Increases the Town's population by " + pop + " and economy by " + Math.floor(tier * bonus * 100) + "%, based on nearby Town Houses.";
             case "Road":
                 return "Most buildings must be built adjacent to roads. Production buildings get a boost being adjacent to a road, and " +
                     "produce nothing when more than " + tier + " tiles away.";

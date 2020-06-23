@@ -18,6 +18,8 @@ export class CreatureDisplay {
         this.imageRect.strokeColor = Phaser.Display.Color.GetColor(200, 0, 0);
         this.imageRect.lineWidth = 2;
         this.image = sceneContext.add.image(x + 5, y + 5, "enemyicons", 63).setOrigin(0);
+        this.image.displayWidth = 64;
+        this.image.displayHeight = 64;
 
         this.nameLabel = sceneContext.add.bitmapText(x + 75, y + 5, "courier20", "");
         //stats

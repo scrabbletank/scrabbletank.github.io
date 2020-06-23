@@ -97,6 +97,8 @@ export class RegionScene extends SceneUIBase {
             var texture = this._getBuildingImage(x, y);
             bld = this.add.image(this.relativeX((x + 0.5) * this.WIDTH + this.offsetX),
                 this.relativeY((y + 0.5) * this.HEIGHT + this.offsetY), texture.sprite, texture.tile);
+            bld.displayWidth = 48;
+            bld.displayHeight = 48;
         }
         // this.add.bitmapText(this.relativeX(x * this.WIDTH + 120), this.relativeY(y * this.HEIGHT + 70), "courier16", this.region.map[y][x].difficulty + "").setOrigin(0.5);
         return { rect: rect, building: bld };
@@ -315,6 +317,8 @@ export class RegionScene extends SceneUIBase {
             } else {
                 this.tileElements[tile.y][tile.x].building = this.add.image(this.relativeX((tile.x + 0.5) * this.WIDTH + this.offsetX),
                     this.relativeY((tile.y + 0.5) * this.HEIGHT + this.offsetY), texture.sprite, texture.tile);
+                this.tileElements[tile.y][tile.x].building.displayWidth = 48;
+                this.tileElements[tile.y][tile.x].building.displayHeight = 48;
             }
 
             // if this is a road we need to update neighbouring roads

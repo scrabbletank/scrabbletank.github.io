@@ -52,11 +52,11 @@ export class GameScene extends SceneUIBase {
     preload() {
         this.load.bitmapFont("courier16", "./../../assets/font/courier16.png", "./../../assets/font/courier16.xml");
         this.load.bitmapFont("courier20", "./../../assets/font/courier20.png", "./../../assets/font/courier20.xml");
-        this.load.spritesheet("icons", "./../../assets/icons/icons.png", { frameWidth: 32, frameHeight: 32 });
-        this.load.spritesheet("bldicons", "./../../assets/icons/buildingicons.png", { frameWidth: 32, frameHeight: 32 });
+        this.load.spritesheet("icons", "./../../assets/icons/icons.png", { frameWidth: 16, frameHeight: 16 });
+        this.load.spritesheet("bldicons", "./../../assets/icons/buildingicons.png", { frameWidth: 16, frameHeight: 16 });
         this.load.spritesheet("roadicons", "./../../assets/icons/roadicons.png", { frameWidth: 50, frameHeight: 50 });
-        this.load.spritesheet("moonicons", "./../../assets/icons/moonicons.png", { frameWidth: 32, frameHeight: 32 });
-        this.load.spritesheet("enemyicons", "./../../assets/enemy/enemyicons.png", { frameWidth: 64, frameHeight: 64 });
+        this.load.spritesheet("moonicons", "./../../assets/icons/moonicons.png", { frameWidth: 16, frameHeight: 16 });
+        this.load.spritesheet("enemyicons", "./../../assets/enemy/enemyicons.png", { frameWidth: 16, frameHeight: 16 });
     }
 
     create() {
@@ -423,7 +423,7 @@ export class GameScene extends SceneUIBase {
         }
         for (var i = 0; i < this.resourceTierButtons.length; i++) {
             this.resourceTierButtons[i].setPosition(20 + (i * 20), this.resourceStart + 20);
-            this.resourceTierButtons[i].setVisible(this.player.resourceTierReached > 1 && i < this.player.resourceTierReached);
+            this.resourceTierButtons[i].setVisible(this.player.resourceTierReached >= 1 && i <= this.player.resourceTierReached);
         }
         this.resourceIcons[6].setVisible(this.progression.unlocks.townTab);
         this.resourceIcons[7].setVisible(this.progression.unlocks.motes);
