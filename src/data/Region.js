@@ -502,15 +502,17 @@ export class Region {
         [1.25, 0.75, 0.25],
         [1.5, 1, 0.5]];
         for (var i = 0; i < this.roads.length; i++) {
-            var maxDist = this.map[this.roads[i][0]][this.roads[i][1]].building.tier;
+            var maxDist = 3;
+            var tier = this.map[this.roads[i][0]][this.roads[i][1]].building.tier;
             for (var y = Math.max(0, this.roads[i][0] - maxDist); y < Math.min(this.height, this.roads[i][0] + maxDist + 1); y++) {
                 for (var x = Math.max(0, this.roads[i][1] - maxDist); x < Math.min(this.width, this.roads[i][1] + maxDist + 1); x++) {
                     var dist = Math.abs(y - this.roads[i][0]) + Math.abs(x - this.roads[i][1]);
                     if (Math.abs(y - this.roads[i][0]) + Math.abs(x - this.roads[i][1]) <= maxDist) {
                         this.map[y][x].roadDist = this.map[y][x].roadDist === -1 ? dist : Math.min(this.map[y][x].roadDist, dist);
                         this.map[y][x].roadBuildable = this.map[y][x].roadDist <= 1;
-                        this.map[y][x].roadBonus = Math.max(this.map[y][x].roadBonus, roadBonus[maxDist - 1][this.map[y][x].roadDist - 1]);
-                        this.map[y][x].houseBuildable = Math.abs(y - this.roads[i][0]) <= 1 && Math.abs(x - this.roads[i][1]) <= 1;
+                        this.map[y][x].roadBonus = Math.max(this.map[y][x].roadBonus, roadBonus[tier - 1][dist - 1]);
+                        this.map[y][x].houseBuildable = this.map[y][x].houseBuildable ||
+                            (Math.abs(y - this.roads[i][0]) <= 1 && Math.abs(x - this.roads[i][1]) <= 1);
                     }
                 }
             }

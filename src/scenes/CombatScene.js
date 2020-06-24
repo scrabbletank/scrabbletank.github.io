@@ -27,6 +27,7 @@ export class CombatScene extends SceneUIBase {
         this.onKillHandlers = [];
         this.onExploreHandlers = [];
         this.target = 0;
+        this.regionTier = 0;
 
         this.playerHitAnim = undefined;
         this.monsterHitAnim = [undefined, undefined, undefined];
@@ -119,7 +120,7 @@ export class CombatScene extends SceneUIBase {
     }
     _onExplore(tile) {
         for (var i = 0; i < this.onExploreHandlers.length; i++) {
-            this.onExploreHandlers[i](tile);
+            this.onExploreHandlers[i](tile, this.regionTier);
         }
     }
     _hideEnemyDisplays() {
@@ -184,6 +185,7 @@ export class CombatScene extends SceneUIBase {
             this.restButton.setVisible(false);
         }
         this.playerDisplay.initWithCreature(this.player.statBlock);
+        this.regionTier = WorldData.instance.getCurrentRegion().regionLevel;
     }
 
     rebirth() {

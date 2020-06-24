@@ -59,7 +59,7 @@ export class RegionScene extends SceneUIBase {
         var r = x < this.region.width - 1 && (this.region.map[y][x + 1].roadDist === 0 || this._nextToConnector(x + 1, y)) ? '1' : '0';
         var u = y > 0 && (this.region.map[y - 1][x].roadDist === 0 || this._nextToConnector(x, y - 1)) ? '1' : '0';
         var d = y < this.region.height - 1 && (this.region.map[y + 1][x].roadDist === 0 || this._nextToConnector(x, y + 1)) ? '1' : '0';
-        return { sprite: "roadicons", tile: Statics.ROADTYPES[l + r + u + d] + (this.region.map[y][x].building.tier - 1) * 20 };
+        return { sprite: "roadicons", tile: Statics.ROADTYPES[l + r + u + d] + (this.region.map[y][x].building.tier - 1) * 20, w: 50, h: 50 };
     }
 
     _getBuildingImage(x, y) {
@@ -68,7 +68,9 @@ export class RegionScene extends SceneUIBase {
         } else {
             return {
                 sprite: this.region.map[y][x].building.texture.sprite,
-                tile: this.region.map[y][x].building.texture.tile + 8 * (this.region.map[y][x].building.tier - 1)
+                tile: this.region.map[y][x].building.texture.tile + 8 * (this.region.map[y][x].building.tier - 1),
+                w: this.region.map[y][x].building.texture.w,
+                h: this.region.map[y][x].building.texture.h
             };
         }
     }
@@ -97,8 +99,8 @@ export class RegionScene extends SceneUIBase {
             var texture = this._getBuildingImage(x, y);
             bld = this.add.image(this.relativeX((x + 0.5) * this.WIDTH + this.offsetX),
                 this.relativeY((y + 0.5) * this.HEIGHT + this.offsetY), texture.sprite, texture.tile);
-            bld.displayWidth = 48;
-            bld.displayHeight = 48;
+            bld.displayWidth = texture.w;
+            bld.displayHeight = texture.h;
         }
         // this.add.bitmapText(this.relativeX(x * this.WIDTH + 120), this.relativeY(y * this.HEIGHT + 70), "courier16", this.region.map[y][x].difficulty + "").setOrigin(0.5);
         return { rect: rect, building: bld };
@@ -137,29 +139,33 @@ export class RegionScene extends SceneUIBase {
         this.floatingText = undefined;
     }
 
+    _exploreTown(x, y) {
+        if (this.progression.unlocks.townTab === false) {
+            this.progression.registerFeatureUnlocked(Statics.UNLOCK_TOWN_TAB,
+                "You've finally made it to the town you saw in the distance, the only square not covered in this " +
+                "horrible fog. As you approach the gate a voice calls to you from the wall.\n\n" +
+                "\"Oh hey, you must be the new hero we've heard about, give me a minute to open the gate.\"\n\n" +
+                "Hero? You woke up naked and alone in the wilderness. Come to think of it, it's amazing you're even " +
+                "still alive. You're still contemplating your existence when the door opens.\n\n" +
+                "\"So hero, you don't mind if I call you hero do you? Just makes things easier. Anyway we have a house " +
+                "laid out for you, don't expect much. The Forge has seen better days and the guilds have all been abandoned " +
+                "but I'm sure you'll see to that, Mr. Hero.\"\n\nYou begin to ask what all this hero nonsense is about " +
+                "when they speak up again.\n\n \"Oh that reminds me, we don't have much, but we can pay you for every one " +
+                "of those monsters you kill. Don't try to lie about how many you've beat, we can tell. Oh, and we'll pay " +
+                "you more when you're clearing new land for us. What were you trying to ask?\"\n\nYou say it was nothing " +
+                "and ask them to lead the way. You don't know about this hero stuff, but money is money. Besides you were " +
+                "already fighting this monsters anyway, might as well make money while you do it.");
+        }
+        this.region.map[y][x].amountExplored = this.region.map[y][x].explorationNeeded;
+        this.region.exploreTile(x, y);
+    }
+
     _handleTileClick(x, y) {
         if (this.region.map[y][x].explored === false && this.region.map[y][x].revealed === false) {
             return;
         }
         if (this.region.map[y][x].name === "Town") {
-            if (this.progression.unlocks.townTab === false) {
-                this.region.map[y][x].amountExplored = this.region.map[y][x].explorationNeeded;
-                this.region.exploreTile(x, y);
-                this.progression.registerFeatureUnlocked(Statics.UNLOCK_TOWN_TAB,
-                    "You've finally made it to the town you saw in the distance, the only square not covered in this " +
-                    "horrible fog. As you approach the gate a voice calls to you from the wall.\n\n" +
-                    "\"Oh hey, you must be the new hero we've heard about, give me a minute to open the gate.\"\n\n" +
-                    "Hero? You woke up naked and alone in the wilderness. Come to think of it, it's amazing you're even " +
-                    "still alive. You're still contemplating your existence when the door opens.\n\n" +
-                    "\"So hero, you don't mind if I call you hero do you? Just makes things easier. Anyway we have a house " +
-                    "laid out for you, don't expect much. The Forge has seen better days and the guilds have all been abandoned " +
-                    "but I'm sure you'll see to that, Mr. Hero.\"\n\nYou begin to ask what all this hero nonsense is about " +
-                    "when they speak up again.\n\n \"Oh that reminds me, we don't have much, but we can pay you for every one " +
-                    "of those monsters you kill. Don't try to lie about how many you've beat, we can tell. Oh, and we'll pay " +
-                    "you more when you're clearing new land for us. What were you trying to ask?\"\n\nYou say it was nothing " +
-                    "and ask them to lead the way. You don't know about this hero stuff, but money is money. Besides you were " +
-                    "already fighting this monsters anyway, might as well make money while you do it.");
-            }
+            this._exploreTown(x, y);
             return;
         }
         if (this.region.map[y][x].name === "Mystic Gate" && this.region.map[y][x].explored === true) {
@@ -269,7 +275,7 @@ export class RegionScene extends SceneUIBase {
         }
     }
 
-    _onExploredCallback(tile) {
+    _onExploredCallback(tile, tier) {
         if (tile.y === 0) {
             //setup new world types
             if (this.progression.unlocks.worldTab === false) {
@@ -279,8 +285,7 @@ export class RegionScene extends SceneUIBase {
                     "a whole world out there. I was wondering what that last tab was going to be.");
             }
 
-            if (WorldData.instance.regionList.length - 1 === WorldData.instance.currentRegion &&
-                WorldData.instance.nextRegions.length === 0) {
+            if (WorldData.instance.regionList.length - 1 === tier && WorldData.instance.nextRegions.length === 0) {
                 WorldData.instance.generateRegionChoices();
                 this.scene.get("WorldScene")._refreshRegions();
             }
@@ -292,6 +297,13 @@ export class RegionScene extends SceneUIBase {
             if (this.autoExploreActive === true) {
                 var pos = this.region.nextWeakestTile();
                 if (pos[0] !== -1) {
+                    if (this.region.map[pos[1]][pos[0]].name === "Town") {
+                        this._exploreTown(x, y);
+                        var pos = this.region.nextWeakestTile();
+                        if (pos[0] === -1) {
+                            return;
+                        }
+                    }
                     this._exploreTile(pos[0], pos[1], true);
                 }
             }
@@ -317,8 +329,8 @@ export class RegionScene extends SceneUIBase {
             } else {
                 this.tileElements[tile.y][tile.x].building = this.add.image(this.relativeX((tile.x + 0.5) * this.WIDTH + this.offsetX),
                     this.relativeY((tile.y + 0.5) * this.HEIGHT + this.offsetY), texture.sprite, texture.tile);
-                this.tileElements[tile.y][tile.x].building.displayWidth = 48;
-                this.tileElements[tile.y][tile.x].building.displayHeight = 48;
+                this.tileElements[tile.y][tile.x].building.displayWidth = texture.w;
+                this.tileElements[tile.y][tile.x].building.displayHeight = texture.h;
             }
 
             // if this is a road we need to update neighbouring roads
@@ -397,7 +409,7 @@ export class RegionScene extends SceneUIBase {
 
     create() {
         //add handlers
-        this.scene.get("CombatScene").registerEvent("onExplore", (a) => { this._onExploredCallback(a); });
+        this.scene.get("CombatScene").registerEvent("onExplore", (a, t) => { this._onExploredCallback(a, t); });
         //background
         this.add.rectangle(this.relativeX(0), this.relativeY(0), 900, 700, 0x000000)
             .setOrigin(0)
