@@ -11,6 +11,7 @@ import { MoonlightData } from "../data/MoonlightData";
 import { TextButton } from "../ui/TextButton";
 import { DynamicSettings } from "../data/DynamicSettings";
 
+var toPhaserColor = (clr) => { return Phaser.Display.Color.GetColor(clr[0], clr[1], clr[2]); };
 
 export class RegionScene extends SceneUIBase {
 
@@ -33,6 +34,9 @@ export class RegionScene extends SceneUIBase {
 
         this.autoExploreActive = false;
         this.updateBuildings = false;
+
+        this.upgradeKey = undefined;
+        this.hoveredTile = [-1, -1];
     }
 
     preload() {
@@ -76,8 +80,8 @@ export class RegionScene extends SceneUIBase {
     }
 
     _setupTile(x, y) {
-        var clr = this.region.map[y][x].color;
-        var border = this.region.map[y][x].borderColor;
+        var clr = toPhaserColor(this.region.map[y][x].color);
+        var border = toPhaserColor(this.region.map[y][x].borderColor);
         if (this.region.map[y][x].revealed === false) {
             clr = Phaser.Display.Color.GetColor(0, 0, 0);
             border = Phaser.Display.Color.GetColor(40, 80, 40);
@@ -86,23 +90,22 @@ export class RegionScene extends SceneUIBase {
         }
         var rect = this.add.rectangle(this.relativeX((x + 0.5) * this.WIDTH + this.offsetX),
             this.relativeY((y + 0.5) * this.HEIGHT + this.offsetY), this.WIDTH - 1, this.HEIGHT - 1, clr);
-        rect.strokeColor = Phaser.Display.Color.GetColor(40, 80, 40);
+        rect.strokeColor = border;
         rect.isStroked = true;
         rect.lineWidth = 1.5;
         rect.setInteractive({ useHandCursor: true })
             .on("pointerdown", () => { this._handleTileClick(x, y); })
-            .on('pointerover', () => { this._setTooltip(x, y); })
-            .on('pointerout', () => { this._disableTooltip() });
+            .on('pointerover', () => { this.hoveredTile = [x, y]; this._setTooltip(x, y); })
+            .on('pointerout', () => { this.hoveredTile = [-1, -1]; this._disableTooltip(); });
 
         var bld = undefined;
-        if (this.region.map[y][x].building !== undefined) {
+        if (this.region.map[y][x].building !== undefined && this.region.map[y][x].revealed === true) {
             var texture = this._getBuildingImage(x, y);
             bld = this.add.image(this.relativeX((x + 0.5) * this.WIDTH + this.offsetX),
                 this.relativeY((y + 0.5) * this.HEIGHT + this.offsetY), texture.sprite, texture.tile);
             bld.displayWidth = texture.w;
             bld.displayHeight = texture.h;
         }
-        // this.add.bitmapText(this.relativeX(x * this.WIDTH + 120), this.relativeY(y * this.HEIGHT + 70), "courier16", this.region.map[y][x].difficulty + "").setOrigin(0.5);
         return { rect: rect, building: bld };
     }
 
@@ -130,13 +133,15 @@ export class RegionScene extends SceneUIBase {
 
         var xAdj = this.relativeX(x * this.WIDTH + this.offsetX);
         xAdj += xAdj + 190 > 1100 ? -150 : 0;
-        var yAdj = this.relativeY(y * this.HEIGHT + this.offsetY - 75);
+        var yAdj = this.relativeY(y * this.HEIGHT + this.offsetY - 82);
         yAdj += yAdj < 100 ? 115 : 0;
-        this.floatingText = new FloatingTooltip(this, txt, xAdj, yAdj, 190, 75);
+        this.floatingText = new FloatingTooltip(this, txt, xAdj, yAdj, 190, 82);
     }
     _disableTooltip() {
-        this.floatingText.destroy();
-        this.floatingText = undefined;
+        if (this.floatingText !== undefined) {
+            this.floatingText.destroy();
+            this.floatingText = undefined;
+        }
     }
 
     _exploreTown(x, y) {
@@ -158,6 +163,7 @@ export class RegionScene extends SceneUIBase {
         }
         this.region.map[y][x].amountExplored = this.region.map[y][x].explorationNeeded;
         this.region.exploreTile(x, y);
+        this.scene.get("DarkWorld").changeRegion();
     }
 
     _handleTileClick(x, y) {
@@ -183,6 +189,16 @@ export class RegionScene extends SceneUIBase {
         this.tileSelectWindow.addOnActionHandler((action, blob) => { this._tileActionHandler(action, blob); });
     }
 
+    _canUpgrade(tile) {
+        if (tile.building.name === "Market") {
+            return tile.building.tier < this.region.townData.getMarketLevel();
+        }
+        if (tile.building.name === "Tavern") {
+            return tile.building.tier < this.region.townData.getTavernLevel();
+        }
+        return tile.building.tier < 3;
+    }
+
     _tileActionHandler(action, blob) {
         switch (action) {
             case "explore":
@@ -204,7 +220,7 @@ export class RegionScene extends SceneUIBase {
                 var player = new PlayerData();
                 var tier = Math.floor(this.region.regionLevel);
                 if (Common.canCraft(blob.tile.building.resourceCosts, player.resources[tier]) === true &&
-                    blob.tile.building.goldCost <= player.gold) {
+                    blob.tile.building.goldCost <= player.gold && this._canUpgrade(blob.tile)) {
                     player.spendResource(blob.tile.building.resourceCosts, tier);
                     player.addGold(-blob.tile.building.goldCost);
                     this.region.upgradeBuilding(blob.tile.x, blob.tile.y);
@@ -219,40 +235,16 @@ export class RegionScene extends SceneUIBase {
                     this.region.destroyBuilding(blob.tile.x, blob.tile.y);
                 }
         }
-        this.tileSelectWindow.destroy();
-        this.tileSelectWindow = undefined;
+        if (this.tileSelectWindow !== undefined) {
+            this.tileSelectWindow.destroy();
+            this.tileSelectWindow = undefined;
+        }
     }
     _rebirthClickedHandler() {
         this.rebirthDialog.destroy();
         this.rebirthDialog = undefined;
 
-        var moonlightEarned = PlayerData.instance.earnableMoonlight(this.region.regionLevel + 1) *
-            (1 + 0.1 * MoonlightData.instance.challenges.time.completions);
-        MoonlightData.instance.moonlight += moonlightEarned;
-
-        if (this.region.regionLevel >= 1) {
-            ProgressionStore.instance.persistentUnlocks.challenge = true;
-        }
-        if (this.region.regionLevel >= 2) {
-            MoonlightData.instance.challenges.buildings.unlocked = true;
-            MoonlightData.instance.challenges.talent.unlocked = true;
-        }
-
-        //handle challenge completion here
-        if (DynamicSettings.instance.maxRunTime !== -1 &&
-            WorldData.instance.time.time - WorldData.instance.timeAtRunStart < DynamicSettings.instance.maxRunTime) {
-            var challenge = MoonlightData.instance.getChallengeFromName(DynamicSettings.instance.challengeName);
-            switch (challenge.name) {
-                case "A Matter of Years":
-                    if (challenge.completions == 0) {
-                        MoonlightData.instance.challenges.forge.unlocked = true;
-                        MoonlightData.instance.challenges.explore.unlocked = true;
-                    }
-            }
-            if (challenge.completions < challenge.maxCompletions) {
-                challenge.completions += 1;
-            }
-        }
+        WorldData.getInstance().handleRunCompletion();
 
         var moonScene = this.scene.get("MoonlightScene");
         moonScene.enableLeveling();
@@ -291,6 +283,15 @@ export class RegionScene extends SceneUIBase {
             }
         }
         if (tile.explored === false) {
+            if (tile.hasRune === true) {
+                this.scene.get("DarkWorld").notifyGear();
+                if (this.progression.unlocks.runes === false) {
+                    this.progression.registerFeatureUnlocked(Statics.UNLOCK_RUNES_UI,
+                        "You found an interesting rock in that last tile and shoved it into your pack, probably due to your crippling need " +
+                        "to hoard things like some RPG character. The rock was glowing so it would probably make a neat good luck charm if you " +
+                        "shoved it into the holes on your gear.");
+                }
+            }
             this.region.exploreTile(tile.x, tile.y);
             this.progression.registerTileExplored();
 
@@ -298,7 +299,7 @@ export class RegionScene extends SceneUIBase {
                 var pos = this.region.nextWeakestTile();
                 if (pos[0] !== -1) {
                     if (this.region.map[pos[1]][pos[0]].name === "Town") {
-                        this._exploreTown(x, y);
+                        this._exploreTown(tile.x, tile.y);
                         var pos = this.region.nextWeakestTile();
                         if (pos[0] === -1) {
                             return;
@@ -311,8 +312,8 @@ export class RegionScene extends SceneUIBase {
     }
 
     _updateTile(tile) {
-        var clr = tile.color;
-        var border = tile.borderColor;
+        var clr = toPhaserColor(tile.color);
+        var border = toPhaserColor(tile.borderColor);
         if (tile.revealed === false) {
             clr = Phaser.Display.Color.GetColor(0, 0, 0);
             border = Phaser.Display.Color.GetColor(40, 80, 40);
@@ -320,8 +321,8 @@ export class RegionScene extends SceneUIBase {
             clr = Common.colorLerp(clr, Phaser.Display.Color.GetColor(0, 0, 0), 0.65);
         }
         this.tileElements[tile.y][tile.x].rect.fillColor = clr;
-        // this.tileElements[tile.y][tile.x].rect.strokeColor = border;
-        if (tile.building !== undefined) {
+        this.tileElements[tile.y][tile.x].rect.strokeColor = border;
+        if (tile.building !== undefined && tile.revealed === true) {
             this.updateBuildings = true;
             var texture = this._getBuildingImage(tile.x, tile.y);
             if (this.tileElements[tile.y][tile.x].building !== undefined) {
@@ -370,11 +371,12 @@ export class RegionScene extends SceneUIBase {
 
     rebirth() {
         // we need to ensure we're only updating when the current region is changed
-        this.region.removeTileChanged();
+        this.region.removeHandlers();
         this.region = WorldData.instance.getCurrentRegion();
         this.region.onTileChanged((x) => { this._updateTile(x); });
-        for (var i = 0; i < this.region.height; i++) {
-            for (var t = 0; t < this.region.width; t++) {
+        this.region.onSighting((x) => { this.scene.get("DarkWorld").notifyRegion(); });
+        for (var i = 0; i < this.tileElements.length; i++) {
+            for (var t = 0; t < this.tileElements[0].length; t++) {
                 this.tileElements[i][t].rect.destroy();
                 if (this.tileElements[i][t].building !== undefined) {
                     this.tileElements[i][t].building.destroy();
@@ -458,6 +460,9 @@ export class RegionScene extends SceneUIBase {
 
         this.progression.addOnUnlockHandler((a, b, c) => { this._handleProgressionEvent(a, b, c) });
         this.region.onTileChanged((x) => { this._updateTile(x); });
+        this.region.onSighting((x) => { this.scene.get("DarkWorld").notifyRegion(); });
+
+        this.upgradeKey = this.input.keyboard.addKey(Phaser.Input.Keyboard.KeyCodes.U);
     }
 
     update(__time, delta) {
@@ -470,13 +475,16 @@ export class RegionScene extends SceneUIBase {
             var lerp = Math.sin((this.sightingVal / 2000) * Math.PI * 2) * 0.5 + 0.5;
             for (var i = 0; i < this.region.sightings.length; i++) {
                 var s = this.region.sightings[i];
-                if (this.region.map[s[0]][s[1]].isInvaded === true && this.region.map[s[0]][s[1]].invasionPower >= Statics.SIGHTING_THRESHOLD) {
-                    this.tileElements[s[0]][s[1]].rect.fillColor = Common.colorLerp(this.region.map[s[0]][s[1]].color, Phaser.Display.Color.GetColor(255, 0, 255), lerp);
-                }
+                var clr = toPhaserColor(this.region.map[s[0]][s[1]].color);
+                this.tileElements[s[0]][s[1]].rect.fillColor = Common.colorLerp(clr, Phaser.Display.Color.GetColor(255, 0, 255), lerp);
             }
         }
 
-        if (this.updateBuildings) {
+        if (Phaser.Input.Keyboard.JustUp(this.upgradeKey) && this.hoveredTile[0] !== -1) {
+            this._tileActionHandler("upgrade", { tile: this.region.map[this.hoveredTile[1]][this.hoveredTile[0]] });
+        }
+
+        if (this.updateBuildings === true) {
             this.updateBuildings = false;
             for (var i = 0; i < this.region.roads.length; i++) {
                 var road = this.region.roads[i];

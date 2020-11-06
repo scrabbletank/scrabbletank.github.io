@@ -41,8 +41,8 @@ export class Building {
     }
 
     static getTooltip(tile, name, tier) {
-        var region = WorldData.instance.getCurrentRegion();
-        var prodBonus = 1 + (tile.defense * MoonlightData.instance.moonperks.moonlightworkers.level * 0.01);
+        var region = WorldData.getInstance().getCurrentRegion();
+        var prodBonus = 1 + (tile.defense * MoonlightData.getInstance().moonperks.moonlightworkers.level * 0.01);
         switch (name) {
             case "Lumberyard":
                 var prod = tier * Common.yieldHelper(Statics.RESOURCE_WOOD, tile.yields) *
@@ -80,7 +80,8 @@ export class Building {
                 return "Increases the defense of all tiles within 2 tiles of this watch tower by " + (tier * 2) + ".";
             case "Market":
                 var closest = Common.nearestPointInList(tile.x, tile.y, region.markets, true);
-                var bonus = Math.max(0, Math.min(10, (closest[1] / Statics.TRADE_HOUSE_MAX_DISTANCE) * 10)) * tier / 100;
+                var max = 7 + MoonlightData.getInstance().moonperks.nightmarket.level;
+                var bonus = Math.max(0, Math.min(max, (closest[1] / Statics.TRADE_HOUSE_MAX_DISTANCE) * max)) * tier / 100;
                 return "Increases the Town's economy by " + Math.floor(bonus * 10000) / 100 + "%, based on distance to " +
                     "the Town and other Markets.";
             case "Tavern":
@@ -104,6 +105,11 @@ export class Building {
                 var bonus = tier * 2 * region.townData.economyMulti;
                 return "Docks don't need roads and enables roads to be built beside them. Increases gold earned per week by " +
                     Math.floor(bonus) + ".";
+            case "Alchemy Lab":
+                var drain = [1, 5, 13, 33, 77];
+                var gain = [0.05, 0.3, 0.9, 3, 8];
+                return "Through strange magic converts " + drain[tier - 1] + " of all resources into " + gain[tier - 1] + " of resources " +
+                    "of the next highest tier each day.";
         }
     }
 }

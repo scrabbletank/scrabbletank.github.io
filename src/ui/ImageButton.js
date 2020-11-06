@@ -30,6 +30,10 @@ export class ImageButton {
         this.backgroundRect.strokeColor = clr;
     }
 
+    removeBackground() {
+        this.backgroundRect.alpha = 0.01;
+    }
+
     _onClick(callback) {
         if (this.enabled === true) {
             callback();
@@ -52,22 +56,22 @@ export class ImageButton {
     }
 
     onClickHandler(callback) {
-        this.backgroundRect.setInteractive({useHandCursor: true})
+        this.backgroundRect.setInteractive({ useHandCursor: true })
             .on("pointerdown", () => { this._onClick(callback) });
         return this;
     }
     onPointerOutHandler(callback) {
-        this.backgroundRect.setInteractive({useHandCursor: true})
+        this.backgroundRect.setInteractive({ useHandCursor: true })
             .on("pointerout", () => { this._onPointerOut(callback) });
         return this;
     }
     onPointerUpHandler(callback) {
-        this.backgroundRect.setInteractive({useHandCursor: true})
+        this.backgroundRect.setInteractive({ useHandCursor: true })
             .on("pointerup", () => { this._onPointerUp(callback) });
         return this;
     }
     onPointerOverHandler(callback) {
-        this.backgroundRect.setInteractive({useHandCursor: true})
+        this.backgroundRect.setInteractive({ useHandCursor: true })
             .on("pointerover", () => { this._onPointerOver(callback) });
         return this;
     }

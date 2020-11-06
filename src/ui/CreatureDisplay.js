@@ -1,5 +1,8 @@
 import { ProgressBar } from './ProgressBar';
+import { TooltipImage } from './TooltipImage';
 import { Common } from '../utils/Common';
+import { TooltipRegistry } from '../data/TooltipRegistry';
+import { Statics } from '../data/Statics';
 
 export class CreatureDisplay {
     constructor(sceneContext, x, y) {
@@ -7,6 +10,7 @@ export class CreatureDisplay {
 
         this.x = x;
         this.y = y;
+        this.sceneContext = sceneContext;
 
         this.backingRect = sceneContext.add.rectangle(x, y, 250, 170, Phaser.Display.Color.GetColor(0, 0, 0)).setOrigin(0, 0);
         this.backingRect.isStroked = true;
@@ -32,6 +36,7 @@ export class CreatureDisplay {
             Phaser.Display.Color.GetColor(170, 0, 0), Phaser.Display.Color.GetColor(32, 32, 32));
         this.attackBar = new ProgressBar(sceneContext, x + 5, y + 145, 240, 14,
             Phaser.Display.Color.GetColor(0, 140, 40), Phaser.Display.Color.GetColor(32, 32, 32));
+        this.traitButtons = [];
     }
 
     initWithCreature(creature) {
@@ -41,9 +46,44 @@ export class CreatureDisplay {
         this.hitnameLabel.setText("Hit: " + Common.numberString(Math.floor(creature.Hit())));
         this.evasionLabel.setText("Evasion: " + Common.numberString(Math.floor(creature.Evasion())));
 
-        this.healthBar.setFillPercent(creature.currentHealth / creature.MaxHealth());
-        this.attackBar.setFillPercent(creature.attackCooldown / creature.attackSpeed);
+        this.healthBar.setFillPercent(creature.currentHealth / creature.MaxHealth(),
+            Common.numberString(Math.ceil(creature.currentHealth)) + "/" + Common.numberString(creature.MaxHealth()));
+        this.attackBar.setFillPercent(creature.attackCooldown / creature.attackSpeed,
+            Math.floor(creature.attackCooldown / creature.attackSpeed * 100) + "%");
         this.image.setTexture(creature.icon.sprite, creature.icon.tile);
+
+        for (var i = 0; i < this.traitButtons.length; i++) {
+            this.traitButtons[i].destroy();
+        }
+        this.traitButtons = [];
+        for (var i = 0; i < creature.traits.length; i++) {
+            var sprite = { sprite: "icons", tile: 63 };
+            switch (creature.traits[i].type) {
+                case Statics.TRAIT_DIRE:
+                    sprite = { sprite: "icons", tile: 43 };
+                    break;
+                case Statics.TRAIT_POISONED:
+                    sprite = { sprite: "icons", tile: 46 };
+                    break;
+                case Statics.TRAIT_MONSTROUS:
+                    sprite = { sprite: "icons", tile: 42 };
+                    break;
+                case Statics.TRAIT_QUICK:
+                    sprite = { sprite: "icons", tile: 49 };
+                    break;
+                case Statics.TRAIT_DEADLY:
+                    sprite = { sprite: "icons", tile: 41 };
+                    break;
+                case Statics.TRAIT_SHIELDED:
+                    sprite = { sprite: "icons", tile: 44 };
+                    break;
+                case Statics.TRAIT_BESERK:
+                    sprite = { sprite: "icons", tile: 45 };
+                    break;
+            }
+            this.traitButtons.push(new TooltipImage(this.sceneContext, this.x + 75 + (i * 20), this.y + 105, 16, 16, sprite,
+                TooltipRegistry.getTraitTooltip(creature.traits[i])));
+        }
     }
 
     setVisible(visible) {
@@ -57,6 +97,9 @@ export class CreatureDisplay {
         this.evasionLabel.setVisible(visible);
         this.healthBar.setVisible(visible);
         this.attackBar.setVisible(visible);
+        for (var i = 0; i < this.traitButtons.length; i++) {
+            this.traitButtons[i].setVisible(visible);
+        }
     }
 
     setHealthBar(healthPercent, text = "") {

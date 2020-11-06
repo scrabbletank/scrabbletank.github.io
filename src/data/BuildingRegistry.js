@@ -42,6 +42,9 @@ export class BuildingRegistry {
             case "town":
                 return new Building("Town", "town", 3, { sprite: "roadicons", tile: 38, w: 50, h: 50 },
                     [15, 10, 0, 0, 10, 0], 50, 5);
+            case "alchemy":
+                return new Building("Alchemy Lab", "alchemy", 1, { sprite: "bldicons", tile: 35, w: 32, h: 32 },
+                    [10, 0, 20, 0, 10, 15], 150, 5);
         }
     }
 }

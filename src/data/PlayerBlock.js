@@ -7,6 +7,10 @@ export class PlayerBlock extends CreatureBlock {
         super();
         this.player = player;
         this.moonData = new MoonlightData();
+        this.secondWindCooldown = 0;
+        this.secondWindDuration = 0;
+        this.hitCounter = 0;
+        this.encounterCounter = 0;
     }
 
     rebirth() {
@@ -45,168 +49,198 @@ export class PlayerBlock extends CreatureBlock {
         this.level = 0;
         this.currentHealth = 25;
         this.attackCooldown = 0;
-        this.secondWindCooldown = 80000;
-        this.secondWindDuration = 10000;
+        this.secondWindCooldown = 0;
+        this.secondWindDuration = 0;
         this.hitCounter = 0;
         this.encounterCounter = 0;
     }
 
     MaxHealth() {
         var ret = this.statBonuses.health + this.Endurance() * Statics.HP_PER_ENDURANCE;
-        ret += this.Endurance() * this.player.talents.end.level;
+        ret += this.Endurance() * this.player.getTalentLevel("end");
+        ret += ret * this.player.runeBonuses.healthPercent;
         return Math.floor(ret);
     }
     Strength() {
-        var ret = this.stats.strength + this.statBonuses.strength;
-        ret = ret * (1 + (this.moonData.moonperks.str.level + MoonlightData.instance.challengePoints) * 0.01);
+        var ret = this.stats.strength + this.statBonuses.strength + this.player.runeBonuses.strFlat;
+        ret = ret * (1 + (this.moonData.moonperks.str.level + MoonlightData.getInstance().challengePoints) * 0.01);
+        ret += ret * this.player.runeBonuses.strPercent;
         return Math.floor(ret);
     }
     Dexterity() {
-        var ret = this.stats.dexterity + this.statBonuses.dexterity;
-        ret = ret * (1 + (this.moonData.moonperks.dex.level + MoonlightData.instance.challengePoints) * 0.01);
+        var ret = this.stats.dexterity + this.statBonuses.dexterity + this.player.runeBonuses.dexFlat;
+        ret = ret * (1 + (this.moonData.moonperks.dex.level + MoonlightData.getInstance().challengePoints) * 0.01);
+        ret += ret * this.player.runeBonuses.dexPercent;
         return Math.floor(ret);
     }
     Agility() {
-        var ret = this.stats.agility + this.statBonuses.agility;
-        ret = ret * (1 + (this.moonData.moonperks.agi.level + MoonlightData.instance.challengePoints) * 0.01);
+        var ret = this.stats.agility + this.statBonuses.agility + this.player.runeBonuses.agiFlat;
+        ret = ret * (1 + (this.moonData.moonperks.agi.level + MoonlightData.getInstance().challengePoints) * 0.01);
+        ret += ret * this.player.runeBonuses.agiPercent;
         return Math.floor(ret);
     }
     Endurance() {
-        var ret = this.stats.endurance + this.statBonuses.endurance;
-        ret = ret * (1 + (this.moonData.moonperks.end.level + MoonlightData.instance.challengePoints) * 0.01);
+        var ret = this.stats.endurance + this.statBonuses.endurance + this.player.runeBonuses.endFlat;
+        ret = ret * (1 + (this.moonData.moonperks.end.level + MoonlightData.getInstance().challengePoints) * 0.01);
+        ret += ret * this.player.runeBonuses.endPercent;
         return Math.floor(ret);
     }
     Recovery() {
-        var ret = this.stats.recovery + this.statBonuses.recovery;
-        ret = ret * (1 + (this.moonData.moonperks.rec.level + MoonlightData.instance.challengePoints) * 0.01);
+        var ret = this.stats.recovery + this.statBonuses.recovery + this.player.runeBonuses.recFlat;
+        ret = ret * (1 + (this.moonData.moonperks.rec.level + MoonlightData.getInstance().challengePoints) * 0.01);
+        ret += ret * this.player.runeBonuses.recPercent;
         return Math.floor(ret);
     }
     Defense() {
-        var ret = this.stats.defense + this.statBonuses.defense;
-        ret = ret * (1 + (this.moonData.moonperks.def.level + MoonlightData.instance.challengePoints) * 0.01);
+        var ret = this.stats.defense + this.statBonuses.defense + this.player.runeBonuses.defFlat;
+        ret = ret * (1 + (this.moonData.moonperks.def.level + MoonlightData.getInstance().challengePoints) * 0.01);
+        ret += ret * this.player.runeBonuses.defPercent;
         return Math.floor(ret);
     }
     Accuracy() {
-        var ret = this.stats.accuracy + this.statBonuses.accuracy;
-        ret = ret * (1 + (this.moonData.moonperks.acc.level + MoonlightData.instance.challengePoints) * 0.01);
+        var ret = this.stats.accuracy + this.statBonuses.accuracy + this.player.runeBonuses.accFlat;
+        ret = ret * (1 + (this.moonData.moonperks.acc.level + MoonlightData.getInstance().challengePoints) * 0.01);
+        ret += ret * this.player.runeBonuses.accPercent;
         return Math.floor(ret);
     }
     Hit() {
         var ret = this.stats.hit + this.statBonuses.hit + this.Dexterity() * Statics.HIT_PER_DEXTERITY;
-        ret += this.Dexterity() * this.player.talents.dex.level;
-        ret = ret * (1 + this.player.talents.hit.level * 0.02);
+        ret += this.Dexterity() * this.player.getTalentLevel("dex");
+        ret = ret * (1 + this.player.getTalentLevel("hit") * 0.04);
+        ret += ret * this.player.runeBonuses.hitPercent;
         return Math.floor(ret);
     }
     Evasion() {
         var ret = this.stats.evasion + this.statBonuses.evasion + this.Agility() * Statics.EVA_PER_AGILITY;
-        ret += this.Agility() * this.player.talents.agi.level;
-        ret = ret * (1 + this.player.talents.evasion.level * 0.02);
+        ret += this.Agility() * this.player.getTalentLevel("agi");
+        ret = ret * (1 + this.player.getTalentLevel("evasion") * 0.04);
+        ret += ret * this.player.runeBonuses.evaPercent;
         return Math.floor(ret);
     }
     CritChance() {
         var ret = this.statBonuses.critChance;
-        ret += this.player.talents.crit.level * 0.01;
+        ret += this.player.getTalentLevel("crit") * 0.01;
+        ret += this.player.runeBonuses.critChance;
         return Math.floor(ret * 100) / 100;
     }
     CritDamage() {
-        var ret = this.stats.critDamage + this.statBonuses.critDamage + this.Accuracy() * Statics.CRITDMG_PER_ACCURACY;
-        ret += this.Accuracy() * this.player.talents.acc.level * 0.005;
+        var ret = 0.25 + this.stats.critDamage + this.statBonuses.critDamage + this.Accuracy() * Statics.CRITDMG_PER_ACCURACY;
+        ret += this.Accuracy() * this.player.getTalentLevel("acc") * 0.005;
         ret = Math.pow(ret, Statics.CRITDMG_DIMINISHING_POWER);
+        ret += ret * this.player.runeBonuses.critPercent;
         return Math.floor(ret * 100) / 100;
     }
     DamageMin() {
-        var ret = this.statBonuses.damageMin * (1 + Math.pow(this.Strength(), Statics.SCALING_DIMINISHING_POWER) * Statics.SCALING_DAMAGE_PER_STRENGTH) +
-            this.Strength() * Statics.STRENGTH_DMG_MIN;
-        ret += this.Strength() * this.player.talents.str.level * 0.02;
+        var ret = this.statBonuses.damageMin * (1 + Math.pow(this.Strength(), Statics.SCALING_DIMINISHING_POWER + this.player.runeBonuses.weaponScaling) * 
+        Statics.SCALING_DAMAGE_PER_STRENGTH) + this.Strength() * Statics.STRENGTH_DMG_MIN;
+        ret += this.Strength() * this.player.getTalentLevel("str") * 0.07 * Statics.STRENGTH_DMG_MIN;
+        ret += this.statBonuses.damageMin * this.player.runeBonuses.weaponPercent;
         return Math.floor(Math.max(1, ret));
     }
     DamageMax() {
-        var ret = this.statBonuses.damageMax * (1 + Math.pow(this.Strength(), Statics.SCALING_DIMINISHING_POWER) * Statics.SCALING_DAMAGE_PER_STRENGTH) +
-            this.Strength() * Statics.STRENGTH_DMG_MAX;
-        ret += this.Strength() * this.player.talents.str.level * 0.05;
+        var ret = this.statBonuses.damageMax * (1 + Math.pow(this.Strength(), Statics.SCALING_DIMINISHING_POWER + this.player.runeBonuses.weaponScaling) * 
+        Statics.SCALING_DAMAGE_PER_STRENGTH) + this.Strength() * Statics.STRENGTH_DMG_MAX;
+        ret += this.Strength() * this.player.getTalentLevel("str") * 0.07 * Statics.STRENGTH_DMG_MAX;
+        ret += this.statBonuses.damageMax * this.player.runeBonuses.weaponPercent;
         return Math.floor(Math.max(1, ret));
     }
     HealthRegen() {
         var ret = this.statBonuses.healthRegen + this.Recovery() * Statics.REGEN_PER_RECOVERY;
-        ret += this.Recovery() * this.player.talents.rec.level * 0.005;
+        ret += this.Recovery() * this.player.getTalentLevel("rec") * 0.08 * Statics.REGEN_PER_RECOVERY;
+        ret += ret * this.player.runeBonuses.regenPercent;
         return Math.floor(ret * 10) / 10;
     }
     Armor() {
         var ret = this.Defense() * Statics.ARMOR_PER_DEFENSE + this.statBonuses.armor *
-            (1 + Math.pow(this.Defense(), Statics.SCALING_DIMINISHING_POWER) * Statics.SCALING_ARMOR_PER_DEFENSE);
-        ret += this.Defense() * this.player.talents.def.level * 0.01;
+            (1 + Math.pow(this.Defense(), Statics.SCALING_DIMINISHING_POWER + this.player.runeBonuses.armorScaling) * Statics.SCALING_ARMOR_PER_DEFENSE);
+        ret += this.Defense() * this.player.getTalentLevel("def") * 0.13 * Statics.ARMOR_PER_DEFENSE;
+        ret += this.statBonuses.armor * this.player.runeBonuses.armorPercent;
         return Math.floor(ret);
     }
+    AttackSpeed() {
+        var ret = this.attackSpeed / (1 + this.player.runeBonuses.baseAttackSpeed);
+        return ret;
+    }
 
-    takeDamage(damage, isCrit) {
-        if (this.player.talents.dodge.level > 0) {
+    takeDamage(damage, isCrit, trueDamage = false) {
+        if (this.player.getTalentLevel("dodge") > 0) {
             this.hitCounter -= 1;
             if (this.hitCounter <= 0) {
-                this.hitCounter = Statics.DODGE_COUNTER - this.player.talents.dodge.level;
+                this.hitCounter = Statics.DODGE_COUNTER - this.player.getTalentLevel("dodge");
                 return 0;
             }
         }
         var dmg = damage;
         if (isCrit === true) {
-            dmg = Math.max(2, dmg - this.Endurance() * 0.05 * this.player.talents.resilient.level);
+            dmg = dmg * Math.pow(0.92, this.player.runeBonuses.enemyCrit);
+            dmg = Math.max(2, dmg - this.Endurance() * 0.05 * this.player.getTalentLevel("resilient"));
         }
-        if (Math.random() < this.player.talents.parry.level * 0.05) {
+        if (Math.random() < this.player.getTalentLevel("parry") * 0.05) {
             dmg = dmg / 2;
         }
-        dmg = super.takeDamage(damage, isCrit);
-        if (this.player.talents.secondwind.level > 0 && this.secondWindCooldown < 0 && this.currentHealth < this.MaxHealth() / 2) {
+        if (Math.random() <= 0.2) {
+            dmg = Math.max(1, dmg - this.Armor() * (this.player.getTalentLevel("block") * 0.25));
+        }
+        dmg = super.takeDamage(dmg, isCrit, trueDamage);
+        if (this.player.getTalentLevel("secondwind") > 0 && this.secondWindCooldown <= 0 && this.currentHealth < this.MaxHealth() / 2) {
             this.secondWindDuration = 10000;
-            this.secondWindCooldown = Statics.SECONDWIND_COOLDOWN - this.player.talents.secondwind.level * 10000;
+            this.secondWindCooldown = Statics.SECONDWIND_COOLDOWN - this.player.getTalentLevel("secondwind") * 10000;
         }
-        if (this.currentHealth <= 0 && this.player.talents.defydeath.level > 0 && this.encounterCounter <= 0) {
+        if (this.currentHealth <= 0 && this.player.getTalentLevel("defydeath") > 0 && this.encounterCounter <= 0) {
             this.currentHealth = 1;
-            this.encounterCounter = Statics.DEFY_DEATH_COUNTER - this.player.talents.defydeath.level;
+            this.encounterCounter = Statics.DEFY_DEATH_COUNTER - this.player.getTalentLevel("defydeath");
         }
+        return dmg;
     }
 
     tickRegen(delta, inCombat = true) {
         var oldVal = this.currentHealth;
         var healMulti = 1;
+        var regen = this.HealthRegen()
         if (inCombat === false) {
-            healMulti = 1 + this.player.talents.quickrecovery.level * 0.25;
+            regen += this.player.runeBonuses.OOCRegen;
+            healMulti = 1 + this.player.getTalentLevel("quickrecovery") * 0.25;
         }
         if (this.secondWindDuration > 0) {
             this.secondWindDuration -= delta;
             healMulti = healMulti * 3;
         }
-        this.currentHealth = Math.min(this.MaxHealth(), this.currentHealth + this.HealthRegen() * (delta / 1000) * healMulti);
+        this.currentHealth = Math.min(this.MaxHealth(), this.currentHealth + regen * (delta / 1000) * healMulti);
         if (oldVal != this.currentHealth) {
             this._onHealthChanged();
         }
     }
+    heal(value) {
+        this.currentHealth = Math.min(this.MaxHealth(), this.currentHealth + value);
+    }
 
     attack(creature, isCrit = false) {
-        if (Math.random() < this.player.talents.stun.level * 0.05) {
+        if (Math.random() < this.player.getTalentLevel("stun") * 0.05) {
             creature.stunTimer = 500;
         }
         var rawDmg = this.rollDamage();
         if (isCrit === true) {
             rawDmg = rawDmg * this.CritDamage();
-            if (Math.random() < (this.player.talents.doublecrit.level * 0.01 * this.CritChance())) {
+            if (Math.random() < (this.player.getTalentLevel("doublecrit") * 0.01 * this.CritChance())) {
                 rawDmg = rawDmg * 2;
             }
         }
         var dmg = creature.takeDamage(rawDmg, isCrit);
         this.attackCooldown = 0;
-        if (Math.random() < this.player.talents.followthrough.level * 0.05) {
-            this.attackCooldown = this.attackSpeed / 2;
+        if (Math.random() < this.player.getTalentLevel("followthrough") * 0.05) {
+            this.attackCooldown = this.AttackSpeed() / 2;
         }
         this._onAttackCooldownChanged();
         return dmg;
     }
     cleave(creature, isCrit = false) {
-        if (Math.random() < this.player.talents.stun.level * 0.05) {
+        if (Math.random() < this.player.getTalentLevel("stun") * 0.05) {
             creature.stunTimer = 500;
         }
-        var rawDmg = this.Strength() * this.player.talents.cleave.level * 0.2;
+        var rawDmg = this.Strength() * this.player.getTalentLevel("cleave") * 0.2;
         if (isCrit === true) {
             rawDmg = rawDmg * this.CritDamage();
-            if (Math.random() < (this.player.talents.doublecrit.level * 0.01 * this.CritChance())) {
+            if (Math.random() < (this.player.getTalentLevel("doublecrit") * 0.01 * this.CritChance())) {
                 rawDmg = rawDmg * 2;
             }
         }

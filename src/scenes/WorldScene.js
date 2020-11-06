@@ -6,6 +6,7 @@ import { RegionRegistry } from "../data/RegionRegistry";
 import { Common } from "../utils/Common";
 import { TooltipRegistry } from "../data/TooltipRegistry";
 import { DynamicSettings } from "../data/DynamicSettings";
+import { Statics } from "../data/Statics";
 
 export class WorldScene extends SceneUIBase {
     constructor(position, name) {
@@ -33,19 +34,19 @@ export class WorldScene extends SceneUIBase {
     }
 
     _setupRegionTile(x, y, region, index) {
-        var diff = (region.regionLevel * DynamicSettings.instance.regionDifficultyIncrease) + "-" +
-            ((region.regionLevel + 1) * DynamicSettings.instance.regionDifficultyIncrease);
+        var diff = (region.regionLevel * DynamicSettings.getInstance().regionDifficultyIncrease) + "-" +
+            ((region.regionLevel + 1) * DynamicSettings.getInstance().regionDifficultyIncrease);
         var explorePercent = Math.floor(region.getExplorePercent() * 100) + "%";
         this.regionIcons.push(new ImageButton(this, x, y, 64, 64, { sprite: "icons", tile: 40 })
             .onClickHandler(() => { this._selectRegion(index); })
-            .onPointerOverHandler(() => { this._createTooltip(x, y, diff, explorePercent, region.type); })
+            .onPointerOverHandler(() => { this._createTooltip(x, y, diff, explorePercent, region); })
             .onPointerOutHandler(() => { this._disableTooltip(); }));
     }
-    _setupPotentialRegionTile(x, y, type, index) {
+    _setupPotentialRegionTile(x, y, region, index) {
         var diff = (this.worldData.regionList.length * 20) + "-" + (this.worldData.regionList.length * 20 + 20);
         this.regionIcons.push(new ImageButton(this, x, y, 64, 64, { sprite: "icons", tile: 40 })
             .onClickHandler(() => { this._chooseNewRegion(index); })
-            .onPointerOverHandler(() => { this._createTooltip(x, y, diff, undefined, type); })
+            .onPointerOverHandler(() => { this._createTooltip(x, y, diff, undefined, region); })
             .onPointerOutHandler(() => { this._disableTooltip(); }));
     }
 
@@ -108,20 +109,51 @@ export class WorldScene extends SceneUIBase {
         this._refreshRegions();
     }
 
-    _createTooltip(x, y, difficulty, explorePercent, regionType) {
+    _createTooltip(x, y, difficulty, explorePercent, region) {
         if (this.floatingText !== undefined) {
             this.floatingText.destroy();
         }
         x += x + 400 > 1100 ? -250 : 64;
         this.floatingText = new ExtendedFloatingTooltip(this, x, y, 400, 150);
-        this.floatingText.addText(10, 10, "courier20", RegionRegistry.REGION_TYPES[regionType].name);
+        this.floatingText.addText(10, 10, "courier20", RegionRegistry.REGION_TYPES[region.type].name);
         this.floatingText.addText(10, 30, "courier16", "Difficulty: " + difficulty);
         if (explorePercent !== undefined) {
             this.floatingText.addText(200, 30, "courier16", "Explored: " + explorePercent);
         }
 
-        var txt = Common.processText(TooltipRegistry.getRegionTooltip(regionType), 48);
-        this.floatingText.addText(10, 50, "courier16", txt);
+        var txt = TooltipRegistry.getRegionTooltip(region.type) + "\n\n";
+        if (region.traits.length > 0) {
+            txt += "Traits: ";
+            for (var i = 0; i < region.traits.length; i++) {
+                switch (region.traits[i].type) {
+                    case Statics.TRAIT_DIRE:
+                        txt += "Dire " + region.traits[i].level;
+                        break;
+                    case Statics.TRAIT_POISONED:
+                        txt += "Poisoned " + region.traits[i].level;
+                        break;
+                    case Statics.TRAIT_MONSTROUS:
+                        txt += "Monstrous " + region.traits[i].level;
+                        break;
+                    case Statics.TRAIT_QUICK:
+                        txt += "Quick " + region.traits[i].level;
+                        break;
+                    case Statics.TRAIT_DEADLY:
+                        txt += "Deadly " + region.traits[i].level;
+                        break;
+                    case Statics.TRAIT_SHIELDED:
+                        txt += "Shielded " + region.traits[i].level;
+                        break;
+                    case Statics.TRAIT_BESERK:
+                        txt += "Beserk " + region.traits[i].level;
+                        break;
+                }
+                if (i < region.traits.length - 1) {
+                    txt += ", ";
+                }
+            }
+        }
+        this.floatingText.addText(10, 50, "courier16", Common.processText(txt, 48));
     }
     _disableTooltip() {
         if (this.floatingText !== undefined) {

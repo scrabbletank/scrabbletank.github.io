@@ -40,6 +40,9 @@ export class TooltipImage {
     }
 
     _showTooltip() {
+        if (this.tooltip == "") {
+            return;
+        }
         if (this.floatingText !== undefined) {
             this.floatingText.destroy();
         }
@@ -51,5 +54,13 @@ export class TooltipImage {
     _removeTooltip() {
         this.floatingText.destroy();
         this.floatingText = undefined;
+    }
+
+    destroy() {
+        if (this.floatingText !== undefined) {
+            this.floatingText.destroy();
+        }
+        this.backRect.destroy();
+        this.img.destroy();
     }
 }

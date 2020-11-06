@@ -16,6 +16,7 @@ export class TextButton {
     setNotification() {
         this.isNotifying = true;
         this.text.setText("!" + this.rawText + "!");
+        this.text.setTint(Phaser.Display.Color.GetColor(255, 255, 0));
         return this;
     }
 
@@ -52,6 +53,7 @@ export class TextButton {
         if (this.isNotifying === true) {
             this.isNotifying = false;
             this.text.setText(this.rawText);
+            this.text.setTint(this.textClr);
         }
         if (this.enabled === true) {
             callback();

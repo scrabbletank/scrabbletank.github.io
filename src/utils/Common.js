@@ -18,11 +18,13 @@ export class Common {
 
     static numberString(x) {
         var ret = new Intl.NumberFormat('en-US').format(x);
-        if (ret.length >= 16) {
+        if (ret.length >= 20) {
+            ret = ret.substr(0, ret.length - 16) + "T";
+        } else if (ret.length >= 16) {
             ret = ret.substr(0, ret.length - 12) + "B";
         } else if (ret.length >= 12) {
             ret = ret.substr(0, ret.length - 8) + "M";
-        } else if (ret.length >= 9) {
+        } else if (ret.length >= 8) {
             ret = ret.substr(0, ret.length - 4) + "K";
         }
         return ret;
@@ -73,39 +75,40 @@ export class Common {
     }
 
     static getBonusText(prop, value) {
+        var sign = value >= 0 ? "+" : "";
         switch (prop) {
             case "health":
-                return "+ " + Math.floor(value) + " Health";
+                return sign + Math.floor(value) + " Health";
             case "damageMin":
-                return "+ " + Math.floor(value) + " Min Damage";
+                return sign + Math.floor(value) + " Min Damage";
             case "damageMax":
-                return "+ " + Math.floor(value) + " Max Damage";
+                return sign + Math.floor(value) + " Max Damage";
             case "strength":
-                return "+ " + Math.floor(value) + " Strength";
+                return sign + Math.floor(value) + " Strength";
             case "dexterity":
-                return "+ " + Math.floor(value) + " Dexterity";
+                return sign + Math.floor(value) + " Dexterity";
             case "agility":
-                return "+ " + Math.floor(value) + " Agility";
+                return sign + Math.floor(value) + " Agility";
             case "endurance":
-                return "+ " + Math.floor(value) + " Endurance";
+                return sign + Math.floor(value) + " Endurance";
             case "recovery":
-                return "+ " + Math.floor(value) + " Recovery";
+                return sign + Math.floor(value) + " Recovery";
             case "defense":
-                return "+ " + Math.floor(value) + " Defense";
+                return sign + Math.floor(value) + " Defense";
             case "accuracy":
-                return "+ " + Math.floor(value) + " Accuracy";
+                return sign + Math.floor(value) + " Accuracy";
             case "hit":
-                return "+ " + Math.floor(value) + " Hit";
+                return sign + Math.floor(value) + " Hit";
             case "evasion":
-                return "+ " + Math.floor(value) + " Evasion";
+                return sign + Math.floor(value) + " Evasion";
             case "critDamage":
-                return "+ " + Math.floor(value * 100) + "% Crit Damage";
+                return sign + Math.floor(value * 100) + "% Crit Damage";
             case "critChance":
-                return "+ " + Math.floor(value * 100) + "% Crit Chance";
+                return sign + Math.floor(value * 100) + "% Crit Chance";
             case "healthRegen":
-                return "+ " + Math.floor(value * 10) / 10 + "/s Health Regen";
+                return sign + Math.floor(value * 10) / 10 + "/s HP Regen";
             case "armor":
-                return "+ " + Math.floor(value) + " Armor";
+                return sign + Math.floor(value) + " Armor";
         }
     }
 

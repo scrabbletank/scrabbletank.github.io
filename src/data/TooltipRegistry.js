@@ -1,3 +1,4 @@
+import { Statics } from "./Statics";
 import { WorldTime } from "./WorldTime";
 
 export class TooltipRegistry {
@@ -5,7 +6,7 @@ export class TooltipRegistry {
         switch (talent.name) {
             case "Strength":
                 return "Each point of Strength increases your damage more. Increases Damage gained by Strength by " +
-                    (talent.level * 5) + "% + (5%).";
+                    (talent.level * 7) + "% + (7%).";
             case "Dexterity":
                 return "Each point of Dexterity gives more Hit. You gain " + (7 + talent.level) + " + (1) Hit per Dexterity.";
             case "Agility":
@@ -13,15 +14,15 @@ export class TooltipRegistry {
             case "Endurance":
                 return "Get more health from Endurance. You gain " + (5 + talent.level) + " + (1) max Health per Endurance.";
             case "Recovery":
-                return "Heal wounds as fast as you get them! Increases Health Regen from Recovery by " + (talent.level * 5) + "% + (5%).";
+                return "Heal wounds as fast as you get them! Increases Health Regen from Recovery by " + (talent.level * 8) + "% + (8%).";
             case "Defense":
-                return "Get more armor from Defense. Increases Armor from Defense by " + (talent.level * 10) + "% + (10%).";
+                return "Get more armor from Defense. Increases Armor from Defense by " + (talent.level * 13) + "% + (13%).";
             case "Accuracy":
-                return "Crit even harder. You gain " + (2.5 + talent.level * 0.5) + "% + (0.5%) Crit Damage per Accuracy.";
+                return "Crit even harder. You gain " + (4 + talent.level * 0.5) + "% + (0.5%) Crit Damage per Accuracy.";
             case "Hit":
-                return "Gain even more Hit from all sources. Increase your Hit by " + (talent.level * 2) + "% + (2%).";
+                return "Gain even more Hit from all sources. Increase your Hit by " + (talent.level * 4) + "% + (4%).";
             case "Evasion":
-                return "Gain even more Evasion from all sources. Increase your Evasion by " + (talent.level * 2) + "% + (2%).";
+                return "Gain even more Evasion from all sources. Increase your Evasion by " + (talent.level * 4) + "% + (4%).";
             case "Critical":
                 return "Everyone loves to crit, so here is some free crit chance. Increase your crit chance by " + (talent.level * 1) + "% + (1%).";
             case "Bounty":
@@ -29,7 +30,7 @@ export class TooltipRegistry {
                     (talent.level * 10) + "% + (10%) chance for enemies to drop loot twice.";
             case "Explorer":
                 return "If you want to explore fast you gotta go fast. Increases your explore speed by " +
-                    (talent.level * 10) + "% + (10%).";
+                    (talent.level * 20) + "% + (20%).";
             case "Cleave":
                 return "Hit everything super hard. You gain a 20% chance your attacks hit an additional target dealing " +
                     (talent.level * 20) + "% + (20%) of your Strength in damage";
@@ -68,7 +69,7 @@ export class TooltipRegistry {
                     (talent.level * 25) + "% + (25%) slower.";
             case "Governance":
                 return "Spend less time fighting things and more time learning how they can fight for you! Increases economy and production by " +
-                    (talent.level * 3) + "% + (3%). This effect is multiplicative, not additive.";
+                    (talent.level * 4) + "% + (4%). This effect is multiplicative, not additive.";
         }
     }
 
@@ -171,14 +172,37 @@ export class TooltipRegistry {
             case "Blackiron Gear":
                 return "Motes of Darkness can reach a " + (20 + moonlight.level * 10) + "% + (10%) bonus before diminishing returns.";
             case "Runelands":
-                return "Each region contains " + (1 + moonlight.level) + " + (1) hidden runes.";
+                return "Each region contains " + (5 + moonlight.level) + " + (1) hidden runes.";
             case "Moonlight Workers":
                 return "Production buildings generate " + (moonlight.level) + "% + (1%) more resources per defense.";
             case "Hero's Pouch":
                 return "Increases your gold cap by " + (moonlight.level * 100) + " + (100) per town.";
             case "Night Market":
-                return "Markets increase your economy by 0-" + (10 + moonlight.level) + "% + (1%) based on distance between the Town " +
+                return "Markets increase your economy by 0-" + (7 + moonlight.level) + "% + (1%) based on distance between the Town " +
                     "and other Markets.";
+            case "Shadow's Metal":
+                return "Metal yields are increased by " + (moonlight.level * 5) + "% + (5%).";
+            case "Shadow's Leather":
+                return "Leather yields are increased by " + (moonlight.level * 5) + "% + (5%).";
+            case "Shadow's Fiber":
+                return "Fiber yields are increased by " + (moonlight.level * 5) + "% + (5%).";
+            case "Shadow's Stone":
+                return "Stone yields are increased by " + (moonlight.level * 5) + "% + (5%).";
+            case "Shadow's Wood":
+                return "Wood yields are increased by " + (moonlight.level * 5) + "% + (5%).";
+            case "Shadow's Crystal":
+                return "Crystal yields are increased by " + (moonlight.level * 5) + "% + (5%).";
+            case "Shadow's Gold":
+                return "Monsters drop " + (moonlight.level * 0.25) + " + (0.25) more gold.";
+            case "Discovery":
+                return "Gain " + (moonlight.level * 10) + " + (10) friendship each time you fully explore a tile.";
+            case "Shadow's Chosen":
+                return "Monsters base shade reward increased by " + (moonlight.level * 1) + " + (1). This is added before other multipliers, " +
+                    "such as Shadow's Blessing or monster level.";
+            case "Corrupted Runes":
+                return "Upgrading and Rerolling Runes costs " + Math.floor(Math.pow(0.93, moonlight.level) * 100) + "% - (~7%) fewer Motes of Darkness.";
+            case "Soulbound":
+                return "Gear gains an additional " + (moonlight.level) + "% + (1%) of their base stats every level.";
         }
     }
 
@@ -204,49 +228,170 @@ export class TooltipRegistry {
             case "A Matter of Years":
                 return "Now that you've reached out into the world and understand the basics why not do it again, but faster. As they " +
                     "say, practice makes perfect!\n\n" +
-                    "Restrictions: Reach the 2nd Gate within " + (10 - challenge.completions) + " Years.\n\n" +
+                    "Restrictions: Reach the 2nd Gate within " + (9 - challenge.completions * 2) + " Years.\n\n" +
                     "On First Completion: Unlock new challenges.\n" +
-                    "On Every Completion: Increases moonlight earned by 10%\n" +
-                    "                     +1 Challenge Point\n\n" +
+                    "On Every Completion: Increases moonlight earned by 15%\n" +
+                    "                     +2 Challenge Points\n\n" +
                     "It is possible to fail this challenge!\n\n" +
                     "Completions: " + challenge.completions + "/" + challenge.maxCompletions + "\n" +
                     "Fastest Time: " + new WorldTime(challenge.fastestTime).getTimespanText();
             case "Forged Ahead":
-                return "Those forge upgrades sure are useful, especially now that all your gear costs " + (10 + challenge.completions * 5) +
+                return "Those forge upgrades sure are useful, especially now that all your gear costs " + (10 + challenge.completions * 10) +
                     " times as much.\n\n" +
-                    "Restrictions: Gear costs increased by " + (10 + challenge.completions * 5) + " times.\n" +
+                    "Restrictions: Gear costs increased by " + (10 + challenge.completions * 10) + " times.\n" +
                     "              Reach the 2nd Gate.\n\n" +
-                    "On Every Completion: Gear costs are multiplied by x0.95\n" +
-                    "                     +1 Challenge Points\n\n" +
-                    "Completions: " + challenge.completions + "/" + challenge.maxCompletions + "\n" +
-                    "Fastest Time: " + new WorldTime(challenge.fastestTime).getTimespanText();
-            case "Vast Continent":
-                return "A Hero must be able to reach all those in need, even the ones really really really far away.\n\n" +
-                    "Restrictions: Explore speed is reduced by 25\n" +
-                    "              Reach Gate " + (1 + challenge.completions) + ".\n\n" +
-                    "On First Completion: Increases explore speed by 25%\n" +
-                    "On Every Completion: Increases explore speed by 10%\n" +
+                    "On Every Completion: Gear costs are multiplied by x0.925\n" +
                     "                     +2 Challenge Points\n\n" +
                     "Completions: " + challenge.completions + "/" + challenge.maxCompletions + "\n" +
-                    "Fastest Time: " + new WorldTime(challenge.fastestTime).getTimespanText();;
-            case "Forgotten Labor":
-                return "None of the townsfolk in this realm know how to work. Either that or they're just really lazy.\n\n" +
-                    "Restrictions: Production buildings are unavailable.\n" +
+                    "Fastest Time: " + new WorldTime(challenge.fastestTime).getTimespanText();
+            case "Giant Lands":
+                return "Is this land massive, or are you just really small? Each region is smaller, but takes 25 times longer to explore. " +
+                    "Also all monsters have the Monstrous " + (2 + 2 * challenge.completions) + " trait.\n\n" +
+                    "Restrictions: Exploration needed is increased by 25x\n" +
                     "              Reach Gate " + (1 + challenge.completions) + ".\n\n" +
-                    "On First Completion: Unlock the Warehouse building.\n" +
-                    "On Every Completion: Increases building production by 3%\n" +
+                    "On Every Completion: Increases explore speed by 25%\n" +
                     "                     +3 Challenge Points\n\n" +
                     "Completions: " + challenge.completions + "/" + challenge.maxCompletions + "\n" +
                     "Fastest Time: " + new WorldTime(challenge.fastestTime).getTimespanText();
             case "Talentless":
                 return "You rely way too much on those talents. Let's see you get through without them.\n\n" +
                     "Restrictions: Talents are removed.\n" +
-                    "              Reach Gate " + (1 + challenge.completions) + ".\n\n" +
-                    "On First Completion: Talent costs scale slightly slower.\n" +
+                    "              Reach Gate " + (3 + challenge.completions) + ".\n\n" +
                     "On Every Completion: Start with +1 Talent points.\n" +
+                    "                     Talent costs scale slightly slower.\n" +
                     "                     +3 Challenge Points\n\n" +
                     "Completions: " + challenge.completions + "/" + challenge.maxCompletions + "\n" +
                     "Fastest Time: " + new WorldTime(challenge.fastestTime).getTimespanText();
+            case "Lazy Townsfolk":
+                return "None of the townsfolk in this realm know how to work. Either that or they're just really lazy.\n\n" +
+                    "Restrictions: Production buildings are unavailable.\n" +
+                    "              Reach Gate " + (3 + challenge.completions) + ".\n\n" +
+                    "On First Completion: Unlock the Warehouse building.\n" +
+                    "On Every Completion: Increases building production by 10%\n" +
+                    "                     +4 Challenge Points\n\n" +
+                    "Completions: " + challenge.completions + "/" + challenge.maxCompletions + "\n" +
+                    "Fastest Time: " + new WorldTime(challenge.fastestTime).getTimespanText();
+            case "Mega Monsters":
+                return "*slaps monster* this baby can fit so many traits inside it. How many? " + (4 + challenge.completions * 2) +
+                    " traits. That's how many.\n\n" +
+                    "Restrictions: Monsters start with " + (4 + challenge.completions * 2) + " traits.\n" +
+                    "              Reach Gate " + (5 + challenge.completions) + ".\n\n" +
+                    "On Every Completion: Monsters give 5% more shade, plus 1% per trait.\n" +
+                    "                     +5 Challenge Points\n\n" +
+                    "Completions: " + challenge.completions + "/" + challenge.maxCompletions + "\n" +
+                    "Fastest Time: " + new WorldTime(challenge.fastestTime).getTimespanText();
         }
+    }
+
+    static getTraitTooltip(trait) {
+        switch (trait.type) {
+            case Statics.TRAIT_DIRE:
+                return "Dire " + trait.level + ": Core stats are increased by " + trait.level * 20 + "%, drops motes and gives " +
+                    trait.level * 75 + "% more experience.";
+            case Statics.TRAIT_POISONED:
+                return "Poisoned " + trait.level + ": Deals " + trait.level * 3 + "% of its max damage per second as true damage.";
+            case Statics.TRAIT_MONSTROUS:
+                return "Monstrous " + trait.level + ": Attack speed is reduced by 15%. Has " + trait.level * 25 + "% increased health and " +
+                    trait.level * 10 + "% increased damage.";
+            case Statics.TRAIT_QUICK:
+                return "Quick " + trait.level + ": Attack speed is increased by 20%. Has " + trait.level * 25 + "% increased evasion.";
+            case Statics.TRAIT_DEADLY:
+                return "Deadly " + trait.level + ": Crit chance is doubled and has " + trait.level * 5 + "% more damage and crit damage.";
+            case Statics.TRAIT_SHIELDED:
+                return "Shielded " + trait.level + ": Every 7 seconds gains " + trait.level * 100 + "% of their armor as a shield that " +
+                    "absorbs incoming damage.";
+            case Statics.TRAIT_BESERK:
+                return "Beserk " + trait.level + ": Hit chance is increased by " + trait.level * 20 + "%, health regen by " +
+                    trait.level * 10 + "% and has a " + Math.floor(((1 - Math.pow(0.92, trait.level)) * 100)) + "% chance to trigger Follow Through.";
+        }
+    }
+
+    static getRuneBonusText(prop, value) {
+        var sign = value >= 0 ? "+" : "-";
+        switch (prop) {
+            case "strPercent":
+                return sign + Math.round(value * 100) + "% Strength";
+            case "strFlat":
+                return sign + Math.floor(value) + " Strength";
+            case "strTalents":
+                return sign + Math.floor(value) + " Strength Talents";
+            case "dexPercent":
+                return sign + Math.round(value * 100) + "% Dexterity";
+            case "dexFlat":
+                return sign + Math.floor(value) + " Dexterity";
+            case "dexTalents":
+                return sign + Math.floor(value) + " Dexterity Talents";
+            case "agiPercent":
+                return sign + Math.round(value * 100) + "% Agility";
+            case "agiFlat":
+                return sign + Math.floor(value) + " Agility";
+            case "agiTalents":
+                return sign + Math.floor(value) + " Agility Talents";
+            case "endPercent":
+                return sign + Math.round(value * 100) + "% Endurance";
+            case "endFlat":
+                return sign + Math.floor(value) + " Endurance";
+            case "endTalents":
+                return sign + Math.floor(value) + " Endurance Talents";
+            case "recPercent":
+                return sign + Math.round(value * 100) + "% Recovery";
+            case "recFlat":
+                return sign + Math.floor(value) + " Recovery";
+            case "recTalents":
+                return sign + Math.floor(value) + " Recovery Talents";
+            case "defPercent":
+                return sign + Math.round(value * 100) + "% Defense";
+            case "defFlat":
+                return sign + Math.floor(value) + " Defense";
+            case "defTalents":
+                return sign + Math.floor(value) + " Defense Talents";
+            case "accPercent":
+                return sign + Math.round(value * 100) + "% Accuracy";
+            case "accFlat":
+                return sign + Math.floor(value) + " Accuracy";
+            case "accTalents":
+                return sign + Math.floor(value) + " Accuracy Talents";
+            case "hitPercent":
+                return sign + Math.round(value * 100) + "% Hit Chance";
+            case "evaPercent":
+                return sign + Math.round(value * 100) + "% Evasoion";
+            case "weaponPercent":
+                return sign + Math.round(value * 100) + "% Gear Damage";
+            case "armorPercent":
+                return sign + Math.round(value * 100) + "% Gear Armor";
+            case "critPercent":
+                return sign + Math.round(value * 100) + "% Crit Damage";
+            case "healthPercent":
+                return sign + Math.round(value * 100) + "% Health";
+            case "regenPercent":
+                return sign + Math.round(value * 100) + "% HP Regen";
+            case "weaponScaling":
+                return sign + Math.round(value * 100) + " Gear Damage Scaling";
+            case "armorScaling":
+                return sign + Math.round(value * 100) + " Gear Armor Scaling";
+            case "baseAttackSpeed":
+                return sign + Math.round(value * 100) + "% Faster Attacks";
+            case "OOCRegen":
+                return sign + value + " Out of Combat Regen";
+            case "enemyCrit":
+                return Math.round(Math.pow(0.92, value) * 100) + "% Crit Damage Taken";
+            case "exploreSpeed":
+                return sign + Math.round(value * 100) + "% Explore Speed";
+            case "friendshipMulti":
+                return sign + Math.round(value * 100) + "% Friendship Earned";
+            case "critChance":
+                return sign + Math.round(value * 100) + "% Crit Chance";
+            case "lootFlat":
+                return sign + value + " to Loot Dropped";
+            case "lootTalent":
+                return sign + Math.round(value * 100) + " Bounty Talent";
+            case "moteChance":
+                return sign + (Math.round(value * 1000) / 10) + "% Mote on Kill";
+            case "shadeFlat":
+                return sign + value + " Shade per Kill";
+            case "regenOnKill":
+                return sign + Math.round(value * 10) / 10 + "s of Regen on Kill";
+        }
+        return "";
     }
 }

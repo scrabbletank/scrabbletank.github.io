@@ -2,7 +2,7 @@
 
 import { Statics } from "./Statics";
 import { Common } from "../utils/Common";
-import { GearData } from "./GearData";
+import { MoonlightData } from "./MoonlightData";
 
 // stat calculations:
 // attacks always hit, but attack speed is adjusted by hit chance/evasion. Higher hit chance means
@@ -60,6 +60,9 @@ export class CreatureBlock {
         this.drops = [];
         this.motes = 0;
         this.icon = { sprite: "enemyicons", tile: 8 };
+        this.traits = [];
+        this.shieldValue = 0;
+        this.shieldCooldown = 0;
 
         this.healthChangedHandlers = [];
         this.attackCooldownChangedHandlers = [];
@@ -110,16 +113,16 @@ export class CreatureBlock {
         return Math.floor(ret * 100) / 100;
     }
     CritDamage() {
-        var ret = this.stats.critDamage + this.statBonuses.critDamage + this.Accuracy() * Statics.CRITDMG_PER_ACCURACY;
+        var ret = 0.25 + this.stats.critDamage + this.statBonuses.critDamage + this.Accuracy() * Statics.CRITDMG_PER_ACCURACY;
         ret = Math.pow(ret, Statics.CRITDMG_DIMINISHING_POWER);
         return Math.floor(ret * 100) / 100;
     }
     DamageMin() {
-        var ret = this.statBonuses.damageMin * (1 + this.Strength() * Statics.SCALING_DAMAGE_PER_STRENGTH) + this.Strength() * Statics.STRENGTH_DMG_MIN;
+        var ret = this.statBonuses.damageMin + this.Strength() * Statics.STRENGTH_DMG_MIN;
         return Math.floor(Math.max(1, ret));
     }
     DamageMax() {
-        var ret = this.statBonuses.damageMax * (1 + this.Strength() * Statics.SCALING_DAMAGE_PER_STRENGTH) + this.Strength() * Statics.STRENGTH_DMG_MAX;
+        var ret = this.statBonuses.damageMax + this.Strength() * Statics.STRENGTH_DMG_MAX;
         return Math.floor(Math.max(1, ret));
     }
     HealthRegen() {
@@ -129,6 +132,9 @@ export class CreatureBlock {
     Armor() {
         var ret = this.Defense() * Statics.ARMOR_PER_DEFENSE + this.statBonuses.armor * (1 + this.Defense() * Statics.SCALING_ARMOR_PER_DEFENSE);
         return Math.floor(ret);
+    }
+    AttackSpeed() {
+        return this.attackSpeed;
     }
 
     registerEvent(event, callback) {
@@ -150,11 +156,18 @@ export class CreatureBlock {
         }
     }
 
-    canAttack() { return this.attackCooldown >= this.attackSpeed; }
+    canAttack() { return this.attackCooldown >= this.AttackSpeed(); }
 
-    takeDamage(damage, isCrit) {
+    takeDamage(damage, __isCrit, trueDamage = false) {
         var dmg = damage;
-        dmg = Math.max(1, dmg - this.Armor());
+        if (this.shieldValue > 0) {
+            var shieldDmg = Math.min(this.shieldValue, dmg);
+            this.shieldValue -= shieldDmg;
+            dmg -= shieldDmg;
+        }
+        if (trueDamage === false) {
+            dmg = Math.max(1, dmg - this.Armor());
+        }
         this.currentHealth -= dmg;
         this._onHealthChanged();
         return dmg;
@@ -162,7 +175,7 @@ export class CreatureBlock {
     rollDamage() {
         return Common.randint(this.DamageMin(), this.DamageMax() + 1);
     }
-    tickRegen(delta, inCombat = true) {
+    tickRegen(delta, __inCombat = true) {
         var oldVal = this.currentHealth;
         var healMulti = 1;
         this.currentHealth = Math.min(this.MaxHealth(), this.currentHealth + this.HealthRegen() * (delta / 1000) * healMulti);
@@ -181,6 +194,15 @@ export class CreatureBlock {
         if (oldVal != this.attackCooldown) {
             this._onAttackCooldownChanged();
         }
+        //handle shielded here
+        var shielded = this.findTrait(Statics.TRAIT_SHIELDED);
+        if (shielded !== undefined) {
+            this.shieldCooldown -= delta;
+            if (this.shieldCooldown <= 0) {
+                this.shieldValue = this.Armor() * shielded.level;
+                this.shieldCooldown = 7000;
+            }
+        }
     }
     attack(creature, isCrit = false) {
         var rawDmg = this.rollDamage();
@@ -189,22 +211,28 @@ export class CreatureBlock {
         }
         var dmg = creature.takeDamage(rawDmg, isCrit);
         this.attackCooldown = 0;
+        //handle beserk trait, giving attack speed refresh
+        var beserk = this.findTrait(Statics.TRAIT_BESERK);
+        if (beserk !== undefined) {
+            if (Math.random() < (1 - Math.pow(0.92, beserk.level))) {
+                this.attackCooldown = this.attackSpeed / 2;
+            }
+        }
+
         this._onAttackCooldownChanged();
         return dmg;
     }
 
     equip(gear) {
-        var gearData = new GearData();
-        var motePower = 1 + gearData.getMotePower(gear.motesFused);
-        for (const prop in this.statBonuses) {
-            this.statBonuses[prop] += gear.statBonuses[prop] * motePower;
+        var bonus = gear.getStatBonuses();
+        for (const prop in bonus) {
+            this.statBonuses[prop] += bonus[prop];
         }
     }
     unequip(gear) {
-        var gearData = new GearData();
-        var motePower = 1 + gearData.getMotePower(gear.motesFused);
-        for (const prop in this.statBonuses) {
-            this.statBonuses[prop] -= gear.statBonuses[prop] * motePower;
+        var bonus = gear.getStatBonuses();
+        for (const prop in bonus) {
+            this.statBonuses[prop] -= bonus[prop];
         }
     }
 
@@ -241,28 +269,97 @@ export class CreatureBlock {
 
         this.currentHealth = this.MaxHealth();
         this.name = level < 1 ? "Weak " + name : name;
-        this.xpReward = shadeBase + (shadeBase / 4) * rLvl;
+        var shade = shadeBase + MoonlightData.getInstance().moonperks.shadow2.level;
+        this.xpReward = shade + (shade / 4) * rLvl;
+        this.xpReward = this.xpReward * (1 + MoonlightData.getInstance().challenges.megamonsters.completions * 0.05);
         this.drops = rewards;
         this.icon = icon;
     }
 
-    addTemplate(templateName) {
-        switch (templateName) {
-            case "Dire":
-                this.name = "Dire " + this.name;
-                this.stats.strength = this.stats.strength * 1.2;
-                this.stats.dexterity = this.stats.dexterity * 1.2;
-                this.stats.agility = this.stats.agility * 1.2;
-                this.stats.endurance = this.stats.endurance * 1.2;
-                this.stats.recovery = this.stats.recovery * 1.2;
-                this.stats.defense = this.stats.defense * 1.2;
-                this.stats.accuracy = this.stats.accuracy * 1.2;
-                this.xpReward = this.xpReward * 2;
-                var newDrops = [];
-                for (var i = 0; i < this.drops.length; i++) {
-                    newDrops.push({ type: this.drops[i].type, rate: this.drops[i].rate * 2 });
-                }
-                this.motes += 1 + Math.floor(this.level / 5);
+    findTrait(trait) {
+        for (var i = 0; i < this.traits.length; i++) {
+            if (this.traits[i].type === trait) {
+                return this.traits[i];
+            }
+        }
+        return undefined;
+    }
+
+    applyTraits() {
+        var extraStats = {
+            health: 0,
+            damageMin: 0,
+            damageMax: 0,
+            strength: 0,
+            dexterity: 0,
+            agility: 0,
+            endurance: 0,
+            recovery: 0,
+            defense: 0,
+            accuracy: 0,
+            hit: 0,
+            evasion: 0,
+            critDamage: 0,
+            critChance: 0,
+            healthRegen: 0,
+            armor: 0,
+            xpReward: 0,
+            motes: 0
+        };
+
+        for (var i = 0; i < this.traits.length; i++) {
+            var trait = this.traits[i];
+            switch (trait.type) {
+                case Statics.TRAIT_DIRE:
+                    extraStats.strength += this.Strength() * (0.2 * trait.level);
+                    extraStats.dexterity += this.Dexterity() * (0.2 * trait.level);
+                    extraStats.agility += this.Agility() * (0.2 * trait.level);
+                    extraStats.endurance += this.Endurance() * (0.2 * trait.level);
+                    extraStats.recovery += this.Recovery() * (0.2 * trait.level);
+                    extraStats.defense += this.Defense() * (0.2 * trait.level);
+                    extraStats.accuracy += this.Accuracy() * (0.2 * trait.level);
+                    extraStats.xpReward += this.xpReward * (0.75 * trait.level);
+                    extraStats.motes += trait.level + Math.floor(this.level / 5);
+                    break;
+                case Statics.TRAIT_MONSTROUS:
+                    extraStats.damageMin += this.DamageMin() * (0.1 * trait.level);
+                    extraStats.damageMax += this.DamageMax() * (0.1 * trait.level);
+                    extraStats.health += this.MaxHealth() * (0.25 * trait.level);
+                    this.attackSpeed = this.attackSpeed * 1.15;
+                    break;
+                case Statics.TRAIT_QUICK:
+                    extraStats.evasion += this.Evasion() * (0.25 * trait.level);
+                    this.attackSpeed = this.attackSpeed * 0.85;
+                    break;
+                case Statics.TRAIT_DEADLY:
+                    this.critChance = this.critChance * 2;
+                    extraStats.damageMin += this.DamageMin() * (0.05 * trait.level);
+                    extraStats.damageMax += this.DamageMax() * (0.05 * trait.level);
+                    extraStats.critDamage += this.CritDamage() * (0.05 * trait.level);
+                    break;
+                case Statics.TRAIT_BESERK:
+                    extraStats.hit += this.Hit() * (0.2 * trait.level);
+                    extraStats.healthRegen += this.HealthRegen() * (0.1 * trait.level);
+                    break;
+            }
+            extraStats.xpReward += this.xpReward * (1 + MoonlightData.getInstance().challenges.megamonsters.completions * 0.01 * trait.level);
+        }
+
+        for (const prop in this.statBonuses) {
+            this.statBonuses[prop] += extraStats[prop];
+        }
+        this.xpReward += extraStats.xpReward;
+        this.motes += extraStats.motes;
+        this.currentHealth = this.MaxHealth();
+    }
+
+    addTrait(trait, level) {
+        var newTrait = this.findTrait(trait);
+        if (newTrait === undefined) {
+            newTrait = { type: trait, level: level };
+            this.traits.push(newTrait);
+        } else {
+            newTrait.level += level;
         }
     }
 }

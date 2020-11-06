@@ -18,7 +18,8 @@ export class ProgressionStore {
                 resourceUI: false,
                 craftingUI: false,
                 buildings: false,
-                motes: false
+                motes: false,
+                runes: false
             };
             this.exploreUnlocks = [
                 {
@@ -159,10 +160,8 @@ export class ProgressionStore {
             ];
             // any one off lore that doesnt fit into the above should go here to be tracked better
             this.loreUnlocks = {
-
             };
             this.loreTexts = {
-
             };
             this.exploresUnlocked = 0;
             this.killsUnlocked = 0;
@@ -202,6 +201,13 @@ export class ProgressionStore {
         return ProgressionStore.instance;
     }
 
+    static getInstance() {
+        if (!ProgressionStore.instance) {
+            return new ProgressionStore();
+        }
+        return ProgressionStore.instance;
+    }
+
     rebirth() {
         this.unlocks = {
             // Tabs
@@ -209,14 +215,15 @@ export class ProgressionStore {
             exploreTab: false,
             combatTab: false,
             townTab: false,
-            talentsTab: MoonlightData.instance.challenges.talent.completions > 0,
+            talentsTab: MoonlightData.getInstance().challenges.talent.completions > 0,
             worldTab: false,
             // Mechanics
             infuseUI: false,
             resourceUI: false,
             craftingUI: false,
             buildings: false,
-            motes: false
+            motes: false,
+            runes: false
         };
         this.exploresUnlocked = 0;
         this.killsUnlocked = 0;
@@ -308,6 +315,12 @@ export class ProgressionStore {
             }
         }
     }
+    registerLore(name) {
+        if (this.loreUnlocks[name] !== undefined && this.loreUnlocks[name] === false) {
+            this._onUnlock(Statics.UNLOCK_GENERIC, 0, this.loreTexts[name]);
+            this.loreUnlocks[name] = true;
+        }
+    }
 
     registerFeatureUnlocked(feature, text) {
         switch (feature) {
@@ -343,6 +356,11 @@ export class ProgressionStore {
                 break;
             case Statics.UNLOCK_WORLD_TAB:
                 this.unlocks.worldTab = true;
+                break;
+            case Statics.UNLOCK_RUNES_UI:
+                this.unlocks.runes = true;
+                break;
+            case Statics.UNLOCK_GENERIC:
                 break;
         }
 

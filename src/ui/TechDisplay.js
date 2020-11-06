@@ -28,6 +28,7 @@ export class TechDisplay {
                 costText += ", " + Common.getCostText(i, resourceCosts[i]);
             }
         }
+        costText += ", Friend Level " + tech.level;
         costText = Common.processText(costText, 67);
         this.costLabel = sceneContext.add.bitmapText(x + 5, y + 80, "courier16", costText);
 

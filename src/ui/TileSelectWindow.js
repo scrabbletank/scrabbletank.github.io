@@ -8,6 +8,7 @@ import { Common } from "../utils/Common";
 import { WorldData } from "../data/WorldData";
 import { Building } from "../data/Building";
 import { FloatingTooltip } from "./FloatingTooltip";
+import { DynamicSettings } from "../data/DynamicSettings";
 
 export class TileSelectWindow {
     constructor(scene, x, y, tile) {
@@ -38,7 +39,8 @@ export class TileSelectWindow {
             txt += "Yields:\n"
             for (var i = 0; i < tile.yields.length; i++) {
                 if (tile.yields[i].rate > 0) {
-                    txt += " " + Statics.RESOURCE_NAMES[tile.yields[i].type] + ": " + tile.yields[i].rate + "\n";
+                    txt += " " + Statics.RESOURCE_NAMES[tile.yields[i].type] + ": " +
+                        (Math.floor(tile.yields[i].rate * 100) / 100) + "\n";
                 }
             }
         }
@@ -59,39 +61,44 @@ export class TileSelectWindow {
                 if (tile.yields.length > 0 && tile.roadBuildable === true) {
                     bld.push("road");
                 }
-                for (var i = 0; i < tile.yields.length; i++) {
-                    switch (tile.yields[i].type) {
-                        case Statics.RESOURCE_WOOD:
-                            bld.push("wood");
-                            break;
-                        case Statics.RESOURCE_LEATHER:
-                            bld.push("leather");
-                            break;
-                        case Statics.RESOURCE_METAL:
-                            bld.push("metal");
-                            break;
-                        case Statics.RESOURCE_FIBER:
-                            bld.push("fiber");
-                            break;
-                        case Statics.RESOURCE_STONE:
-                            bld.push("stone");
-                            break;
-                        case Statics.RESOURCE_CRYSTAL:
-                            bld.push("crystal");
-                            break;
+                if (DynamicSettings.getInstance().buildingsAllowed === true) {
+                    for (var i = 0; i < tile.yields.length; i++) {
+                        switch (tile.yields[i].type) {
+                            case Statics.RESOURCE_WOOD:
+                                bld.push("wood");
+                                break;
+                            case Statics.RESOURCE_LEATHER:
+                                bld.push("leather");
+                                break;
+                            case Statics.RESOURCE_METAL:
+                                bld.push("metal");
+                                break;
+                            case Statics.RESOURCE_FIBER:
+                                bld.push("fiber");
+                                break;
+                            case Statics.RESOURCE_STONE:
+                                bld.push("stone");
+                                break;
+                            case Statics.RESOURCE_CRYSTAL:
+                                bld.push("crystal");
+                                break;
+                        }
                     }
                 }
                 if (tile.dockBuildable === true) {
                     bld.push("docks");
                 }
+                if (region.townData.alchemyEnabled === true) {
+                    bld.push("alchemy");
+                }
                 if (tile.yields.length > 0) {
                     if (tile.houseBuildable) {
                         bld.push("house");
-                        if (region.townData.upgrades.market.level > 0) {
+                        if (region.townData.getMarketLevel() > 0) {
                             bld.push("market");
                         }
                     }
-                    if (region.townData.upgrades.tavern.level > 0) {
+                    if (region.townData.getTavernLevel() > 0) {
                         bld.push("tavern");
                     }
                     bld.push("watchtower");
@@ -141,9 +148,9 @@ export class TileSelectWindow {
 
     _canUpgrade(bld) {
         if (bld.name === "Market") {
-            return bld.tier < WorldData.instance.getCurrentRegion().townData.upgrades.market.level;
+            return bld.tier < WorldData.instance.getCurrentRegion().townData.getMarketLevel();
         } else if (bld.name === "Tavern") {
-            return bld.tier < WorldData.instance.getCurrentRegion().townData.upgrades.tavern.level;
+            return bld.tier < WorldData.instance.getCurrentRegion().townData.getTavernLevel();
         } else {
             return bld.tier < 3;
         }

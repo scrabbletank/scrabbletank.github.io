@@ -27,7 +27,7 @@ export class TalentScene extends SceneUIBase {
         for (const prop in this.player.talents) {
             var x = this.relativeX(standardArray[idx][0] + 18);
             var y = this.relativeY(standardArray[idx][1] + 20);
-            this._setupTalentButton(this.player.talents[prop], x, y, idx);
+            this._setupTalentButton(prop, x, y, idx);
             idx++;
         }
     }
@@ -52,24 +52,24 @@ export class TalentScene extends SceneUIBase {
         for (const prop in this.player.talents) {
             var x = this.relativeX(standardArray[idx][0] + 18);
             var y = this.relativeY(standardArray[idx][1] + 20);
-            this._setupTalentButton(this.player.talents[prop], x, y, idx);
+            this._setupTalentButton(prop, x, y, idx);
             idx++;
         }
 
         this.player.registerEvent("onTalentChanged", () => { this._onTalentChanged(); });
     }
 
-    _setupTalentButton(talent, x, y, index) {
-        this.talentButtons.push(new ImageButton(this, x, y, 48, 48, talent.texture)
+    _setupTalentButton(talentName, x, y, index) {
+        this.talentButtons.push(new ImageButton(this, x, y, 48, 48, this.player.talents[talentName].texture)
             .onClickHandler(() => {
-                this._levelUpTalent(talent);
+                this._levelUpTalent(this.player.talents[talentName]);
                 this._disableTooltip();
-                this._setTooltip(talent, x, y);
-                this._updateTalentButton(talent, index);
+                this._setTooltip(talentName, x, y);
+                this._updateTalentButton(this.player.talents[talentName], index);
             })
-            .onPointerOverHandler(() => { this._setTooltip(talent, x, y); })
+            .onPointerOverHandler(() => { this._setTooltip(talentName, x, y); })
             .onPointerOutHandler(() => { this._disableTooltip(); }));
-        this._updateTalentButton(talent, index);
+        this._updateTalentButton(this.player.talents[talentName], index);
     }
 
     _updateTalentButton(talent, index) {
@@ -100,11 +100,12 @@ export class TalentScene extends SceneUIBase {
         this.player.levelTalent(talent);
     }
 
-    _setTooltip(talent, x, y) {
+    _setTooltip(talentName, x, y) {
+        var talent = this.player.talents[talentName];
         if (this.FloatingTooltip !== undefined) {
             this._disableTooltip();
         }
-        var txt = talent.name + " Lv" + talent.level + "\n" +
+        var txt = talent.name + " Lv" + this.player.getTalentLevel(talentName) + "\n" +
             TooltipRegistry.getTalentTooltip(talent) + "\n\n";
 
         if (talent.requires.length > 0) {

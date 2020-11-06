@@ -34,8 +34,8 @@ export class TownScene extends SceneUIBase {
             .setInteractive();
 
         this.townNameLabel = this.add.bitmapText(this.relativeX(10), this.relativeY(10), "courier20", "Town");
-        this.regionNameLabel = this.add.bitmapText(this.relativeX(10), this.relativeY(30), "courier16", "Region 1");
-        this.statsLabel = this.add.bitmapText(this.relativeX(15), this.relativeY(50), "courier16", "Region 1");
+        this.regionNameLabel = this.add.bitmapText(this.relativeX(10), this.relativeY(30), "courier16", "Region ");
+        this.statsLabel = this.add.bitmapText(this.relativeX(15), this.relativeY(50), "courier16", "");
 
         this.buildingBtn = new TextButton(this, this.relativeX(240), this.relativeY(10), 120, 20, "Buildings")
             .onClickHandler(() => { this._showBuildings(true); });
@@ -67,7 +67,8 @@ export class TownScene extends SceneUIBase {
         var gold = TownData.getTechGoldCost(tech, region.townData.tier);
         var resource = TownData.getTechResourceCost(tech, region.townData.tier);
         var player = new PlayerData();
-        if (player.gold >= gold && Common.canCraft(resource, player.resources[region.townData.tier - 1]) === true) {
+        if (player.gold >= gold && Common.canCraft(resource, player.resources[region.townData.tier - 1]) === true &&
+            region.townData.friendshipLevel >= tech.level) {
             player.addGold(-gold);
             player.spendResource(resource, region.townData.tier - 1);
             region.townData.increaseTechLevel(tech);
@@ -83,21 +84,28 @@ export class TownScene extends SceneUIBase {
     _updateStatus() {
         var region = WorldData.instance.getCurrentRegion();
         var player = new PlayerData();
-        var govBonus = (1 + player.talents.governance.level * 0.03);
+        var govBonus = (1 + player.getTalentLevel("governance") * 0.04);
 
-        var txt = "Population: " + Math.floor(region.townData.currentPopulation) + "/" + Math.floor(region.townData.getMaxPopulation()) + "\n" +
-            "Tax Income: " + Math.floor(region.townData.getTownIncome()) + "g/week\n" +
-            "T" + region.townData.tier + " Crafting Cost: " + (Math.floor(player.craftingCosts[region.townData.tier - 1] * 10000) / 100) + "%\n" +
-            "Economy: " + Math.floor(region.townData.economyMulti * 100 * govBonus) + "%\n" +
-            "Production: " + Math.floor(region.townData.productionMulti * 100) + "%\n" +
-            "Bounty Gold: " + Math.floor(region.townData.bountyMulti * 100) + "%\n" +
+        var txt = "Population: " + Math.round(region.townData.currentPopulation) + "/" + Math.floor(region.townData.getMaxPopulation()) + "\n" +
+            "Tax Income: " + Math.round(region.townData.getTownIncome()) + "g/week\n" +
+            "T" + region.townData.tier + " Crafting Cost: " + (Math.round(player.craftingCosts[region.townData.tier - 1] * 10000) / 100) + "%\n" +
+            "Economy: " + Math.round(region.townData.economyMulti * 100 * govBonus) + "%\n" +
+            "Production: " + Math.round(region.townData.productionMulti * 100) + "%\n" +
+            "Bounty Gold: " + Math.round(region.townData.bountyMulti * 100) + "%\n" +
+            "Friendship: " + Math.floor(region.townData.friendship) + "/" + region.townData.friendshipToNext + "\n" +
+            "Friendship\nLevel: " + region.townData.friendshipLevel + " (+" + Math.round((region.townData.getFriendshipBonus() - 1) * 100) + "% Shade)\n" +
             "Daily Production:\n";
 
         for (var i = 0; i < region.resourcesPerDay.length; i++) {
             txt += "  " + Statics.RESOURCE_NAMES[i] + ": " + (Math.floor(region.resourcesPerDay[i] * region.townData.productionMulti * govBonus * 100) / 100) + "\n";
         }
+        if (region.alchemyDrain > 0) {
+            txt += "  Alchemy Drain: " + region.alchemyDrain + "\n" +
+                "  Alchemy Gain: " + Math.round(region.alchemyGain * 100) / 100;
+        }
 
         this.statsLabel.setText(txt);
+        this.regionNameLabel.setText("Region " + (region.regionLevel + 1));
 
         for (var i = 0; i < this.buildingDisplays.length; i++) {
             this.buildingDisplays[i].destroy();

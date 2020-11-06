@@ -11,58 +11,11 @@ export class PlayerData {
     constructor() {
         if (!PlayerData.instance) {
             this.statBlock = new PlayerBlock(this);
-            this.shade = 0;
-            this.statPoints = 3;
-            this.talentPoints = 0;
-            this.statLevel = 1;
-            this.talentLevel = 1;
-            this.nextStatCost = Statics.STAT_COST_BASE;
-            this.nextTalentCost = Statics.TALENT_COST_BASE;
-            this.resources = [[0, 0, 0, 0, 0, 0], [0, 0, 0, 0, 0, 0], [0, 0, 0, 0, 0, 0], [0, 0, 0, 0, 0, 0],
-            [0, 0, 0, 0, 0, 0], [0, 0, 0, 0, 0, 0], [0, 0, 0, 0, 0, 0], [0, 0, 0, 0, 0, 0]];
-            this.resourceTierReached = 0;
             this.statChangedHandlers = [];
             this.resourceChangedHandlers = [];
             this.talentChangedHandlers = [];
-            this.craftingCosts = [1, 1, 1, 1, 1, 1, 1, 1];
-            this.gold = 0;
-            this.motes = 0;
-            this.challengeExploreMulti = 1;
-            if (MoonlightData.instance.challenges.explore.completions > 0) {
-                this.challengeExploreMulti = 1.25 + (MoonlightData.instance.challenges.explore.completions * 0.1);
-            }
 
-            this.weapon = undefined;
-            this.armor = undefined;
-            this.trinket = undefined;
-
-            this.talents = {
-                str: { name: "Strength", level: 0, maxLevel: -1, requires: [], texture: { sprite: "icons", tile: 0 } },
-                dex: { name: "Dexterity", level: 0, maxLevel: -1, requires: [], texture: { sprite: "icons", tile: 1 } },
-                agi: { name: "Agility", level: 0, maxLevel: -1, requires: [], texture: { sprite: "icons", tile: 2 } },
-                end: { name: "Endurance", level: 0, maxLevel: -1, requires: [], texture: { sprite: "icons", tile: 3 } },
-                rec: { name: "Recovery", level: 0, maxLevel: -1, requires: [], texture: { sprite: "icons", tile: 4 } },
-                def: { name: "Defense", level: 0, maxLevel: -1, requires: [], texture: { sprite: "icons", tile: 5 } },
-                acc: { name: "Accuracy", level: 0, maxLevel: -1, requires: [], texture: { sprite: "icons", tile: 6 } },
-                cleave: { name: "Cleave", level: 0, maxLevel: 5, requires: ["str"], texture: { sprite: "icons", tile: 8 } },
-                hit: { name: "Hit", level: 0, maxLevel: -1, requires: ["dex"], texture: { sprite: "icons", tile: 9 } },
-                evasion: { name: "Evasion", level: 0, maxLevel: -1, requires: ["agi"], texture: { sprite: "icons", tile: 10 } },
-                resilient: { name: "Resilient", level: 0, maxLevel: 10, requires: ["end"], texture: { sprite: "icons", tile: 11 } },
-                quickrecovery: { name: "Quick Recovery", level: 0, maxLevel: 12, requires: ["rec"], texture: { sprite: "icons", tile: 12 } },
-                block: { name: "Block", level: 0, maxLevel: 12, requires: ["def"], texture: { sprite: "icons", tile: 13 } },
-                crit: { name: "Critical", level: 0, maxLevel: 15, requires: ["acc"], texture: { sprite: "icons", tile: 14 } },
-                stun: { name: "Stunning Hit", level: 0, maxLevel: 5, requires: ["cleave"], texture: { sprite: "icons", tile: 16 } },
-                followthrough: { name: "Follow Through", level: 0, maxLevel: 5, requires: ["hit"], texture: { sprite: "icons", tile: 17 } },
-                dodge: { name: "Dodge", level: 0, maxLevel: 5, requires: ["evasion"], texture: { sprite: "icons", tile: 18 } },
-                defydeath: { name: "Defy Death", level: 0, maxLevel: 5, requires: ["resilient"], texture: { sprite: "icons", tile: 19 } },
-                secondwind: { name: "Second Wind", level: 0, maxLevel: 5, requires: ["quickrecovery"], texture: { sprite: "icons", tile: 20 } },
-                parry: { name: "Parry", level: 0, maxLevel: 5, requires: ["block"], texture: { sprite: "icons", tile: 21 } },
-                doublecrit: { name: "Double Crit", level: 0, maxLevel: 5, requires: ["crit"], texture: { sprite: "icons", tile: 22 } },
-                bounty: { name: "Bounty", level: 0, maxLevel: -1, requires: [], texture: { sprite: "icons", tile: 7 } },
-                explorer: { name: "Explorer", level: 0, maxLevel: -1, requires: [], texture: { sprite: "icons", tile: 15 } },
-                guardian: { name: "Guardian", level: 0, maxLevel: 5, requires: [], texture: { sprite: "icons", tile: 39 } },
-                governance: { name: "Governance", level: 0, maxLevel: 10, requires: [], texture: { sprite: "icons", tile: 38 } }
-            }
+            this._init();
 
             PlayerData.instance = this;
         }
@@ -70,11 +23,17 @@ export class PlayerData {
         return PlayerData.instance;
     }
 
-    rebirth() {
-        this.statBlock.rebirth();
+    static getInstance() {
+        if (!PlayerData.instance) {
+            return new PlayerData();
+        }
+        return PlayerData.instance;
+    }
+
+    _init() {
         this.shade = 0;
         this.statPoints = 3;
-        this.talentPoints = MoonlightData.instance.challenges.talent.completions;
+        this.talentPoints = MoonlightData.getInstance().challenges.talent.completions;
         this.statLevel = 1;
         this.talentLevel = 1;
         this.nextStatCost = Statics.STAT_COST_BASE;
@@ -83,16 +42,14 @@ export class PlayerData {
         [0, 0, 0, 0, 0, 0], [0, 0, 0, 0, 0, 0], [0, 0, 0, 0, 0, 0], [0, 0, 0, 0, 0, 0]];
         this.craftingCosts = [1, 1, 1, 1, 1, 1, 1, 1];
         for (var i = 0; i < this.craftingCosts.length; i++) {
-            this.craftingCosts[i] = this.craftingCosts[i] * DynamicSettings.instance.gearCostMulti;
-            this.craftingCosts[i] = this.craftingCosts[i] * Math.pow(Statics.FORGE_REDUCTION,
-                MoonlightData.instance.challenges.forge.completions);
+            this.craftingCosts[i] = this.craftingCosts[i] * DynamicSettings.getInstance().gearCostMulti;
+            this.craftingCosts[i] = this.craftingCosts[i] * Math.pow(0.925,
+                MoonlightData.getInstance().challenges.forge.completions);
         }
+        this.resourceTierReached = 0;
         this.gold = 0;
         this.motes = 0;
-        this.challengeExploreMulti = 1;
-        if (MoonlightData.instance.challenges.explore.completions > 0) {
-            this.challengeExploreMulti = 1.25 + (MoonlightData.instance.challenges.explore.completions * 0.1);
-        }
+        this.challengeExploreMulti = 1 + (MoonlightData.getInstance().challenges.explore.completions * 0.25);
 
         this.weapon = undefined;
         this.armor = undefined;
@@ -125,10 +82,64 @@ export class PlayerData {
             guardian: { name: "Guardian", level: 0, maxLevel: 5, requires: [], texture: { sprite: "icons", tile: 39 } },
             governance: { name: "Governance", level: 0, maxLevel: 10, requires: [], texture: { sprite: "icons", tile: 38 } }
         }
+
+        this.runeBonuses = {
+            strPercent: 0,
+            strFlat: 0,
+            strTalents: 0,
+            dexPercent: 0,
+            dexFlat: 0,
+            dexTalents: 0,
+            agiPercent: 0,
+            agiFlat: 0,
+            agiTalents: 0,
+            endPercent: 0,
+            endFlat: 0,
+            endTalents: 0,
+            recPercent: 0,
+            recFlat: 0,
+            recTalents: 0,
+            defPercent: 0,
+            defFlat: 0,
+            defTalents: 0,
+            accPercent: 0,
+            accFlat: 0,
+            accTalents: 0,
+            hitPercent: 0,
+            evaPercent: 0,
+            regenPercent: 0,
+            weaponPercent: 0,
+            armorPercent: 0,
+            critPercent: 0,
+            healthPercent: 0,
+            weaponScaling: 0,
+            armorScaling: 0,
+            baseAttackSpeed: 0,
+            OOCRegen: 0,
+            enemyCrit: 0,
+            exploreSpeed: 0,
+            friendshipMulti: 0,
+            critChance: 0,
+            lootFlat: 0,
+            lootTalent: 0,
+            moteChance: 0,
+            shadeFlat: 0,
+            regenOnKill: 0
+        }
+
+        this.runes = [];
+    }
+
+    rebirth() {
+        this.statBlock.rebirth();
+        this._init();
     }
 
     increaseStat(stat, val) {
         var statChange = Math.min(this.statPoints, val);
+        if (statChange == 0) {
+            return;
+        }
         this.statPoints -= statChange;
         switch (stat) {
             case 'str':
@@ -188,6 +199,12 @@ export class PlayerData {
         return MoonlightData.getMoonlightEarned((this.statLevel - 1) + (this.talentLevel - 1) * 3, gateReached);
     }
 
+    getExploreMulti() {
+        return (1 + this.runeBonuses.exploreSpeed + this.talents.explorer.level * 0.2) *
+            (1 + Statics.AGI_EXPLORE_MULTI * Math.pow(this.statBlock.Agility(), Statics.AGI_EXPLORE_POWER)) *
+            this.challengeExploreMulti;
+    }
+
     getStatCost(buyAmount) {
         var ret = 0;
         for (var i = 0; i < buyAmount; i++) {
@@ -197,11 +214,49 @@ export class PlayerData {
     }
     getTalentCost(buyAmount) {
         var ret = 0;
-        var challengeMod = MoonlightData.instance.challenges.talent.completions > 0 ? 0.02 : 0;
+        var challengeMod = MoonlightData.getInstance().challenges.talent.completions * 0.008;
         for (var i = 0; i < buyAmount; i++) {
             ret += Statics.TALENT_COST_BASE * Math.pow(Statics.TALENT_COST_POWER - challengeMod, (this.talentLevel - 1 + i));
         }
         return ret;
+    }
+    getTalentLevel(name) {
+        if (this.talents[name] === undefined) {
+            return 0;
+        }
+        switch (name) {
+            case "str":
+            case "cleave":
+            case "stun":
+                return this.talents[name].level + this.runeBonuses.strTalents;
+            case "dex":
+            case "hit":
+            case "followthrough":
+                return this.talents[name].level + this.runeBonuses.dexTalents;
+            case "agi":
+            case "evasion":
+            case "dodge":
+                return this.talents[name].level + this.runeBonuses.agiTalents;
+            case "end":
+            case "resilient":
+            case "defydeath":
+                return this.talents[name].level + this.runeBonuses.endTalents;
+            case "rec":
+            case "quickrecovery":
+            case "secondwind":
+                return this.talents[name].level + this.runeBonuses.recTalents;
+            case "def":
+            case "block":
+            case "parry":
+                return this.talents[name].level + this.runeBonuses.defTalents;
+            case "acc":
+            case "crit":
+            case "doublecrit":
+                return this.talents[name].level + this.runeBonuses.accTalents;
+            case "bounty":
+                return this.talents[name].level + this.runeBonuses.lootTalent;
+        }
+        return this.talents[name].level;
     }
 
     buyStat(buyAmount) {
@@ -213,7 +268,7 @@ export class PlayerData {
         }
     }
     buyTalent(buyAmount) {
-        var challengeMod = MoonlightData.instance.challenges.talent.completions > 0 ? 0.02 : 0;
+        var challengeMod = MoonlightData.getInstance().challenges.talent.completions > 0 ? 0.02 : 0;
         for (var i = 0; i < buyAmount; i++) {
             this.talentPoints += 1;
             this.shade -= this.nextTalentCost;
@@ -254,6 +309,16 @@ export class PlayerData {
         this._onResourcesChanged();
     }
 
+    addRune(rune) {
+        this.runes.push(rune);
+    }
+    removeRune(idx) {
+        if (idx < 0 || idx >= this.runes.length) {
+            return;
+        }
+        this.runes.splice(idx, 1);
+    }
+
     equip(gear) {
         switch (gear.slotType) {
             case Statics.GEAR_WEAPON:
@@ -278,22 +343,33 @@ export class PlayerData {
                 this.statBlock.equip(this.trinket);
                 break;
         }
+        var runeBonus = gear.getRuneBonuses();
+        for (const prop in runeBonus) {
+            this.runeBonuses[prop] += runeBonus[prop];
+        }
         this._onStatChanged();
     }
     unequip(slot) {
+        var runeBonus = {};
         switch (slot) {
             case Statics.GEAR_WEAPON:
                 this.statBlock.unequip(this.weapon);
+                runeBonus = this.weapon.getRuneBonuses();
                 this.weapon = undefined;
                 break;
             case Statics.GEAR_ARMOR:
                 this.statBlock.unequip(this.armor);
+                runeBonus = this.armor.getRuneBonuses();
                 this.armor = undefined;
                 break;
             case Statics.GEAR_TRINKET:
                 this.statBlock.unequip(this.trinket);
+                runeBonus = this.trinket.getRuneBonuses();
                 this.trinket = undefined;
                 break;
+        }
+        for (const prop in runeBonus) {
+            this.runeBonuses[prop] -= runeBonus[prop];
         }
         this._onStatChanged();
     }
@@ -320,6 +396,7 @@ export class PlayerData {
             gold: this.gold,
             mote: this.motes,
             talents: this.talents,
+            runes: this.runes,
             w: this.weapon === undefined ? "" : this.weapon.name,
             a: this.armor === undefined ? "" : this.armor.name,
             t: this.trinket === undefined ? "" : this.trinket.name
@@ -343,8 +420,9 @@ export class PlayerData {
         this.gold = saveObj.gold;
         this.motes = saveObj.mote;
         this.talents = saveObj.talents;
+        this.runes = saveObj.runes === undefined ? [] : saveObj.runes;
 
-        var gearData = new GearData();
+        var gearData = GearData.getInstance();
         if (saveObj.w !== "") {
             this.equip(gearData.getGearByName(saveObj.w));
         }

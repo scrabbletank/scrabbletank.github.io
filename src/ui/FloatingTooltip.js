@@ -6,6 +6,8 @@ export class FloatingTooltip {
         this.boundingBox.isStroked = true;
         this.boundingBox.lineWidth = 2;
         this.text = sceneContext.add.bitmapText(x + width / 2, y + height / 2, font, tooltipMessage, fontSize, 1).setOrigin(0.5);
+        this.boundingBox.setDepth(99);
+        this.text.setDepth(100);
     }
 
     setVisible(visible) {

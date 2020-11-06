@@ -30,8 +30,8 @@ export class RebirthDialog {
 
 
         var playerData = new PlayerData();
-        var costTxt = "MOONLIGHT\n" + (playerData.earnableMoonlight(regionLevel + 1) *
-            (1 + 0.1 * MoonlightData.instance.challenges.time.completions));
+        var costTxt = "MOONLIGHT\n" + Math.round((playerData.earnableMoonlight(regionLevel + 1) *
+            (1 + 0.15 * MoonlightData.instance.challenges.time.completions)));
         this.moonlightLabel = scene.add.bitmapText(x + 200, y + 190, "courier20", costTxt, 20, 1).setOrigin(0.5, 0);
         this.moonlightLabel.setTint(Phaser.Display.Color.GetColor(206, 238, 240));
 

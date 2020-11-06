@@ -14,10 +14,10 @@ export class ActiveChallengeDialog {
         this.backingRect.strokeColor = Phaser.Display.Color.GetColor(255, 255, 255);
         this.backingRect.lineWidth = 4;
 
-        this.title = scene.add.bitmapText(x + 350, y + 5, "courier20", DynamicSettings.instance.challengeName).setOrigin(0.5, 0);
+        this.title = scene.add.bitmapText(x + 350, y + 5, "courier20", DynamicSettings.getInstance().challengeName).setOrigin(0.5, 0);
 
-        var runTime = WorldData.instance.time.time - WorldData.instance.timeAtRunStart;
-        var txt = TooltipRegistry.getChallengeDescription(MoonlightData.instance.getChallengeFromName(DynamicSettings.instance.challengeName));
+        var runTime = WorldData.getInstance().time.time - WorldData.getInstance().timeAtRunStart;
+        var txt = TooltipRegistry.getChallengeDescription(MoonlightData.getInstance().getChallengeFromName(DynamicSettings.getInstance().challengeName));
         txt += "\nCurrent Run Time: " + new WorldTime(runTime).getTimespanText() + "\n\n" +
             "You may abandon this challenge, causing you to gate immediately. You will not get any Moonlight for this run if you abandon.";
         this.desc = scene.add.bitmapText(x + 10, y + 30, "courier20", Common.processText(txt, 70)).setOrigin(0);

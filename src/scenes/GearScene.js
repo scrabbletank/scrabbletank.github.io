@@ -4,9 +4,11 @@ import { GearCraftDisplay } from "../ui/GearCraftDisplay";
 import { Statics } from "../data/Statics";
 import { ProgressionStore } from "../data/ProgressionStore";
 import { GearDisplay } from "../ui/GearDisplay";
-import { Common } from "../utils/Common";
 import { GearData } from "../data/GearData";
 import { PlayerData } from "../data/PlayerData";
+import { GearRuneWindow } from "../ui/GearRuneWindow";
+import { ImageButton } from "../ui/ImageButton";
+import { RuneUpgradeWindow } from "../ui/RuneUpgradeWindow";
 
 export class GearScene extends SceneUIBase {
     constructor(position, name) {
@@ -27,25 +29,28 @@ export class GearScene extends SceneUIBase {
             .setOrigin(0)
             .setInteractive();
 
-        this.allBtn = new TextButton(this, this.relativeX(340), this.relativeY(10), 50, 20, "All");
+        this.runeBtn = new ImageButton(this, this.relativeX(250), this.relativeY(10), 32, 32, { sprite: "runeicons", tile: 0 });
+        this.runeBtn.onClickHandler(() => { this._onRuneUpgradeHandler(); });
+        this.runeBtn.setVisible(ProgressionStore.getInstance().unlocks.runes);
+        this.allBtn = new TextButton(this, this.relativeX(290), this.relativeY(10), 50, 20, "All");
         this.allBtn.onClickHandler(() => { this._changeFilter(-1); });
-        this.tier0Btn = new TextButton(this, this.relativeX(390), this.relativeY(10), 80, 20, "Broken");
+        this.tier0Btn = new TextButton(this, this.relativeX(340), this.relativeY(10), 80, 20, "Broken");
         this.tier0Btn.onClickHandler(() => { this._changeFilter(0); });
-        this.tier1Btn = new TextButton(this, this.relativeX(470), this.relativeY(10), 30, 20, "T1");
+        this.tier1Btn = new TextButton(this, this.relativeX(420), this.relativeY(10), 30, 20, "T1");
         this.tier1Btn.onClickHandler(() => { this._changeFilter(1); });
-        this.tier2Btn = new TextButton(this, this.relativeX(500), this.relativeY(10), 30, 20, "T2");
+        this.tier2Btn = new TextButton(this, this.relativeX(450), this.relativeY(10), 30, 20, "T2");
         this.tier2Btn.onClickHandler(() => { this._changeFilter(2); });
-        this.tier3Btn = new TextButton(this, this.relativeX(530), this.relativeY(10), 30, 20, "T3");
+        this.tier3Btn = new TextButton(this, this.relativeX(480), this.relativeY(10), 30, 20, "T3");
         this.tier3Btn.onClickHandler(() => { this._changeFilter(3); });
-        this.tier4Btn = new TextButton(this, this.relativeX(560), this.relativeY(10), 30, 20, "T4");
+        this.tier4Btn = new TextButton(this, this.relativeX(510), this.relativeY(10), 30, 20, "T4");
         this.tier4Btn.onClickHandler(() => { this._changeFilter(4); });
-        this.tier5Btn = new TextButton(this, this.relativeX(590), this.relativeY(10), 30, 20, "T5");
+        this.tier5Btn = new TextButton(this, this.relativeX(540), this.relativeY(10), 30, 20, "T5");
         this.tier5Btn.onClickHandler(() => { this._changeFilter(5); });
-        this.tier6Btn = new TextButton(this, this.relativeX(620), this.relativeY(10), 30, 20, "T6");
+        this.tier6Btn = new TextButton(this, this.relativeX(570), this.relativeY(10), 30, 20, "T6");
         this.tier6Btn.onClickHandler(() => { this._changeFilter(6); });
-        this.tier7Btn = new TextButton(this, this.relativeX(650), this.relativeY(10), 30, 20, "T7");
+        this.tier7Btn = new TextButton(this, this.relativeX(600), this.relativeY(10), 30, 20, "T7");
         this.tier7Btn.onClickHandler(() => { this._changeFilter(7); });
-        this.tier8Btn = new TextButton(this, this.relativeX(680), this.relativeY(10), 30, 20, "T8");
+        this.tier8Btn = new TextButton(this, this.relativeX(630), this.relativeY(10), 30, 20, "T8");
         this.tier8Btn.onClickHandler(() => { this._changeFilter(8); });
 
         this.prevPageBtn = new TextButton(this, this.relativeX(850), this.relativeY(10), 20, 20, "<")
@@ -69,6 +74,7 @@ export class GearScene extends SceneUIBase {
         switch (type) {
             case Statics.UNLOCK_RESOURCE_UI:
             case Statics.UNLOCK_CRAFTING_UI:
+            case Statics.UNLOCK_RUNES_UI:
                 this._updateTierButtons();
                 this._setupView();
                 break;
@@ -153,42 +159,33 @@ export class GearScene extends SceneUIBase {
         this._setupGearDisplays();
     }
     _onUpgradeHandler(gear) {
-        var craftCostMulti = gear.tier <= 0 ? 1 : this.player.craftingCosts[gear.tier - 1];
-        var res = [];
-        for (var i = 0; i < gear.costs.length; i++) {
-            res.push(gear.costs[i] * craftCostMulti);
-        }
-        if (Common.canCraft(res, this.player.resources[Math.max(0, gear.tier - 1)]) === false) {
-            return;
-        }
-        this.player.spendResource(res, Math.max(0, gear.tier - 1));
-        if (this._isEquipedItem(gear)) {
-            this.player.unequip(gear.slotType);
-            gear.bringToLevel(gear.level + 1);
-            this.player.equip(gear);
-            this._setupGearDisplays();
-        } else {
-            gear.bringToLevel(gear.level + 1);
-        }
-
+        GearData.getInstance().upgradeGear(gear);
+        this._setupGearDisplays();
         this._setupView();
     }
     _onFuseHandler(gear) {
-        if (this.player.motes <= 0) {
-            return;
-        }
-        var wasEquipped = this._isEquipedItem(gear);
-        if (wasEquipped === true) {
-            this.player.unequip(gear.slotType);
-        }
         var motesFused = Math.min(this.player.motes, this.scene.get("DarkWorld").buyAmount);
-        this.player.addMote(-motesFused);
-        gear.motesFused += motesFused;
-        if (wasEquipped === true) {
-            this.player.equip(gear);
-        }
+        GearData.getInstance().fuseGear(gear, motesFused);
+
         this._setupView();
         this._setupGearDisplays();
+    }
+    _onRuneHandler(gear) {
+        this._closeRuneWindow();
+        this.runeWindow = new GearRuneWindow(this, 350, 150, gear);
+        this.runeWindow.onCancelHandler(() => { this._closeRuneWindow(); });
+    }
+    _onRuneUpgradeHandler(gear) {
+        this._closeRuneWindow();
+        this.runeWindow = new RuneUpgradeWindow(this, 350, 150, gear);
+        this.runeWindow.onCancelHandler(() => { this._closeRuneWindow(); });
+    }
+
+    _closeRuneWindow() {
+        if (this.runeWindow !== undefined) {
+            this.runeWindow.destroy();
+            this.runeWindow = undefined;
+        }
     }
 
     _setupView() {
@@ -197,12 +194,13 @@ export class GearScene extends SceneUIBase {
         }
         this.craftDisplays = [];
         for (var i = this.page * 6; i < Math.min(this.gearList.length, this.page * 6 + 6); i++) {
-            var x = this.relativeX(320 + i % 2 * 290);
+            var x = this.relativeX(290 + i % 2 * 305);
             var y = this.relativeY(40 + Math.floor((i - this.page * 6) / 2) * 215);
             this.craftDisplays.push(new GearCraftDisplay(this, x, y, this.gearList[i])
                 .registerEvents("onEquip", (gear) => { this._onEquipHandler(gear); })
                 .registerEvents("onUpgrade", (gear) => { this._onUpgradeHandler(gear); })
-                .registerEvents("onFuse", (gear) => { this._onFuseHandler(gear); }));
+                .registerEvents("onFuse", (gear) => { this._onFuseHandler(gear); })
+                .registerEvents("onRune", (gear) => { this._onRuneHandler(gear); }));
         }
     }
 
