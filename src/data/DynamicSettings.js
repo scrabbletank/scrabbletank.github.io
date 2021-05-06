@@ -6,7 +6,7 @@ export class DynamicSettings {
         if (!DynamicSettings.instance) {
             // min region required for gates
             this.minGateRegion = 0;
-            this.regionSize = [9, 11];
+            this.regionSize = [11, 13];
             this.regionDifficultyIncrease = 20;
             this.maxGearTier = 8;
             this.maxResourceTier = 8;
@@ -19,6 +19,9 @@ export class DynamicSettings {
             this.challengeName = "";
             this.startingTraits = 0;
             this.fixedTraits = [];
+            this.productionMulti = 1;
+            this.spendFriendship = false;
+            this.friendshipToProduction = false;
 
             DynamicSettings.instance = this;
         }
@@ -35,7 +38,7 @@ export class DynamicSettings {
 
     reset() {
         this.minGateRegion = 0;
-        this.regionSize = [9, 11];
+        this.regionSize = [11, 13];
         this.regionDifficultyIncrease = 20;
         this.maxGearTier = 8;
         this.maxResourceTier = 8;
@@ -48,6 +51,9 @@ export class DynamicSettings {
         this.challengeName = "";
         this.startingTraits = 0;
         this.fixedTraits = [];
+        this.productionMulti = 1;
+        this.spendFriendship = false;
+        this.friendshipToProduction = false;
     }
 
     setupChallenge(challenge) {
@@ -56,7 +62,7 @@ export class DynamicSettings {
         switch (challenge.name) {
             case "A Matter of Years":
                 this.minGateRegion = 1;
-                this.maxRunTime = Statics.TIME_PER_YEAR * (9 - challenge.completions * 2);
+                this.maxRunTime = Statics.TIME_PER_YEAR * (5 - challenge.completions);
                 break;
             case "Forged Ahead":
                 this.minGateRegion = 1;
@@ -80,6 +86,12 @@ export class DynamicSettings {
                 this.minGateRegion = 3 + challenge.completions;
                 this.startingTraits = 4 + challenge.completions * 2;
                 break;
+            case "Outcast":
+                this.productionMulti = 0.5 - (challenge.completions * 0.1);
+                this.spendFriendship = true;
+                this.friendshipToProduction = true;
+                this.regionDifficultyIncrease = 40 + (5 * challenge.completions);
+                break;
         }
     }
 
@@ -98,7 +110,10 @@ export class DynamicSettings {
             te: this.talentsEnabled,
             cn: this.challengeName,
             st: this.startingTraits,
-            ft: this.fixedTraits
+            ft: this.fixedTraits,
+            pm: this.productionMulti,
+            sf: this.spendFriendship,
+            ftp: this.friendshipToProduction
         }
 
         return saveObj;
@@ -118,5 +133,8 @@ export class DynamicSettings {
         this.challengeName = saveObj.cn;
         this.startingTraits = saveObj.st;
         this.fixedTraits = saveObj.ft;
+        this.productionMulti = saveObj.pm ? saveObj.pm : 1;
+        this.spendFriendship = saveObj.sf ? saveObj.sf : false;
+        this.friendshipToProduction = saveObj.ftp ? saveObj.ftp : false;
     }
 }

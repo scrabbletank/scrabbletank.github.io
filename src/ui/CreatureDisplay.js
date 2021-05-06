@@ -105,6 +105,9 @@ export class CreatureDisplay {
     setHealthBar(healthPercent, text = "") {
         this.healthBar.setFillPercent(healthPercent, text);
     }
+    setShieldBar(shieldPercent) {
+        this.healthBar.setSecondaryFillPercent(shieldPercent);
+    }
 
     setAttackBar(attackPercent, text = "") {
         this.attackBar.setFillPercent(attackPercent, text);

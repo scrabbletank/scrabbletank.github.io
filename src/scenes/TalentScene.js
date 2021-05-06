@@ -10,6 +10,10 @@ export class TalentScene extends SceneUIBase {
         super(position, name);
     }
 
+    refresh() {
+        this.rebirth();
+    }
+
     rebirth() {
         this.talentLabel.setText("Talent Points\n" + this.player.talentPoints);
 
@@ -40,14 +44,26 @@ export class TalentScene extends SceneUIBase {
 
         this.floatingText = undefined;
         this.talentLabel = this.add.bitmapText(this.relativeX(450), this.relativeY(25), "courier20", "Talent Points\n0", 20, 1).setOrigin(0.5);
+        this.player = new PlayerData();
+        this.talentButtons = [];
 
+        this._refreshView();
+
+        this.player.registerEvent("onTalentChanged", () => { this._onTalentChanged(); });
+    }
+
+    _refreshView() {
         var standardArray = [[264, 288], [312, 240], [360, 216], [408, 192], [456, 216], [504, 240], [552, 288],
         [216, 240], [264, 192], [336, 144], [408, 120], [480, 144], [552, 192], [600, 240],
         [168, 192], [240, 120], [312, 72], [408, 48], [504, 72], [576, 120], [648, 192],
         [408, 312], [480, 384], [336, 384], [408, 456]];
-        this.player = new PlayerData();
 
+        for (var i = 0; i < this.talentButtons.length; i++) {
+            this.talentButtons[i].destroy();
+        }
+        this._disableTooltip();
         this.talentButtons = [];
+
         var idx = 0;
         for (const prop in this.player.talents) {
             var x = this.relativeX(standardArray[idx][0] + 18);
@@ -55,8 +71,6 @@ export class TalentScene extends SceneUIBase {
             this._setupTalentButton(prop, x, y, idx);
             idx++;
         }
-
-        this.player.registerEvent("onTalentChanged", () => { this._onTalentChanged(); });
     }
 
     _setupTalentButton(talentName, x, y, index) {
@@ -65,7 +79,7 @@ export class TalentScene extends SceneUIBase {
                 this._levelUpTalent(this.player.talents[talentName]);
                 this._disableTooltip();
                 this._setTooltip(talentName, x, y);
-                this._updateTalentButton(this.player.talents[talentName], index);
+                this._refreshView();
             })
             .onPointerOverHandler(() => { this._setTooltip(talentName, x, y); })
             .onPointerOutHandler(() => { this._disableTooltip(); }));
@@ -77,6 +91,10 @@ export class TalentScene extends SceneUIBase {
             this.talentButtons[index].setBorderTint(Phaser.Display.Color.GetColor(0, 220, 0));
         } else if (talent.level > 0) {
             this.talentButtons[index].setBorderTint(Phaser.Display.Color.GetColor(212, 175, 55));
+        } else if (this._haveTalentRequirements(talent) === false) {
+            this.talentButtons[index].setTint(Phaser.Display.Color.GetColor(32, 32, 32));
+        } else {
+            this.talentButtons[index].clearTint();
         }
     }
 
@@ -106,7 +124,7 @@ export class TalentScene extends SceneUIBase {
             this._disableTooltip();
         }
         var txt = talent.name + " Lv" + this.player.getTalentLevel(talentName) + "\n" +
-            TooltipRegistry.getTalentTooltip(talent) + "\n\n";
+            TooltipRegistry.getTalentTooltip(talent, this.player.getTalentLevel(talentName)) + "\n\n";
 
         if (talent.requires.length > 0) {
             txt += "Requires: ";
@@ -118,7 +136,9 @@ export class TalentScene extends SceneUIBase {
         this.floatingText = new FloatingTooltip(this, txt, x + (x + 450 > 1100 ? -450 : 0), y + (y > 300 ? -150 : 50), 450, 150, "courier16", 16);
     }
     _disableTooltip() {
-        this.floatingText.destroy();
-        this.floatingText = undefined;
+        if (this.floatingText !== undefined) {
+            this.floatingText.destroy();
+            this.floatingText = undefined;
+        }
     }
 }

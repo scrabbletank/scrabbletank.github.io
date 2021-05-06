@@ -9,6 +9,7 @@ import { PlayerData } from "../data/PlayerData";
 import { GearRuneWindow } from "../ui/GearRuneWindow";
 import { ImageButton } from "../ui/ImageButton";
 import { RuneUpgradeWindow } from "../ui/RuneUpgradeWindow";
+import { WorldData } from "../data/WorldData";
 
 export class GearScene extends SceneUIBase {
     constructor(position, name) {
@@ -58,6 +59,7 @@ export class GearScene extends SceneUIBase {
         this.nextPageBtn = new TextButton(this, this.relativeX(870), this.relativeY(10), 20, 20, ">")
             .onClickHandler(() => { this._nextPage(); });
 
+        this.craftingCostLabel = this.add.bitmapText(this.relativeX(10), this.relativeY(10), "courier16", "Crafting Cost: 100%");
         this.weaponLabel = this.add.bitmapText(this.relativeX(0), this.relativeY(0), "courier20", "Weapon");
         this.armorLabel = this.add.bitmapText(this.relativeX(0), this.relativeY(0), "courier20", "Armor");
         this.trinketLabel = this.add.bitmapText(this.relativeX(0), this.relativeY(0), "courier20", "Trinket");
@@ -77,6 +79,7 @@ export class GearScene extends SceneUIBase {
             case Statics.UNLOCK_RUNES_UI:
                 this._updateTierButtons();
                 this._setupView();
+                this.runeBtn.setVisible(ProgressionStore.getInstance().unlocks.runes);
                 break;
         }
     }
@@ -107,6 +110,13 @@ export class GearScene extends SceneUIBase {
     }
 
     _changeFilter(filter) {
+        if (filter === -1) {
+            this.craftingCostLabel.setText("Crafting Cost: N/A");
+        } else if (filter === 0) {
+            this.craftingCostLabel.setText("Crafting Cost: 100%");
+        } else {
+            this.craftingCostLabel.setText("Crafting Cost: " + (Math.round(this.player.craftingCosts[filter - 1] * 10000) / 100) + "%");
+        }
         var gearData = new GearData();
         this.gearList = [];
         this.page = 0;
@@ -135,8 +145,8 @@ export class GearScene extends SceneUIBase {
         }
         this.gearDisplays = [];
 
-        this.weaponLabel.setPosition(this.relativeX(10), this.relativeY(10));
-        var h = 10 + this.weaponLabel.getTextBounds(true).local.height;
+        this.weaponLabel.setPosition(this.relativeX(10), this.relativeY(30));
+        var h = 35 + this.weaponLabel.getTextBounds(true).local.height;
 
         this.gearDisplays.push(new GearDisplay(this, this.relativeX(20), this.relativeY(h), this.player.weapon));
         h += 20 + this.gearDisplays[0].getTextBounds();
@@ -202,6 +212,12 @@ export class GearScene extends SceneUIBase {
                 .registerEvents("onFuse", (gear) => { this._onFuseHandler(gear); })
                 .registerEvents("onRune", (gear) => { this._onRuneHandler(gear); }));
         }
+    }
+
+    refresh() {
+        this._updateTierButtons();
+        this._setupGearDisplays();
+        this._changeFilter(-1);
     }
 
     rebirth() {

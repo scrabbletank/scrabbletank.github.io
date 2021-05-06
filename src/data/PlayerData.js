@@ -124,7 +124,14 @@ export class PlayerData {
             lootTalent: 0,
             moteChance: 0,
             shadeFlat: 0,
-            regenOnKill: 0
+            regenOnKill: 0,
+            dexToStr: 0,
+            endToRec: 0,
+            agiToDef: 0,
+            allPercent: 0,
+            guardianTalent: 0,
+            governanceTalent: 0,
+            agilityScaling: 0
         }
 
         this.runes = [];
@@ -200,8 +207,10 @@ export class PlayerData {
     }
 
     getExploreMulti() {
-        return (1 + this.runeBonuses.exploreSpeed + this.talents.explorer.level * 0.2) *
-            (1 + Statics.AGI_EXPLORE_MULTI * Math.pow(this.statBlock.Agility(), Statics.AGI_EXPLORE_POWER)) *
+        return (1 + this.talents.explorer.level * 0.2) *
+            (1 + this.runeBonuses.exploreSpeed) *
+            (1 + Statics.AGI_EXPLORE_MULTI * Math.pow(this.statBlock.Agility(), Statics.AGI_EXPLORE_POWER + this.runeBonuses.agilityScaling)) *
+            (1 + MoonlightData.getInstance().moonperks.farstrider.level * 0.1) *
             this.challengeExploreMulti;
     }
 
@@ -255,6 +264,10 @@ export class PlayerData {
                 return this.talents[name].level + this.runeBonuses.accTalents;
             case "bounty":
                 return this.talents[name].level + this.runeBonuses.lootTalent;
+            case "governance":
+                return this.talents[name].level + this.runeBonuses.governanceTalent;
+            case "guardian":
+                return this.talents[name].level + this.runeBonuses.guardianTalent;
         }
         return this.talents[name].level;
     }
@@ -307,6 +320,9 @@ export class PlayerData {
     addMote(amount) {
         this.motes += amount;
         this._onResourcesChanged();
+    }
+    addShade(amount) {
+        this.shade += amount;
     }
 
     addRune(rune) {

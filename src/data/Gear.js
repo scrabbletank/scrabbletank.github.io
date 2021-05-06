@@ -4,24 +4,6 @@ import { Statics } from './Statics';
 
 export class Gear {
     constructor(name, tier, slotType, stats, costs, costsLvl) {
-        // this.statBonuses = {
-        //     health: 0,
-        //     damageMin: 0,
-        //     damageMax: 0,
-        //     strength: 0,
-        //     dexterity: 0,
-        //     agility: 0,
-        //     endurance: 0,
-        //     recovery: 0,
-        //     defense: 0,
-        //     accuracy: 0,
-        //     hit: 0,
-        //     evasion: 0,
-        //     critDamage: 0,
-        //     critChance: 0,
-        //     healthRegen: 0,
-        //     armor: 0
-        // };
         this.tier = tier;
         this.slotType = slotType;
         this.name = name;

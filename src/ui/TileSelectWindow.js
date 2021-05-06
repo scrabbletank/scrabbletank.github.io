@@ -9,6 +9,7 @@ import { WorldData } from "../data/WorldData";
 import { Building } from "../data/Building";
 import { FloatingTooltip } from "./FloatingTooltip";
 import { DynamicSettings } from "../data/DynamicSettings";
+import { MoonlightData } from "../data/MoonlightData";
 
 export class TileSelectWindow {
     constructor(scene, x, y, tile) {
@@ -35,12 +36,13 @@ export class TileSelectWindow {
             txt += "Explored\n" +
                 "Defense: " + Math.floor(tile.defense) + "\n";
         }
-        if (tile.explored === true && tile.yields.length > 0) {
+        var yieldSum = tile.yields.reduce((a, b) => { return a + b; });
+        if (tile.explored === true && yieldSum > 0) {
             txt += "Yields:\n"
             for (var i = 0; i < tile.yields.length; i++) {
-                if (tile.yields[i].rate > 0) {
-                    txt += " " + Statics.RESOURCE_NAMES[tile.yields[i].type] + ": " +
-                        (Math.floor(tile.yields[i].rate * 100) / 100) + "\n";
+                if (tile.yields[i] > 0) {
+                    txt += " " + Statics.RESOURCE_NAMES[i] + ": " +
+                        (Math.floor(tile.yields[i] * 100) / 100) + "\n";
                 }
             }
         }
@@ -58,44 +60,43 @@ export class TileSelectWindow {
             if (tile.building === undefined) {
                 this.buildingLabel = scene.add.bitmapText(x + 180, y + 5, "courier20", "Buildings:");
                 var bld = [];
-                if (tile.yields.length > 0 && tile.roadBuildable === true) {
+                if (yieldSum !== 0 && tile.roadBuildable === true) {
                     bld.push("road");
                 }
                 if (DynamicSettings.getInstance().buildingsAllowed === true) {
-                    for (var i = 0; i < tile.yields.length; i++) {
-                        switch (tile.yields[i].type) {
-                            case Statics.RESOURCE_WOOD:
-                                bld.push("wood");
-                                break;
-                            case Statics.RESOURCE_LEATHER:
-                                bld.push("leather");
-                                break;
-                            case Statics.RESOURCE_METAL:
-                                bld.push("metal");
-                                break;
-                            case Statics.RESOURCE_FIBER:
-                                bld.push("fiber");
-                                break;
-                            case Statics.RESOURCE_STONE:
-                                bld.push("stone");
-                                break;
-                            case Statics.RESOURCE_CRYSTAL:
-                                bld.push("crystal");
-                                break;
-                        }
+                    if (tile.yields[0] > 0) {
+                        bld.push("wood");
+                    }
+                    if (tile.yields[1] > 0) {
+                        bld.push("leather");
+                    }
+                    if (tile.yields[2] > 0) {
+                        bld.push("metal");
+                    }
+                    if (tile.yields[3] > 0) {
+                        bld.push("fiber");
+                    }
+                    if (tile.yields[4] > 0) {
+                        bld.push("stone");
+                    }
+                    if (tile.yields[5] > 0) {
+                        bld.push("crystal");
                     }
                 }
                 if (tile.dockBuildable === true) {
                     bld.push("docks");
                 }
-                if (region.townData.alchemyEnabled === true) {
-                    bld.push("alchemy");
-                }
-                if (tile.yields.length > 0) {
+                if (yieldSum > 0) {
                     if (tile.houseBuildable) {
                         bld.push("house");
                         if (region.townData.getMarketLevel() > 0) {
                             bld.push("market");
+                        }
+                        if (region.townData.alchemyEnabled === true) {
+                            bld.push("alchemy");
+                        }
+                        if (MoonlightData.getInstance().challenges.buildings.completions > 0) {
+                            bld.push("warehouse");
                         }
                     }
                     if (region.townData.getTavernLevel() > 0) {
@@ -170,7 +171,7 @@ export class TileSelectWindow {
                 if (this.floatingText !== undefined) {
                     this.floatingText.destroy();
                 }
-                var descTxt = Common.processText(Building.getTooltip(tile, building.name, building.tier), 24);
+                var descTxt = Common.processText(Building.getTooltip(tile, building.name, building.tier, true), 24);
                 this.floatingText = new ExtendedFloatingTooltip(scene, x + (x + 350 > 1100 ? -350 : 0), y - 150, 350, 150)
                     .addText(5, 5, "courier20", building.name)
                     .addText(230, 5, "courier20", "Costs:")

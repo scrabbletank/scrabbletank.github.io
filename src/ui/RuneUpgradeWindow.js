@@ -30,29 +30,40 @@ export class RuneUpgradeWindow {
         this.upgradeRune.displayHeight = 48;
         this.runeText = [];
 
-        this.upgradeTxt = this.scene.add.bitmapText(this.x + 125, this.y + 330, "courier16",
+        this.upgradeBtn = new TextButton(this.scene, this.x + 20, this.y + 315, 120, 20, "Upgrade");
+        this.upgradeBtn.onClickHandler(() => { this._upgradeRune(); });
+        this.rerollBtn = new TextButton(this.scene, this.x + 20, this.y + 390, 120, 20, "Reroll");
+        this.rerollBtn.onClickHandler(() => { this._rerollRune(); });
+        this.shatterBtn = new TextButton(this.scene, this.x + 20, this.y + 465, 120, 20, "Shatter");
+        this.shatterBtn.onClickHandler(() => { this._shatterRune(); });
+        this.upgradeTxt = this.scene.add.bitmapText(this.x + 125, this.y + 275, "courier16",
             "Empower this rune with\nMotes of Darkness").setOrigin(0.5, 0);
         this.upgradeTxt.setCenterAlign();
-        this.upgradeBtn = new TextButton(this.scene, this.x + 20, this.y + 370, 120, 20, "Upgrade");
-        this.upgradeBtn.onClickHandler(() => { this._upgradeRune(); });
-        this.rerollTxt = this.scene.add.bitmapText(this.x + 125, this.y + 400, "courier16",
+        this.rerollTxt = this.scene.add.bitmapText(this.x + 125, this.y + 345, "courier16",
             "Use Motes to Reforge this\nRune into a different Rune.").setOrigin(0.5, 0);
         this.rerollTxt.setCenterAlign();
-        this.rerollBtn = new TextButton(this.scene, this.x + 20, this.y + 445, 120, 20, "Reroll");
-        this.rerollBtn.onClickHandler(() => { this._rerollRune(); });
-        this.cancelBtn = new TextButton(this.scene, this.x + 575, this.y + 475, 120, 20, "Cancel");
-        this.upgradeCost = this.scene.add.bitmapText(this.x + 205, this.y + 371, "courier16", "").setOrigin(1, 0);
-        this.rerollCost = this.scene.add.bitmapText(this.x + 205, this.y + 446, "courier16", "").setOrigin(1, 0);
-        this.upgradeIcon = this.scene.add.image(x + 220, y + 380, "icons", 39)
+        this.shatterTxt = this.scene.add.bitmapText(this.x + 125, this.y + 420, "courier16",
+            "Shatter this rune for\nMotes of Darkness.").setOrigin(0.5, 0);
+        this.shatterTxt.setCenterAlign();
+        this.upgradeCost = this.scene.add.bitmapText(this.x + 205, this.y + 316, "courier16", "").setOrigin(1, 0);
+        this.rerollCost = this.scene.add.bitmapText(this.x + 205, this.y + 391, "courier16", "").setOrigin(1, 0);
+        this.shatterCost = this.scene.add.bitmapText(this.x + 205, this.y + 466, "courier16", "").setOrigin(1, 0);
+        this.upgradeIcon = this.scene.add.image(x + 220, y + 325, "icons", 39)
         this.upgradeIcon.displayWidth = 20;
         this.upgradeIcon.displayHeight = 20;
-        this.rerollIcon = this.scene.add.image(x + 220, y + 455, "icons", 39)
+        this.rerollIcon = this.scene.add.image(x + 220, y + 400, "icons", 39)
         this.rerollIcon.displayWidth = 20;
         this.rerollIcon.displayHeight = 20;
+        this.shatterIcon = this.scene.add.image(x + 220, y + 475, "icons", 39)
+        this.shatterIcon.displayWidth = 20;
+        this.shatterIcon.displayHeight = 20;
         this.upgradeUI = [
             this.upgradeTxt, this.upgradeBtn, this.rerollTxt, this.rerollBtn,
-            this.upgradeCost, this.rerollCost, this.upgradeIcon, this.rerollIcon
+            this.upgradeCost, this.rerollCost, this.upgradeIcon, this.rerollIcon,
+            this.shatterTxt, this.shatterBtn, this.shatterCost, this.shatterIcon
         ];
+
+        this.cancelBtn = new TextButton(this.scene, this.x + 575, this.y + 475, 120, 20, "Cancel");
 
         this._setupViews();
         for (var i = 0; i < this.upgradeUI.length; i++) {
@@ -76,6 +87,15 @@ export class RuneUpgradeWindow {
         }
         if (this.selectedRune !== -1) {
             this._selectRune(this.selectedRune);
+        } else {
+            for (var i = 0; i < this.runeText.length; i++) {
+                this.runeText[i].destroy();
+            }
+            this.runeText = [];
+            this.upgradeRune.destroy();
+            this.upgradeRune = this.scene.add.image(this.x + 125, this.y + 50, "runeicons", 0).setOrigin(0.5);
+            this.upgradeRune.displayWidth = 48;
+            this.upgradeRune.displayHeight = 48;
         }
     }
 
@@ -108,7 +128,8 @@ export class RuneUpgradeWindow {
 
         var cost = RuneRegistry.getUpgradeCost(rune);
         this.upgradeCost.setText(Common.numberString(cost));
-        this.rerollCost.setText(Common.numberString(cost / 2));
+        this.rerollCost.setText(Common.numberString(Math.floor(cost / 2)));
+        this.shatterCost.setText(Common.numberString(RuneRegistry.getSellCost(rune)));
 
         for (var i = 0; i < this.upgradeUI.length; i++) {
             this.upgradeUI[i].setVisible(true);
@@ -132,6 +153,17 @@ export class RuneUpgradeWindow {
             var newRune = RuneRegistry.getRandomRuneAtLevel(rune.level);
             PlayerData.getInstance().runes[this.selectedRune] = newRune;
             this._setupViews();
+        }
+    }
+    _shatterRune() {
+        var rune = PlayerData.getInstance().runes[this.selectedRune];
+        var cost = RuneRegistry.getSellCost(rune);
+        PlayerData.getInstance().removeRune(this.selectedRune);
+        PlayerData.getInstance().addMote(cost);
+        this.selectedRune = -1;
+        this._setupViews();
+        for (var i = 0; i < this.upgradeUI.length; i++) {
+            this.upgradeUI[i].setVisible(false);
         }
     }
 

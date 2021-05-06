@@ -152,7 +152,7 @@ var RuneWords = {
         }
     },
     Ryn: {
-        dropRate: 20,
+        dropRate: 15,
         getBonus: (level) => {
             return {
                 critChance: 0.01 * level
@@ -160,7 +160,7 @@ var RuneWords = {
         }
     },
     Eld: {
-        dropRate: 20,
+        dropRate: 15,
         getBonus: (level) => {
             return {
                 lootFlat: level
@@ -182,7 +182,7 @@ var RuneWords = {
         }
     },
     Rath: {
-        dropRate: 20,
+        dropRate: 15,
         getBonus: (level) => {
             return {
                 shadeFlat: 10 * level
@@ -190,11 +190,65 @@ var RuneWords = {
         }
     },
     Run: {
-        dropRate: 20,
+        dropRate: 15,
         getBonus: (level) => {
             return {
                 baseAttackSpeed: 0.05 * level
             };
+        }
+    },
+    Chel: {
+        dropRate: 15,
+        getBonus: (level) => {
+            return {
+                dexToStr: 0.01 * level
+            };
+        },
+        Mal: {
+            Myr: {
+                getBonus: (level) => {
+                    return {
+                        allPercent: 0.03 * level
+                    };
+                }
+            }
+        },
+        Rath: {
+            getBonus: (level) => {
+                return {
+                    governanceTalent: 2 * level
+                };
+            }
+        }
+    },
+    Mal: {
+        dropRate: 15,
+        getBonus: (level) => {
+            return {
+                endToRec: 0.01 * level
+            };
+        },
+        Eid: {
+            getBonus: (level) => {
+                return {
+                    agilityScaling: 0.01 * level
+                };
+            }
+        }
+    },
+    Myr: {
+        dropRate: 15,
+        getBonus: (level) => {
+            return {
+                agiToDef: 0.01 * level
+            };
+        },
+        Eid: {
+            getBonus: (level) => {
+                return {
+                    guardianTalent: 2 * level
+                };
+            }
         }
     },
     Tak: {
@@ -327,6 +381,12 @@ export class RuneRegistry {
                 return { sprite: "runeicons", tile: 18 };
             case "Zel":
                 return { sprite: "runeicons", tile: 19 };
+            case "Chel":
+                return { sprite: "runeicons", tile: 20 };
+            case "Mal":
+                return { sprite: "runeicons", tile: 21 };
+            case "Myr":
+                return { sprite: "runeicons", tile: 22 };
         }
         return { sprite: "runeicons", tile: 0 };
     }
@@ -341,6 +401,10 @@ export class RuneRegistry {
     static getUpgradeCost(rune) {
         return Math.round((100 + (Math.floor(Math.pow(rune.level - 1, 1.5)) * 200)) *
             Math.pow(0.93, MoonlightData.getInstance().moonperks.runes3.level));
+    }
+
+    static getSellCost(rune) {
+        return Math.round((100 + (Math.floor(Math.pow(rune.level - 1, 1.5)) * 200)) * 0.2);
     }
 
     static getRandomRuneAtLevel(level) {

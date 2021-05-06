@@ -2,106 +2,74 @@ import { Statics } from "./Statics";
 import { WorldTime } from "./WorldTime";
 
 export class TooltipRegistry {
-    static getTalentTooltip(talent) {
+    static getTalentTooltip(talent, lvl) {
         switch (talent.name) {
             case "Strength":
                 return "Each point of Strength increases your damage more. Increases Damage gained by Strength by " +
-                    (talent.level * 7) + "% + (7%).";
+                    (lvl * 7) + "% + (7%).";
             case "Dexterity":
-                return "Each point of Dexterity gives more Hit. You gain " + (7 + talent.level) + " + (1) Hit per Dexterity.";
+                return "Each point of Dexterity gives more Hit. You gain " + (7 + lvl) + " + (1) Hit per Dexterity.";
             case "Agility":
-                return "Each point of Agility gives more Evasion. You gain " + (7 + talent.level) + " + (1) Evasion per Agility.";
+                return "Each point of Agility gives more Evasion. You gain " + (7 + lvl) + " + (1) Evasion per Agility.";
             case "Endurance":
-                return "Get more health from Endurance. You gain " + (5 + talent.level) + " + (1) max Health per Endurance.";
+                return "Get more health from Endurance. You gain " + (5 + lvl) + " + (1) max Health per Endurance.";
             case "Recovery":
-                return "Heal wounds as fast as you get them! Increases Health Regen from Recovery by " + (talent.level * 8) + "% + (8%).";
+                return "Heal wounds as fast as you get them! Increases Health Regen from Recovery by " + (lvl * 8) + "% + (8%).";
             case "Defense":
-                return "Get more armor from Defense. Increases Armor from Defense by " + (talent.level * 13) + "% + (13%).";
+                return "Get more armor from Defense. Increases Armor from Defense by " + (lvl * 13) + "% + (13%).";
             case "Accuracy":
-                return "Crit even harder. You gain " + (4 + talent.level * 0.5) + "% + (0.5%) Crit Damage per Accuracy.";
+                return "Crit even harder. You gain " + (3 + lvl * 0.5) + " + (0.5) Crit Power per Accuracy.";
             case "Hit":
-                return "Gain even more Hit from all sources. Increase your Hit by " + (talent.level * 4) + "% + (4%).";
+                return "Gain even more Hit from all sources. Increase your Hit by " + (lvl * 4) + "% + (4%).";
             case "Evasion":
-                return "Gain even more Evasion from all sources. Increase your Evasion by " + (talent.level * 4) + "% + (4%).";
+                return "Gain even more Evasion from all sources. Increase your Evasion by " + (lvl * 4) + "% + (4%).";
             case "Critical":
-                return "Everyone loves to crit, so here is some free crit chance. Increase your crit chance by " + (talent.level * 1) + "% + (1%).";
+                return "Everyone loves to crit, so here is some free crit chance. Increase your crit chance by " + (lvl * 1) + "% + (1%).";
             case "Bounty":
                 return "Somehow improves how much loot enemies drop. Increases your perception or something? Gain a " +
-                    (talent.level * 10) + "% + (10%) chance for enemies to drop loot twice.";
+                    (lvl * 10) + "% + (10%) chance for enemies to drop loot twice.";
             case "Explorer":
                 return "If you want to explore fast you gotta go fast. Increases your explore speed by " +
-                    (talent.level * 20) + "% + (20%).";
+                    (lvl * 20) + "% + (20%).";
             case "Cleave":
                 return "Hit everything super hard. You gain a 20% chance your attacks hit an additional target dealing " +
-                    (talent.level * 20) + "% + (20%) of your Strength in damage";
+                    (lvl * 20) + "% + (20%) of your Strength in damage";
             case "Resilient":
                 return "Brush off critical attacks like they were merely normal attacks. When hit by a crit you reduce the damage by " +
-                    (talent.level * 5) + "% + (5%) of your Endurance, to a minimum of 2.";
+                    (lvl * 5) + "% + (5%) of your Endurance, to a minimum of 2.";
             case "Quick Recovery":
                 return "All you need is a quick rest between fights and your good to go. Your Health Regen increases by " +
-                    (talent.level * 25) + "% + (25%) while out of combat.";
+                    (lvl * 25) + "% + (25%) while out of combat.";
             case "Block":
                 return "Your mastery of defense allows you to sometimes block part of a hit, isn't that great? You have a 20% chance to block " +
-                    (talent.level * 25) + " + (25%) of your Defense worth of damage.";
+                    (lvl * 25) + " + (25%) of your Defense worth of damage.";
             case "Stunning Hit":
                 return "Hit them so hard you leave them concussed, causing serious long term damage. Each attack has a " +
-                    (talent.level * 5) + "% + (5%) chance to halt their attack bar for 0.5 seconds.";
+                    (lvl * 5) + "% + (5%) chance to halt their attack bar for 0.5 seconds.";
             case "Follow Through":
                 return "The best attacks are those that are immediately followed by more attacks. After attacking, gives a " +
-                    (talent.level * 5) + "% + (5%) chance that your attack bar starts half full, or half empty if you prefer.";
+                    (lvl * 5) + "% + (5%) chance that your attack bar starts half full, or half empty if you prefer.";
             case "Dodge":
                 return "All the Hit in the world can't touch you some of the time. You automatically dodge every " +
-                    (13 - talent.level) + " - (1) Attacks against you.";
+                    (13 - lvl) + " - (1) Attacks against you.";
             case "Defy Death":
                 return "Have you tried just... not dying? The next time you take lethal damage, you survive at 1 Health. Can be used again after " +
-                    (8 - talent.level) + " - (1) encounters. I didn't even know I tracked encounters!";
+                    (8 - lvl) + " - (1) encounters. I didn't even know I tracked encounters!";
             case "Second Wind":
                 return "All the best heroes are able to get right back to it after a beat down. When you drop below 50% health your " +
-                    "Health Regen is tripled for 10 seconds. Has a " + (80 - talent.level * 10) + " - (10) second cooldown.";
+                    "Health Regen is tripled for 10 seconds. Has a " + (80 - lvl * 10) + " - (10) second cooldown.";
             case "Parry":
-                return "Why block when you can parry? gives a " + (talent.level * 5) + "% + (5%) chance an enemy causes a glancing hit, dealing " +
+                return "Why block when you can parry? gives a " + (lvl * 5) + "% + (5%) chance an enemy causes a glancing hit, dealing " +
                     "half damage. Thats still something, right?";
             case "Double Crit":
                 return "Crit so hard your crits have crits. Gain a chance to crit twice, doubling your crit damage for the attack. Double crit " +
-                    "chance is " + (talent.level * 1) + "% + (1%) of your normal crit chance.";
+                    "chance is " + (lvl * 1) + "% + (1%) of your normal crit chance.";
             case "Guardian":
                 return "Getting invaded while you weren't paying attention sucks. Isn't this supposed to be an idle game? Invasions build up " +
-                    (talent.level * 25) + "% + (25%) slower.";
+                    (lvl * 25) + "% + (25%) slower.";
             case "Governance":
                 return "Spend less time fighting things and more time learning how they can fight for you! Increases economy and production by " +
-                    (talent.level * 4) + "% + (4%). This effect is multiplicative, not additive.";
-        }
-    }
-
-    static getBuildingTooltip(name, tier) {
-        switch (name) {
-            case "Lumberyard":
-                return "Produces " + tier + "x this tile's Wood yield at the end of each day.";
-            case "Hunter's Lodge":
-                return "Produces " + tier + "x this tile's Leather yield at the end of each day.";
-            case "Mine":
-                return "Produces " + tier + "x this tile's Metal yield at the end of each day.";
-            case "Herbalist's Hut":
-                return "Produces " + tier + "x this tile's Fiber yield at the end of each day.";
-            case "Quarry":
-                return "Produces " + tier + "x this tile's Stone yield at the end of each day.";
-            case "Crystal Loom":
-                return "Produces " + tier + "x this tile's Crystal yield at the end of each day.";
-            case "Town House":
-                return "Increases the Town's max population by " + (tier * 5) + ".";
-            case "Watch Tower":
-                return "Increases the defense of all tiles within 2 tiles of this watch tower by " + (tier * 2) + ".";
-            case "Market":
-                return "Increases the Town's economy by 0" + "-" + (tier * 10) + "%, based on distance to " +
-                    "the Town and other Markets. Reaches max bonus at 4 tiles.";
-            case "Tavern":
-                return "Increases the Town's economy by " + (tier * 2) + "% per house adjacent to them.";
-            case "Road":
-                return "Most buildings must be built adjacent to roads. Production buildings get a boost being adjacent to a road, and " +
-                    "produce nothing when more than " + tier + " tiles away.";
-            case "Docks":
-                return "Docks don't need roads and enables roads to be built beside them. Increases gold earned per week by " +
-                    (tier * 2) + ", applied before any economy bonus.";
+                    (lvl * 4) + "% + (4%). This effect is multiplicative, not additive.";
         }
     }
 
@@ -115,7 +83,7 @@ export class TooltipRegistry {
                 return "Each level increases Bounty gold from killing monsters in this region by 10%. The best quest is the " +
                     "one that pays the most.";
             case "Market":
-                return "Unlocks the Market. Once built the Market increases tax income by 0-10% based on distance to " +
+                return "Unlocks the Market. Once built the Market increases tax income by 0-5% based on distance to " +
                     "the Town and other Markets.";
             case "Tavern":
                 return "Everyone Needs a drink. Unlocks the Tavern, combining your two loves, getting more money and people that " +
@@ -178,7 +146,7 @@ export class TooltipRegistry {
             case "Hero's Pouch":
                 return "Increases your gold cap by " + (moonlight.level * 100) + " + (100) per town.";
             case "Night Market":
-                return "Markets increase your economy by 0-" + (7 + moonlight.level) + "% + (1%) based on distance between the Town " +
+                return "Markets increase your economy by 0-" + (5 + moonlight.level) + "% + (1%) based on distance between the Town " +
                     "and other Markets.";
             case "Shadow's Metal":
                 return "Metal yields are increased by " + (moonlight.level * 5) + "% + (5%).";
@@ -197,12 +165,38 @@ export class TooltipRegistry {
             case "Discovery":
                 return "Gain " + (moonlight.level * 10) + " + (10) friendship each time you fully explore a tile.";
             case "Shadow's Chosen":
-                return "Monsters base shade reward increased by " + (moonlight.level * 1) + " + (1). This is added before other multipliers, " +
+                return "Monsters base shade reward increased by " + (moonlight.level * 2) + " + (2). This is added before other multipliers, " +
                     "such as Shadow's Blessing or monster level.";
             case "Corrupted Runes":
                 return "Upgrading and Rerolling Runes costs " + Math.floor(Math.pow(0.93, moonlight.level) * 100) + "% - (~7%) fewer Motes of Darkness.";
             case "Soulbound":
                 return "Gear gains an additional " + (moonlight.level) + "% + (1%) of their base stats every level.";
+            case "Farstrider":
+                return "Your explore speed is increased by " + (moonlight.level * 10) + "% + (10%).";
+            case "Motivated Labor":
+                return "Production is increased by " + (moonlight.level) + "% + (1%) per friendship level.";
+            case "Crown Lands":
+                return "Each explored tile increases your base gold cap by " + (moonlight.level * 2) + " + (2).";
+            case "Mystic Cauldron":
+                return "Alchemy Labs create " + (moonlight.level * 10) + "% + (10%) more resources from the same inputs.";
+            case "Shadow's Harvest":
+                return "Each day you gain " + (moonlight.level * 0.1) + " + (0.1) shade per villager. This bonus is increased by Shadow's Blessing.";
+            case "Shadow Wolf Charm":
+                return "Unlocks the Shadow Wolf Charm trinket which grants Strength and Damage. Available up to tier " + (moonlight.level) + " + (1)";
+            case "Moonlight Circlet":
+                return "Unlocks the Moonlight Circlet trinket which grants Dexterity and Hit. Available up to tier " + (moonlight.level) + " + (1)";
+            case "Moon Treads":
+                return "Unlocks the Moon Treads trinket which grants Agility and Evasion. Available up to tier " + (moonlight.level) + " + (1)";
+            case "Moonstone":
+                return "Unlocks the Moonstone trinket which grants Endurance, Health, and Crit Resistance. Available up to tier " + (moonlight.level) + " + (1)";
+            case "Dreamlight Bracer":
+                return "Unlocks the Dreamlight Bracer trinket which grants Recovery and Health Regen. Available up to tier " + (moonlight.level) + " + (1)";
+            case "Shadow Veil":
+                return "Unlocks the Shadow Veil trinket which grants Defense and Armor. Available up to tier " + (moonlight.level) + " + (1)";
+            case "Nightmare Pendant":
+                return "Unlocks the Nightmare Pendant trinket which grants Accuracy, Crit Chance and Crit Power. Available up to tier " + (moonlight.level) + " + (1)";
+            case "Night Labour":
+                return "Unlocks Night Labour for Towns. When active, villagers gold income is reduced by 50% while all production is increased by " + (moonlight.level * 10) + "% + (10%).";
         }
     }
 
@@ -228,7 +222,7 @@ export class TooltipRegistry {
             case "A Matter of Years":
                 return "Now that you've reached out into the world and understand the basics why not do it again, but faster. As they " +
                     "say, practice makes perfect!\n\n" +
-                    "Restrictions: Reach the 2nd Gate within " + (9 - challenge.completions * 2) + " Years.\n\n" +
+                    "Restrictions: Reach the 2nd Gate within " + (5 - challenge.completions) + " Years.\n\n" +
                     "On First Completion: Unlock new challenges.\n" +
                     "On Every Completion: Increases moonlight earned by 15%\n" +
                     "                     +2 Challenge Points\n\n" +
@@ -280,6 +274,17 @@ export class TooltipRegistry {
                     "                     +5 Challenge Points\n\n" +
                     "Completions: " + challenge.completions + "/" + challenge.maxCompletions + "\n" +
                     "Fastest Time: " + new WorldTime(challenge.fastestTime).getTimespanText();
+            case "Outcast":
+                return "You rely too much on others. Time to learn the true meaning of friendship.\n\n" +
+                    "Restrictions: Building Production reduced by " + (50 + challenge.completions * 10) + "%.\n" +
+                    "              Town Upgrades cost 1 level of friendship.\n" +
+                    "              Region spans " + (40 + (challenge.completions * 5)) + " levels.\n" +
+                    "              Reach Gate " + (5 + challenge.completions) + ".\n\n" +
+                    "On Every Completion: Gain 10% more friendship.\n" +
+                    "                     Friendship tiers scale slightly slower.\n" +
+                    "                     +5 Challenge Points\n\n" +
+                    "Completions: " + challenge.completions + "/" + challenge.maxCompletions + "\n" +
+                    "Fastest Time: " + new WorldTime(challenge.fastestTime).getTimespanText();
         }
     }
 
@@ -296,10 +301,10 @@ export class TooltipRegistry {
             case Statics.TRAIT_QUICK:
                 return "Quick " + trait.level + ": Attack speed is increased by 20%. Has " + trait.level * 25 + "% increased evasion.";
             case Statics.TRAIT_DEADLY:
-                return "Deadly " + trait.level + ": Crit chance is doubled and has " + trait.level * 5 + "% more damage and crit damage.";
+                return "Deadly " + trait.level + ": Crit chance is doubled and has " + trait.level * 5 + "% more damage and crit power.";
             case Statics.TRAIT_SHIELDED:
-                return "Shielded " + trait.level + ": Every 7 seconds gains " + trait.level * 100 + "% of their armor as a shield that " +
-                    "absorbs incoming damage.";
+                return "Shielded " + trait.level + ": Every second gains " + trait.level * 20 + "% of their armor as a shield that " +
+                    "absorbs incoming damage. Crit Resistance is increased 1000% while shielded.";
             case Statics.TRAIT_BESERK:
                 return "Beserk " + trait.level + ": Hit chance is increased by " + trait.level * 20 + "%, health regen by " +
                     trait.level * 10 + "% and has a " + Math.floor(((1 - Math.pow(0.92, trait.level)) * 100)) + "% chance to trigger Follow Through.";
@@ -307,7 +312,7 @@ export class TooltipRegistry {
     }
 
     static getRuneBonusText(prop, value) {
-        var sign = value >= 0 ? "+" : "-";
+        var sign = value >= 0 ? "+" : "";
         switch (prop) {
             case "strPercent":
                 return sign + Math.round(value * 100) + "% Strength";
@@ -354,13 +359,13 @@ export class TooltipRegistry {
             case "hitPercent":
                 return sign + Math.round(value * 100) + "% Hit Chance";
             case "evaPercent":
-                return sign + Math.round(value * 100) + "% Evasoion";
+                return sign + Math.round(value * 100) + "% Evasion";
             case "weaponPercent":
                 return sign + Math.round(value * 100) + "% Gear Damage";
             case "armorPercent":
                 return sign + Math.round(value * 100) + "% Gear Armor";
             case "critPercent":
-                return sign + Math.round(value * 100) + "% Crit Damage";
+                return sign + Math.round(value * 100) + "% Crit Power";
             case "healthPercent":
                 return sign + Math.round(value * 100) + "% Health";
             case "regenPercent":
@@ -384,13 +389,27 @@ export class TooltipRegistry {
             case "lootFlat":
                 return sign + value + " to Loot Dropped";
             case "lootTalent":
-                return sign + Math.round(value * 100) + " Bounty Talent";
+                return sign + value + " Bounty Talent";
             case "moteChance":
                 return sign + (Math.round(value * 1000) / 10) + "% Mote on Kill";
             case "shadeFlat":
                 return sign + value + " Shade per Kill";
             case "regenOnKill":
                 return sign + Math.round(value * 10) / 10 + "s of Regen on Kill";
+            case "dexToStr":
+                return sign + Math.round(value * 100) + "% Dexterity to Strength";
+            case "endToRec":
+                return sign + Math.round(value * 100) + "% Endurance to Recovery";
+            case "agiToDef":
+                return sign + Math.round(value * 100) + "% Agility to Defense";
+            case "allPercent":
+                return sign + Math.round(value * 100) + "% All Attributes";
+            case "governanceTalent":
+                return sign + value + " Governance Talent";
+            case "guardianTalent":
+                return sign + value + " Guardian Talent";
+            case "agilityScaling":
+                return sign + Math.round(value * 100) + " Agility Explore Scaling";
         }
         return "";
     }

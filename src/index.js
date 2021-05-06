@@ -5,7 +5,7 @@ var gameScene = new GameScene([200, 200], "DarkWorld");
 
 var config = {
     type: Phaser.AUTO,
-    parent: 'phaser-example',
+    parent: 'gameCanvas',
     width: 1100,
     height: 800,
     pixelArt: true,

@@ -17,7 +17,7 @@ import { TownData } from './TownData';
 import { PlayerData } from './PlayerData';
 import { MoonlightData } from './MoonlightData';
 import { RegionRegistry } from './RegionRegistry';
-import { Building } from './Building';
+import { Building, BuildingTypes } from './Building';
 import { DynamicSettings } from './DynamicSettings';
 import { BuildingRegistry } from './BuildingRegistry';
 import { WorldData } from './WorldData';
@@ -109,33 +109,6 @@ export class TileData {
         var d = Math.min(1, (Math.max(0, difficulty - baseDifficulty) / maxDiff));
         this.borderColor = [255, 255 - (d > 0.5 ? 255 * (d - 0.5) * 2 : 0), 255 - Math.min(255, (255 * d * 2))];
         this.yields = [];
-        for (var i = 0; i < tileType.yields.length; i++) {
-            var rate = tileType.yields[i].rate;
-            switch (tileType.yields[i].type) {
-                case Statics.RESOURCE_METAL:
-                    rate = rate * (1 + MoonlightData.getInstance().moonperks.metal.level * 0.05);
-                    break;
-                case Statics.RESOURCE_LEATHER:
-                    rate = rate * (1 + MoonlightData.getInstance().moonperks.leather.level * 0.05);
-                    break;
-                case Statics.RESOURCE_FIBER:
-                    rate = rate * (1 + MoonlightData.getInstance().moonperks.fiber.level * 0.05);
-                    break;
-                case Statics.RESOURCE_STONE:
-                    rate = rate * (1 + MoonlightData.getInstance().moonperks.stone.level * 0.05);
-                    break;
-                case Statics.RESOURCE_WOOD:
-                    rate = rate * (1 + MoonlightData.getInstance().moonperks.wood.level * 0.05);
-                    break;
-                case Statics.RESOURCE_CRYSTAL:
-                    rate = rate * (1 + MoonlightData.getInstance().moonperks.crystal.level * 0.05);
-                    break;
-            }
-            this.yields.push({
-                type: tileType.yields[i].type,
-                rate: rate
-            });
-        }
         this.parent = region;
     }
 
@@ -194,20 +167,22 @@ export class TileData {
             var min = this.difficulty < 30 ? 1 : 2;
             var max = (this.difficulty < 5 ? 2 : 3) + (this.difficulty > 15 ? 1 : 0)
             var numCreatures = this.difficulty > 0 ? Common.randint(min, max) : 1;
-
             for (var i = 0; i < numCreatures; i++) {
                 var num = Common.randint(0, this.enemies.length);
                 enemyList.push(CreatureRegistry.GetCreatureByName(this.enemies[num], this.difficulty));
-                if (MoonlightData.getInstance().moonperks.direbeasts.level > 0) {
-                    if (Math.random() < 0.05) {
-                        enemyList[i].addTrait("Dire", 1);
-                    }
-                }
-                for (var t = 0; t < this.parent.traits.length; t++) {
-                    enemyList[i].addTrait(this.parent.traits[t].type, this.parent.traits[t].level);
-                }
-                enemyList[i].applyTraits();
             }
+        }
+
+        for (var i = 0; i < enemyList.length; i++) {
+            if (enemyList[i].level > 100) {
+                if (Math.random() < 0.05) {
+                    enemyList[i].addTrait("Dire", 1);
+                }
+            }
+            for (var t = 0; t < this.parent.traits.length; t++) {
+                enemyList[i].addTrait(this.parent.traits[t].type, this.parent.traits[t].level);
+            }
+            enemyList[i].applyTraits();
         }
 
 
@@ -225,6 +200,7 @@ export class Region {
         this.roads = [];
         this.markets = [];
         this.productionBuildings = [];
+        this.warehouses = [];
         this.alchemyDrain = 0;
         this.alchemyGain = 0;
 
@@ -319,10 +295,39 @@ export class Region {
             }
             region.map.push(row);
         }
+        // yields for a tile are based on their surrounding tiles
+        for (var i = 0; i < region.height; i++) {
+            for (var t = 0; t < region.width; t++) {
+                region.map[i][t].yields = region._getTileYields(t, i);
+            }
+        }
 
         region._init();
 
         return region;
+    }
+
+    _getTileYields(px, py) {
+        // we use the tile yields as a mask to determine which yields we should add for a given tile
+        var yieldMask = RegionRegistry.TILE_TYPES[this.map[py][px].regName].yields;
+        var yields = [0, 0, 0, 0, 0, 0];
+        for (var y = Math.max(0, py - 1); y < Math.min(this.height, py + 2); y++) {
+            for (var x = Math.max(0, px - 1); x < Math.min(this.width, px + 2); x++) {
+                for (var i = 0; i < yields.length; i++) {
+                    if (yieldMask[i] === 0) {
+                        continue;
+                    }
+                    yields[i] += RegionRegistry.TILE_TYPES[this.map[y][x].regName].yields[i] * Statics.TILE_YIELD_SHARING;
+                }
+            }
+        }
+        yields[0] = yields[0] * (1 + MoonlightData.getInstance().moonperks.wood.level * 0.05);
+        yields[1] = yields[1] * (1 + MoonlightData.getInstance().moonperks.leather.level * 0.05);
+        yields[2] = yields[2] * (1 + MoonlightData.getInstance().moonperks.metal.level * 0.05);
+        yields[3] = yields[3] * (1 + MoonlightData.getInstance().moonperks.fiber.level * 0.05);
+        yields[4] = yields[4] * (1 + MoonlightData.getInstance().moonperks.stone.level * 0.05);
+        yields[5] = yields[5] * (1 + MoonlightData.getInstance().moonperks.crystal.level * 0.05);
+        return yields;
     }
 
     generateTerrain(pointList) {
@@ -379,7 +384,7 @@ export class Region {
         }
 
         //find a place to put the mystic gate, either randomly in a spot max difficulty or above, or at highest difficulty place otherwise
-        var gatePos;
+        var gatePos = [-1, -1];
         if (this.regionLevel >= DynamicSettings.getInstance().minGateRegion) {
             var mysticGateSpots = [];
             var max = 0;
@@ -429,6 +434,13 @@ export class Region {
             }
         }
 
+        // yields for a tile are based on their surrounding tiles
+        for (var i = 0; i < this.height; i++) {
+            for (var t = 0; t < this.width; t++) {
+                this.map[i][t].yields = this._getTileYields(t, i);
+            }
+        }
+
         this.map[townPoint[1]][townPoint[0]].init("town", minDiff, minDiff, this);
         this.map[townPoint[1]][townPoint[0]].building = BuildingRegistry.getBuildingByName("town");
         this.placeBuilding(townPoint[0], townPoint[1], BuildingRegistry.getBuildingByName("town"));
@@ -461,6 +473,7 @@ export class Region {
     exploreTile(x, y) {
         if (this.map[y][x].revealed === true && this.map[y][x].explored !== true) {
             this.tilesExplored += 1;
+            this.townData.setTilesExplored(this.tilesExplored);
             this.map[y][x].explored = true;
             this.townData.addFriendship(10 * MoonlightData.getInstance().moonperks.discovery.level);
             if (this.map[y][x].hasRune === true) {
@@ -512,6 +525,7 @@ export class Region {
         }
         this.townData.currentPopulation = this.townData.currentPopulation * Statics.POP_MULTI_AFTER_INVASION;
         this.tilesExplored -= 1;
+        this.townData.setTilesExplored(this.tilesExplored);
         this.endSighting(tile[1], tile[0]);
     }
 
@@ -566,11 +580,13 @@ export class Region {
             (x > 0 && this.map[y][x - 1].name != this.map[y][x].name) ||
             (x < this.width - 1 && this.map[y][x + 1].name != this.map[y][x].name));
     }
+
     _init() {
         this.roads = [];
         this.markets = [{ x: Math.floor(this.width / 2), y: this.height - 3 }];
         this.taverns = [];
         this.productionBuildings = [];
+        this.warehouses = [];
 
         for (var i = 0; i < this.height; i++) {
             for (var t = 0; t < this.width; t++) {
@@ -581,6 +597,8 @@ export class Region {
                         this.markets.push({ x: t, y: i });
                     } else if (this.map[i][t].building.name === "Tavern") {
                         this.taverns.push([i, t]);
+                    } else if (this.map[i][t].building.name === "Warehouse") {
+                        this.warehouses.push([i, t]);
                     } else if (this.map[i][t].building.name !== "Town House") {
                         this.productionBuildings.push([i, t]);
                     }
@@ -592,6 +610,30 @@ export class Region {
         }
 
         this._calculateTileBonuses();
+    }
+
+    _getBuildingEfficiency(px, py, potential = false) {
+        let bldCount = potential === false ? 0 : 1;
+        for (var y = Math.max(0, py - 1); y < Math.min(this.height, py + 2); y++) {
+            for (var x = Math.max(0, px - 1); x < Math.min(this.width, px + 2); x++) {
+                if (this.map[y][x].building !== undefined) {
+                    switch (this.map[y][x].building.buildingType) {
+                        case BuildingTypes.PRODUCTION:
+                            bldCount += 1;
+                            break;
+                        case BuildingTypes.ECON:
+                        case BuildingTypes.OTHER:
+                            bldCount += 0.30;
+                            break;
+                        case BuildingTypes.HOUSE:
+                            bldCount += 0.15;
+                        default:
+                            break;
+                    }
+                }
+            }
+        }
+        return Math.pow(Statics.PRODUCTION_EFFICIENCY_MULT, bldCount - 1);
     }
 
     _calculateTileBonuses() {
@@ -640,7 +682,7 @@ export class Region {
 
         //get market bonuses
         for (var i = 1; i < this.markets.length; i++) {
-            var max = 10 + MoonlightData.getInstance().moonperks.nightmarket.level;
+            var max = 5 + MoonlightData.getInstance().moonperks.nightmarket.level;
             var tier = this.map[this.markets[i].y][this.markets[i].x].building.tier;
             var closest = Common.nearestPointInList(this.markets[i].x, this.markets[i].y, this.markets, true);
             econBonus += Math.max(0, Math.min(max, (closest[1] / Statics.TRADE_HOUSE_MAX_DISTANCE) * max)) * tier / 100;
@@ -661,6 +703,16 @@ export class Region {
             }
             econBonus += bonus * tier;
         }
+        //warehouses add to road bonus for all adjacent buildings
+        for (var i = 1; i < this.warehouses.length; i++) {
+            var bonus = this.map[this.warehouses[i][0]][this.warehouses[i][1]].building.tier * 0.15;
+            for (var y = Math.max(0, this.warehouses[i][0] - 1); y < Math.min(this.height, this.warehouses[i][0] + 2); y++) {
+                for (var x = Math.max(0, this.warehouses[i][1] - 1); x < Math.min(this.width, this.warehouses[i][1] + 2); x++) {
+                    this.map[y][x].roadBonus += bonus;
+                }
+            }
+        }
+
         //calculate production bonuses of some prod buildings
         var dockBonus = [1, 1.25, 1.5, 1.75, 2];
         for (var i = 0; i < this.productionBuildings.length; i++) {
@@ -698,31 +750,26 @@ export class Region {
         for (var i = 0; i < this.productionBuildings.length; i++) {
             var tile = this.map[this.productionBuildings[i][0]][this.productionBuildings[i][1]];
             var prodBonus = 1 + (tile.defense * MoonlightData.getInstance().moonperks.moonlightworkers.level * 0.01);
-            prodBonus = prodBonus * (1 + MoonlightData.getInstance().challenges.buildings.completions);
+            prodBonus = prodBonus * (1 + MoonlightData.getInstance().challenges.buildings.completions) *
+                this._getBuildingEfficiency(tile.x, tile.y) * tile.roadBonus;
             switch (tile.building.name) {
                 case "Lumberyard":
-                    this.resourcesPerDay[Statics.RESOURCE_WOOD] += tile.building.tier * Common.yieldHelper(Statics.RESOURCE_WOOD, tile.yields) *
-                        prodBonus * tile.roadBonus;
+                    this.resourcesPerDay[Statics.RESOURCE_WOOD] += tile.building.tier * tile.yields[0] * prodBonus;
                     break;
                 case "Hunter's Lodge":
-                    this.resourcesPerDay[Statics.RESOURCE_LEATHER] += tile.building.tier * Common.yieldHelper(Statics.RESOURCE_LEATHER, tile.yields) *
-                        prodBonus * tile.roadBonus;
+                    this.resourcesPerDay[Statics.RESOURCE_LEATHER] += tile.building.tier * tile.yields[1] * prodBonus;
                     break;
                 case "Mine":
-                    this.resourcesPerDay[Statics.RESOURCE_METAL] += tile.building.tier * Common.yieldHelper(Statics.RESOURCE_METAL, tile.yields) *
-                        prodBonus * tile.roadBonus;
+                    this.resourcesPerDay[Statics.RESOURCE_METAL] += tile.building.tier * tile.yields[2] * prodBonus;
                     break;
                 case "Herbalist's Hut":
-                    this.resourcesPerDay[Statics.RESOURCE_FIBER] += tile.building.tier * Common.yieldHelper(Statics.RESOURCE_FIBER, tile.yields) *
-                        prodBonus * tile.roadBonus;
+                    this.resourcesPerDay[Statics.RESOURCE_FIBER] += tile.building.tier * tile.yields[3] * prodBonus;
                     break;
                 case "Quarry":
-                    this.resourcesPerDay[Statics.RESOURCE_STONE] += tile.building.tier * Common.yieldHelper(Statics.RESOURCE_STONE, tile.yields) *
-                        prodBonus * tile.roadBonus;
+                    this.resourcesPerDay[Statics.RESOURCE_STONE] += tile.building.tier * tile.yields[4] * prodBonus;
                     break;
                 case "Crystal Loom":
-                    this.resourcesPerDay[Statics.RESOURCE_CRYSTAL] += tile.building.tier * Common.yieldHelper(Statics.RESOURCE_CRYSTAL, tile.yields) *
-                        prodBonus * tile.roadBonus;
+                    this.resourcesPerDay[Statics.RESOURCE_CRYSTAL] += tile.building.tier * tile.yields[5] * prodBonus;
                     break;
                 case "Docks":
                     this.townData.buildingIncome += 2 * tile.building.tier;
@@ -773,6 +820,9 @@ export class Region {
             case "Town":
                 this.roads.push([tile.y, tile.x]);
                 break;
+            case "Warehouse":
+                this.warehouses.push([tile.y, tile.x]);
+                break;
         }
     }
     _removeBuilding(tile) {
@@ -809,6 +859,9 @@ export class Region {
                 break;
             case "Road":
                 this.roads = this.roads.filter(p => p[1] !== tile.x || p[0] !== tile.y);
+                break;
+            case "Warehouse":
+                this.warehouses = this.warehouses.filter(p => p[1] !== tile.x || p[0] !== tile.y);
                 break;
         }
     }
@@ -870,10 +923,11 @@ export class Region {
 
         //add resources from buildings here
         var resource = [];
-        var govBonus = 1 + player.getTalentLevel("governance") * 0.04;
+        var prodBonus = this.townData.getProductionMulti() *
+            (1 + player.getTalentLevel("governance") * 0.04);
         var tier = Math.min(this.regionLevel, 8);
         for (var i = 0; i < this.resourcesPerDay.length; i++) {
-            resource.push(Math.max(0, this.resourcesPerDay[i] * this.townData.productionMulti * govBonus));
+            resource.push(Math.max(0, this.resourcesPerDay[i] * prodBonus));
         }
         player.addResource(resource, tier);
 
@@ -881,12 +935,13 @@ export class Region {
         // If there are not enough resources to drain, production is scaled proportionally across all alchemy labs
         if (this.alchemyDrain > 0) {
             var resource = [];
+            var moonlightBonus = 1 + (MoonlightData.getInstance().moonperks.mysticcauldron.level * 0.1);
             for (var i = 0; i < player.resources[tier].length; i++) {
                 resource.push(Math.min(this.alchemyDrain, player.resources[tier][i]));
             }
             player.spendResource(resource, tier);
             for (var i = 0; i < player.resources[tier].length; i++) {
-                resource[i] = (resource[i] / this.alchemyDrain) * this.alchemyGain;
+                resource[i] = (resource[i] / this.alchemyDrain) * this.alchemyGain * moonlightBonus;
             }
             player.addResource(resource, Math.min(tier + 1, 8));
         }

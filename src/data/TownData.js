@@ -1,8 +1,8 @@
 import { PlayerData } from "./PlayerData";
 import { Statics } from "./Statics";
-import { ProgressionStore } from "./ProgressionStore";
 import { WorldData } from "./WorldData";
 import { MoonlightData } from "./MoonlightData";
+import { DynamicSettings } from "./DynamicSettings";
 
 export class TownData {
     static getTechGoldCost(tech, tier) {
@@ -24,6 +24,11 @@ export class TownData {
             ret.push(Math.floor(((aGold + bGold + cGold) / 5) * tGold) * 5);
         }
         return ret;
+    }
+    static calcFriendshipToLevel(level) {
+        var scalePower = Statics.FRIENDSHIP_POWER - (0.015 * MoonlightData.getInstance().challenges.outcast.completions);
+        return Statics.FRIENDSHIP_BASE + Math.floor(Math.pow(level * Statics.FRIENDSHIP_FLAT, scalePower) /
+            Statics.FRIENDSHIP_FLAT) * Statics.FRIENDSHIP_FLAT;
     }
 
     constructor(tier) {
@@ -47,6 +52,8 @@ export class TownData {
         this.friendship = 0;
         this.friendshipLevel = 0;
         this.friendshipToNext = 25;
+        this.tilesExplored = 0;
+        this.nightLabourActive = false;
 
         this.buildings = {
             forge: {
@@ -131,7 +138,9 @@ export class TownData {
     }
     getGoldCap() {
         var player = new PlayerData();
-        return (this.currentPopulation * Statics.GOLDCAP_PER_POP + this.goldCapBonus) * this.economyMulti * (1 + player.getTalentLevel("governance") * 0.04);
+        var exploreBonus = MoonlightData.getInstance().moonperks.crownlands.level * 2;
+        return (this.currentPopulation * Statics.GOLDCAP_PER_POP + this.goldCapBonus + exploreBonus) *
+            this.economyMulti * (1 + player.getTalentLevel("governance") * 0.04);
     }
     getMaxPopulation() {
         return this.maxPopulation + this.tavernPopulation;
@@ -145,21 +154,53 @@ export class TownData {
     setTavernPopulation(pop) {
         this.tavernPopulation = pop;
     }
+    setTilesExplored(explored) {
+        this.tilesExplored = explored;
+    }
+    getProductionMulti() {
+        var nightLabourBonus = this.nightLabourActive === true ? (1 + 0.1 * MoonlightData.getInstance().moonperks.nightlabour.level) : 1;
+        var multi = this.productionMulti *
+            (1 + this.friendshipLevel * 0.01 * MoonlightData.getInstance().moonperks.motivatedlabor.level) *
+            nightLabourBonus * DynamicSettings.getInstance().productionMulti;
+        if (DynamicSettings.getInstance().friendshipToProduction === true) {
+            return multi + this.friendshipLevel * 0.05;
+        } else {
+            return multi;
+        }
+    }
 
     addFriendship(value) {
         this.friendship += value;
         if (this.friendship >= this.friendshipToNext) {
             this.friendshipLevel += 1;
-            this._calcFriendshipToNext();
+            this.friendshipToNext = TownData.calcFriendshipToLevel(this.friendshipLevel);
+        }
+    }
+    spendFriendship(value) {
+        this.friendship = Math.max(0, this.friendship - value);
+        for (var i = 0; i < this.friendshipLevel; i++) {
+            var temp = TownData.calcFriendshipToLevel(i);
+            if (this.friendship < temp) {
+                this.friendshipLevel = i;
+                this.friendshipToNext = temp;
+                break;
+            }
         }
     }
     getFriendshipBonus() {
         return 1 + (this.friendshipLevel * Statics.FRIENDSHIP_SHADE_BONUS);
     }
-    _calcFriendshipToNext() {
-        this.friendshipToNext = Statics.FRIENDSHIP_BASE + Math.floor(Math.pow(this.friendshipLevel * Statics.FRIENDSHIP_FLAT, Statics.FRIENDSHIP_POWER) /
-            Statics.FRIENDSHIP_FLAT) * Statics.FRIENDSHIP_FLAT;
+    toggleNightLabour() {
+        if (this.nightLabourActive === true) {
+            this.baseIncome = Statics.BASE_TAX_INCOME + moonData.moonperks.vault.level * 0.1;
+            this.nightLabourActive = false;
+        } else {
+            this.baseIncome = (Statics.BASE_TAX_INCOME + moonData.moonperks.vault.level * 0.1) / 2;
+            this.nightLabourActive = true;
+        }
     }
+
+
     endOfDay() {
 
     }
@@ -168,6 +209,8 @@ export class TownData {
         if (this.townExplored === true) {
             this.currentPopulation = Math.min(this.getMaxPopulation(), this.currentPopulation * Statics.POPULATION_GROWTH);
             PlayerData.getInstance().addGold(this.getTownIncome());
+            PlayerData.getInstance().addShade(this.currentPopulation * 0.1 *
+                MoonlightData.getInstance().moonperks.shadow3.level);
         }
     }
 
@@ -196,7 +239,8 @@ export class TownData {
             re: this.researchEnabled,
             fr: this.friendship,
             frl: this.friendshipLevel,
-            alc: this.alchemyEnabled
+            alc: this.alchemyEnabled,
+            tl: this.tilesExplored
         }
 
         return saveObj;
@@ -216,7 +260,8 @@ export class TownData {
         this.friendship = saveObj.fr;
         this.friendshipLevel = saveObj.frl;
         this.alchemyEnabled = saveObj.alc;
-        this._calcFriendshipToNext();
+        this.tilesExplored = saveObj.tl ? saveObj.tl : 0;
+        this.friendshipToNext = TownData.calcFriendshipToLevel(this.friendshipLevel);
         for (var i = 0; i < saveObj.bld.length; i++) {
             this.buildings[saveObj.bld[i][0]].level = saveObj.bld[i][1];
         }

@@ -7,9 +7,7 @@ import { Common } from "../utils/Common";
 import { TileSelectWindow } from "../ui/TileSelectWindow";
 import { PlayerData } from "../data/PlayerData";
 import { RebirthDialog } from "../ui/RebirthDialog";
-import { MoonlightData } from "../data/MoonlightData";
 import { TextButton } from "../ui/TextButton";
-import { DynamicSettings } from "../data/DynamicSettings";
 
 var toPhaserColor = (clr) => { return Phaser.Display.Color.GetColor(clr[0], clr[1], clr[2]); };
 
@@ -22,8 +20,8 @@ export class RegionScene extends SceneUIBase {
         this.tileClickHandlers = [];
         var worldData = new WorldData();
         this.region = worldData.getCurrentRegion();
-        this.offsetX = 380 - this.region.width * this.WIDTH / 2;
-        this.offsetY = 350 - this.region.height * this.HEIGHT / 2;
+        this.offsetX = 360 - this.region.width * this.WIDTH / 2;
+        this.offsetY = 370 - this.region.height * this.HEIGHT / 2;
 
         this.progression = new ProgressionStore();
         this.letters = ['A', 'B', 'C', 'D', 'E', 'F', 'G', 'H', 'I', 'J', 'K', 'L', 'M', 'N', 'O', 'P', 'Q'];
@@ -37,6 +35,10 @@ export class RegionScene extends SceneUIBase {
 
         this.upgradeKey = undefined;
         this.hoveredTile = [-1, -1];
+        this.regionTiles = [];
+        this.regionStats = undefined;
+
+        WorldData.getInstance().onRegionChanged(() => { this._onRegionChanged(); });
     }
 
     preload() {
@@ -52,6 +54,47 @@ export class RegionScene extends SceneUIBase {
     _handleProgressionEvent(type, __count, __text) {
         if (type === Statics.UNLOCK_BUILDING_UI) {
             this.invasionLabel.setVisible(true);
+        }
+    }
+
+    _setupRegionButton(idx, x, y) {
+        return new TextButton(this, x, y, 20, 20, (idx + 1) + "").onClickHandler(() => {
+            WorldData.getInstance().setCurrentRegion(idx);
+            this.scene.get("DarkWorld").changeRegion();
+            this.scene.get("RegionScene").changeRegion();
+            this.scene.get("TownScene").changeRegion();
+        });
+    }
+
+    _onRegionChanged() {
+        for (var i = 0; i < this.regionTiles.length; i++) {
+            this.regionTiles[i].destroy();
+        }
+        this.regionTiles = [];
+
+        if (WorldData.getInstance().regionList.length > 1) {
+            this.regionTiles.push(this.add.bitmapText(this.relativeX(660), this.relativeY(10), "courier20", "Regions:"));
+            for (var i = 0; i < WorldData.getInstance().regionList.length; i++) {
+                var x = this.relativeX(660 + i * 20);
+                var y = this.relativeY(35);
+                this.regionTiles.push(this._setupRegionButton(i, x, y));
+            }
+        }
+    }
+
+    _updateRegionStats() {
+        if (this.regionStats !== undefined) {
+            this.regionStats.destroy();
+        }
+
+        if (this.region.townData.townExplored === true) {
+            var prodBonus = this.region.townData.getProductionMulti();
+            var govBonus = (1 + PlayerData.getInstance().getTalentLevel("governance") * 0.04);
+            var txt = "Daily Production:\n"
+            for (var i = 0; i < this.region.resourcesPerDay.length; i++) {
+                txt += " " + Statics.RESOURCE_NAMES[i] + ": " + (Math.floor(this.region.resourcesPerDay[i] * prodBonus * govBonus * 100) / 100) + "\n";
+            }
+            this.regionStats = this.add.bitmapText(this.relativeX(660), this.relativeY(220), "courier20", txt);
         }
     }
 
@@ -163,7 +206,7 @@ export class RegionScene extends SceneUIBase {
         }
         this.region.map[y][x].amountExplored = this.region.map[y][x].explorationNeeded;
         this.region.exploreTile(x, y);
-        this.scene.get("DarkWorld").changeRegion();
+        this.scene.get("DarkWorld").townButton.setVisible(true);
     }
 
     _handleTileClick(x, y) {
@@ -215,6 +258,7 @@ export class RegionScene extends SceneUIBase {
                     blob.tile.building = blob.building;
                     this.scene.get("TownScene")._updateStatus();
                 }
+                this._updateRegionStats();
                 break;
             case "upgrade":
                 var player = new PlayerData();
@@ -228,12 +272,15 @@ export class RegionScene extends SceneUIBase {
                         blob.tile.building.texture.tile + 8 * (blob.tile.building.tier - 1));
                     this.scene.get("TownScene")._updateStatus();
                 }
+                this._updateRegionStats();
                 break;
             case "destroy":
                 if (PlayerData.instance.gold >= blob.tile.building.tier * Statics.DESTROY_BUILDING_COST) {
                     PlayerData.instance.addGold(-blob.tile.building.tier * Statics.DESTROY_BUILDING_COST);
                     this.region.destroyBuilding(blob.tile.x, blob.tile.y);
                 }
+                this._updateRegionStats();
+                break;
         }
         if (this.tileSelectWindow !== undefined) {
             this.tileSelectWindow.destroy();
@@ -312,6 +359,7 @@ export class RegionScene extends SceneUIBase {
     }
 
     _updateTile(tile) {
+        this.scene.get("TownScene").updateResearchButton();
         var clr = toPhaserColor(tile.color);
         var border = toPhaserColor(tile.borderColor);
         if (tile.revealed === false) {
@@ -365,6 +413,10 @@ export class RegionScene extends SceneUIBase {
         }
     }
 
+    refresh() {
+        this.rebirth();
+    }
+
     changeRegion() {
         this.rebirth();
     }
@@ -375,6 +427,9 @@ export class RegionScene extends SceneUIBase {
         this.region = WorldData.instance.getCurrentRegion();
         this.region.onTileChanged((x) => { this._updateTile(x); });
         this.region.onSighting((x) => { this.scene.get("DarkWorld").notifyRegion(); });
+        this.offsetX = 360 - this.region.width * this.WIDTH / 2;
+        this.offsetY = 370 - this.region.height * this.HEIGHT / 2;
+
         for (var i = 0; i < this.tileElements.length; i++) {
             for (var t = 0; t < this.tileElements[0].length; t++) {
                 this.tileElements[i][t].rect.destroy();
@@ -382,6 +437,9 @@ export class RegionScene extends SceneUIBase {
                     this.tileElements[i][t].building.destroy();
                 }
             }
+        }
+        for (var i = 0; i < this.guides.length; i++) {
+            this.guides[i].destroy();
         }
         this.tileElements = [];
         for (var i = 0; i < this.region.height; i++) {
@@ -391,11 +449,24 @@ export class RegionScene extends SceneUIBase {
             }
             this.tileElements.push(row);
         }
+
+        // X/Y GUIDES
+        this.guides = [];
+        for (var i = 0; i < this.region.height; i++) {
+            this.guides.push(this.add.bitmapText(this.relativeX(this.offsetX - this.WIDTH / 2),
+                this.relativeY(this.offsetY + ((i + 0.5) * this.HEIGHT)), "courier20", this.letters[i]).setOrigin(0.5));
+        }
+        for (var i = 0; i < this.region.width; i++) {
+            this.guides.push(this.add.bitmapText(this.relativeX(this.offsetX + ((i + 0.5) * this.WIDTH)),
+                this.relativeY(this.offsetY - this.HEIGHT / 2), "courier20", "" + (i + 1)).setOrigin(0.5));
+        }
+
         var invasionPercent = this.region.invasionCounter / Statics.INVASION_THRESHOLD;
         this.invasionLabel.setText("Invasion\n" + Math.floor(invasionPercent * 100) + "%");
         this.invasionLabel.setVisible(this.progression.unlocks.buildings);
         this.autoExploreLabel.setVisible(this.progression.persistentUnlocks.autoExplore);
         this.autoExploreButton.setVisible(this.progression.persistentUnlocks.autoExplore);
+        this._updateRegionStats();
     }
 
     _toggleAutoExplore() {
@@ -449,13 +520,14 @@ export class RegionScene extends SceneUIBase {
             this.tileElements.push(row);
         }
         // X/Y GUIDES
+        this.guides = [];
         for (var i = 0; i < this.region.height; i++) {
-            this.add.bitmapText(this.relativeX(this.offsetX - this.WIDTH / 2),
-                this.relativeY(this.offsetY + ((i + 0.5) * this.HEIGHT)), "courier20", this.letters[i]).setOrigin(0.5);
+            this.guides.push(this.add.bitmapText(this.relativeX(this.offsetX - this.WIDTH / 2),
+                this.relativeY(this.offsetY + ((i + 0.5) * this.HEIGHT)), "courier20", this.letters[i]).setOrigin(0.5));
         }
         for (var i = 0; i < this.region.width; i++) {
-            this.add.bitmapText(this.relativeX(this.offsetX + ((i + 0.5) * this.WIDTH)),
-                this.relativeY(this.offsetY - this.HEIGHT / 2), "courier20", "" + (i + 1)).setOrigin(0.5);
+            this.guides.push(this.add.bitmapText(this.relativeX(this.offsetX + ((i + 0.5) * this.WIDTH)),
+                this.relativeY(this.offsetY - this.HEIGHT / 2), "courier20", "" + (i + 1)).setOrigin(0.5));
         }
 
         this.progression.addOnUnlockHandler((a, b, c) => { this._handleProgressionEvent(a, b, c) });
@@ -463,6 +535,8 @@ export class RegionScene extends SceneUIBase {
         this.region.onSighting((x) => { this.scene.get("DarkWorld").notifyRegion(); });
 
         this.upgradeKey = this.input.keyboard.addKey(Phaser.Input.Keyboard.KeyCodes.U);
+        this._updateRegionStats();
+        this._onRegionChanged();
     }
 
     update(__time, delta) {

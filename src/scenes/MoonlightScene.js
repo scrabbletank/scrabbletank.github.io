@@ -1,7 +1,6 @@
 import { SceneUIBase } from "./SceneUIBase";
 import { TooltipRegistry } from "../data/TooltipRegistry";
 import { Common } from "../utils/Common";
-import { PlayerData } from "../data/PlayerData";
 import { FloatingTooltip } from "../ui/FloatingTooltip";
 import { ImageButton } from "../ui/ImageButton";
 import { MoonlightData } from "../data/MoonlightData";
@@ -33,7 +32,9 @@ export class MoonlightScene extends SceneUIBase {
         var standardArray = [[648, 480], [672, 408], [624, 312], [552, 240], [456, 192], [360, 144], [264, 120],
         [168, 144], [144, 216], [192, 312], [264, 384], [360, 432], [456, 480], [552, 504],
         [528, 576], [312, 504], [120, 360], [120, 72], [72, 240], [672, 552], [744, 432], [696, 288],
-        [624, 192], [528, 120], [408, 72], [264, 48], [24, 384], [192, 456], [216, 552], [480, 648]];
+        [624, 192], [528, 120], [408, 72], [264, 48], [24, 384], [192, 456], [216, 552], [480, 648], [408, 552],
+        [336, 624], [-24, 240], [96, 504], [672, 624], [816, 480], [792, 288], [720, 168], [624, 72], [480, 0],
+        [288, -24], [120, 0]];
         this.moonlight = new MoonlightData();
 
         this.moonlightButtons = [];
@@ -41,7 +42,7 @@ export class MoonlightScene extends SceneUIBase {
         for (const prop in this.moonlight.moonperks) {
             var x = this.relativeX(standardArray[idx][0] + 118);
             var y = this.relativeY(standardArray[idx][1] + 56);
-            this._setupMoonlightButton(this.moonlight.moonperks[prop], x, y);
+            this._setupMoonlightButton(this.moonlight.moonperks[prop], x, y, idx);
             idx++;
         }
 
@@ -66,6 +67,35 @@ export class MoonlightScene extends SceneUIBase {
         this.challengeBtn.setVisible(ProgressionStore.getInstance().persistentUnlocks.challenges);
         this.challengePointIcon.setVisible(ProgressionStore.getInstance().persistentUnlocks.challenges);
         this.challengePointLabel.setVisible(ProgressionStore.getInstance().persistentUnlocks.challenges);
+    }
+
+    refresh() {
+        var standardArray = [[648, 480], [672, 408], [624, 312], [552, 240], [456, 192], [360, 144], [264, 120],
+        [168, 144], [144, 216], [192, 312], [264, 384], [360, 432], [456, 480], [552, 504],
+        [528, 576], [312, 504], [120, 360], [120, 72], [72, 240], [672, 552], [744, 432], [696, 288],
+        [624, 192], [528, 120], [408, 72], [264, 48], [24, 384], [192, 456], [216, 552], [480, 648], [408, 552],
+        [336, 624], [-24, 240], [96, 504], [672, 624], [816, 480], [792, 288], [720, 168], [624, 72], [480, 0],
+        [288, -24], [120, 0]];
+        this.moonlight = new MoonlightData();
+
+        for (var i = 0; i < this.moonlightButtons.length; i++) {
+            this.moonlightButtons[i].destroy();
+        }
+
+        this.moonlightButtons = [];
+        var idx = 0;
+        for (const prop in this.moonlight.moonperks) {
+            var x = this.relativeX(standardArray[idx][0] + 118);
+            var y = this.relativeY(standardArray[idx][1] + 56);
+            this._setupMoonlightButton(this.moonlight.moonperks[prop], x, y, idx);
+            idx++;
+        }
+        this.challengeBtn.setVisible(ProgressionStore.getInstance().persistentUnlocks.challenges);
+        this.challengePointIcon.setVisible(ProgressionStore.getInstance().persistentUnlocks.challenges);
+        this.challengePointLabel.setText(MoonlightData.getInstance().challengePoints + "");
+        this.challengePointLabel.setVisible(ProgressionStore.getInstance().persistentUnlocks.challenges);
+        this._onMoonlightChanged();
+        this._disableTooltip();
     }
 
     enableLeveling() {
@@ -117,20 +147,39 @@ export class MoonlightScene extends SceneUIBase {
         this.canLevelPerks = true;
     }
 
-    _setupMoonlightButton(perk, x, y) {
+    _setupMoonlightButton(perk, x, y, index) {
         this.moonlightButtons.push(new ImageButton(this, x, y, 48, 48, perk.texture)
             .onClickHandler(() => {
                 this._levelUpPerk(perk);
                 this._onMoonlightChanged();
                 this._disableTooltip();
                 this._setTooltip(perk, x, y);
+                this.refresh();
             })
             .onPointerOverHandler(() => { this._setTooltip(perk, x, y); })
             .onPointerOutHandler(() => { this._disableTooltip(); }));
+        this._updateMoonlightButton(perk, index);
+    }
+
+    _havePerkRequirements(perk) {
+        for (var i = 0; i < perk.requires.length; i++) {
+            if (this.moonlight.moonperks[perk.requires[i]].level === 0) {
+                return false;
+            }
+        }
+        return true;
+    }
+
+    _updateMoonlightButton(perk, index) {
+        if (this._havePerkRequirements(perk) === false) {
+            this.moonlightButtons[index].setTint(Phaser.Display.Color.GetColor(32, 32, 32));
+        } else {
+            this.moonlightButtons[index].clearTint();
+        }
     }
 
     _onMoonlightChanged() {
-        this.moonlightLabel.setText("MOONLIGHT\n" + Common.numberString(this.moonlight.moonlight));
+        this.moonlightLabel.setText("MOONLIGHT\n" + Common.numberString(Math.round(this.moonlight.moonlight)));
     }
 
     _levelUpPerk(perk) {
@@ -163,7 +212,9 @@ export class MoonlightScene extends SceneUIBase {
         this.floatingText = new FloatingTooltip(this, txt, x + (x + 450 > 1100 ? -450 : 0), y + (y > 300 ? -150 : 50), 450, 150, "courier16", 16);
     }
     _disableTooltip() {
-        this.floatingText.destroy();
-        this.floatingText = undefined;
+        if (this.floatingText !== undefined) {
+            this.floatingText.destroy();
+            this.floatingText = undefined;
+        }
     }
 }

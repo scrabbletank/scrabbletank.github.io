@@ -18,6 +18,20 @@ export class LoreScene extends SceneUIBase {
         return super.relativeX(val) + 1000;
     }
 
+    refresh() {
+        this.cameras.getCamera("loreBox").scrollY = this.relativeY(0);
+        for (var i = 0; i < this.labels.length; i++) {
+            this.labels[i].destroy();
+        }
+        this.labels = [];
+        this.labelIndex = 0;
+
+        for (var i = 0; i < this.loreStore.lore.length; i++) {
+            this.addText(this.loreStore.lore[i], false);
+        }
+        this._scrollTo(this.labels.length - 1);
+    }
+
     rebirth() {
         this.cameras.getCamera("loreBox").scrollY = this.relativeY(0);
         for (var i = 0; i < this.labels.length; i++) {

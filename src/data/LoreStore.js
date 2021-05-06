@@ -9,6 +9,13 @@ export class LoreStore {
         return LoreStore.instance;
     }
 
+    static getInstance() {
+        if (!LoreStore.instance) {
+            return new LoreStore();
+        }
+        return LoreStore.instance;
+    }
+
     rebirth() {
         this.lore = [];
     }

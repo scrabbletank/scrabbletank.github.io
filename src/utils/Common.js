@@ -101,8 +101,10 @@ export class Common {
                 return sign + Math.floor(value) + " Hit";
             case "evasion":
                 return sign + Math.floor(value) + " Evasion";
-            case "critDamage":
-                return sign + Math.floor(value * 100) + "% Crit Damage";
+            case "critPower":
+                return sign + Math.floor(value) + " Crit Power";
+            case "critResistance":
+                return sign + Math.floor(value) + " Crit Resist";
             case "critChance":
                 return sign + Math.floor(value * 100) + "% Crit Chance";
             case "healthRegen":
@@ -168,16 +170,5 @@ export class Common {
             a.r + (b.r - a.r) * lerp,
             a.g + (b.g - a.g) * lerp,
             a.b + (b.b - a.b) * lerp);
-    }
-
-    static yieldHelper(type, yields) {
-        var amount = 0;
-        for (var i = 0; i < yields.length; i++) {
-            if (yields[i].type === type) {
-                amount = yields[i].rate;
-                break;
-            }
-        }
-        return amount;
     }
 }

@@ -5,6 +5,7 @@
   "main": "index.js",
   "dependencies": {
     "live-server": "^1.2.1",
+    "lz-string": "^1.4.4",
     "phaser": "^3.23.0",
     "phaser3-project-template": "^1.0.9",
     "webpack": "^4.43.0",

@@ -54,7 +54,7 @@ export class WorldTime {
     }
 
     addOfflineTime(timeOffline) {
-        this.offlineTime = Math.min(86400000, this.offlineTime + timeOffline / 2);
+        this.offlineTime = Math.min(86400000, this.offlineTime + timeOffline);
     }
 
     update(delta) {

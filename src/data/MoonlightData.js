@@ -55,9 +55,9 @@ export class MoonlightData {
                     name: "Moon Runes", level: 0, maxLevel: 1, requires: [], cost: [1000, 0, 0],
                     texture: { sprite: "moonicons", tile: 8 }
                 },
-                direbeasts: {
-                    name: "Dire Beasts", level: 0, maxLevel: 1, requires: [], cost: [250, 0, 0],
-                    texture: { sprite: "moonicons", tile: 13 }
+                farstrider: {
+                    name: "Farstrider", level: 0, maxLevel: -1, requires: [], cost: [25, 25, 1.15],
+                    texture: { sprite: "moonicons", tile: 15 }
                 },
                 heartofdarkness: {
                     name: "Heart of Darkness", level: 0, maxLevel: -1, requires: [], cost: [100, 100, 1.25],
@@ -111,9 +111,9 @@ export class MoonlightData {
                     name: "Shadow's Gold", level: 0, maxLevel: -1, requires: ["acc"], cost: [120, 30, 1.125],
                     texture: { sprite: "moonicons", tile: 30 }
                 },
-                discovery: {
-                    name: "Discovery", level: 0, maxLevel: -1, requires: ["moonlightworkers"], cost: [150, 100, 1.25],
-                    texture: { sprite: "moonicons", tile: 15 }
+                motivatedlabor: {
+                    name: "Motivated Labor", level: 0, maxLevel: -1, requires: ["moonlightworkers"], cost: [100, 50, 1.5],
+                    texture: { sprite: "moonicons", tile: 17 }
                 },
                 shadow2: {
                     name: "Shadow's Chosen", level: 0, maxLevel: -1, requires: ["shadow"], cost: [75, 75, 1.1],
@@ -126,6 +126,54 @@ export class MoonlightData {
                 soulbound: {
                     name: "Soulbound", level: 0, maxLevel: -1, requires: ["blackirongear"], cost: [250, 100, 1.1],
                     texture: { sprite: "moonicons", tile: 21 }
+                },
+                discovery: {
+                    name: "Discovery", level: 0, maxLevel: -1, requires: ["farstrider"], cost: [100, 50, 1.2],
+                    texture: { sprite: "moonicons", tile: 16 }
+                },
+                crownlands: {
+                    name: "Crown Lands", level: 0, maxLevel: -1, requires: ["discovery"], cost: [60, 25, 1.2],
+                    texture: { sprite: "moonicons", tile: 18 }
+                },
+                mysticcauldron: {
+                    name: "Mystic Cauldron", level: 0, maxLevel: -1, requires: ["moonwine"], cost: [45, 55, 1.2],
+                    texture: { sprite: "moonicons", tile: 23 }
+                },
+                shadow3: {
+                    name: "Shadow's Harvest", level: 0, maxLevel: -1, requires: ["shadow2"], cost: [45, 55, 1.2],
+                    texture: { sprite: "moonicons", tile: 31 }
+                },
+                strtrinket: {
+                    name: "Shadow Wolf Charm", level: 0, maxLevel: 8, requires: ["metal"], cost: [100, 0, 2],
+                    texture: { sprite: "moonicons", tile: 32 }
+                },
+                dextrinket: {
+                    name: "Moonlight Circlet", level: 0, maxLevel: 8, requires: ["leather"], cost: [100, 0, 2],
+                    texture: { sprite: "moonicons", tile: 32 }
+                },
+                agitrinket: {
+                    name: "Moon Treads", level: 0, maxLevel: 8, requires: ["fiber"], cost: [100, 0, 2],
+                    texture: { sprite: "moonicons", tile: 32 }
+                },
+                endtrinket: {
+                    name: "Moonstone", level: 0, maxLevel: 8, requires: ["stone"], cost: [100, 0, 2],
+                    texture: { sprite: "moonicons", tile: 32 }
+                },
+                rectrinket: {
+                    name: "Dreamlight Bracer", level: 0, maxLevel: 8, requires: ["wood"], cost: [100, 0, 2],
+                    texture: { sprite: "moonicons", tile: 32 }
+                },
+                deftrinket: {
+                    name: "Shadow Veil", level: 0, maxLevel: 8, requires: ["crystal"], cost: [100, 0, 2],
+                    texture: { sprite: "moonicons", tile: 32 }
+                },
+                acctrinket: {
+                    name: "Nightmare Pendant", level: 0, maxLevel: 8, requires: ["gold"], cost: [100, 0, 2],
+                    texture: { sprite: "moonicons", tile: 32 }
+                },
+                nightlabour: {
+                    name: "Night Labour", level: 0, maxLevel: -1, requires: ["heropouch"], cost: [100, 25, 1.5],
+                    texture: { sprite: "moonicons", tile: 9 }
                 }
             };
 
@@ -135,7 +183,8 @@ export class MoonlightData {
                 explore: { name: "Giant Lands", completions: 0, maxCompletions: 5, unlocked: false, fastestTime: 0 },
                 buildings: { name: "Lazy Townsfolk", completions: 0, maxCompletions: 5, unlocked: false, fastestTime: 0 },
                 talent: { name: "Talentless", completions: 0, maxCompletions: 5, unlocked: false, fastestTime: 0 },
-                megamonsters: { name: "Mega Monsters", completions: 0, maxCompletions: 5, unlocked: false, fastestTime: 0 }
+                megamonsters: { name: "Mega Monsters", completions: 0, maxCompletions: 5, unlocked: false, fastestTime: 0 },
+                outcast: { name: "Outcast", completions: 0, maxCompletions: 5, unlocked: false, fastestTime: 0 }
             };
 
             MoonlightData.instance = this;

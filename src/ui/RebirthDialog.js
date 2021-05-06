@@ -19,10 +19,43 @@ export class RebirthDialog {
         desc = Common.processText(desc, 48);
         this.descLabel = scene.add.bitmapText(x + 200, y + 30, "courier16", desc, 16, 1).setOrigin(0.5, 0);
 
-        desc = "\"THE MOON CALLS TO ALL IN THESE LANDS THAT WOULD HEAR IT. BE REBORN IN MOONLIGHT.\"";
+        var descColor = Phaser.Display.Color.GetColor(96, 172, 177);
+        switch (regionLevel) {
+            case 0:
+                desc = "\"THE MOON CALLS TO ALL IN THESE LANDS THAT WOULD HEAR IT. BE REBORN IN MOONLIGHT.\"";
+                break;
+            case 1:
+                desc = "\"THE CHILD RETURNS, TRAVELLING THE HORIZON. MY BOUNTY FLURISHES WITH EACH STEP.\"";
+                break;
+            case 2:
+                desc = "\"I SPEAK, YET DO NOT HEAR. MYRAH KEEPS ALL IN SHADOW. THE STARLESS NIGHT RETURNS.\"";
+                break;
+            case 3:
+                desc = "\"MOONLIGHT STRENGTHENS YOU, BUT I OFFER MORE. FACE MY CHALLENGES, FOR THERE ARE GREATER DANGERS.\"";
+                break;
+            case 4:
+                desc = "\"DO YOU WAVER, CHILD OF MOONLIGHT? YOUR STRENGTH GROWS, BUT FAR HAS MYRAH HID... TURNING ALL AGAINST US.\"";
+                break;
+            case 5:
+                desc = "\"...\"";
+                break;
+            case 6:
+                desc = "\"YOU TRAVEL FAR. MYRAH TRIES TO HIDE MY VOICE. COME, MY CHALLENGES WILL PREPARE YOU FOR THE COMING NIGHT.\""
+                break;
+            case 7:
+                desc = "\"WE WILL NOT RETURN, SLAVE OF MOONLIGHT. THE STARS WILL NOT COME TO YOU. LEAVE NOW.\"";
+                descColor = Phaser.Display.Color.GetColor(177, 100, 169);
+                break;
+            case 8:
+                desc = "\"DO NOT LISTEN. THEIR LIES ARE AS NUMEROUS AS THE STARS IN THE SKY. WE SHALL PURGE THEM BOTH.\"";
+                break;
+            default:
+                desc = "\"...\"";
+                break;
+        }
         desc = Common.processText(desc, 48);
         this.desc2Label = scene.add.bitmapText(x + 200, y + 107, "courier16", desc, 16, 1).setOrigin(0.5, 0);
-        this.desc2Label.setTint(Phaser.Display.Color.GetColor(96, 172, 177));
+        this.desc2Label.setTint(descColor);
 
         desc = "You hear a voice calling to you. Do you enter into the unknown, or continue your journey?";
         desc = Common.processText(desc, 48);

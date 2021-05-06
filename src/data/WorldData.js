@@ -11,13 +11,14 @@ export class WorldData {
         if (!WorldData.instance) {
             var regSize = DynamicSettings.getInstance().regionSize;
             this.regionList = [];
-            this.regionList.push(new Region(regSize[0], regSize[1], 0, "temperate", this._randomizeTraits()));
+            this.regionList.push(new Region(regSize[0], regSize[1], 0, "temperate", this._randomizeTraits(0)));
             this.currentRegion = 0;
             this.nextRegions = [];
             this.timeAtRunStart = 0;
             this.time = new WorldTime();
             this.time.registerEvent("onDayEnd", () => { this.updateDay(); });
             this.time.registerEvent("onWeekEnd", () => { this.updateWeek(); });
+            this.onRegionChangedHandlers = [];
             WorldData.instance = this;
         }
 
@@ -34,10 +35,21 @@ export class WorldData {
     rebirth() {
         var regSize = DynamicSettings.getInstance().regionSize;
         this.regionList = [];
-        this.regionList.push(new Region(regSize[0], regSize[1], 0, "temperate", this._randomizeTraits()));
+        this.regionList.push(new Region(regSize[0], regSize[1], 0, "temperate", this._randomizeTraits(0)));
         this.currentRegion = 0;
         this.nextRegions = [];
         this.timeAtRunStart = this.time.time;
+        this._onRegionChangedHandler();
+    }
+
+    onRegionChanged(callback) {
+        this.onRegionChangedHandlers.push(callback);
+    }
+
+    _onRegionChangedHandler() {
+        for (var i = 0; i < this.onRegionChangedHandlers.length; i++) {
+            this.onRegionChangedHandlers[i]();
+        }
     }
 
     getRegion(idx) {
@@ -51,6 +63,7 @@ export class WorldData {
     }
     setCurrentRegion(index) {
         this.currentRegion = index;
+        this._onRegionChangedHandler();
     }
     getGoldCap() {
         var cap = 0;
@@ -85,7 +98,7 @@ export class WorldData {
         this.nextRegions = [];
         for (var i = 0; i < numChoices; i++) {
             var choice = Common.randint(0, choices.length);
-            var totalTraits = Math.floor((this.regionList.length - 1) / 2);
+            var totalTraits = Math.floor((this.regionList.length) / 2);
             this.nextRegions.push({
                 type: choices[choice],
                 traits: this._randomizeTraits(totalTraits)
@@ -99,6 +112,7 @@ export class WorldData {
         this.regionList.push(new Region(regSize[0], regSize[1], this.regionList.length, this.nextRegions[index].type, this.nextRegions[index].traits));
         this.regionList[this.regionList.length - 1].worldHeight = Math.floor((index + 1) * (700 / (this.nextRegions.length + 1)));
         this.nextRegions = [];
+        this._onRegionChangedHandler();
     }
 
     handleRunCompletion() {
@@ -115,6 +129,9 @@ export class WorldData {
         }
         if (this.getCurrentRegion().regionLevel >= 4) {
             MoonlightData.getInstance().challenges.megamonsters.unlocked = true;
+        }
+        if (this.getCurrentRegion().regionLevel >= 6) {
+            MoonlightData.getInstance().challenges.outcast.unlocked = true;
         }
 
         //handle challenge completion here

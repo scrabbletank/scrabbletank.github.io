@@ -56,8 +56,16 @@ export class CombatScene extends SceneUIBase {
 
     _monsterHealthCallback(health, idx) {
         health = Math.max(0, health);
-        this.monsterDiplays[idx].setHealthBar(health / this.combatManager.monsters[idx].MaxHealth(),
-            Common.numberString(Math.ceil(health)) + "/" + Common.numberString(this.combatManager.monsters[idx].MaxHealth()));
+        var shieldPercent = this.combatManager.monsters[idx].shieldValue / this.combatManager.monsters[idx].MaxHealth();
+        var fillTxt = "";
+        if (shieldPercent > 0) {
+            fillTxt = Common.numberString(Math.ceil(health)) + "+(" + Common.numberString(Math.ceil(this.combatManager.monsters[idx].shieldValue)) + ")/" +
+                Common.numberString(this.combatManager.monsters[idx].MaxHealth());
+        } else {
+            fillTxt = Common.numberString(Math.ceil(health)) + "/" + Common.numberString(this.combatManager.monsters[idx].MaxHealth());
+        }
+        this.monsterDiplays[idx].setHealthBar(health / this.combatManager.monsters[idx].MaxHealth(), fillTxt);
+        this.monsterDiplays[idx].setShieldBar(shieldPercent);
     }
     _monsterAttackCooldownCallback(attackCooldown, idx) {
         this.monsterDiplays[idx].setAttackBar(attackCooldown / this.combatManager.monsters[idx].attackSpeed,

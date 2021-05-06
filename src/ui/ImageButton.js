@@ -26,6 +26,13 @@ export class ImageButton {
         this.enabled = enabled;
     }
 
+    setTint(clr) {
+        this.img.setTint(clr);
+    }
+    clearTint() {
+        this.img.clearTint();
+    }
+
     setBorderTint(clr) {
         this.backgroundRect.strokeColor = clr;
     }

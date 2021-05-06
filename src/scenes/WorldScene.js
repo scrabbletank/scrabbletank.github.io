@@ -18,6 +18,10 @@ export class WorldScene extends SceneUIBase {
         this.worldData = new WorldData();
     }
 
+    refresh() {
+        this._refreshRegions();
+    }
+
     rebirth() {
     }
 
