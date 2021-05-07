@@ -44,7 +44,7 @@ export class MoonlightData {
                     texture: { sprite: "moonicons", tile: 22 }
                 },
                 hardenedvillagers: {
-                    name: "Hardened Villagers", level: 0, maxLevel: 5, requires: [], cost: [40, 25, 1.5],
+                    name: "Hardened Villagers", level: 0, maxLevel: -1, requires: [], cost: [40, 25, 1.5],
                     texture: { sprite: "moonicons", tile: 11 }
                 },
                 shadow: {

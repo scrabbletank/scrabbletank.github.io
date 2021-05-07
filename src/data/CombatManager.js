@@ -116,7 +116,7 @@ export class CombatManager {
         }
         this.target = this._getTarget();
         if (this.combatCallback !== undefined) {
-            this.combatCallback();
+            this.combatCallback(this.activeTile.isInvaded);
         }
     }
 

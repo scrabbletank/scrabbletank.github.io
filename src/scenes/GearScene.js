@@ -22,6 +22,8 @@ export class GearScene extends SceneUIBase {
         this.gearDisplays = [];
 
         this.progression = new ProgressionStore();
+
+        WorldData.getInstance().time.registerEvent("onDayEnd", () => { this._setupView(); });
     }
 
     create() {
@@ -214,10 +216,12 @@ export class GearScene extends SceneUIBase {
         }
     }
 
-    refresh() {
+    refresh(changeFilter = true) {
         this._updateTierButtons();
         this._setupGearDisplays();
-        this._changeFilter(-1);
+        if (changeFilter) {
+            this._changeFilter(-1);
+        }
     }
 
     rebirth() {

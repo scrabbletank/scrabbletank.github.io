@@ -36,7 +36,7 @@ export class CombatScene extends SceneUIBase {
             .registerEvent("onReward", (x, y) => { this._rewardCallback(x, y); })
             .registerEvent("onPlayerDefeat", () => { this._playerDefeatCallback(); })
             .registerEvent("onExplore", (x, y) => { this._exploreCallback(x, y); })
-            .registerEvent("onCombatStart", () => { this._onCombatCallback(); });
+            .registerEvent("onCombatStart", (x) => { this._onCombatCallback(x); });
     }
 
     enableScene() {
@@ -148,13 +148,17 @@ export class CombatScene extends SceneUIBase {
     }
 
     initFight(tile) {
+        const letters = ['A', 'B', 'C', 'D', 'E', 'F', 'G', 'H', 'I', 'J', 'K', 'L', 'M', 'N', 'O', 'P', 'Q'];
+        const tileName = letters[tile.y] + "" + (tile.x + 1) + " - " + tile.name;
         if (tile.amountExplored >= tile.explorationNeeded) {
             this.explorationBar.setFillPercent(tile.amountExplored / tile.explorationNeeded,
-                "Explored");
+                tileName + ": Explored");
         } else {
             this.explorationBar.setFillPercent(tile.amountExplored / tile.explorationNeeded,
-                Math.floor(tile.amountExplored / tile.explorationNeeded * 100) + "%");
+                tileName + ": " + Math.floor(tile.amountExplored / tile.explorationNeeded * 100) + "%");
         }
+        this.invasionCounter.setVisible(tile.isInvaded);
+        this.invasionCounter.setText("Invaders: " + (tile.invasionFights * 3));
         this.combatManager.setTile(tile);
         this.combatManager.initFight();
         this.regionTier = WorldData.instance.getCurrentRegion().regionLevel;
@@ -178,6 +182,9 @@ export class CombatScene extends SceneUIBase {
 
         this.explorationBar = new ProgressBar(this, this.relativeX(10), this.relativeY(10), 880, 20,
             Phaser.Display.Color.GetColor(0, 0, 255), Phaser.Display.Color.GetColor(32, 32, 64));
+        this.invasionCounter = this.add.bitmapText(this.relativeX(400), this.relativeY(35), "courier20", "Invaders: 0")
+            .setTint(Phaser.Display.Color.GetColor(220, 0, 220));
+        this.invasionCounter.setVisible(false);
         this.monsterDiplays = [];
         this.monsterDiplays.push(new CreatureDisplay(this, this.relativeX(325), this.relativeY(70)));
         this.monsterDiplays.push(new CreatureDisplay(this, this.relativeX(100), this.relativeY(170)));
@@ -207,25 +214,32 @@ export class CombatScene extends SceneUIBase {
     }
 
     _exploreCallback(tile, exploreFinished) {
+        const letters = ['A', 'B', 'C', 'D', 'E', 'F', 'G', 'H', 'I', 'J', 'K', 'L', 'M', 'N', 'O', 'P', 'Q'];
+        const tileName = letters[tile.y] + "" + (tile.x + 1) + " - " + tile.name;
         if (tile.amountExplored >= tile.explorationNeeded) {
             this.explorationBar.setFillPercent(tile.amountExplored / tile.explorationNeeded,
-                "Explored");
+                tileName + ": Explored");
         } else {
             this.explorationBar.setFillPercent(tile.amountExplored / tile.explorationNeeded,
-                Math.floor(tile.amountExplored / tile.explorationNeeded * 100) + "%");
+                tileName + ": " + Math.floor(tile.amountExplored / tile.explorationNeeded * 100) + "%");
         }
         if (exploreFinished === true) {
             this._onExplore(tile);
         }
     }
 
-    _onCombatCallback() {
+    _onCombatCallback(isInvasion) {
         this._hideEnemyDisplays();
         var monsters = this.combatManager.monsters;
         for (var i = 0; i < monsters.length; i++) {
             this.monsterDiplays[i].setVisible(true);
             this.monsterDiplays[i].initWithCreature(monsters[i]);
+            if (isInvasion === true) {
+                this.monsterDiplays[i].setInvader();
+            }
         }
+        this.invasionCounter.setVisible(this.combatManager.activeTile.isInvaded);
+        this.invasionCounter.setText("Invaders: " + (this.combatManager.activeTile.invasionFights * 3));
         this.restButton.setVisible(false);
         this.playerDisplay.initWithCreature(this.player.statBlock);
     }

@@ -45,6 +45,7 @@ export class CreatureDisplay {
         this.armorLabel.setText("Armor: " + Common.numberString(Math.floor(creature.Armor())));
         this.hitnameLabel.setText("Hit: " + Common.numberString(Math.floor(creature.Hit())));
         this.evasionLabel.setText("Evasion: " + Common.numberString(Math.floor(creature.Evasion())));
+        this.backingRect.strokeColor = Phaser.Display.Color.GetColor(200, 0, 0);
 
         this.healthBar.setFillPercent(creature.currentHealth / creature.MaxHealth(),
             Common.numberString(Math.ceil(creature.currentHealth)) + "/" + Common.numberString(creature.MaxHealth()));
@@ -111,6 +112,10 @@ export class CreatureDisplay {
 
     setAttackBar(attackPercent, text = "") {
         this.attackBar.setFillPercent(attackPercent, text);
+    }
+
+    setInvader() {
+        this.backingRect.strokeColor = Phaser.Display.Color.GetColor(200, 0, 200);
     }
 
     getCenterX() { return this.x + 125; }

@@ -66,21 +66,21 @@ export class PlayerData {
             cleave: { name: "Cleave", level: 0, maxLevel: 5, requires: ["str"], texture: { sprite: "icons", tile: 8 } },
             hit: { name: "Hit", level: 0, maxLevel: -1, requires: ["dex"], texture: { sprite: "icons", tile: 9 } },
             evasion: { name: "Evasion", level: 0, maxLevel: -1, requires: ["agi"], texture: { sprite: "icons", tile: 10 } },
-            resilient: { name: "Resilient", level: 0, maxLevel: 10, requires: ["end"], texture: { sprite: "icons", tile: 11 } },
-            quickrecovery: { name: "Quick Recovery", level: 0, maxLevel: 12, requires: ["rec"], texture: { sprite: "icons", tile: 12 } },
-            block: { name: "Block", level: 0, maxLevel: 12, requires: ["def"], texture: { sprite: "icons", tile: 13 } },
-            crit: { name: "Critical", level: 0, maxLevel: 15, requires: ["acc"], texture: { sprite: "icons", tile: 14 } },
+            resilient: { name: "Resilient", level: 0, maxLevel: -1, requires: ["end"], texture: { sprite: "icons", tile: 11 } },
+            quickrecovery: { name: "Quick Recovery", level: 0, maxLevel: -1, requires: ["rec"], texture: { sprite: "icons", tile: 12 } },
+            block: { name: "Block", level: 0, maxLevel: -1, requires: ["def"], texture: { sprite: "icons", tile: 13 } },
+            crit: { name: "Critical", level: 0, maxLevel: -1, requires: ["acc"], texture: { sprite: "icons", tile: 14 } },
             stun: { name: "Stunning Hit", level: 0, maxLevel: 5, requires: ["cleave"], texture: { sprite: "icons", tile: 16 } },
             followthrough: { name: "Follow Through", level: 0, maxLevel: 5, requires: ["hit"], texture: { sprite: "icons", tile: 17 } },
             dodge: { name: "Dodge", level: 0, maxLevel: 5, requires: ["evasion"], texture: { sprite: "icons", tile: 18 } },
             defydeath: { name: "Defy Death", level: 0, maxLevel: 5, requires: ["resilient"], texture: { sprite: "icons", tile: 19 } },
             secondwind: { name: "Second Wind", level: 0, maxLevel: 5, requires: ["quickrecovery"], texture: { sprite: "icons", tile: 20 } },
             parry: { name: "Parry", level: 0, maxLevel: 5, requires: ["block"], texture: { sprite: "icons", tile: 21 } },
-            doublecrit: { name: "Double Crit", level: 0, maxLevel: 5, requires: ["crit"], texture: { sprite: "icons", tile: 22 } },
+            doublecrit: { name: "Double Crit", level: 0, maxLevel: -1, requires: ["crit"], texture: { sprite: "icons", tile: 22 } },
             bounty: { name: "Bounty", level: 0, maxLevel: -1, requires: [], texture: { sprite: "icons", tile: 7 } },
             explorer: { name: "Explorer", level: 0, maxLevel: -1, requires: [], texture: { sprite: "icons", tile: 15 } },
-            guardian: { name: "Guardian", level: 0, maxLevel: 5, requires: [], texture: { sprite: "icons", tile: 39 } },
-            governance: { name: "Governance", level: 0, maxLevel: 10, requires: [], texture: { sprite: "icons", tile: 38 } }
+            guardian: { name: "Guardian", level: 0, maxLevel: -1, requires: [], texture: { sprite: "icons", tile: 39 } },
+            governance: { name: "Governance", level: 0, maxLevel: -1, requires: [], texture: { sprite: "icons", tile: 38 } }
         }
 
         this.runeBonuses = {
