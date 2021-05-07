@@ -142,7 +142,6 @@ export class CreatureBlock {
         return this.attackSpeed;
     }
     CritDamage(resist) {
-        console.log(this.CritPower(), resist, Math.max(1, 1 + (-0.5 + (Math.sqrt(this.CritPower()) / Math.sqrt(resist))) * 0.5));
         return Math.max(1, 1 + (-0.5 + (Math.sqrt(this.CritPower()) / Math.sqrt(resist))) * 0.5);
     }
 

@@ -193,8 +193,14 @@ export class MoonlightScene extends SceneUIBase {
         if (this.FloatingTooltip !== undefined) {
             this._disableTooltip();
         }
-        var txt = perk.name + " Lv" + perk.level + "\n" +
-            TooltipRegistry.getMoonlightTooltip(perk) + "\n\n";
+        var txt = "";
+        if (perk.maxLevel !== -1) {
+            txt = perk.name + " Lv" + perk.level + "/" + perk.maxLevel + "\n" +
+                TooltipRegistry.getMoonlightTooltip(perk) + "\n\n";
+        } else {
+            txt = perk.name + " Lv" + perk.level + "\n" +
+                TooltipRegistry.getMoonlightTooltip(perk) + "\n\n";
+        }
 
         var cost = Math.floor((perk.cost[0] + perk.cost[1] * (perk.level)) * Math.pow(perk.cost[2], perk.level));
 
