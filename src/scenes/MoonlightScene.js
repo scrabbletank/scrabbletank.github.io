@@ -49,6 +49,7 @@ export class MoonlightScene extends SceneUIBase {
         this.exitButton = new TextButton(this, this.relativeX(950), this.relativeY(730), 120, 40, "BACK")
             .onClickHandler(() => {
                 if (this.canLevelPerks === true) {
+                    this.exitButton.setText("BACK");
                     var game = this.scene.get("DarkWorld");
                     this.canLevelPerks = false;
                     game.rebirth();
@@ -100,6 +101,7 @@ export class MoonlightScene extends SceneUIBase {
 
     enableLeveling() {
         this.canLevelPerks = true;
+        this.exitButton.setText("REBIRTH");
         this.challengeBtn.setVisible(ProgressionStore.getInstance().persistentUnlocks.challenges);
         this.challengePointIcon.setVisible(ProgressionStore.getInstance().persistentUnlocks.challenges);
         this.challengePointLabel.setText(MoonlightData.getInstance().challengePoints + "");

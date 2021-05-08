@@ -107,7 +107,8 @@ export class Building {
                 return "Most buildings must be built adjacent to roads. Production buildings get a boost being adjacent to a road, and " +
                     "produce nothing when more than " + tier + " tiles away.";
             case "Docks":
-                var bonus = tier * 2 * region.townData.economyMulti;
+                var dockEff = region._getDockEfficiency(tile.x, tile.y, potential);
+                var bonus = tier * Statics.DOCK_BASE_ECON * region.townData.economyMulti * dockEff;
                 return "Docks don't need roads and enables roads to be built beside them. Increases gold earned per week by " +
                     Math.floor(bonus) + ".";
             case "Alchemy Lab":

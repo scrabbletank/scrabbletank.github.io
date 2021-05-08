@@ -479,7 +479,31 @@ creatureDefs['catfish'] = {
     rewardBase: 2.2,
     icon: { sprite: "enemyicons", tile: 9 }
 };
-
+creatureDefs['lootgoblin'] = {
+    name: "Loot Goblin",
+    scaleBlock:
+    {
+        strength: 0.77,
+        dexterity: 1.2,
+        agility: 1.6,
+        endurance: 0.9,
+        recovery: 0.9,
+        defense: 1,
+        accuracy: 1.15,
+        armor: 1.5,
+        health: 1.4,
+        healthRegen: 0.8,
+        damageMin: 1.275,
+        damageMax: 1.375,
+        hit: 0.9,
+        evasion: 1.2
+    },
+    attackSpeed: 1400,
+    critChance: 0.4,
+    shadeBase: 125,
+    rewardBase: 15,
+    icon: { sprite: "enemyicons", tile: 14 }
+};
 
 export class CreatureRegistry {
     static GetCreatureByName(name, level) {

@@ -571,7 +571,7 @@ export class GameScene extends SceneUIBase {
 
     _openExportDialog() {
         this._closeExportDialog();
-        this.exportDialog = new ExportDialog(this, 485, 300);
+        this.exportDialog = new ExportDialog(this, 485, 250);
         this.exportDialog.onCloseHandler(() => { this._closeExportDialog(); });
     }
     _closeExportDialog() {

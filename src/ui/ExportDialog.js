@@ -3,7 +3,7 @@ import { TextButton } from "./TextButton";
 
 export class ExportDialog {
     constructor(scene, x, y) {
-        this.backingRect = scene.add.rectangle(x, y, 350, 200, Phaser.Display.Color.GetColor(0, 0, 0))
+        this.backingRect = scene.add.rectangle(x, y, 350, 300, Phaser.Display.Color.GetColor(0, 0, 0))
             .setOrigin(0, 0).setInteractive();
         this.backingRect.isStroked = true;
         this.backingRect.strokeColor = Phaser.Display.Color.GetColor(255, 255, 255);
@@ -15,42 +15,45 @@ export class ExportDialog {
         this.titleLabel = scene.add.bitmapText(x + 175, y + 10, "courier20", "Import/Export Save").setOrigin(0.5, 0);
         var txt = Common.processText("Copies your save information to/from the clipboard so you can backup your save or send " +
             "it to another computer.", 42);
-        this.descLabel = scene.add.bitmapText(x + 10, y + 50, "courier16", txt);
+        this.descLabel = scene.add.bitmapText(x + 10, y + 40, "courier16", txt);
 
-        this.resultLabel = undefined;
+        this.manualSaveLabel = scene.add.bitmapText(x + 175, y + 150, "courier20", "Manual Save").setOrigin(0.5, 0);
+        var txt = Common.processText("Click to manually save your game.", 42);
+        this.mSaveDescLabel = scene.add.bitmapText(x + 10, y + 180, "courier16", txt);
 
-        this.exportButton = new TextButton(scene, x + 10, y + 170, 110, 20, "Export")
+        this.exportButton = new TextButton(scene, x + 43, y + 100, 110, 20, "Export")
             .onClickHandler(() => { this._export(); });
-        this.importButton = new TextButton(scene, x + 120, y + 170, 110, 20, "Import")
+        this.importButton = new TextButton(scene, x + 196, y + 100, 110, 20, "Import")
             .onClickHandler(() => { this._import(); });
-        this.closeButton = new TextButton(scene, x + 230, y + 170, 110, 20, "Back");
+        this.saveButton = new TextButton(scene, x + 120, y + 210, 110, 20, "Save")
+            .onClickHandler(() => { this._save(); });
+        this.closeButton = new TextButton(scene, x + 230, y + 270, 110, 20, "Back");
+    }
+
+    _save() {
+        this.scene.scene.get("DarkWorld").save();
+        this.saveButton.setText("Saved!")
     }
 
     _export() {
         this.scene.scene.get("DarkWorld").copyToClipboard();
-        if (this.resultLabel !== undefined) {
-            this.resultLabel.destroy();
-        }
-        this.resultLabel = this.scene.add.bitmapText(this.x + 175, this.y + 110, "courier20", "Copied!").setOrigin(0.5, 0);
+        this.exportButton.setText("Copied!")
     }
     _import() {
         this.scene.scene.get("DarkWorld").copyFromClipboard();
-        if (this.resultLabel !== undefined) {
-            this.resultLabel.destroy();
-        }
-        this.resultLabel = this.scene.add.bitmapText(this.x + 175, this.y + 110, "courier20", "Loaded!").setOrigin(0.5, 0);
+        this.importButton.setText("Loaded!")
     }
 
     destroy() {
         this.backingRect.destroy();
         this.titleLabel.destroy();
         this.descLabel.destroy();
+        this.manualSaveLabel.destroy();
+        this.mSaveDescLabel.destroy();
         this.exportButton.destroy();
         this.importButton.destroy();
+        this.saveButton.destroy();
         this.closeButton.destroy();
-        if (this.resultLabel !== undefined) {
-            this.resultLabel.destroy();
-        }
     }
 
     onCloseHandler(callback) {

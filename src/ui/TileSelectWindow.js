@@ -10,11 +10,13 @@ import { Building } from "../data/Building";
 import { FloatingTooltip } from "./FloatingTooltip";
 import { DynamicSettings } from "../data/DynamicSettings";
 import { MoonlightData } from "../data/MoonlightData";
+import { PlayerData } from "../data/PlayerData";
 
 export class TileSelectWindow {
     constructor(scene, x, y, tile) {
         var progression = new ProgressionStore();
         var region = new WorldData().getCurrentRegion();
+        var regionTier = Math.min(region.regionLevel, 8);
 
         this.backRect = scene.add.rectangle(x, y, 500, 220, Phaser.Display.Color.GetColor(0, 0, 0))
             .setInteractive()
@@ -51,7 +53,7 @@ export class TileSelectWindow {
         this.buildingLabel = undefined;
         this.floatingText = undefined;
         this.buildingDesc = undefined;
-        this.buildingCosts = undefined;
+        this.buildingCostLabels = [];
         this.upgradeButton = undefined;
         this.destroyButton = undefined;
         this.buildingButtons = [];
@@ -115,14 +117,25 @@ export class TileSelectWindow {
                 var desc = Common.processText(Building.getTooltip(tile, tile.building.name, tile.building.tier), 27);
                 this.buildingDesc = scene.add.bitmapText(x + 150, y + 25, "courier16", desc);
                 if (this._canUpgrade(tile.building)) {
-                    var txt = "Upgrade:\n";
+                    this.buildingCostLabels.push(scene.add.bitmapText(x + 395, y + 25, "courier16", "Upgrade:"));
+                    var costY = y + 42;
                     for (var i = 0; i < tile.building.resourceCosts.length; i++) {
                         if (tile.building.resourceCosts[i] > 0) {
-                            txt += Statics.RESOURCE_NAMES[i] + ": " + Common.numberString(tile.building.resourceCosts[i]) + "\n";
+                            var clr = PlayerData.getInstance().resources[regionTier][i] >= tile.building.resourceCosts[i] ?
+                                Phaser.Display.Color.GetColor(255, 255, 255) : Phaser.Display.Color.GetColor(255, 80, 80);
+                            var label = scene.add.bitmapText(x + 395, costY, "courier16",
+                                Statics.RESOURCE_NAMES[i] + ": " + Common.numberString(tile.building.resourceCosts[i]));
+                            label.setTint(clr);
+                            this.buildingCostLabels.push(label);
+                            costY += 17;
                         }
                     }
-                    txt += "Gold: " + tile.building.goldCost;
-                    this.buildingCosts = scene.add.bitmapText(x + 395, y + 25, "courier16", txt);
+                    var label = scene.add.bitmapText(x + 395, costY, "courier16", "Gold: " + tile.building.goldCost);
+                    var clr = PlayerData.getInstance().gold >= tile.building.goldCost ?
+                        Phaser.Display.Color.GetColor(255, 255, 255) : Phaser.Display.Color.GetColor(255, 80, 80);
+                    label.setTint(clr);
+                    this.buildingCostLabels.push(label);
+
                     this.upgradeButton = new TextButton(scene, x + 175, y + 195, 140, 20, "Upgrade")
                         .onClickHandler(() => { this._onAction("upgrade", { tile: tile }); });
                 }
@@ -161,22 +174,29 @@ export class TileSelectWindow {
         return new ImageButton(scene, x, y, 32, 32, building.texture)
             .onClickHandler(() => { this._onAction("build", { tile: tile, building: building }); })
             .onPointerOverHandler(() => {
-                var costTxt = "";
-                for (var i = 0; i < building.resourceCosts.length; i++) {
-                    if (building.resourceCosts[i] > 0) {
-                        costTxt += Statics.RESOURCE_NAMES[i] + ": " + building.resourceCosts[i] + "\n";
-                    }
-                }
-                costTxt += "Gold: " + building.goldCost;
                 if (this.floatingText !== undefined) {
                     this.floatingText.destroy();
                 }
+                var regionTier = Math.min(WorldData.getInstance().getCurrentRegion().regionLevel, 8);
                 var descTxt = Common.processText(Building.getTooltip(tile, building.name, building.tier, true), 24);
                 this.floatingText = new ExtendedFloatingTooltip(scene, x + (x + 350 > 1100 ? -350 : 0), y - 150, 350, 150)
                     .addText(5, 5, "courier20", building.name)
                     .addText(230, 5, "courier20", "Costs:")
-                    .addText(235, 25, "courier16", costTxt)
                     .addText(10, 25, "courier16", descTxt);
+
+                var costY = 25;
+                for (var i = 0; i < building.resourceCosts.length; i++) {
+                    if (building.resourceCosts[i] > 0) {
+                        var clr = PlayerData.getInstance().resources[regionTier][i] >= building.resourceCosts[i] ?
+                            Phaser.Display.Color.GetColor(255, 255, 255) : Phaser.Display.Color.GetColor(255, 80, 80);
+                        this.floatingText.addText(235, costY, "courier16",
+                            Statics.RESOURCE_NAMES[i] + ": " + Common.numberString(building.resourceCosts[i]), clr);
+                        costY += 17;
+                    }
+                }
+                var clr = PlayerData.getInstance().gold >= building.goldCost ?
+                    Phaser.Display.Color.GetColor(255, 255, 255) : Phaser.Display.Color.GetColor(255, 80, 80);
+                this.floatingText.addText(235, costY, "courier16", "Gold: " + building.goldCost, clr);
             })
             .onPointerOutHandler(() => { this._clearTooltip(); });
     }
@@ -215,8 +235,8 @@ export class TileSelectWindow {
         if (this.buildingDesc !== undefined) {
             this.buildingDesc.destroy();
         }
-        if (this.buildingCosts !== undefined) {
-            this.buildingCosts.destroy();
+        for (var i = 0; i < this.buildingCostLabels.length; i++) {
+            this.buildingCostLabels[i].destroy();
         }
         if (this.upgradeButton !== undefined) {
             this.upgradeButton.destroy();

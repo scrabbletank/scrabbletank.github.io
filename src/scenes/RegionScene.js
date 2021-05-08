@@ -8,6 +8,7 @@ import { TileSelectWindow } from "../ui/TileSelectWindow";
 import { PlayerData } from "../data/PlayerData";
 import { RebirthDialog } from "../ui/RebirthDialog";
 import { TextButton } from "../ui/TextButton";
+import { ProgressBar } from "../ui/ProgressBar";
 
 var toPhaserColor = (clr) => { return Phaser.Display.Color.GetColor(clr[0], clr[1], clr[2]); };
 
@@ -37,6 +38,7 @@ export class RegionScene extends SceneUIBase {
         this.hoveredTile = [-1, -1];
         this.regionTiles = [];
         this.regionStats = undefined;
+        this.activeTile = undefined;
 
         WorldData.getInstance().onRegionChanged(() => { this._onRegionChanged(); });
     }
@@ -88,13 +90,12 @@ export class RegionScene extends SceneUIBase {
         }
 
         if (this.region.townData.townExplored === true) {
-            var prodBonus = this.region.townData.getProductionMulti();
-            var govBonus = (1 + PlayerData.getInstance().getTalentLevel("governance") * 0.04);
             var txt = "Daily Production:\n"
-            for (var i = 0; i < this.region.resourcesPerDay.length; i++) {
-                txt += " " + Statics.RESOURCE_NAMES[i] + ": " + (Math.floor(this.region.resourcesPerDay[i] * prodBonus * govBonus * 100) / 100) + "\n";
+            var resources = this.region._getResourcesPerDay();
+            for (var i = 0; i < resources.length; i++) {
+                txt += " " + Statics.RESOURCE_NAMES[i] + ": " + (Math.floor(resources[i] * 100) / 100) + "\n";
             }
-            this.regionStats = this.add.bitmapText(this.relativeX(660), this.relativeY(220), "courier20", txt);
+            this.regionStats = this.add.bitmapText(this.relativeX(660), this.relativeY(250), "courier20", txt);
         }
     }
 
@@ -304,6 +305,7 @@ export class RegionScene extends SceneUIBase {
     }
 
     _exploreTile(x, y, fromAutoExplore) {
+        this.activeTile = this.region.map[y][x];
         if (this.progression.unlocks.combatTab === false) {
             this.progression.registerFeatureUnlocked(Statics.UNLOCK_COMBAT_TAB,
                 "Well this isn't so bad, walking aimlessly through this fog covered wilderness.\n" +
@@ -509,6 +511,11 @@ export class RegionScene extends SceneUIBase {
         this.autoExploreLabel.setVisible(this.progression.persistentUnlocks.autoExplore);
         this.autoExploreButton.setVisible(this.progression.persistentUnlocks.autoExplore);
 
+        this.exploreLabel = this.add.bitmapText(this.relativeX(660), this.relativeY(220), "courier20", "Exploring:");
+        this.exploreProgressBar = new ProgressBar(this, this.relativeX(765), this.relativeY(220), 130, 20,
+            Phaser.Display.Color.GetColor(0, 0, 255), Phaser.Display.Color.GetColor(32, 32, 64));
+        this.exploreProgressBar.setFillPercent(0);
+
         this.floatingText = undefined;
 
         this.tileElements = [];
@@ -565,6 +572,11 @@ export class RegionScene extends SceneUIBase {
                 var texture = this._getBuildingImage(road[1], road[0]);
                 this.tileElements[road[0]][road[1]].building.setTexture(texture.sprite, texture.tile);
             }
+        }
+
+        if (this.activeTile !== undefined) {
+            const tileName = this.letters[this.activeTile.y] + "" + (this.activeTile.x + 1) + " - " + this.activeTile.name;
+            this.exploreProgressBar.setFillPercent(this.activeTile.amountExplored / this.activeTile.explorationNeeded, tileName)
         }
     }
 }

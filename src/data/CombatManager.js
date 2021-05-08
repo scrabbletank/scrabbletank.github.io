@@ -165,10 +165,18 @@ export class CombatManager {
             }
             rewards.friendship += this.activeTile.getFriendshipReward();
         }
+        if (player.getTalentLevel('bundle') > 0) {
+            var totalBundle = this.monsters.length * player.getTalentLevel('bundle') * 0.03;
+            var townProd = WorldData.getInstance().getCurrentRegion()._getResourcesPerDay();
+            for (var i = 0; i < townProd.length; i++) {
+                rewards.resource[i] += townProd[i] * totalBundle;
+            }
+        }
         rewards.gold = (rewards.gold + (this.activeTile.explored ? 1 : 5)) * this.activeTile.parent.townData.bountyMulti;
         rewards.shade *= MoonlightData.getInstance().getShadowBonus() * this.activeTile.parent.townData.getFriendshipBonus();
         rewards.friendship *= (1 + player.runeBonuses.friendshipMulti) *
-            (1 + MoonlightData.getInstance().challenges.outcast.completions * 0.1);
+            (1 + MoonlightData.getInstance().challenges.outcast.completions * 0.1) *
+            (1 + player.getTalentLevel('charisma') * 0.1);
 
         if (this.activeTile.isInvaded === true) {
             if (ProgressionStore.getInstance().unlocks.motes === false) {
@@ -219,7 +227,7 @@ export class CombatManager {
                 if (this.monsters[i].canAttack() === true) {
                     var crit = this.monsters[i].CritChance() > Math.random();
                     var dmg = this.monsters[i].attack(player.statBlock, crit);
-                    this.globalAttackCooldown = 150;
+                    this.globalAttackCooldown = Statics.GLOBAL_ATTACK_COOLDOWN;
 
                     if (this.playerHitCallback !== undefined) {
                         this.playerHitCallback(this.monsters[i], crit);
@@ -263,7 +271,7 @@ export class CombatManager {
                 }
 
                 this.target = this._getTarget();
-                this.globalAttackCooldown = 150;
+                this.globalAttackCooldown = Statics.GLOBAL_ATTACK_COOLDOWN;
             }
 
             if (this._monstersAlive() === false) {
