@@ -439,8 +439,14 @@ export class PlayerData {
         this.craftingCosts = saveObj.crf;
         this.gold = saveObj.gold;
         this.motes = saveObj.mote;
-        this.talents = saveObj.talents;
+        // this.talents = saveObj.talents;
         this.runes = saveObj.runes === undefined ? [] : saveObj.runes;
+
+        for (let key in Object.keys(saveObj.talents)) {
+            if (this.talents[key] !== undefined) {
+                this.talents[key] = saveObj.talents[key];
+            }
+        }
 
         var gearData = GearData.getInstance();
         if (saveObj.w !== "") {

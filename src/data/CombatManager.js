@@ -227,7 +227,7 @@ export class CombatManager {
                 if (this.monsters[i].canAttack() === true) {
                     var crit = this.monsters[i].CritChance() > Math.random();
                     var dmg = this.monsters[i].attack(player.statBlock, crit);
-                    this.globalAttackCooldown = 150;
+                    this.globalAttackCooldown = Statics.GLOBAL_ATTACK_COOLDOWN;
 
                     if (this.playerHitCallback !== undefined) {
                         this.playerHitCallback(this.monsters[i], crit);
@@ -271,7 +271,7 @@ export class CombatManager {
                 }
 
                 this.target = this._getTarget();
-                this.globalAttackCooldown = 150;
+                this.globalAttackCooldown = Statics.GLOBAL_ATTACK_COOLDOWN;
             }
 
             if (this._monstersAlive() === false) {

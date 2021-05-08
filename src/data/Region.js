@@ -945,7 +945,7 @@ export class Region {
     _getResourcesPerDay() {
         var resource = [];
         var prodBonus = this.townData.getProductionMulti() *
-            (1 + player.getTalentLevel("governance") * 0.04);
+            (1 + PlayerData.getInstance().getTalentLevel("governance") * 0.04);
         for (var i = 0; i < this.resourcesPerDay.length; i++) {
             resource.push(Math.max(0, this.resourcesPerDay[i] * prodBonus));
         }

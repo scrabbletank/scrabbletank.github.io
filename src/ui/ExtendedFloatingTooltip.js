@@ -11,8 +11,12 @@ export class ExtendedFloatingTooltip {
         this.textList = [];
     }
 
-    addText(x, y, font, text) {
-        this.textList.push(this.context.add.bitmapText(this.x + x, this.y + y, font, text));
+    addText(x, y, font, text, clr=undefined) {
+        var label = this.context.add.bitmapText(this.x + x, this.y + y, font, text);
+        if (clr !== undefined) {
+            label.setTint(clr);
+        }
+        this.textList.push(label);
         return this;
     }
 

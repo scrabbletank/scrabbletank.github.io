@@ -77,6 +77,7 @@ var Statics = {
 
     // COMBAT
     COMBAT_COOLDOWN: 2500,
+    GLOBAL_ATTACK_COOLDOWN: 100,
 
     // TOWN
     BASE_TAX_INCOME: 0.5,
