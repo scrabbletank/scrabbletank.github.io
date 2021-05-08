@@ -70,6 +70,19 @@ export class TooltipRegistry {
             case "Governance":
                 return "Spend less time fighting things and more time learning how they can fight for you! Increases economy and production by " +
                     (lvl * 4) + "% + (4%). This effect is multiplicative, not additive.";
+            case "Loot Goblin":
+                return "Your desire for loot is so strong you've summoned the Loot Goblin! Each enemy has a " +
+                    (lvl * 0.5) + "% + (0.5%) chance to be a Loot Goblin, giving 10x the usual reward.";
+            case "Bundle":
+                return "The villagers say they don't have anymore money to pay you a better bounty, so have these rocks instead! While " +
+                    "exploring you earn " + (lvl * 3) + "% + (3%) of the Towns daily production per kill.";
+            case "Charisma":
+                return "Your screams of terror while fighting the monsters has charmed the villagers. Gain " +
+                    (lvl * 10) + "% + (10%) more friendship from killing monsters.";
+            case "Town Guard":
+                return "Motivate the elderly to throw their bodies at enemy invasions! When the invasion counter reaches 100% you have a " +
+                    (lvl * 0.5) + "% + (0.5%) chance per defense to not be invaded! You'll still lose population, but that's a sacrifice " +
+                    "you're willing to make.";
         }
     }
 

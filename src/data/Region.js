@@ -118,13 +118,15 @@ export class TileData {
         this.invasionFights = 5;
     }
 
-    invade() {
+    invade(destroy=true) {
         this.isInvaded = false;
         this.invasionPower = 0;
         this.amountExplored = 0;
         this.invasionFights = 0;
-        this.explored = false;
-        this.revealed = true;
+        if (destroy === true) {
+            this.explored = false;
+            this.revealed = true;
+        }
     }
 
     getInvasionMulti() { return Math.min(5, Math.floor(Math.max(0, Math.log2(this.invasionPower / Statics.SIGHTING_DIVIDER)))); }
@@ -168,8 +170,12 @@ export class TileData {
             var max = (this.difficulty < 5 ? 2 : 3) + (this.difficulty > 15 ? 1 : 0)
             var numCreatures = this.difficulty > 0 ? Common.randint(min, max) : 1;
             for (var i = 0; i < numCreatures; i++) {
-                var num = Common.randint(0, this.enemies.length);
-                enemyList.push(CreatureRegistry.GetCreatureByName(this.enemies[num], this.difficulty));
+                if (Math.random() <= PlayerData.getInstance().getTalentLevel("lootgoblin") * 0.005) {
+                    enemyList.push(CreatureRegistry.GetCreatureByName("lootgoblin", this.difficulty));
+                } else {
+                    var num = Common.randint(0, this.enemies.length);
+                    enemyList.push(CreatureRegistry.GetCreatureByName(this.enemies[num], this.difficulty));
+                }
             }
         }
 
@@ -519,13 +525,18 @@ export class Region {
     _invade() {
         this.invasionCounter = 0;
         var tile = this.sightings[Common.randint(0, this.sightings.length)];
-        this.map[tile[0]][tile[1]].invade();
-        if (this.map[tile[0]][tile[1]].building != undefined) {
-            this.destroyBuilding(tile[1], tile[0]);
+        if (Math.random() <= tile.defense * PlayerData.getInstance().getTalentLevel('townguard') * 0.005) {
+            this.map[tile[0]][tile[1]].invade(false);
+            this.townData.currentPopulation = this.townData.currentPopulation * Statics.POP_MULTI_AFTER_INVASION;
+        } else {
+            this.map[tile[0]][tile[1]].invade();
+            if (this.map[tile[0]][tile[1]].building != undefined) {
+                this.destroyBuilding(tile[1], tile[0]);
+            }
+            this.townData.currentPopulation = this.townData.currentPopulation * Statics.POP_MULTI_AFTER_INVASION;
+            this.tilesExplored -= 1;
+            this.townData.setTilesExplored(this.tilesExplored);
         }
-        this.townData.currentPopulation = this.townData.currentPopulation * Statics.POP_MULTI_AFTER_INVASION;
-        this.tilesExplored -= 1;
-        this.townData.setTilesExplored(this.tilesExplored);
         this.endSighting(tile[1], tile[0]);
     }
 
@@ -622,13 +633,26 @@ export class Region {
                             bldCount += 1;
                             break;
                         case BuildingTypes.ECON:
-                        case BuildingTypes.OTHER:
                             bldCount += 0.30;
                             break;
                         case BuildingTypes.HOUSE:
                             bldCount += 0.15;
                         default:
                             break;
+                    }
+                }
+            }
+        }
+        return Math.pow(Statics.PRODUCTION_EFFICIENCY_MULT, bldCount - 1);
+    }
+
+    _getDockEfficiency(px, py, potential = false) {
+        let bldCount = potential === false ? 0 : 1;
+        for (var y = Math.max(0, py - 1); y < Math.min(this.height, py + 2); y++) {
+            for (var x = Math.max(0, px - 1); x < Math.min(this.width, px + 2); x++) {
+                if (this.map[y][x].building !== undefined) {
+                    if (this.map[y][x].building.name === "Docks") {
+                        bldCount += 1;
                     }
                 }
             }
@@ -772,7 +796,8 @@ export class Region {
                     this.resourcesPerDay[Statics.RESOURCE_CRYSTAL] += tile.building.tier * tile.yields[5] * prodBonus;
                     break;
                 case "Docks":
-                    this.townData.buildingIncome += 2 * tile.building.tier;
+                    var dockEff = this._getDockEfficiency(tile.x, tile.y);
+                    this.townData.buildingIncome += Statics.DOCK_BASE_ECON * tile.building.tier * dockEff;
                     break;
                 case "Alchemy Lab":
                     this.alchemyDrain += drain[tile.building.tier - 1];
@@ -917,18 +942,23 @@ export class Region {
     update(delta) {
     }
 
+    _getResourcesPerDay() {
+        var resource = [];
+        var prodBonus = this.townData.getProductionMulti() *
+            (1 + player.getTalentLevel("governance") * 0.04);
+        for (var i = 0; i < this.resourcesPerDay.length; i++) {
+            resource.push(Math.max(0, this.resourcesPerDay[i] * prodBonus));
+        }
+        return resource;
+    }
+
     updateDay() {
         this.townData.endOfDay();
         var player = new PlayerData();
 
         //add resources from buildings here
-        var resource = [];
-        var prodBonus = this.townData.getProductionMulti() *
-            (1 + player.getTalentLevel("governance") * 0.04);
         var tier = Math.min(this.regionLevel, 8);
-        for (var i = 0; i < this.resourcesPerDay.length; i++) {
-            resource.push(Math.max(0, this.resourcesPerDay[i] * prodBonus));
-        }
+        var resource = this._getResourcesPerDay();
         player.addResource(resource, tier);
 
         // calculate alchemy production here, first drain resources, and then give proportional resources of next tier

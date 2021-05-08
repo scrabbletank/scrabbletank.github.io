@@ -3,6 +3,8 @@ import { Statics } from "../data/Statics";
 
 export class Combat {
     static getAttackSpeedMultiplier(hit, evasion) {
+        hit = Math.max(1, hit);
+        evasion = Math.max(1, evasion);
         return Math.pow(hit, Statics.ATTACK_SPEED_POWER) / Math.pow(evasion, Statics.ATTACK_SPEED_POWER);
     }
 

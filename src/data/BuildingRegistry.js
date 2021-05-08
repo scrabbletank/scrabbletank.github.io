@@ -37,7 +37,7 @@ export class BuildingRegistry {
                 return new Building("Road", "road", 1, BuildingTypes.ROAD, { sprite: "roadicons", tile: 0, w: 32, h: 32 },
                     [5, 0, 0, 0, 3, 0], 5, 7);
             case "docks":
-                return new Building("Docks", "docks", 1, BuildingTypes.ECON, { sprite: "bldicons", tile: 34, w: 32, h: 32 },
+                return new Building("Docks", "docks", 1, BuildingTypes.ROAD, { sprite: "bldicons", tile: 34, w: 32, h: 32 },
                     [15, 10, 0, 0, 10, 0], 50, 5);
             case "town":
                 return new Building("Town", "town", 3, BuildingTypes.ROAD, { sprite: "roadicons", tile: 38, w: 50, h: 50 },

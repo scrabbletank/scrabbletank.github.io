@@ -88,11 +88,10 @@ export class RegionScene extends SceneUIBase {
         }
 
         if (this.region.townData.townExplored === true) {
-            var prodBonus = this.region.townData.getProductionMulti();
-            var govBonus = (1 + PlayerData.getInstance().getTalentLevel("governance") * 0.04);
             var txt = "Daily Production:\n"
-            for (var i = 0; i < this.region.resourcesPerDay.length; i++) {
-                txt += " " + Statics.RESOURCE_NAMES[i] + ": " + (Math.floor(this.region.resourcesPerDay[i] * prodBonus * govBonus * 100) / 100) + "\n";
+            var resources = this.region._getResourcesPerDay();
+            for (var i = 0; i < resources.length; i++) {
+                txt += " " + Statics.RESOURCE_NAMES[i] + ": " + (Math.floor(resources * 100) / 100) + "\n";
             }
             this.regionStats = this.add.bitmapText(this.relativeX(660), this.relativeY(220), "courier20", txt);
         }

@@ -80,7 +80,11 @@ export class PlayerData {
             bounty: { name: "Bounty", level: 0, maxLevel: -1, requires: [], texture: { sprite: "icons", tile: 7 } },
             explorer: { name: "Explorer", level: 0, maxLevel: -1, requires: [], texture: { sprite: "icons", tile: 15 } },
             guardian: { name: "Guardian", level: 0, maxLevel: 5, requires: [], texture: { sprite: "icons", tile: 39 } },
-            governance: { name: "Governance", level: 0, maxLevel: 10, requires: [], texture: { sprite: "icons", tile: 38 } }
+            governance: { name: "Governance", level: 0, maxLevel: 10, requires: [], texture: { sprite: "icons", tile: 38 } },
+            lootgoblin: { name: "Loot Goblin", level: 0, maxLevel: 10, requires: ["bounty"], texture: { sprite: "icons", tile: 51 } },
+            bundle: { name: "Bundle", level: 0, maxLevel: -1, requires: ["explorer"], texture: { sprite: "icons", tile: 52 } },
+            charisma: { name: "Charisma", level: 0, maxLevel: -1, requires: ["governance"], texture: { sprite: "icons", tile: 53 } },
+            townguard: { name: "Town Guard", level: 0, maxLevel: -1, requires: ["guardian"], texture: { sprite: "icons", tile: 50 } }
         }
 
         this.runeBonuses = {
