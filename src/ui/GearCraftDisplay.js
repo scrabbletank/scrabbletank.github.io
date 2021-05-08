@@ -45,6 +45,7 @@ export class GearCraftDisplay {
         this.statLabels = []
         var txt = "";
         var bonus = gear.getStatBonuses();
+        const resourceTier = Math.max(0, gear.tier - 1);
         for (const prop in bonus) {
             if (bonus[prop] !== 0) {
                 txt += Common.getBonusText(prop, bonus[prop]) + "\n";
@@ -54,13 +55,19 @@ export class GearCraftDisplay {
         if (progression.unlocks.resourceUI === true) {
             var player = new PlayerData();
             var craftCostMulti = gear.tier <= 0 ? 1 : player.craftingCosts[gear.tier - 1];
-            txt = "";
+            var idx = 0;
             for (var i = 0; i < gear.costs.length; i++) {
                 if (gear.costs[i] !== 0) {
-                    txt += Common.getCostText(i, Math.floor(gear.costs[i] * craftCostMulti)) + '\n';
+                    txt = Common.getCostText(i, Math.floor(gear.costs[i] * craftCostMulti));
+                    var clr = player.resources[resourceTier][i] >= gear.costs[i] * craftCostMulti ?
+                        Phaser.Display.Color.GetColor(255, 255, 255) : Phaser.Display.Color.GetColor(255, 80, 80);
+                    var label = sceneContext.add.bitmapText(x + 148, y + 45 + (17 * idx), "courier16", txt);
+                    label.setTint(clr);
+                    this.statLabels.push(label);
+                    idx++;
                 }
             }
-            this.statLabels.push(sceneContext.add.bitmapText(x + 148, y + 45, "courier16", txt));
+            // this.statLabels.push(sceneContext.add.bitmapText(x + 148, y + 45, "courier16", txt));
         }
         this.equipBtn = undefined;
         this.upgradeBtn = undefined;

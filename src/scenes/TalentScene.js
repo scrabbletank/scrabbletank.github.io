@@ -123,8 +123,15 @@ export class TalentScene extends SceneUIBase {
         if (this.FloatingTooltip !== undefined) {
             this._disableTooltip();
         }
-        var txt = talent.name + " Lv" + this.player.getTalentLevel(talentName) + "\n" +
-            TooltipRegistry.getTalentTooltip(talent, this.player.getTalentLevel(talentName)) + "\n\n";
+        var txt = "";
+        if (talent.maxLevel !== -1) {
+            txt = talent.name + " Lv" + this.player.getTalentLevel(talentName) + "/" +
+                talent.maxLevel + "\n" +
+                TooltipRegistry.getTalentTooltip(talent, this.player.getTalentLevel(talentName)) + "\n\n";
+        } else {
+            txt = talent.name + " Lv" + this.player.getTalentLevel(talentName) + "\n" +
+                TooltipRegistry.getTalentTooltip(talent, this.player.getTalentLevel(talentName)) + "\n\n";
+        }
 
         if (talent.requires.length > 0) {
             txt += "Requires: ";
