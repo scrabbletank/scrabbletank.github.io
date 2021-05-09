@@ -43,8 +43,9 @@ export class TalentScene extends SceneUIBase {
             .setInteractive();
 
         this.floatingText = undefined;
-        this.talentLabel = this.add.bitmapText(this.relativeX(450), this.relativeY(25), "courier20", "Talent Points\n0", 20, 1).setOrigin(0.5);
         this.player = new PlayerData();
+        this.talentLabel = this.add.bitmapText(this.relativeX(450), this.relativeY(25), "courier20",
+            "Talent Points\n" + this.player.talentPoints, 20, 1).setOrigin(0.5);
         this.talentButtons = [];
 
         this._refreshView();

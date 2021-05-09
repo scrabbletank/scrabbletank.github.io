@@ -439,13 +439,19 @@ export class PlayerData {
         this.craftingCosts = saveObj.crf;
         this.gold = saveObj.gold;
         this.motes = saveObj.mote;
-        // this.talents = saveObj.talents;
         this.runes = saveObj.runes === undefined ? [] : saveObj.runes;
 
-        for (let key in Object.keys(saveObj.talents)) {
-            if (this.talents[key] !== undefined) {
-                this.talents[key] = saveObj.talents[key];
+        var keys = Object.keys(saveObj.talents);
+        var whelp = 0;
+        for (var i = 0; i < keys.length; i++) {
+            if (this.talents[keys[i]] !== undefined) {
+                this.talents[keys[i]] = saveObj.talents[keys[i]];
+                whelp += this.talents[keys[i]].level;
             }
+        }
+
+        if (whelp != this.talentPoints + this.talentLevel) {
+            this.talentPoints = this.talentLevel - whelp + 5;
         }
 
         var gearData = GearData.getInstance();
