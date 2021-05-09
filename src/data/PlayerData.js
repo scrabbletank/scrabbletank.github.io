@@ -450,8 +450,9 @@ export class PlayerData {
             }
         }
 
-        if (whelp != this.talentPoints + (this.talentLevel - 1)) {
+        if (whelp + this.talentPoints != (this.talentLevel - 1)) {
             this.talentPoints = (this.talentLevel - 1) - whelp + 5;
+            this.talentLevel += 5;
         }
 
         var gearData = GearData.getInstance();
