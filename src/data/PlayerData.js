@@ -450,7 +450,6 @@ export class PlayerData {
             }
         }
 
-        console.log(whelp, this.talentPoints, this.talentLevel);
         if (whelp != this.talentPoints + (this.talentLevel - 1)) {
             this.talentPoints = (this.talentLevel - 1) - whelp + 5;
         }
