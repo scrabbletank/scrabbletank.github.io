@@ -445,7 +445,7 @@ export class PlayerData {
         var whelp = 0;
         for (var i = 0; i < keys.length; i++) {
             if (this.talents[keys[i]] !== undefined) {
-                this.talents[keys[i]] = saveObj.talents[keys[i]];
+                this.talents[keys[i]].level = saveObj.talents[keys[i]].level;
                 whelp += this.talents[keys[i]].level;
             }
         }
