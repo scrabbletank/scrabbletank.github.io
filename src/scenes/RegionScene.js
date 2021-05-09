@@ -570,7 +570,10 @@ export class RegionScene extends SceneUIBase {
             for (var i = 0; i < this.region.roads.length; i++) {
                 var road = this.region.roads[i];
                 var texture = this._getBuildingImage(road[1], road[0]);
-                this.tileElements[road[0]][road[1]].building.setTexture(texture.sprite, texture.tile);
+                // this can happen if the town isn't discovered yet and they build a building, skip the town road for now.
+                if (this.tileElements[road[0]][road[1]].building !== undefined) {
+                    this.tileElements[road[0]][road[1]].building.setTexture(texture.sprite, texture.tile);
+                }
             }
         }
 

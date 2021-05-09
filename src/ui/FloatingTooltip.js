@@ -1,13 +1,11 @@
 
 export class FloatingTooltip {
-    constructor(sceneContext, tooltipMessage, x, y, width, height, font = "courier20", fontSize = 20) {
-        this.boundingBox = sceneContext.add.rectangle(x, y, width, height, 0x222222).setOrigin(0);
+    constructor(sceneContext, tooltipMessage, x, y, width, height, font = "courier20", fontSize = 20, depth=0) {
+        this.boundingBox = sceneContext.add.rectangle(x, y, width, height, 0x222222).setOrigin(0).setDepth(depth);
         this.boundingBox.strokeColor = 0xbbbbbb;
         this.boundingBox.isStroked = true;
         this.boundingBox.lineWidth = 2;
-        this.text = sceneContext.add.bitmapText(x + width / 2, y + height / 2, font, tooltipMessage, fontSize, 1).setOrigin(0.5);
-        this.boundingBox.setDepth(99);
-        this.text.setDepth(100);
+        this.text = sceneContext.add.bitmapText(x + width / 2, y + height / 2, font, tooltipMessage, fontSize, 1).setOrigin(0.5).setDepth(depth);
     }
 
     setVisible(visible) {

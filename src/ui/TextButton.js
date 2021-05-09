@@ -1,11 +1,11 @@
 export class TextButton {
-    constructor(sceneContext, x, y, width, height, text) {
-        this.backgroundRect = sceneContext.add.rectangle(x, y, width, height, 0x000000).setOrigin(0, 0);
+    constructor(sceneContext, x, y, width, height, text, depth=0) {
+        this.backgroundRect = sceneContext.add.rectangle(x, y, width, height, 0x000000).setOrigin(0, 0).setDepth(depth);
         this.backgroundRect.isStroked = true;
         this.backgroundRect.strokeColor = Phaser.Display.Color.GetColor(255, 255, 255);
         this.backgroundRect.lineWidth = 1;
         this.rawText = text;
-        this.text = sceneContext.add.bitmapText(x + width / 2, y + height / 2 -1, "courier20", text).setOrigin(0.5);
+        this.text = sceneContext.add.bitmapText(x + width / 2, y + height / 2 -1, "courier20", text).setOrigin(0.5).setDepth(depth);
         this.enabled = true;
         this.width = width;
         this.height = height;

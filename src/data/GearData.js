@@ -36,6 +36,7 @@ export class GearData {
     }
 
     load(saveObj, ver) {
+        this._initGear();
         for (var i = 0; i < saveObj.gear.length; i++) {
             this.gear[i].load(saveObj.gear[i], ver);
         }

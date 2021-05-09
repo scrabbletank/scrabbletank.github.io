@@ -1,10 +1,10 @@
 export class ImageButton {
-    constructor(sceneContext, x, y, width, height, texture) {
-        this.backgroundRect = sceneContext.add.rectangle(x, y, width, height, 0x000000).setOrigin(0, 0);
+    constructor(sceneContext, x, y, width, height, texture, depth=0) {
+        this.backgroundRect = sceneContext.add.rectangle(x, y, width, height, 0x000000).setOrigin(0, 0).setDepth(depth);
         this.backgroundRect.isStroked = true;
         this.backgroundRect.strokeColor = Phaser.Display.Color.GetColor(255, 255, 255);
         this.backgroundRect.lineWidth = 1;
-        this.img = sceneContext.add.image(x + width / 2, y + height / 2, texture.sprite, texture.tile).setOrigin(0.5);
+        this.img = sceneContext.add.image(x + width / 2, y + height / 2, texture.sprite, texture.tile).setOrigin(0.5).setDepth(depth);
         this.img.displayWidth = width;
         this.img.displayHeight = height;
         this.enabled = true;

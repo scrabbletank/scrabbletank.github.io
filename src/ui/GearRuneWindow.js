@@ -19,12 +19,13 @@ export class GearRuneWindow {
         this.backRect.isStroked = true;
         this.backRect.strokeColor = Phaser.Display.Color.GetColor(128, 128, 128);
         this.backRect.lineWidth = 2;
+        this.backRect.setDepth(998);
         this.separator = sceneContext.add.rectangle(x + 250, y, 2, 500,
-            Phaser.Display.Color.GetColor(128, 128, 128)).setOrigin(0, 0);
+            Phaser.Display.Color.GetColor(128, 128, 128)).setOrigin(0, 0).setDepth(999);
 
-        this.socketTitle = sceneContext.add.bitmapText(x + 5, y + 5, "courier20", "SOCKETS").setOrigin(0, 0);
-        this.runeTitle = sceneContext.add.bitmapText(x + 260, y + 5, "courier20", "RUNES").setOrigin(0, 0);
-        this.cancelBtn = new TextButton(this.scene, this.x + 575, this.y + 475, 120, 20, "Cancel");
+        this.socketTitle = sceneContext.add.bitmapText(x + 5, y + 5, "courier20", "SOCKETS").setOrigin(0, 0).setDepth(999);
+        this.runeTitle = sceneContext.add.bitmapText(x + 260, y + 5, "courier20", "RUNES").setOrigin(0, 0).setDepth(999);
+        this.cancelBtn = new TextButton(this.scene, this.x + 575, this.y + 475, 120, 20, "Cancel", 999);
 
         this.gearRuneImages = [];
         this.runeBonuses = [];
@@ -57,7 +58,8 @@ export class GearRuneWindow {
 
         var t = this.y + 140;
         for (var i = 0; i < this.gear.compiledRunes.length; i++) {
-            var text = this.scene.add.bitmapText(this.x + 15, t, "courier20", this.gear.compiledRunes[i].word + " Lv" + this.gear.compiledRunes[i].level);
+            var text = this.scene.add.bitmapText(this.x + 15, t, "courier20",
+                this.gear.compiledRunes[i].word + " Lv" + this.gear.compiledRunes[i].level).setDepth(999);;
             text.setTint(Phaser.Display.Color.GetColor(200, 0, 200));
             this.runeBonuses.push(text);
 
@@ -65,7 +67,7 @@ export class GearRuneWindow {
             for (const prop in this.gear.compiledRunes[i].bonus) {
                 txt += TooltipRegistry.getRuneBonusText(prop, this.gear.compiledRunes[i].bonus[prop]) + "\n";
             }
-            text = this.scene.add.bitmapText(this.x + 15, t + 20, "courier16", txt);
+            text = this.scene.add.bitmapText(this.x + 15, t + 20, "courier16", txt).setDepth(999);;
             this.runeBonuses.push(text);
 
             t += 20 + text.getTextBounds(true).local.height + 10;
@@ -104,7 +106,7 @@ export class GearRuneWindow {
         for (const prop in bonus) {
             txt += TooltipRegistry.getRuneBonusText(prop, bonus[prop]) + "\n";
         }
-        var runeBtn = new ImageButton(sceneContext, x, y, 48, 48, RuneRegistry.getRuneTexture(rune.word));
+        var runeBtn = new ImageButton(sceneContext, x, y, 48, 48, RuneRegistry.getRuneTexture(rune.word), 999);
         runeBtn.onClickHandler(() => { this._slotRune(idx); });
         if (rune.word != "Empty") {
             runeBtn.onPointerOverHandler(() => { this._showTooltip(sceneContext, txt, x, y); })
@@ -120,7 +122,7 @@ export class GearRuneWindow {
         for (const prop in bonus) {
             txt += TooltipRegistry.getRuneBonusText(prop, bonus[prop]) + "\n";
         }
-        var runeBtn = new ImageButton(sceneContext, x, y, 48, 48, RuneRegistry.getRuneTexture(rune.word));
+        var runeBtn = new ImageButton(sceneContext, x, y, 48, 48, RuneRegistry.getRuneTexture(rune.word), 999);
         runeBtn.onClickHandler(() => { this._selectRune(idx); })
             .onPointerOverHandler(() => { this._showTooltip(sceneContext, txt, x, y); })
             .onPointerOutHandler(() => { this._removeTooltip() });
@@ -133,7 +135,7 @@ export class GearRuneWindow {
         }
         var posX = x + (x + 200 > 1100 ? -152 : 0);
         var posY = y + (y - 60 < 100 ? 50 : -62);
-        this.floatingText = new FloatingTooltip(scenContext, text, posX, posY, 200, 60, "courier16", 16);
+        this.floatingText = new FloatingTooltip(scenContext, text, posX, posY, 200, 60, "courier16", 16, 1000);
     }
 
     _removeTooltip() {

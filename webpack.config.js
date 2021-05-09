@@ -5,7 +5,7 @@ const path = require('path');
 
 module.exports = {
     
-    mode: "production",
+    mode: "development",
     externals: {
       phaser: {
         root: "phaser",
