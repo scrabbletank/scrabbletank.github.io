@@ -45,7 +45,7 @@ export class TownScene extends SceneUIBase {
         this.townNameLabel = this.add.bitmapText(this.relativeX(10), this.relativeY(10), "courier20", "Town");
         this.regionNameLabel = this.add.bitmapText(this.relativeX(10), this.relativeY(30), "courier16", "Region ");
         this.statsLabel = this.add.bitmapText(this.relativeX(15), this.relativeY(50), "courier16", "");
-        this.nightLabourBtn = new TextButton(this, this.relativeX(15), this.relativeY(50), 180, 20, "Turn On Night Labour")
+        this.nightLabourBtn = new TextButton(this, this.relativeX(15), this.relativeY(50), 220, 20, "Turn On Night Labour")
             .onClickHandler(() => { this._toggleNightLabour(); });
         this.nightLabourBtn.setVisible(false);
 
@@ -133,8 +133,8 @@ export class TownScene extends SceneUIBase {
         this.regionNameLabel.setText("Region " + (region.regionLevel + 1));
 
         if (MoonlightData.getInstance().moonperks.nightlabour.level > 0) {
-            var h = this.statsLabel.getTextBounds().local.height + 20;
-            this.nightLabourBtn.setPosition(this.relativeX(15), h);
+            var h = this.statsLabel.getTextBounds().local.height + 60;
+            this.nightLabourBtn.setPosition(this.relativeX(15), this.relativeY(h));
             this.nightLabourBtn.setVisible(true);
         }
 

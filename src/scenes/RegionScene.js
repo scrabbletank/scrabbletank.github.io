@@ -262,6 +262,9 @@ export class RegionScene extends SceneUIBase {
                 this._updateRegionStats();
                 break;
             case "upgrade":
+                if (blob.tile.building === undefined) {
+                    break;
+                }
                 var player = new PlayerData();
                 var tier = Math.floor(this.region.regionLevel);
                 if (Common.canCraft(blob.tile.building.resourceCosts, player.resources[tier]) === true &&

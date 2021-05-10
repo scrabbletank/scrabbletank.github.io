@@ -192,10 +192,10 @@ export class TownData {
     }
     toggleNightLabour() {
         if (this.nightLabourActive === true) {
-            this.baseIncome = Statics.BASE_TAX_INCOME + moonData.moonperks.vault.level * 0.1;
+            this.baseIncome = Statics.BASE_TAX_INCOME + MoonlightData.getInstance().moonperks.vault.level * 0.1;
             this.nightLabourActive = false;
         } else {
-            this.baseIncome = (Statics.BASE_TAX_INCOME + moonData.moonperks.vault.level * 0.1) / 2;
+            this.baseIncome = (Statics.BASE_TAX_INCOME + MoonlightData.getInstance().moonperks.vault.level * 0.1) / 2;
             this.nightLabourActive = true;
         }
     }
