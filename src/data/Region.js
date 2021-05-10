@@ -182,7 +182,7 @@ export class TileData {
         for (var i = 0; i < enemyList.length; i++) {
             if (enemyList[i].level > 100) {
                 if (Math.random() < 0.05) {
-                    enemyList[i].addTrait("Dire", 1);
+                    enemyList[i].addTrait(Statics.TRAIT_DIRE, 1);
                 }
             }
             for (var t = 0; t < this.parent.traits.length; t++) {
