@@ -322,6 +322,7 @@ export class TooltipRegistry {
                 return "Beserk " + trait.level + ": Hit chance is increased by " + trait.level * 20 + "%, health regen by " +
                     trait.level * 10 + "% and has a " + Math.floor(((1 - Math.pow(0.92, trait.level)) * 100)) + "% chance to trigger Follow Through.";
         }
+        return trait.type + ": Missing Tooltip. Better report this to the dev.";
     }
 
     static getRuneBonusText(prop, value) {
