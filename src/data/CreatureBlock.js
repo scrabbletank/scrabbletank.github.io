@@ -330,7 +330,7 @@ export class CreatureBlock {
                     extraStats.defense += this.Defense() * (0.2 * trait.level);
                     extraStats.accuracy += this.Accuracy() * (0.2 * trait.level);
                     extraStats.xpReward += this.xpReward * (0.75 * trait.level);
-                    extraStats.motes += trait.level + Math.floor(this.level / 5);
+                    extraStats.motes += trait.level + Math.floor(this.level / 20);
                     break;
                 case Statics.TRAIT_MONSTROUS:
                     extraStats.damageMin += this.DamageMin() * (0.1 * trait.level);

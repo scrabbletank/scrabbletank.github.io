@@ -325,6 +325,7 @@ export class TooltipRegistry {
                 return "First Strike " + trait.level + ": Starts combat with their attack bar filled to 95% and gain " +
                     trait.level * 25 + "% more Accuracy.";
         }
+        return trait.type + ": Missing Tooltip. Better report this to the dev.";
     }
 
     static getRuneBonusText(prop, value) {
