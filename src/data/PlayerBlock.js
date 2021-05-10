@@ -2,7 +2,7 @@ import { CreatureBlock } from "./CreatureBlock";
 import { Statics } from "./Statics";
 import { MoonlightData } from "./MoonlightData";
 
-export class PlayerBlock extends CreatureBlock {
+export class AdventurerBlock extends CreatureBlock {
     constructor(player) {
         super();
         this.player = player;
@@ -165,6 +165,10 @@ export class PlayerBlock extends CreatureBlock {
     AttackSpeed() {
         var ret = this.attackSpeed / (1 + this.player.runeBonuses.baseAttackSpeed);
         return ret;
+    }
+
+    getStatTooltip() {
+
     }
 
     takeDamage(damage, isCrit, trueDamage = false) {

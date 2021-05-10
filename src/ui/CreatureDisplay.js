@@ -81,6 +81,9 @@ export class CreatureDisplay {
                 case Statics.TRAIT_BESERK:
                     sprite = { sprite: "icons", tile: 45 };
                     break;
+                case Statics.TRAIT_FIRSTSTRIKE:
+                    sprite = { sprite: "icons", tile: 56 };
+                    break;
             }
             this.traitButtons.push(new TooltipImage(this.sceneContext, this.x + 75 + (i * 20), this.y + 105, 16, 16, sprite,
                 TooltipRegistry.getTraitTooltip(creature.traits[i])));

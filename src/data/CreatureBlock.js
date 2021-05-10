@@ -316,6 +316,7 @@ export class CreatureBlock {
             xpReward: 0,
             motes: 0
         };
+        var firstStrike = false;
 
         for (var i = 0; i < this.traits.length; i++) {
             var trait = this.traits[i];
@@ -351,6 +352,10 @@ export class CreatureBlock {
                     extraStats.hit += this.Hit() * (0.2 * trait.level);
                     extraStats.healthRegen += this.HealthRegen() * (0.1 * trait.level);
                     break;
+                case Statics.TRAIT_FIRSTSTRIKE:
+                    firstStrike = true;
+                    extraStats.accuracy += this.Accuracy() * (0.25 * trait.level);
+                    break;
             }
             extraStats.xpReward += this.xpReward * (1 + MoonlightData.getInstance().challenges.megamonsters.completions * 0.01 * trait.level);
         }
@@ -361,6 +366,9 @@ export class CreatureBlock {
         this.xpReward += extraStats.xpReward;
         this.motes += extraStats.motes;
         this.currentHealth = this.MaxHealth();
+        if (firstStrike === true) {
+            this.attackCooldown = this.AttackSpeed() * 0.95;
+        }
     }
 
     addTrait(trait, level) {

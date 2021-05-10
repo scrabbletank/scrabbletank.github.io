@@ -80,7 +80,7 @@ export class WorldData {
             traits.push({ type: settings.fixedTraits[i].type, level: settings.fixedTraits[i].level });
         }
         for (var i = 0; i < count + settings.startingTraits; i++) {
-            var traitType = Common.randint(1, 7);
+            var traitType = Common.randint(1, 8);
             var temp = traits.find(t => t.type === traitType);
             if (temp !== undefined) {
                 temp.level += 1;

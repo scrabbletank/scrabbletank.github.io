@@ -151,6 +151,9 @@ export class WorldScene extends SceneUIBase {
                     case Statics.TRAIT_BESERK:
                         txt += "Beserk " + region.traits[i].level;
                         break;
+                    case Statics.TRAIT_FIRSTSTRIKE:
+                        txt += "First Strike " + region.traits[i].level;
+                        break;
                 }
                 if (i < region.traits.length - 1) {
                     txt += ", ";

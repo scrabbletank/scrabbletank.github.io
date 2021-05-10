@@ -304,7 +304,7 @@ export class TooltipRegistry {
     static getTraitTooltip(trait) {
         switch (trait.type) {
             case Statics.TRAIT_DIRE:
-                return "Dire " + trait.level + ": Core stats are increased by " + trait.level * 20 + "%, drops motes and gives " +
+                return "Dire " + trait.level + ": Core stats are increased by " + trait.level * 20 + "%, drops motes, and gives " +
                     trait.level * 75 + "% more experience.";
             case Statics.TRAIT_POISONED:
                 return "Poisoned " + trait.level + ": Deals " + trait.level * 3 + "% of its max damage per second as true damage.";
@@ -321,6 +321,9 @@ export class TooltipRegistry {
             case Statics.TRAIT_BESERK:
                 return "Beserk " + trait.level + ": Hit chance is increased by " + trait.level * 20 + "%, health regen by " +
                     trait.level * 10 + "% and has a " + Math.floor(((1 - Math.pow(0.92, trait.level)) * 100)) + "% chance to trigger Follow Through.";
+            case Statics.TRAIT_FIRSTSTRIKE:
+                return "First Strike " + trait.level + ": Starts combat with their attack bar filled to 95% and gain " +
+                    trait.level * 25 + "% more Accuracy.";
         }
     }
 

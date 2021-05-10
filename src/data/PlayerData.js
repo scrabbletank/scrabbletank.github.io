@@ -1,5 +1,5 @@
 import { Statics } from "./Statics";
-import { PlayerBlock } from "./PlayerBlock";
+import { AdventurerBlock } from "./PlayerBlock";
 import { WorldData } from "./WorldData";
 import { GearData } from "./GearData";
 import { MoonlightData } from "./MoonlightData";
@@ -10,7 +10,7 @@ import { DynamicSettings } from "./DynamicSettings";
 export class PlayerData {
     constructor() {
         if (!PlayerData.instance) {
-            this.statBlock = new PlayerBlock(this);
+            this.statBlock = new AdventurerBlock(this);
             this.statChangedHandlers = [];
             this.resourceChangedHandlers = [];
             this.talentChangedHandlers = [];
@@ -50,6 +50,7 @@ export class PlayerData {
         this.gold = 0;
         this.motes = 0;
         this.challengeExploreMulti = 1 + (MoonlightData.getInstance().challenges.explore.completions * 0.25);
+        this.playerClass = Statics.CLASS_ADVENTURER;
 
         this.weapon = undefined;
         this.armor = undefined;
@@ -176,6 +177,77 @@ export class PlayerData {
                 break;
         }
         this._onStatChanged();
+    }
+
+    strTooltip() {
+        switch (this.playerClass) {
+            case Statics.CLASS_ADVENTURER:
+                return "";
+            case Statics.CLASS_BESERKER:
+                return "";
+            case Statics.CLASS_WIZARD:
+                return "";
+        }
+    }
+    dexTooltip() {
+        switch (this.playerClass) {
+            case Statics.CLASS_ADVENTURER:
+                return "";
+            case Statics.CLASS_BESERKER:
+                return "";
+            case Statics.CLASS_WIZARD:
+                return "";
+        }
+    }
+    agiTooltip() {
+        switch (this.playerClass) {
+            case Statics.CLASS_ADVENTURER:
+                return "";
+            case Statics.CLASS_BESERKER:
+                return "";
+            case Statics.CLASS_WIZARD:
+                return "";
+        }
+    }
+    endTooltip() {
+        switch (this.playerClass) {
+            case Statics.CLASS_ADVENTURER:
+                return "";
+            case Statics.CLASS_BESERKER:
+                return "";
+            case Statics.CLASS_WIZARD:
+                return "";
+        }
+    }
+    recTooltip() {
+        switch (this.playerClass) {
+            case Statics.CLASS_ADVENTURER:
+                return "";
+            case Statics.CLASS_BESERKER:
+                return "";
+            case Statics.CLASS_WIZARD:
+                return "";
+        }
+    }
+    defTooltip() {
+        switch (this.playerClass) {
+            case Statics.CLASS_ADVENTURER:
+                return "";
+            case Statics.CLASS_BESERKER:
+                return "";
+            case Statics.CLASS_WIZARD:
+                return "";
+        }
+    }
+    accTooltip() {
+        switch (this.playerClass) {
+            case Statics.CLASS_ADVENTURER:
+                return "";
+            case Statics.CLASS_BESERKER:
+                return "";
+            case Statics.CLASS_WIZARD:
+                return "";
+        }
     }
 
     _onStatChanged() {
@@ -413,6 +485,7 @@ export class PlayerData {
             res: this.resources,
             rtr: this.resourceTierReached,
             crf: this.craftingCosts,
+            pc: this.playerClass,
             gold: this.gold,
             mote: this.motes,
             talents: this.talents,
@@ -437,22 +510,16 @@ export class PlayerData {
         this.resources = saveObj.res;
         this.resourceTierReached = saveObj.rtr;
         this.craftingCosts = saveObj.crf;
+        this.playerClass = saveObj.pc === undefined ? Statics.CLASS_ADVENTURER : saveObj.pc;
         this.gold = saveObj.gold;
         this.motes = saveObj.mote;
         this.runes = saveObj.runes === undefined ? [] : saveObj.runes;
 
         var keys = Object.keys(saveObj.talents);
-        var whelp = 0;
         for (var i = 0; i < keys.length; i++) {
             if (this.talents[keys[i]] !== undefined) {
                 this.talents[keys[i]].level = saveObj.talents[keys[i]].level;
-                whelp += this.talents[keys[i]].level;
             }
-        }
-
-        if (whelp + this.talentPoints != (this.talentLevel - 1)) {
-            this.talentPoints = (this.talentLevel - 1) - whelp + 5;
-            this.talentLevel += 5;
         }
 
         var gearData = GearData.getInstance();
