@@ -140,7 +140,7 @@ export class TileData {
         }
         var exploreMulti = PlayerData.getInstance().getExploreMulti() *
             DynamicSettings.getInstance().exploreSpeed *
-            WorldData.getInstance().getCurrentRegion().townData.exploreMulti;
+            this.parent.townData.exploreMulti;
         exploreMulti = exploreMulti / this.exploreSpeed;
         this.amountExplored += delta * exploreMulti;
 
