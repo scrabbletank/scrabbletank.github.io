@@ -161,7 +161,7 @@ export class CombatScene extends SceneUIBase {
         this.invasionCounter.setText("Invaders: " + (tile.invasionFights * 3));
         this.combatManager.setTile(tile);
         this.combatManager.initFight();
-        this.regionTier = WorldData.instance.getCurrentRegion().regionLevel;
+        this.regionTier = tile.parent.regionLevel;
     }
 
     rebirth() {

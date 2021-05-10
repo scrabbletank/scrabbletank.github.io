@@ -239,7 +239,7 @@ export class GameScene extends SceneUIBase {
         this.registry.set('disableTooltip', () => { this._disableTooltip(); });
 
         this.regionScene = new RegionScene([200, 100], "RegionScene");
-        this.regionScene.registerEvent("onTileClick", (x, y, ae) => { this._handleTileClick(x, y, ae); });
+        this.regionScene.registerEvent("onTileClick", (t, ae) => { this._handleTileClick(t, ae); });
 
         this.combatScene = new CombatScene([200, 100], "CombatScene");
         this.combatScene.registerEvent("onReward", (a) => { this._onRewardCallback(a); });
@@ -516,14 +516,13 @@ export class GameScene extends SceneUIBase {
         }
     }
 
-    _handleTileClick(x, y, fromAutoExplore = false) {
-        var region = this.worldData.getCurrentRegion();
-        if (region.isExplorable(x, y)) {
+    _handleTileClick(tile, fromAutoExplore = false) {
+        if (tile.parent.isExplorable(tile.x, tile.y)) {
             if (fromAutoExplore === false) {
                 this.scene.bringToTop("CombatScene");
                 this.scene.bringToTop("DarkWorld");
             }
-            this.combatScene.initFight(region.map[y][x]);
+            this.combatScene.initFight(tile);
         }
     }
 

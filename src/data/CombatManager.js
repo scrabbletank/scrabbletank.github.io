@@ -4,7 +4,6 @@ import { Common } from "../utils/Common";
 import { Combat } from "../utils/Combat";
 import { Statics } from "./Statics";
 import { ProgressionStore } from "./ProgressionStore";
-import { WorldData } from "./WorldData";
 import { DynamicSettings } from "./DynamicSettings";
 import { RegionRegistry } from "./RegionRegistry";
 
@@ -167,7 +166,7 @@ export class CombatManager {
         }
         if (player.getTalentLevel('bundle') > 0) {
             var totalBundle = this.monsters.length * player.getTalentLevel('bundle') * 0.03;
-            var townProd = WorldData.getInstance().getCurrentRegion()._getResourcesPerDay();
+            var townProd = this.activeTile.parent._getResourcesPerDay();
             for (var i = 0; i < townProd.length; i++) {
                 rewards.resource[i] += townProd[i] * totalBundle;
             }
@@ -191,7 +190,7 @@ export class CombatManager {
             rewards.motes += 1 + MoonlightData.getInstance().moonperks.heartofdarkness.level;
             this.activeTile.invasionFights -= 1;
             if (this.activeTile.invasionFights <= 0) {
-                WorldData.getInstance().getCurrentRegion().endSighting(this.activeTile.x, this.activeTile.y);
+                this.activeTile.parent.endSighting(this.activeTile.x, this.activeTile.y);
             }
         }
 

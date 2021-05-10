@@ -246,7 +246,7 @@ export class RegionScene extends SceneUIBase {
     _tileActionHandler(action, blob) {
         switch (action) {
             case "explore":
-                this._exploreTile(blob.tile.x, blob.tile.y, false);
+                this._exploreTile(blob.tile, false);
                 break;
             case "build":
                 var player = new PlayerData();
@@ -307,19 +307,20 @@ export class RegionScene extends SceneUIBase {
         this.rebirthDialog = undefined;
     }
 
-    _exploreTile(x, y, fromAutoExplore) {
-        this.activeTile = this.region.map[y][x];
+    _exploreTile(tile, fromAutoExplore) {
+        this.activeTile = tile;
         if (this.progression.unlocks.combatTab === false) {
             this.progression.registerFeatureUnlocked(Statics.UNLOCK_COMBAT_TAB,
                 "Well this isn't so bad, walking aimlessly through this fog covered wilderness.\n" +
                 "I wonder if I'll meet a new friend.\n");
         }
         for (var i = 0; i < this.tileClickHandlers.length; i++) {
-            this.tileClickHandlers[i](x, y, fromAutoExplore);
+            this.tileClickHandlers[i](tile, fromAutoExplore);
         }
     }
 
     _onExploredCallback(tile, tier) {
+        var activeRegion = WorldData.getInstance().regionList[tier];
         if (tile.y === 0) {
             //setup new world types
             if (this.progression.unlocks.worldTab === false) {
@@ -344,20 +345,20 @@ export class RegionScene extends SceneUIBase {
                         "shoved it into the holes on your gear.");
                 }
             }
-            this.region.exploreTile(tile.x, tile.y);
+            activeRegion.exploreTile(tile.x, tile.y);
             this.progression.registerTileExplored();
 
             if (this.autoExploreActive === true) {
-                var pos = this.region.nextWeakestTile();
+                var pos = activeRegion.nextWeakestTile();
                 if (pos[0] !== -1) {
-                    if (this.region.map[pos[1]][pos[0]].name === "Town") {
+                    if (activeRegion.map[pos[1]][pos[0]].name === "Town") {
                         this._exploreTown(tile.x, tile.y);
-                        var pos = this.region.nextWeakestTile();
+                        var pos = activeRegion.nextWeakestTile();
                         if (pos[0] === -1) {
                             return;
                         }
                     }
-                    this._exploreTile(pos[0], pos[1], true);
+                    this._exploreTile(activeRegion.map[pos[1]][pos[0]], true);
                 }
             }
         }
