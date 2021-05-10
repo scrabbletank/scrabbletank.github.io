@@ -78,21 +78,13 @@ export class GameScene extends SceneUIBase {
         this.statLabels = [];
         this.statIcons = [];
         this.statIncButtons = [];
-        this.statIcons.push(new TooltipImage(this, 20, 20, 16, 16, { sprite: "icons", tile: 0 },
-            "Strength determines how hard you hit. Each point increases your min Damage by 0.4, max Damage by 1, and increases damage " +
-            "from gear by ~1% (diminishing returns)."));
-        this.statIcons.push(new TooltipImage(this, 20, 40, 16, 16, { sprite: "icons", tile: 1 },
-            "Dexterity determines your ability to hit enemies. Each point increases your Hit by 7."));
-        this.statIcons.push(new TooltipImage(this, 20, 60, 16, 16, { sprite: "icons", tile: 2 },
-            "Agility determines how hard you are to hit. Each point increases your Evasion by 7 and gives a small boost to explore speed."));
-        this.statIcons.push(new TooltipImage(this, 20, 80, 16, 16, { sprite: "icons", tile: 3 },
-            "Endurance determines your health resistance against criticals. Each point increases your max Health by 5 and Crit Resistance by 3."));
-        this.statIcons.push(new TooltipImage(this, 20, 100, 16, 16, { sprite: "icons", tile: 4 },
-            "Recovery determines how easily you heal your wounds. Each point increases your Health Regen by 0.15/s."));
-        this.statIcons.push(new TooltipImage(this, 20, 120, 16, 16, { sprite: "icons", tile: 5 },
-            "Defense determines how durable your body is. Each point increases your armor by 0.2 and increases armor from gear by ~1% (diminishing returns)."));
-        this.statIcons.push(new TooltipImage(this, 20, 140, 16, 16, { sprite: "icons", tile: 6 },
-            "Accuracy determines your ability to strike weak points. Each point increases your Crit Power by 3."));
+        this.statIcons.push(new TooltipImage(this, 20, 20, 16, 16, { sprite: "icons", tile: 0 }, this.player.strTooltip()));
+        this.statIcons.push(new TooltipImage(this, 20, 40, 16, 16, { sprite: "icons", tile: 1 }, this.player.dexTooltip()));
+        this.statIcons.push(new TooltipImage(this, 20, 60, 16, 16, { sprite: "icons", tile: 2 }, this.player.agiTooltip()));
+        this.statIcons.push(new TooltipImage(this, 20, 80, 16, 16, { sprite: "icons", tile: 3 }, this.player.endTooltip()));
+        this.statIcons.push(new TooltipImage(this, 20, 100, 16, 16, { sprite: "icons", tile: 4 }, this.player.recTooltip()));
+        this.statIcons.push(new TooltipImage(this, 20, 120, 16, 16, { sprite: "icons", tile: 5 }, this.player.defTooltip()));
+        this.statIcons.push(new TooltipImage(this, 20, 140, 16, 16, { sprite: "icons", tile: 6 }, this.player.accTooltip()));
 
         this.statIncButtons.push(new TextButton(this, 150, 20, 16, 16, '+')
             .onClickHandler(() => { this._increaseStat('str'); }));
@@ -268,6 +260,7 @@ export class GameScene extends SceneUIBase {
             this._layoutStats();
         });
         this.player.registerEvent("onResourcesChanged", () => { this._updateResources(); });
+        this.player.registerEvent("onTalentChanged", () => { this.updateStatIcons(); });
 
         if (this.progression.unlocks.gearTab === false) {
             this.loreScene.addText("You open your eyes and see a vast wilderness before you. " +
@@ -305,6 +298,16 @@ export class GameScene extends SceneUIBase {
     }
     notifyRegion() {
         this.regionButton.setNotification();
+    }
+
+    updateStatIcons() {
+        this.statIcons[0].setTooltip(this.player.strTooltip());
+        this.statIcons[1].setTooltip(this.player.dexTooltip());
+        this.statIcons[2].setTooltip(this.player.agiTooltip());
+        this.statIcons[3].setTooltip(this.player.endTooltip());
+        this.statIcons[4].setTooltip(this.player.recTooltip());
+        this.statIcons[5].setTooltip(this.player.defTooltip());
+        this.statIcons[6].setTooltip(this.player.accTooltip());
     }
 
     _handleProgressionEvents(type, count, text) {

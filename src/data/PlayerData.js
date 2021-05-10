@@ -10,12 +10,12 @@ import { DynamicSettings } from "./DynamicSettings";
 export class PlayerData {
     constructor() {
         if (!PlayerData.instance) {
-            this.statBlock = new AdventurerBlock(this);
             this.statChangedHandlers = [];
             this.resourceChangedHandlers = [];
             this.talentChangedHandlers = [];
 
             this._init();
+            this.statBlock = new AdventurerBlock(this);
 
             PlayerData.instance = this;
         }
@@ -28,6 +28,64 @@ export class PlayerData {
             return new PlayerData();
         }
         return PlayerData.instance;
+    }
+    _setClassStatics() {
+        switch (this.playerClass) {
+            case Statics.CLASS_ADVENTURER:
+                this.classStatics = {
+                    STRENGTH_DMG_MIN: 0.4,
+                    STRENGTH_DMG_MAX: 1,
+                    HIT_PER_DEXTERITY: 7,
+                    EVA_PER_AGILITY: 7,
+                    HP_PER_ENDURANCE: 5,
+                    REGEN_PER_RECOVERY: 0.15,
+                    ARMOR_PER_DEFENSE: 0.2,
+                    SCALING_ARMOR_PER_DEFENSE: 0.01,
+                    SCALING_DAMAGE_PER_STRENGTH: 0.01,
+                    CRITPOWER_PER_ACCURACY: 3,
+                    CRITRESISTANCE_PER_ENDURANCE: 3,
+                    AGI_EXPLORE_POWER: 0.44,
+                    AGI_EXPLORE_MULTI: 0.03,
+                    SCALING_DIMINISHING_POWER: 0.65
+                }
+                break;
+            case Statics.CLASS_BESERKER:
+                this.classStatics = {
+                    STRENGTH_DMG_MIN: 0.4,
+                    STRENGTH_DMG_MAX: 1,
+                    HIT_PER_DEXTERITY: 7,
+                    EVA_PER_AGILITY: 7,
+                    HP_PER_ENDURANCE: 5,
+                    REGEN_PER_RECOVERY: 0.15,
+                    ARMOR_PER_DEFENSE: 0.2,
+                    SCALING_ARMOR_PER_DEFENSE: 0.01,
+                    SCALING_DAMAGE_PER_STRENGTH: 0.01,
+                    CRITPOWER_PER_ACCURACY: 3,
+                    CRITRESISTANCE_PER_ENDURANCE: 3,
+                    AGI_EXPLORE_POWER: 0.44,
+                    AGI_EXPLORE_MULTI: 0.03,
+                    SCALING_DIMINISHING_POWER: 0.65
+                }
+                break;
+            case Statics.CLASS_WIZARD:
+                this.classStatics = {
+                    STRENGTH_DMG_MIN: 0.2,
+                    STRENGTH_DMG_MAX: 0.5,
+                    HIT_PER_DEXTERITY: 7,
+                    EVA_PER_AGILITY: 5,
+                    HP_PER_ENDURANCE: 3,
+                    REGEN_PER_RECOVERY: 0.15,
+                    ARMOR_PER_BARRIER: 0.06,
+                    SHIELD_PER_BARRIER: 3,
+                    GEAR_ARMOR_TO_SHIELD: 2,
+                    GEAR_DAMAGE_TO_MAGIC: 0.5,
+                    SPELL_POWER_PER_POWER: 1,
+                    CRITRESISTANCE_PER_ENDURANCE: 3,
+                    AGI_EXPLORE_POWER: 0.44,
+                    AGI_EXPLORE_MULTI: 0.03
+                }
+                break;
+        }
     }
 
     _init() {
@@ -51,6 +109,7 @@ export class PlayerData {
         this.motes = 0;
         this.challengeExploreMulti = 1 + (MoonlightData.getInstance().challenges.explore.completions * 0.25);
         this.playerClass = Statics.CLASS_ADVENTURER;
+        this._setClassStatics();
 
         this.weapon = undefined;
         this.armor = undefined;
@@ -182,17 +241,22 @@ export class PlayerData {
     strTooltip() {
         switch (this.playerClass) {
             case Statics.CLASS_ADVENTURER:
-                return "";
+                return "Strength determines how hard you hit. Each point increases your min Damage by " +
+                    (Math.floor(this.classStatics.STRENGTH_DMG_MIN * ((1 + this.getTalentLevel("str") * 0.07) * 100)) / 100) +
+                    ", max Damage by " +
+                    (Math.floor(this.classStatics.STRENGTH_DMG_MAX * ((1 + this.getTalentLevel("str") * 0.07) * 100)) / 100) +
+                    ", and increases damage from gear by ~1% (diminishing returns).";
             case Statics.CLASS_BESERKER:
                 return "";
             case Statics.CLASS_WIZARD:
-                return "";
+                return "Strength determines how hard you hit. Each point increases your min Damage by";
         }
     }
     dexTooltip() {
         switch (this.playerClass) {
             case Statics.CLASS_ADVENTURER:
-                return "";
+                return "Dexterity determines your ability to hit enemies. Each point increases your Hit by " +
+                    (this.classStatics.HIT_PER_DEXTERITY + this.getTalentLevel('dex')) + ".";
             case Statics.CLASS_BESERKER:
                 return "";
             case Statics.CLASS_WIZARD:
@@ -202,7 +266,8 @@ export class PlayerData {
     agiTooltip() {
         switch (this.playerClass) {
             case Statics.CLASS_ADVENTURER:
-                return "";
+                return "Agility determines how hard you are to hit. Each point increases your Evasion by " +
+                    (this.classStatics.HIT_PER_DEXTERITY + this.getTalentLevel('dex')) + " and gives a small boost to explore speed.";
             case Statics.CLASS_BESERKER:
                 return "";
             case Statics.CLASS_WIZARD:
@@ -212,7 +277,8 @@ export class PlayerData {
     endTooltip() {
         switch (this.playerClass) {
             case Statics.CLASS_ADVENTURER:
-                return "";
+                return "Endurance determines your health and resistance against criticals. Each point increases your max Health by " +
+                    (this.classStatics.HP_PER_ENDURANCE + this.getTalentLevel('end')) + " and Crit Resistance by 3.";
             case Statics.CLASS_BESERKER:
                 return "";
             case Statics.CLASS_WIZARD:
@@ -222,7 +288,8 @@ export class PlayerData {
     recTooltip() {
         switch (this.playerClass) {
             case Statics.CLASS_ADVENTURER:
-                return "";
+                return "Recovery determines how easily you heal your wounds. Each point increases your Health Regen by " +
+                    (Math.floor(this.classStatics.REGEN_PER_RECOVERY * ((1 + this.getTalentLevel("rec") * 0.08) * 100)) / 100) + "/s.";
             case Statics.CLASS_BESERKER:
                 return "";
             case Statics.CLASS_WIZARD:
@@ -232,7 +299,9 @@ export class PlayerData {
     defTooltip() {
         switch (this.playerClass) {
             case Statics.CLASS_ADVENTURER:
-                return "";
+                return "Defense determines how durable your body is. Each point increases your armor by " +
+                    (Math.floor(this.classStatics.ARMOR_PER_DEFENSE * ((1 + this.getTalentLevel("def") * 0.13) * 100)) / 100) +
+                    " and increases armor from gear by ~1% (diminishing returns).";
             case Statics.CLASS_BESERKER:
                 return "";
             case Statics.CLASS_WIZARD:
@@ -242,7 +311,8 @@ export class PlayerData {
     accTooltip() {
         switch (this.playerClass) {
             case Statics.CLASS_ADVENTURER:
-                return "";
+                return "Accuracy determines your ability to strike weak points. Each point increases your Crit Power by " +
+                    (this.classStatics.CRITPOWER_PER_ACCURACY + this.getTalentLevel('acc') * 0.5) + ".";
             case Statics.CLASS_BESERKER:
                 return "";
             case Statics.CLASS_WIZARD:
