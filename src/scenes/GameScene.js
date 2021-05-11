@@ -57,6 +57,7 @@ export class GameScene extends SceneUIBase {
         this.load.bitmapFont("courier16", "./../../assets/font/anonpro16.png", "./../../assets/font/anonpro16.xml");
         this.load.bitmapFont("courier20", "./../../assets/font/anonpro20.png", "./../../assets/font/anonpro20.xml");
         this.load.spritesheet("icons", "./../../assets/icons/icons.png", { frameWidth: 16, frameHeight: 16 });
+        this.load.spritesheet("talenticons", "./../../assets/icons/talenticons.png", { frameWidth: 16, frameHeight: 16 });
         this.load.spritesheet("bldicons", "./../../assets/icons/buildingicons.png", { frameWidth: 16, frameHeight: 16 });
         this.load.spritesheet("roadicons", "./../../assets/icons/roadicons.png", { frameWidth: 50, frameHeight: 50 });
         this.load.spritesheet("moonicons", "./../../assets/icons/moonicons.png", { frameWidth: 16, frameHeight: 16 });

@@ -39,6 +39,11 @@ var Statics = {
     GEAR_ARMOR: 1,
     GEAR_TRINKET: 2,
 
+    //DAMAGE TYPES
+    DMG_NORMAL: 0,
+    DMG_MAGIC: 1,
+    DMG_TRUE: 2,
+
     //RUNES
     RUNESLOTS_PER_TIER: [0, 2, 2, 3, 3, 4, 4, 5, 6],
 

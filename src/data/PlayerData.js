@@ -1,5 +1,5 @@
 import { Statics } from "./Statics";
-import { AdventurerBlock } from "./PlayerBlock";
+import { AdventurerBlock } from "./AdventurerBlock";
 import { WorldData } from "./WorldData";
 import { GearData } from "./GearData";
 import { MoonlightData } from "./MoonlightData";
@@ -48,6 +48,37 @@ export class PlayerData {
                     AGI_EXPLORE_MULTI: 0.03,
                     SCALING_DIMINISHING_POWER: 0.65
                 }
+                this.talents = {
+                    str: { name: "Strength", level: 0, maxLevel: -1, requires: [], texture: { sprite: "icons", tile: 0 } },
+                    dex: { name: "Dexterity", level: 0, maxLevel: -1, requires: [], texture: { sprite: "icons", tile: 1 } },
+                    agi: { name: "Agility", level: 0, maxLevel: -1, requires: [], texture: { sprite: "icons", tile: 2 } },
+                    end: { name: "Endurance", level: 0, maxLevel: -1, requires: [], texture: { sprite: "icons", tile: 3 } },
+                    rec: { name: "Recovery", level: 0, maxLevel: -1, requires: [], texture: { sprite: "icons", tile: 4 } },
+                    def: { name: "Defense", level: 0, maxLevel: -1, requires: [], texture: { sprite: "icons", tile: 5 } },
+                    acc: { name: "Accuracy", level: 0, maxLevel: -1, requires: [], texture: { sprite: "icons", tile: 6 } },
+                    cleave: { name: "Cleave", level: 0, maxLevel: 5, requires: ["str"], texture: { sprite: "icons", tile: 8 } },
+                    hit: { name: "Hit", level: 0, maxLevel: -1, requires: ["dex"], texture: { sprite: "icons", tile: 9 } },
+                    evasion: { name: "Evasion", level: 0, maxLevel: -1, requires: ["agi"], texture: { sprite: "icons", tile: 10 } },
+                    resilient: { name: "Resilient", level: 0, maxLevel: -1, requires: ["end"], texture: { sprite: "icons", tile: 11 } },
+                    quickrecovery: { name: "Quick Recovery", level: 0, maxLevel: -1, requires: ["rec"], texture: { sprite: "icons", tile: 12 } },
+                    block: { name: "Block", level: 0, maxLevel: -1, requires: ["def"], texture: { sprite: "icons", tile: 13 } },
+                    crit: { name: "Critical", level: 0, maxLevel: -1, requires: ["acc"], texture: { sprite: "icons", tile: 14 } },
+                    stun: { name: "Stunning Hit", level: 0, maxLevel: 5, requires: ["cleave"], texture: { sprite: "icons", tile: 16 } },
+                    followthrough: { name: "Follow Through", level: 0, maxLevel: 5, requires: ["hit"], texture: { sprite: "icons", tile: 17 } },
+                    dodge: { name: "Dodge", level: 0, maxLevel: 5, requires: ["evasion"], texture: { sprite: "icons", tile: 18 } },
+                    defydeath: { name: "Defy Death", level: 0, maxLevel: 5, requires: ["resilient"], texture: { sprite: "icons", tile: 19 } },
+                    secondwind: { name: "Second Wind", level: 0, maxLevel: 5, requires: ["quickrecovery"], texture: { sprite: "icons", tile: 20 } },
+                    parry: { name: "Parry", level: 0, maxLevel: 5, requires: ["block"], texture: { sprite: "icons", tile: 21 } },
+                    doublecrit: { name: "Double Crit", level: 0, maxLevel: -1, requires: ["crit"], texture: { sprite: "icons", tile: 22 } },
+                    bounty: { name: "Bounty", level: 0, maxLevel: -1, requires: [], texture: { sprite: "icons", tile: 7 } },
+                    explorer: { name: "Explorer", level: 0, maxLevel: -1, requires: [], texture: { sprite: "icons", tile: 15 } },
+                    guardian: { name: "Guardian", level: 0, maxLevel: -1, requires: [], texture: { sprite: "icons", tile: 39 } },
+                    governance: { name: "Governance", level: 0, maxLevel: -1, requires: [], texture: { sprite: "icons", tile: 38 } },
+                    lootgoblin: { name: "Loot Goblin", level: 0, maxLevel: 10, requires: ["bounty"], texture: { sprite: "icons", tile: 51 } },
+                    bundle: { name: "Bundle", level: 0, maxLevel: -1, requires: ["explorer"], texture: { sprite: "icons", tile: 52 } },
+                    charisma: { name: "Charisma", level: 0, maxLevel: -1, requires: ["governance"], texture: { sprite: "icons", tile: 53 } },
+                    townguard: { name: "Town Guard", level: 0, maxLevel: -1, requires: ["guardian"], texture: { sprite: "icons", tile: 50 } }
+                }
                 break;
             case Statics.CLASS_BESERKER:
                 this.classStatics = {
@@ -84,6 +115,38 @@ export class PlayerData {
                     AGI_EXPLORE_POWER: 0.44,
                     AGI_EXPLORE_MULTI: 0.03
                 }
+                this.talents = {
+                    cantrip: { name: "Cantrip", level: 0, maxLevel: -1, requires: [], texture: { sprite: "talenticons", tile: 0 } },
+                    first: { name: "First Level Spell", level: 0, maxLevel: 1, requires: ["cantrip"], texture: { sprite: "talenticons", tile: 1 } },
+                    second: { name: "Second Level Spell", level: 0, maxLevel: 2, requires: ["first"], texture: { sprite: "talenticons", tile: 2 } },
+                    third: { name: "Third Level Spell", level: 0, maxLevel: 3, requires: ["second"], texture: { sprite: "talenticons", tile: 3 } },
+                    fourth: { name: "Fourth Level Spell", level: 0, maxLevel: 4, requires: ["third"], texture: { sprite: "talenticons", tile: 4 } },
+                    fifth: { name: "Fifth Level Spell", level: 0, maxLevel: 5, requires: ["fourth"], texture: { sprite: "talenticons", tile: 5 } },
+                    entangle: { name: "Entagle", level: 0, maxLevel: -1, requires: ["first"], texture: { sprite: "talenticons", tile: 9 } },
+                    thorns: { name: "Thorns", level: 0, maxLevel: -1, requires: ["entangle"], texture: { sprite: "talenticons", tile: 17 } },
+                    barrier: { name: "Barrier", level: 0, maxLevel: -1, requires: ["second"], texture: { sprite: "talenticons", tile: 10 } },
+                    shell: { name: "Shell", level: 0, maxLevel: -1, requires: ["barrier"], texture: { sprite: "talenticons", tile: 18 } },
+                    fireball: { name: "Fireball", level: 0, maxLevel: -1, requires: ["third"], texture: { sprite: "talenticons", tile: 11 } },
+                    ignite: { name: "Ignite", level: 0, maxLevel: -1, requires: ["fireball"], texture: { sprite: "talenticons", tile: 19 } },
+                    haste: { name: "Haste", level: 0, maxLevel: 10, requires: ["fourth"], texture: { sprite: "talenticons", tile: 12 } },
+                    quicken: { name: "Quicken", level: 0, maxLevel: -1, requires: ["haste"], texture: { sprite: "talenticons", tile: 20 } },
+                    powerwordkill: { name: "Power Word Kill", level: 0, maxLevel: -1, requires: ["fifth"], texture: { sprite: "talenticons", tile: 13 } },
+                    powerwordstun: { name: "Power Word Stun", level: 0, maxLevel: 5, requires: ["powerwordkill"], texture: { sprite: "talenticons", tile: 21 } },
+                    wizstr: { name: "Elective Studies: Strength", level: 0, maxLevel: -1, requires: ["cantrip"], texture: { sprite: "icons", tile: 0 } },
+                    wizdex: { name: "Elective Studies: Dexterity", level: 0, maxLevel: -1, requires: ["cantrip"], texture: { sprite: "icons", tile: 1 } },
+                    wizagi: { name: "Elective Studies: Agility", level: 0, maxLevel: -1, requires: ["cantrip"], texture: { sprite: "icons", tile: 2 } },
+                    wizend: { name: "Elective Studies: Endurance", level: 0, maxLevel: -1, requires: ["cantrip"], texture: { sprite: "icons", tile: 3 } },
+                    alchemy: { name: "Alchemy", level: 0, maxLevel: -1, requires: ["cantrip"], texture: { sprite: "talenticons", tile: 8 } },
+                    runemancy: { name: "Runemancy", level: 0, maxLevel: -1, requires: ["cantrip"], texture: { sprite: "talenticons", tile: 16 } },
+                    bounty: { name: "Bounty", level: 0, maxLevel: -1, requires: [], texture: { sprite: "icons", tile: 7 } },
+                    explorer: { name: "Explorer", level: 0, maxLevel: -1, requires: [], texture: { sprite: "icons", tile: 15 } },
+                    guardian: { name: "Guardian", level: 0, maxLevel: -1, requires: [], texture: { sprite: "icons", tile: 39 } },
+                    governance: { name: "Governance", level: 0, maxLevel: -1, requires: [], texture: { sprite: "icons", tile: 38 } },
+                    lootgoblin: { name: "Loot Goblin", level: 0, maxLevel: 10, requires: ["bounty"], texture: { sprite: "icons", tile: 51 } },
+                    bundle: { name: "Bundle", level: 0, maxLevel: -1, requires: ["explorer"], texture: { sprite: "icons", tile: 52 } },
+                    charisma: { name: "Charisma", level: 0, maxLevel: -1, requires: ["governance"], texture: { sprite: "icons", tile: 53 } },
+                    townguard: { name: "Town Guard", level: 0, maxLevel: -1, requires: ["guardian"], texture: { sprite: "icons", tile: 50 } }
+                }
                 break;
         }
     }
@@ -108,44 +171,45 @@ export class PlayerData {
         this.gold = 0;
         this.motes = 0;
         this.challengeExploreMulti = 1 + (MoonlightData.getInstance().challenges.explore.completions * 0.25);
-        this.playerClass = Statics.CLASS_ADVENTURER;
+        this.playerClass = Statics.CLASS_WIZARD;
         this._setClassStatics();
+        this.classChosen = false;
 
         this.weapon = undefined;
         this.armor = undefined;
         this.trinket = undefined;
 
-        this.talents = {
-            str: { name: "Strength", level: 0, maxLevel: -1, requires: [], texture: { sprite: "icons", tile: 0 } },
-            dex: { name: "Dexterity", level: 0, maxLevel: -1, requires: [], texture: { sprite: "icons", tile: 1 } },
-            agi: { name: "Agility", level: 0, maxLevel: -1, requires: [], texture: { sprite: "icons", tile: 2 } },
-            end: { name: "Endurance", level: 0, maxLevel: -1, requires: [], texture: { sprite: "icons", tile: 3 } },
-            rec: { name: "Recovery", level: 0, maxLevel: -1, requires: [], texture: { sprite: "icons", tile: 4 } },
-            def: { name: "Defense", level: 0, maxLevel: -1, requires: [], texture: { sprite: "icons", tile: 5 } },
-            acc: { name: "Accuracy", level: 0, maxLevel: -1, requires: [], texture: { sprite: "icons", tile: 6 } },
-            cleave: { name: "Cleave", level: 0, maxLevel: 5, requires: ["str"], texture: { sprite: "icons", tile: 8 } },
-            hit: { name: "Hit", level: 0, maxLevel: -1, requires: ["dex"], texture: { sprite: "icons", tile: 9 } },
-            evasion: { name: "Evasion", level: 0, maxLevel: -1, requires: ["agi"], texture: { sprite: "icons", tile: 10 } },
-            resilient: { name: "Resilient", level: 0, maxLevel: -1, requires: ["end"], texture: { sprite: "icons", tile: 11 } },
-            quickrecovery: { name: "Quick Recovery", level: 0, maxLevel: -1, requires: ["rec"], texture: { sprite: "icons", tile: 12 } },
-            block: { name: "Block", level: 0, maxLevel: -1, requires: ["def"], texture: { sprite: "icons", tile: 13 } },
-            crit: { name: "Critical", level: 0, maxLevel: -1, requires: ["acc"], texture: { sprite: "icons", tile: 14 } },
-            stun: { name: "Stunning Hit", level: 0, maxLevel: 5, requires: ["cleave"], texture: { sprite: "icons", tile: 16 } },
-            followthrough: { name: "Follow Through", level: 0, maxLevel: 5, requires: ["hit"], texture: { sprite: "icons", tile: 17 } },
-            dodge: { name: "Dodge", level: 0, maxLevel: 5, requires: ["evasion"], texture: { sprite: "icons", tile: 18 } },
-            defydeath: { name: "Defy Death", level: 0, maxLevel: 5, requires: ["resilient"], texture: { sprite: "icons", tile: 19 } },
-            secondwind: { name: "Second Wind", level: 0, maxLevel: 5, requires: ["quickrecovery"], texture: { sprite: "icons", tile: 20 } },
-            parry: { name: "Parry", level: 0, maxLevel: 5, requires: ["block"], texture: { sprite: "icons", tile: 21 } },
-            doublecrit: { name: "Double Crit", level: 0, maxLevel: -1, requires: ["crit"], texture: { sprite: "icons", tile: 22 } },
-            bounty: { name: "Bounty", level: 0, maxLevel: -1, requires: [], texture: { sprite: "icons", tile: 7 } },
-            explorer: { name: "Explorer", level: 0, maxLevel: -1, requires: [], texture: { sprite: "icons", tile: 15 } },
-            guardian: { name: "Guardian", level: 0, maxLevel: -1, requires: [], texture: { sprite: "icons", tile: 39 } },
-            governance: { name: "Governance", level: 0, maxLevel: -1, requires: [], texture: { sprite: "icons", tile: 38 } },
-            lootgoblin: { name: "Loot Goblin", level: 0, maxLevel: 10, requires: ["bounty"], texture: { sprite: "icons", tile: 51 } },
-            bundle: { name: "Bundle", level: 0, maxLevel: -1, requires: ["explorer"], texture: { sprite: "icons", tile: 52 } },
-            charisma: { name: "Charisma", level: 0, maxLevel: -1, requires: ["governance"], texture: { sprite: "icons", tile: 53 } },
-            townguard: { name: "Town Guard", level: 0, maxLevel: -1, requires: ["guardian"], texture: { sprite: "icons", tile: 50 } }
-        }
+        // this.talents = {
+        //     str: { name: "Strength", level: 0, maxLevel: -1, requires: [], texture: { sprite: "icons", tile: 0 } },
+        //     dex: { name: "Dexterity", level: 0, maxLevel: -1, requires: [], texture: { sprite: "icons", tile: 1 } },
+        //     agi: { name: "Agility", level: 0, maxLevel: -1, requires: [], texture: { sprite: "icons", tile: 2 } },
+        //     end: { name: "Endurance", level: 0, maxLevel: -1, requires: [], texture: { sprite: "icons", tile: 3 } },
+        //     rec: { name: "Recovery", level: 0, maxLevel: -1, requires: [], texture: { sprite: "icons", tile: 4 } },
+        //     def: { name: "Defense", level: 0, maxLevel: -1, requires: [], texture: { sprite: "icons", tile: 5 } },
+        //     acc: { name: "Accuracy", level: 0, maxLevel: -1, requires: [], texture: { sprite: "icons", tile: 6 } },
+        //     cleave: { name: "Cleave", level: 0, maxLevel: 5, requires: ["str"], texture: { sprite: "icons", tile: 8 } },
+        //     hit: { name: "Hit", level: 0, maxLevel: -1, requires: ["dex"], texture: { sprite: "icons", tile: 9 } },
+        //     evasion: { name: "Evasion", level: 0, maxLevel: -1, requires: ["agi"], texture: { sprite: "icons", tile: 10 } },
+        //     resilient: { name: "Resilient", level: 0, maxLevel: -1, requires: ["end"], texture: { sprite: "icons", tile: 11 } },
+        //     quickrecovery: { name: "Quick Recovery", level: 0, maxLevel: -1, requires: ["rec"], texture: { sprite: "icons", tile: 12 } },
+        //     block: { name: "Block", level: 0, maxLevel: -1, requires: ["def"], texture: { sprite: "icons", tile: 13 } },
+        //     crit: { name: "Critical", level: 0, maxLevel: -1, requires: ["acc"], texture: { sprite: "icons", tile: 14 } },
+        //     stun: { name: "Stunning Hit", level: 0, maxLevel: 5, requires: ["cleave"], texture: { sprite: "icons", tile: 16 } },
+        //     followthrough: { name: "Follow Through", level: 0, maxLevel: 5, requires: ["hit"], texture: { sprite: "icons", tile: 17 } },
+        //     dodge: { name: "Dodge", level: 0, maxLevel: 5, requires: ["evasion"], texture: { sprite: "icons", tile: 18 } },
+        //     defydeath: { name: "Defy Death", level: 0, maxLevel: 5, requires: ["resilient"], texture: { sprite: "icons", tile: 19 } },
+        //     secondwind: { name: "Second Wind", level: 0, maxLevel: 5, requires: ["quickrecovery"], texture: { sprite: "icons", tile: 20 } },
+        //     parry: { name: "Parry", level: 0, maxLevel: 5, requires: ["block"], texture: { sprite: "icons", tile: 21 } },
+        //     doublecrit: { name: "Double Crit", level: 0, maxLevel: -1, requires: ["crit"], texture: { sprite: "icons", tile: 22 } },
+        //     bounty: { name: "Bounty", level: 0, maxLevel: -1, requires: [], texture: { sprite: "icons", tile: 7 } },
+        //     explorer: { name: "Explorer", level: 0, maxLevel: -1, requires: [], texture: { sprite: "icons", tile: 15 } },
+        //     guardian: { name: "Guardian", level: 0, maxLevel: -1, requires: [], texture: { sprite: "icons", tile: 39 } },
+        //     governance: { name: "Governance", level: 0, maxLevel: -1, requires: [], texture: { sprite: "icons", tile: 38 } },
+        //     lootgoblin: { name: "Loot Goblin", level: 0, maxLevel: 10, requires: ["bounty"], texture: { sprite: "icons", tile: 51 } },
+        //     bundle: { name: "Bundle", level: 0, maxLevel: -1, requires: ["explorer"], texture: { sprite: "icons", tile: 52 } },
+        //     charisma: { name: "Charisma", level: 0, maxLevel: -1, requires: ["governance"], texture: { sprite: "icons", tile: 53 } },
+        //     townguard: { name: "Town Guard", level: 0, maxLevel: -1, requires: ["guardian"], texture: { sprite: "icons", tile: 50 } }
+        // }
 
         this.runeBonuses = {
             strPercent: 0,
@@ -249,7 +313,11 @@ export class PlayerData {
             case Statics.CLASS_BESERKER:
                 return "";
             case Statics.CLASS_WIZARD:
-                return "Strength determines how hard you hit. Each point increases your min Damage by";
+                return "Strength determines how hard you hit. Each point increases your min Damage by " +
+                    (Math.floor(this.classStatics.STRENGTH_DMG_MIN * ((1 + this.getTalentLevel("wizstr") * 0.05) * 100)) / 100) +
+                    ", max Damage by " +
+                    (Math.floor(this.classStatics.STRENGTH_DMG_MAX * ((1 + this.getTalentLevel("wizstr") * 0.05) * 100)) / 100) +
+                    ".";
         }
     }
     dexTooltip() {
@@ -260,18 +328,21 @@ export class PlayerData {
             case Statics.CLASS_BESERKER:
                 return "";
             case Statics.CLASS_WIZARD:
-                return "";
+                return "Dexterity determines your ability to hit enemies. Each point increases your Hit by " +
+                    (this.classStatics.HIT_PER_DEXTERITY + this.getTalentLevel('wizdex')) + ".";
         }
     }
     agiTooltip() {
         switch (this.playerClass) {
             case Statics.CLASS_ADVENTURER:
                 return "Agility determines how hard you are to hit. Each point increases your Evasion by " +
-                    (this.classStatics.HIT_PER_DEXTERITY + this.getTalentLevel('dex')) + " and gives a small boost to explore speed.";
+                    (this.classStatics.EVA_PER_AGILITY + this.getTalentLevel('agi')) + " and gives a small boost to explore speed.";
             case Statics.CLASS_BESERKER:
                 return "";
             case Statics.CLASS_WIZARD:
-                return "";
+                return "Agility determines how hard you are to hit. Each point increases your Evasion by " +
+                    (Math.floor((this.classStatics.EVA_PER_AGILITY + this.getTalentLevel('wizagi') * 0.7) * 10) / 10) +
+                    " and gives a small boost to explore speed.";
         }
     }
     endTooltip() {
@@ -282,7 +353,8 @@ export class PlayerData {
             case Statics.CLASS_BESERKER:
                 return "";
             case Statics.CLASS_WIZARD:
-                return "";
+                return "Endurance determines your health and resistance against criticals. Each point increases your max Health by " +
+                    (this.classStatics.HP_PER_ENDURANCE + this.getTalentLevel('wizend') * 0.5) + " and Crit Resistance by 3.";
         }
     }
     recTooltip() {
@@ -293,7 +365,8 @@ export class PlayerData {
             case Statics.CLASS_BESERKER:
                 return "";
             case Statics.CLASS_WIZARD:
-                return "";
+                return "Recovery determines how easily you heal your wounds. Each point increases your Health Regen by " +
+                    (Math.floor(this.classStatics.REGEN_PER_RECOVERY * 100) / 100) + "/s.";
         }
     }
     defTooltip() {
@@ -305,7 +378,9 @@ export class PlayerData {
             case Statics.CLASS_BESERKER:
                 return "";
             case Statics.CLASS_WIZARD:
-                return "";
+                return "Ward determines your magical protections. Each point increases your armor by " +
+                    (Math.floor(this.classStatics.ARMOR_PER_BARRIER * 100) / 100) +
+                    " and increases your start of combat shield by " + this.classStatics.SHIELD_PER_BARRIER + ".";
         }
     }
     accTooltip() {
@@ -316,7 +391,11 @@ export class PlayerData {
             case Statics.CLASS_BESERKER:
                 return "";
             case Statics.CLASS_WIZARD:
-                return "";
+                var spellpower = this.classStatics.SPELL_POWER_PER_POWER * (1 + this.getTalentLevel('first') * 0.01) *
+                    (1 + this.getTalentLevel('second') * 0.01) * (1 + this.getTalentLevel('third') * 0.01) * (1 + this.getTalentLevel('fourth') * 0.01) *
+                    (1 + this.getTalentLevel('fifth') * 0.01) * (1 + this.getTalentLevel('runemancy') * this.getTotalSocketedRunes() * 0.01) *
+                    (1 + this.statBlock.CritChance());
+                return "Power determines your magical might. Each point increases your Spell Power by " + (Math.floor(spellpower * 100) / 100) + ".";
         }
     }
 
@@ -416,6 +495,26 @@ export class PlayerData {
                 return this.talents[name].level + this.runeBonuses.guardianTalent;
         }
         return this.talents[name].level;
+    }
+
+    getTotalSocketedRunes() {
+        var num = 0;
+        if (this.weapon !== undefined) {
+            for (var i = 0; i < this.weapon.runes.length; i++) {
+                num += this.weapon.runes[i].level !== 0 ? 1 : 0;
+            }
+        }
+        if (this.armor !== undefined) {
+            for (var i = 0; i < this.armor.runes.length; i++) {
+                num += this.armor.runes[i].level !== 0 ? 1 : 0;
+            }
+        }
+        if (this.trinket !== undefined) {
+            for (var i = 0; i < this.trinket.runes.length; i++) {
+                num += this.trinket.runes[i].level !== 0 ? 1 : 0;
+            }
+        }
+        return num;
     }
 
     buyStat(buyAmount) {

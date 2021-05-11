@@ -4,10 +4,20 @@ import { Common } from "../utils/Common";
 import { PlayerData } from "../data/PlayerData";
 import { FloatingTooltip } from "../ui/FloatingTooltip";
 import { ImageButton } from "../ui/ImageButton";
+import { Statics } from "../data/Statics";
 
 export class TalentScene extends SceneUIBase {
     constructor(position, name) {
         super(position, name);
+        this.adventurerArray = [[264, 288], [312, 240], [360, 216], [408, 192], [456, 216], [504, 240], [552, 288],
+        [216, 240], [264, 192], [336, 144], [408, 120], [480, 144], [552, 192], [600, 240],
+        [168, 192], [240, 120], [312, 72], [408, 48], [504, 72], [576, 120], [648, 192],
+        [408, 312], [480, 384], [336, 384], [408, 456], [336, 312], [480, 312], [480, 456], [336, 456]];
+
+        this.wizardArray = [[264, 240], [264, 168], [336, 168], [408, 168], [480, 168], [552, 168],
+        [264, 96], [264, 24], [336, 96], [336, 24], [408, 96], [408, 24], [480, 96], [480, 24], [552, 96], [552, 24],
+        [336, 240], [408, 240], [480, 240], [552, 240], [192, 312], [192, 240],
+        [408, 312], [480, 384], [336, 384], [408, 456], [336, 312], [480, 312], [480, 456], [336, 456]];
     }
 
     refresh() {
@@ -17,20 +27,26 @@ export class TalentScene extends SceneUIBase {
     rebirth() {
         this.talentLabel.setText("Talent Points\n" + this.player.talentPoints);
 
-        var standardArray = [[264, 288], [312, 240], [360, 216], [408, 192], [456, 216], [504, 240], [552, 288],
-        [216, 240], [264, 192], [336, 144], [408, 120], [480, 144], [552, 192], [600, 240],
-        [168, 192], [240, 120], [312, 72], [408, 48], [504, 72], [576, 120], [648, 192],
-        [408, 312], [480, 384], [336, 384], [408, 456], [336, 312], [480, 312], [480, 456], [336, 456]];
-
         for (var i = 0; i < this.talentButtons.length; i++) {
             this.talentButtons[i].destroy();
         }
 
         this.talentButtons = [];
+        var talentArray = [];
+        switch (this.player.playerClass) {
+            case Statics.CLASS_ADVENTURER:
+                talentArray = this.adventurerArray;
+                break;
+            case Statics.CLASS_BESERKER:
+                break;
+            case Statics.CLASS_WIZARD:
+                talentArray = this.wizardArray;
+                break;
+        }
         var idx = 0;
         for (const prop in this.player.talents) {
-            var x = this.relativeX(standardArray[idx][0] + 18);
-            var y = this.relativeY(standardArray[idx][1] + 20);
+            var x = this.relativeX(talentArray[idx][0] + 18);
+            var y = this.relativeY(talentArray[idx][1] + 20);
             this._setupTalentButton(prop, x, y, idx);
             idx++;
         }
@@ -54,21 +70,28 @@ export class TalentScene extends SceneUIBase {
     }
 
     _refreshView() {
-        var standardArray = [[264, 288], [312, 240], [360, 216], [408, 192], [456, 216], [504, 240], [552, 288],
-        [216, 240], [264, 192], [336, 144], [408, 120], [480, 144], [552, 192], [600, 240],
-        [168, 192], [240, 120], [312, 72], [408, 48], [504, 72], [576, 120], [648, 192],
-        [408, 312], [480, 384], [336, 384], [408, 456], [336, 312], [480, 312], [480, 456], [336, 456]];
 
         for (var i = 0; i < this.talentButtons.length; i++) {
             this.talentButtons[i].destroy();
         }
         this._disableTooltip();
         this.talentButtons = [];
-
+        var talentArray = [];
+        switch (this.player.playerClass) {
+            case Statics.CLASS_ADVENTURER:
+                talentArray = this.adventurerArray;
+                break;
+            case Statics.CLASS_BESERKER:
+                break;
+            case Statics.CLASS_WIZARD:
+                talentArray = this.wizardArray;
+                break;
+        }
         var idx = 0;
         for (const prop in this.player.talents) {
-            var x = this.relativeX(standardArray[idx][0] + 18);
-            var y = this.relativeY(standardArray[idx][1] + 20);
+            console.log(prop, idx);
+            var x = this.relativeX(talentArray[idx][0] + 18);
+            var y = this.relativeY(talentArray[idx][1] + 20);
             this._setupTalentButton(prop, x, y, idx);
             idx++;
         }

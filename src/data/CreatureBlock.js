@@ -64,6 +64,11 @@ export class CreatureBlock {
         this.traits = [];
         this.shieldValue = 0;
         this.shieldCooldown = 0;
+        this.slowTimer = 0;
+        this.slowPercent = 0;
+        this.slowDamage = 0;
+        this.igniteTimer = 0;
+        this.igniteDamage = 0;
 
         this.healthChangedHandlers = [];
         this.attackCooldownChangedHandlers = [];
@@ -166,15 +171,23 @@ export class CreatureBlock {
 
     canAttack() { return this.attackCooldown >= this.AttackSpeed(); }
 
-    takeDamage(damage, __isCrit, trueDamage = false) {
+    takeDamage(damage, __isCrit, dmgType) {
         var dmg = damage;
-        if (this.shieldValue > 0) {
-            var shieldDmg = Math.min(this.shieldValue, dmg);
-            this.shieldValue -= shieldDmg;
-            dmg -= shieldDmg;
-        }
-        if (trueDamage === false) {
+        if (dmgType = Statics.DMG_NORMAL) {
+            if (this.shieldValue > 0) {
+                var shieldDmg = Math.min(this.shieldValue, dmg);
+                this.shieldValue -= shieldDmg;
+                dmg -= shieldDmg;
+            }
             dmg = Math.max(1, dmg - this.Armor());
+        } else if (dmgType = Statics.DMG_MAGIC) {
+            // magic damage ignores 90% of armor but does half damage to shields
+            var shieldDmg = Math.min(this.shieldValue, dmg / 2);
+            this.shieldValue -= shieldDmg;
+            dmg -= shieldDmg * 2;
+            dmg = Math.max(1, dmg - this.Armor() * 0.1);
+        } else if (dmgType = Statics.DMG_TRUE) {
+            //true damage bypasses shields?
         }
         this.currentHealth -= dmg;
         this._onHealthChanged();
@@ -207,6 +220,15 @@ export class CreatureBlock {
             this.stunTimer -= delta;
             return;
         }
+        if (this.igniteTimer > 0) {
+            this.igniteTimer -= delta * multi;
+            this.takeDamage(this.igniteDamage * (delta * multi / 1000));
+        }
+        if (this.slowTimer > 0) {
+            this.slowTimer -= delta * multi;
+            this.takeDamage(this.slowDamage * (delta * multi / 1000));
+            delta = delta * (1 - this.slowPercent);
+        }
         var oldVal = this.attackCooldown;
         this.attackCooldown = Math.min(this.attackSpeed, this.attackCooldown + delta * multi);
         if (oldVal != this.attackCooldown) {
@@ -218,7 +240,7 @@ export class CreatureBlock {
         if (isCrit === true) {
             rawDmg = rawDmg * this.CritDamage(creature.CritResistance());
         }
-        var dmg = creature.takeDamage(rawDmg, isCrit);
+        var dmg = creature.takeDamage(rawDmg, isCrit, Statics.DMG_NORMAL);
         this.attackCooldown = 0;
         //handle beserk trait, giving attack speed refresh
         var beserk = this.findTrait(Statics.TRAIT_BESERK);

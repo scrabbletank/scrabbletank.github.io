@@ -220,7 +220,7 @@ export class CombatManager {
 
                 var poison = this.monsters[i].findTrait(Statics.TRAIT_POISONED);
                 if (poison !== undefined) {
-                    player.statBlock.takeDamage(this.monsters[i].DamageMax() * 0.03 * poison.level * (delta / 1000), false, true);
+                    player.statBlock.takeDamage(this.monsters[i].DamageMax() * 0.03 * poison.level * (delta / 1000), false, Statics.DMG_TRUE);
                 }
 
                 if (this.monsters[i].canAttack() === true) {
@@ -241,7 +241,17 @@ export class CombatManager {
 
             if (player.statBlock.canAttack() === true) {
                 var crit = player.statBlock.CritChance() > Math.random();
-                player.statBlock.attack(this.monsters[this.target], crit);
+                if (player.statBlock.canCastFireball !== undefined &&
+                    player.statBlock.canCastFireball() === true) {
+                    for (var i = 0; i < this.monsters.length; i++) {
+                        var dmg = player.statBlock._castFireball(this.monsters[i]);
+                        if (this.creatureHitCallback !== undefined) {
+                            this.creatureHitCallback(this.monsters[i], false);
+                        }
+                    }
+                } else {
+                    player.statBlock.attack(this.monsters[this.target], crit);
+                }
                 if (this.monsters[this.target].currentHealth <= 0) {
                     player.statBlock.heal(player.statBlock.HealthRegen() * player.runeBonuses.regenOnKill);
                 }

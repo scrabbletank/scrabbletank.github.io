@@ -58,7 +58,7 @@ export class AdventurerBlock extends CreatureBlock {
     }
 
     MaxHealth() {
-        var ret = this.statBonuses.health + this.Endurance() * Statics.HP_PER_ENDURANCE;
+        var ret = this.statBonuses.health + this.Endurance() * this.player.classStatics.HP_PER_ENDURANCE;
         ret += this.Endurance() * this.player.getTalentLevel("end");
         ret += ret * this.player.runeBonuses.healthPercent;
         return Math.floor(ret);
@@ -109,14 +109,14 @@ export class AdventurerBlock extends CreatureBlock {
         return Math.floor(ret);
     }
     Hit() {
-        var ret = this.stats.hit + this.statBonuses.hit + this.Dexterity() * Statics.HIT_PER_DEXTERITY;
+        var ret = this.stats.hit + this.statBonuses.hit + this.Dexterity() * this.player.classStatics.HIT_PER_DEXTERITY;
         ret += this.Dexterity() * this.player.getTalentLevel("dex");
         ret = ret * (1 + this.player.getTalentLevel("hit") * 0.04);
         ret += ret * this.player.runeBonuses.hitPercent;
         return Math.floor(ret);
     }
     Evasion() {
-        var ret = this.stats.evasion + this.statBonuses.evasion + this.Agility() * Statics.EVA_PER_AGILITY;
+        var ret = this.stats.evasion + this.statBonuses.evasion + this.Agility() * this.player.classStatics.EVA_PER_AGILITY;
         ret += this.Agility() * this.player.getTalentLevel("agi");
         ret = ret * (1 + this.player.getTalentLevel("evasion") * 0.04);
         ret += ret * this.player.runeBonuses.evaPercent;
@@ -129,37 +129,37 @@ export class AdventurerBlock extends CreatureBlock {
         return Math.floor(ret * 100) / 100;
     }
     CritResistance() {
-        var ret = this.stats.critResistance + this.statBonuses.critResistance + this.Endurance() * Statics.CRITRESISTANCE_PER_ENDURANCE;
+        var ret = this.stats.critResistance + this.statBonuses.critResistance + this.Endurance() * this.player.classStatics.CRITRESISTANCE_PER_ENDURANCE;
         return Math.floor(ret);
     }
     CritPower() {
-        var ret = this.stats.critPower + this.statBonuses.critPower + this.Accuracy() * Statics.CRITPOWER_PER_ACCURACY;
+        var ret = this.stats.critPower + this.statBonuses.critPower + this.Accuracy() * this.player.classStatics.CRITPOWER_PER_ACCURACY;
         ret += this.Accuracy() * this.player.getTalentLevel("acc") * 0.5;
         ret += ret * this.player.runeBonuses.critPercent;
         return Math.floor(ret);
     }
     DamageMin() {
-        var ret = this.statBonuses.damageMin * (1 + this.player.runeBonuses.weaponPercent) * (1 + Math.pow(this.Strength(), Statics.SCALING_DIMINISHING_POWER +
-            this.player.runeBonuses.weaponScaling) * Statics.SCALING_DAMAGE_PER_STRENGTH) + this.Strength() * Statics.STRENGTH_DMG_MIN;
-        ret += this.Strength() * this.player.getTalentLevel("str") * 0.07 * Statics.STRENGTH_DMG_MIN;
+        var ret = this.statBonuses.damageMin * (1 + this.player.runeBonuses.weaponPercent) * (1 + Math.pow(this.Strength(), this.player.classStatics.SCALING_DIMINISHING_POWER +
+            this.player.runeBonuses.weaponScaling) * this.player.classStatics.SCALING_DAMAGE_PER_STRENGTH) + this.Strength() * this.player.classStatics.STRENGTH_DMG_MIN;
+        ret += this.Strength() * this.player.getTalentLevel("str") * 0.07 * this.player.classStatics.STRENGTH_DMG_MIN;
         return Math.floor(Math.max(1, ret));
     }
     DamageMax() {
-        var ret = this.statBonuses.damageMax * (1 + this.player.runeBonuses.weaponPercent) * (1 + Math.pow(this.Strength(), Statics.SCALING_DIMINISHING_POWER +
-            this.player.runeBonuses.weaponScaling) * Statics.SCALING_DAMAGE_PER_STRENGTH) + this.Strength() * Statics.STRENGTH_DMG_MAX;
-        ret += this.Strength() * this.player.getTalentLevel("str") * 0.07 * Statics.STRENGTH_DMG_MAX;
+        var ret = this.statBonuses.damageMax * (1 + this.player.runeBonuses.weaponPercent) * (1 + Math.pow(this.Strength(), this.player.classStatics.SCALING_DIMINISHING_POWER +
+            this.player.runeBonuses.weaponScaling) * this.player.classStatics.SCALING_DAMAGE_PER_STRENGTH) + this.Strength() * this.player.classStatics.STRENGTH_DMG_MAX;
+        ret += this.Strength() * this.player.getTalentLevel("str") * 0.07 * this.player.classStatics.STRENGTH_DMG_MAX;
         return Math.floor(Math.max(1, ret));
     }
     HealthRegen() {
-        var ret = this.statBonuses.healthRegen + this.Recovery() * Statics.REGEN_PER_RECOVERY;
-        ret += this.Recovery() * this.player.getTalentLevel("rec") * 0.08 * Statics.REGEN_PER_RECOVERY;
+        var ret = this.statBonuses.healthRegen + this.Recovery() * this.player.classStatics.REGEN_PER_RECOVERY;
+        ret += this.Recovery() * this.player.getTalentLevel("rec") * 0.08 * this.player.classStatics.REGEN_PER_RECOVERY;
         ret += ret * this.player.runeBonuses.regenPercent;
         return Math.floor(ret * 10) / 10;
     }
     Armor() {
-        var ret = this.Defense() * Statics.ARMOR_PER_DEFENSE + this.statBonuses.armor * (1 + this.player.runeBonuses.armorPercent) *
-            (1 + Math.pow(this.Defense(), Statics.SCALING_DIMINISHING_POWER + this.player.runeBonuses.armorScaling) * Statics.SCALING_ARMOR_PER_DEFENSE);
-        ret += this.Defense() * this.player.getTalentLevel("def") * 0.13 * Statics.ARMOR_PER_DEFENSE;
+        var ret = this.Defense() * this.player.classStatics.ARMOR_PER_DEFENSE + this.statBonuses.armor * (1 + this.player.runeBonuses.armorPercent) *
+            (1 + Math.pow(this.Defense(), this.player.classStatics.SCALING_DIMINISHING_POWER + this.player.runeBonuses.armorScaling) * this.player.classStatics.SCALING_ARMOR_PER_DEFENSE);
+        ret += this.Defense() * this.player.getTalentLevel("def") * 0.13 * this.player.classStatics.ARMOR_PER_DEFENSE;
         return Math.floor(ret);
     }
     AttackSpeed() {
@@ -167,11 +167,7 @@ export class AdventurerBlock extends CreatureBlock {
         return ret;
     }
 
-    getStatTooltip() {
-
-    }
-
-    takeDamage(damage, isCrit, trueDamage = false) {
+    takeDamage(damage, isCrit, dmgType) {
         if (this.player.getTalentLevel("dodge") > 0) {
             this.hitCounter -= 1;
             if (this.hitCounter <= 0) {
@@ -190,7 +186,7 @@ export class AdventurerBlock extends CreatureBlock {
         if (Math.random() <= 0.2) {
             dmg = Math.max(1, dmg - this.Armor() * (this.player.getTalentLevel("block") * 0.25));
         }
-        dmg = super.takeDamage(dmg, isCrit, trueDamage);
+        dmg = super.takeDamage(dmg, isCrit, dmgType);
         if (this.player.getTalentLevel("secondwind") > 0 && this.secondWindCooldown <= 0 && this.currentHealth < this.MaxHealth() / 2) {
             this.secondWindDuration = 10000;
             this.secondWindCooldown = Statics.SECONDWIND_COOLDOWN - this.player.getTalentLevel("secondwind") * 10000;
@@ -234,7 +230,7 @@ export class AdventurerBlock extends CreatureBlock {
                 rawDmg = rawDmg * 2;
             }
         }
-        var dmg = creature.takeDamage(rawDmg, isCrit);
+        var dmg = creature.takeDamage(rawDmg, isCrit, Statics.DMG_NORMAL);
         this.attackCooldown = 0;
         if (Math.random() < this.player.getTalentLevel("followthrough") * 0.05) {
             this.attackCooldown = this.AttackSpeed() / 2;
@@ -253,7 +249,7 @@ export class AdventurerBlock extends CreatureBlock {
                 rawDmg = rawDmg * 2;
             }
         }
-        return creature.takeDamage(rawDmg, isCrit);
+        return creature.takeDamage(rawDmg, isCrit, Statics.DMG_NORMAL);
     }
 
     save() {
