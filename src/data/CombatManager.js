@@ -137,7 +137,7 @@ export class CombatManager {
     _handleRewards() {
         this.fightCooldown = Statics.COMBAT_COOLDOWN;
         var rewards = {
-            tier: this.activeTile.parent.regionLevel,
+            tier: Math.min(7, this.activeTile.parent.regionLevel),
             resource: [0, 0, 0, 0, 0, 0],
             shade: 0,
             gold: 0,
@@ -220,7 +220,7 @@ export class CombatManager {
 
                 var poison = this.monsters[i].findTrait(Statics.TRAIT_POISONED);
                 if (poison !== undefined) {
-                    player.statBlock.takeDamage(this.monsters[i].DamageMax() * 0.03 * poison.level * (delta / 1000), false, true);
+                    player.statBlock.takeDamage(this.monsters[i].DamageMax() * 0.05 * poison.level * (delta / 1000), false, true);
                 }
 
                 if (this.monsters[i].canAttack() === true) {

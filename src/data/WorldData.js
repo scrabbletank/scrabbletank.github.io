@@ -80,12 +80,18 @@ export class WorldData {
             traits.push({ type: settings.fixedTraits[i].type, level: settings.fixedTraits[i].level });
         }
         for (var i = 0; i < count + settings.startingTraits; i++) {
-            var traitType = Common.randint(1, 7);
-            var temp = traits.find(t => t.type === traitType);
-            if (temp !== undefined) {
-                temp.level += 1;
+            // only allow a max of 5 traits
+            if (traits.length >= 5) {
+                var inc = Common.randint(0, traits.length);
+                traits[inc].level += 1;
             } else {
-                traits.push({ type: traitType, level: 1 });
+                var traitType = Common.randint(1, 7);
+                var temp = traits.find(t => t.type === traitType);
+                if (temp !== undefined) {
+                    temp.level += 1;
+                } else {
+                    traits.push({ type: traitType, level: 1 });
+                }
             }
         }
         traits = traits.sort((a, b) => { return b.level - a.level });
@@ -93,12 +99,11 @@ export class WorldData {
     }
 
     generateRegionChoices() {
-        var numChoices = Common.randint(2, 5);
         var choices = ["temperate", "mountains", "desert", "forest", "hills"];
         this.nextRegions = [];
-        for (var i = 0; i < numChoices; i++) {
+        for (var i = 0; i < 3; i++) {
             var choice = Common.randint(0, choices.length);
-            var totalTraits = Math.floor((this.regionList.length) / 2);
+            var totalTraits = this.regionList.length - 1;
             this.nextRegions.push({
                 type: choices[choice],
                 traits: this._randomizeTraits(totalTraits)
@@ -220,5 +225,8 @@ export class WorldData {
         this.nextRegions = saveObj.nr;
         this.timeAtRunStart = saveObj.st;
         this.time.load(saveObj.time, ver);
+        if (this.nextRegions.length > 0 && this.nextRegions.length !== 3) {
+            this.generateRegionChoices();
+        }
     }
 }

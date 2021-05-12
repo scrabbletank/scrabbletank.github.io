@@ -77,8 +77,8 @@ export class RegionScene extends SceneUIBase {
         if (WorldData.getInstance().regionList.length > 1) {
             this.regionTiles.push(this.add.bitmapText(this.relativeX(660), this.relativeY(10), "courier20", "Regions:"));
             for (var i = 0; i < WorldData.getInstance().regionList.length; i++) {
-                var x = this.relativeX(660 + i * 20);
-                var y = this.relativeY(35);
+                var x = this.relativeX(660 + (i % 10) * 20);
+                var y = this.relativeY(35 + Math.floor(i / 10) * 20);
                 this.regionTiles.push(this._setupRegionButton(i, x, y));
             }
         }
@@ -365,7 +365,7 @@ export class RegionScene extends SceneUIBase {
     }
 
     _updateTile(tile) {
-        this.scene.get("TownScene").updateResearchButton();
+        this.scene.get("TownScene").refresh();
         var clr = toPhaserColor(tile.color);
         var border = toPhaserColor(tile.borderColor);
         if (tile.revealed === false) {
@@ -497,7 +497,7 @@ export class RegionScene extends SceneUIBase {
         this.invasionLabel = this.add.bitmapText(this.relativeX(720), this.relativeY(90), "courier20", "Invasion", 20, 1);
         this.invasionLabel.setVisible(this.progression.unlocks.buildings);
         var invasionPercent = this.region.invasionCounter / Statics.INVASION_THRESHOLD;
-        this.invasionLabel.setTint(Phaser.Display.Color.GetColor(40 + invasionPercent * 215, 40 + invasionPercent * 215, 40 + invasionPercent * 215));
+        this.invasionLabel.setTint(Phaser.Display.Color.GetColor(255, 255, 255));
 
         this.offlineLabel = this.add.bitmapText(this.relativeX(660), this.relativeY(140), "courier20", "Offline Time: " + WorldData.instance.time.getOfflineTimeString());
         this.speed1xButton = new TextButton(this, this.relativeX(795), this.relativeY(160), 30, 20, "1x")
@@ -552,10 +552,11 @@ export class RegionScene extends SceneUIBase {
 
     update(__time, delta) {
         this.offlineLabel.setText("Offline Time: " + WorldData.instance.time.getOfflineTimeString());
+        var invasionPercent = this.region.invasionCounter / Statics.INVASION_THRESHOLD;
+        this.invasionLabel.setText("Invasion\n" + Math.floor(invasionPercent * 100) + "%");
+        this.invasionLabel.setTint(Common.colorLerp(
+            Phaser.Display.Color.GetColor(255, 255, 255), Phaser.Display.Color.GetColor(255, 0, 255), invasionPercent));
         if (this.region.sightings.length > 0) {
-            var invasionPercent = this.region.invasionCounter / Statics.INVASION_THRESHOLD;
-            this.invasionLabel.setText("Invasion\n" + Math.floor(invasionPercent * 100) + "%");
-            this.invasionLabel.setTint(Phaser.Display.Color.GetColor(40 + invasionPercent * 215, 40 + invasionPercent * 215, 40 + invasionPercent * 215));
             this.sightingVal = (this.sightingVal + delta) % 2000;
             var lerp = Math.sin((this.sightingVal / 2000) * Math.PI * 2) * 0.5 + 0.5;
             for (var i = 0; i < this.region.sightings.length; i++) {

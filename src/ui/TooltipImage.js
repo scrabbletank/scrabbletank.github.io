@@ -52,8 +52,10 @@ export class TooltipImage {
     }
 
     _removeTooltip() {
-        this.floatingText.destroy();
-        this.floatingText = undefined;
+        if (this.floatingText !== undefined) {
+            this.floatingText.destroy();
+            this.floatingText = undefined;
+        }
     }
 
     destroy() {

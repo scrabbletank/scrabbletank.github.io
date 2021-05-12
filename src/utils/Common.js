@@ -78,39 +78,39 @@ export class Common {
         var sign = value >= 0 ? "+" : "";
         switch (prop) {
             case "health":
-                return sign + Math.floor(value) + " Health";
+                return sign + Common.numberString(Math.floor(value)) + " Health";
             case "damageMin":
-                return sign + Math.floor(value) + " Min Damage";
+                return sign + Common.numberString(Math.floor(value)) + " Min Dmg";
             case "damageMax":
-                return sign + Math.floor(value) + " Max Damage";
+                return sign + Common.numberString(Math.floor(value)) + " Max Dmg";
             case "strength":
-                return sign + Math.floor(value) + " Strength";
+                return sign + Common.numberString(Math.floor(value)) + " Strength";
             case "dexterity":
-                return sign + Math.floor(value) + " Dexterity";
+                return sign + Common.numberString(Math.floor(value)) + " Dexterity";
             case "agility":
-                return sign + Math.floor(value) + " Agility";
+                return sign + Common.numberString(Math.floor(value)) + " Agility";
             case "endurance":
-                return sign + Math.floor(value) + " Endurance";
+                return sign + Common.numberString(Math.floor(value)) + " Endurance";
             case "recovery":
-                return sign + Math.floor(value) + " Recovery";
+                return sign + Common.numberString(Math.floor(value)) + " Recovery";
             case "defense":
-                return sign + Math.floor(value) + " Defense";
+                return sign + Common.numberString(Math.floor(value)) + " Defense";
             case "accuracy":
-                return sign + Math.floor(value) + " Accuracy";
+                return sign + Common.numberString(Math.floor(value)) + " Accuracy";
             case "hit":
-                return sign + Math.floor(value) + " Hit";
+                return sign + Common.numberString(Math.floor(value)) + " Hit";
             case "evasion":
-                return sign + Math.floor(value) + " Evasion";
+                return sign + Common.numberString(Math.floor(value)) + " Evasion";
             case "critPower":
-                return sign + Math.floor(value) + " Crit Power";
+                return sign + Common.numberString(Math.floor(value)) + " Crit Power";
             case "critResistance":
-                return sign + Math.floor(value) + " Crit Resist";
+                return sign + Common.numberString(Math.floor(value)) + " Crit Resist";
             case "critChance":
-                return sign + Math.floor(value * 100) + "% Crit Chance";
+                return sign + Common.numberString(Math.floor(value * 100)) + "% Crit Chance";
             case "healthRegen":
-                return sign + Math.floor(value * 10) / 10 + "/s HP Regen";
+                return sign + Common.numberString(Math.floor(value * 10) / 10) + "/s HP Regen";
             case "armor":
-                return sign + Math.floor(value) + " Armor";
+                return sign + Common.numberString(Math.floor(value)) + " Armor";
         }
     }
 
