@@ -16,7 +16,7 @@ export class TileSelectWindow {
     constructor(scene, x, y, tile) {
         var progression = new ProgressionStore();
         var region = new WorldData().getCurrentRegion();
-        var regionTier = Math.min(region.regionLevel, 8);
+        var regionTier = Math.min(region.regionLevel, 7);
 
         this.backRect = scene.add.rectangle(x, y, 500, 220, Phaser.Display.Color.GetColor(0, 0, 0))
             .setInteractive()
@@ -177,7 +177,7 @@ export class TileSelectWindow {
                 if (this.floatingText !== undefined) {
                     this.floatingText.destroy();
                 }
-                var regionTier = Math.min(WorldData.getInstance().getCurrentRegion().regionLevel, 8);
+                var regionTier = Math.min(WorldData.getInstance().getCurrentRegion().regionLevel, 7);
                 var descTxt = Common.processText(Building.getTooltip(tile, building.name, building.tier, true), 24);
                 this.floatingText = new ExtendedFloatingTooltip(scene, x + (x + 350 > 1100 ? -350 : 0), y - 150, 350, 150)
                     .addText(5, 5, "courier20", building.name)

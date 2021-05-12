@@ -30,6 +30,7 @@ export class RegionButton {
     onClickHandler(callback) {
         this.backingRect.setInteractive({ useHandCursor: true })
             .on("pointerdown", () => { callback(); });
+        this.regionImg.onClickHandler(callback);
         return this;
     }
 
