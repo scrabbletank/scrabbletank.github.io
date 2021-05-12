@@ -230,6 +230,19 @@ export class TooltipRegistry {
         }
     }
 
+    static getRegionImage(regionName) {
+        switch (regionName) {
+            case "unknown":
+                return { sprite: "icons", tile: 58 };
+            case "hills":
+                return { sprite: "icons", tile: 59 };
+            case "desert":
+                return { sprite: "icons", tile: 57 };
+            default:
+                return { sprite: "icons", tile: 40 };
+        }
+    }
+
     static getChallengeDescription(challenge) {
         switch (challenge.name) {
             case "A Matter of Years":
@@ -307,14 +320,14 @@ export class TooltipRegistry {
                 return "Dire " + trait.level + ": Core stats are increased by " + trait.level * 20 + "%, drops motes and gives " +
                     trait.level * 75 + "% more experience.";
             case Statics.TRAIT_POISONED:
-                return "Poisoned " + trait.level + ": Deals " + trait.level * 3 + "% of its max damage per second as true damage.";
+                return "Poisoned " + trait.level + ": Deals " + trait.level * 5 + "% of its max damage per second as true damage.";
             case Statics.TRAIT_MONSTROUS:
                 return "Monstrous " + trait.level + ": Attack speed is reduced by 15%. Has " + trait.level * 25 + "% increased health and " +
                     trait.level * 10 + "% increased damage.";
             case Statics.TRAIT_QUICK:
                 return "Quick " + trait.level + ": Attack speed is increased by 20%. Has " + trait.level * 25 + "% increased evasion.";
             case Statics.TRAIT_DEADLY:
-                return "Deadly " + trait.level + ": Crit chance is doubled and has " + trait.level * 5 + "% more damage and crit power.";
+                return "Deadly " + trait.level + ": Crit chance is doubled and has " + trait.level * 30 + "% more crit power.";
             case Statics.TRAIT_SHIELDED:
                 return "Shielded " + trait.level + ": Every second gains " + trait.level * 20 + "% of their armor as a shield that " +
                     "absorbs incoming damage. Crit Resistance is increased 1000% while shielded.";
@@ -323,6 +336,25 @@ export class TooltipRegistry {
                     trait.level * 10 + "% and has a " + Math.floor(((1 - Math.pow(0.92, trait.level)) * 100)) + "% chance to trigger Follow Through.";
         }
         return trait.type + ": Missing Tooltip. Better report this to the dev.";
+    }
+
+    static getTraitImage(trait) {
+        switch (trait.type) {
+            case Statics.TRAIT_DIRE:
+                return { sprite: "icons", tile: 43 };
+            case Statics.TRAIT_POISONED:
+                return { sprite: "icons", tile: 46 };
+            case Statics.TRAIT_MONSTROUS:
+                return { sprite: "icons", tile: 42 };
+            case Statics.TRAIT_QUICK:
+                return { sprite: "icons", tile: 49 };
+            case Statics.TRAIT_DEADLY:
+                return { sprite: "icons", tile: 41 };
+            case Statics.TRAIT_SHIELDED:
+                return { sprite: "icons", tile: 44 };
+            case Statics.TRAIT_BESERK:
+                return { sprite: "icons", tile: 45 };
+        }
     }
 
     static getRuneBonusText(prop, value) {

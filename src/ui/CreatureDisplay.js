@@ -58,30 +58,7 @@ export class CreatureDisplay {
         }
         this.traitButtons = [];
         for (var i = 0; i < creature.traits.length; i++) {
-            var sprite = { sprite: "icons", tile: 63 };
-            switch (creature.traits[i].type) {
-                case Statics.TRAIT_DIRE:
-                    sprite = { sprite: "icons", tile: 43 };
-                    break;
-                case Statics.TRAIT_POISONED:
-                    sprite = { sprite: "icons", tile: 46 };
-                    break;
-                case Statics.TRAIT_MONSTROUS:
-                    sprite = { sprite: "icons", tile: 42 };
-                    break;
-                case Statics.TRAIT_QUICK:
-                    sprite = { sprite: "icons", tile: 49 };
-                    break;
-                case Statics.TRAIT_DEADLY:
-                    sprite = { sprite: "icons", tile: 41 };
-                    break;
-                case Statics.TRAIT_SHIELDED:
-                    sprite = { sprite: "icons", tile: 44 };
-                    break;
-                case Statics.TRAIT_BESERK:
-                    sprite = { sprite: "icons", tile: 45 };
-                    break;
-            }
+            var sprite = TooltipRegistry.getTraitImage(creature.traits[i]);
             this.traitButtons.push(new TooltipImage(this.sceneContext, this.x + 75 + (i * 20), this.y + 105, 16, 16, sprite,
                 TooltipRegistry.getTraitTooltip(creature.traits[i])));
         }

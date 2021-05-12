@@ -49,7 +49,7 @@ export class Building {
         return bld;
     }
 
-    static getTooltip(tile, name, tier, potential=false) {
+    static getTooltip(tile, name, tier, potential = false) {
         var region = WorldData.getInstance().getCurrentRegion();
         var prodBonus = 1 + (tile.defense * MoonlightData.getInstance().moonperks.moonlightworkers.level * 0.01);
         var eff = tile.roadBonus * region._getBuildingEfficiency(tile.x, tile.y, potential);
@@ -80,7 +80,11 @@ export class Building {
                 return "Produces " + Math.floor(prod * 100) / 100 + " Crystal at the end of each day. Production at " +
                     Math.floor(eff * 100) + "% based on distance to roads and other buildings.";
             case "Town House":
-                return "Increases the Town's max population by " + (tier * 5) + ".";
+                if (tile.houseBuildable === true) {
+                    return "Increases the Town's max population by " + (tier * 5) + ".";
+                } else {
+                    return "This house is too far away from a road and has been abandoned.";
+                }
             case "Watch Tower":
                 return "Increases the defense of all tiles within 2 tiles of this watch tower by " + (tier * 2) + ".";
             case "Market":
@@ -90,13 +94,14 @@ export class Building {
                 return "Increases the Town's economy by " + Math.floor(bonus * 10000) / 100 + "%, based on distance to " +
                     "the Town and other Markets.";
             case "Tavern":
-                var maxDist = 1;
+                var maxDist = 1 + MoonlightData.getInstance().moonperks.moonwine.level;
                 var bonus = 0;
                 var pop = 0;
                 for (var y = Math.max(0, tile.y - maxDist); y < Math.min(region.height, tile.y + maxDist + 1); y++) {
                     for (var x = Math.max(0, tile.x - maxDist); x < Math.min(region.width, tile.x + maxDist + 1); x++) {
                         if (Math.abs(y - tile.y) + Math.abs(x - tile.x) <= maxDist &&
-                            region.map[y][x].building !== undefined && region.map[y][x].building.name === "Town House") {
+                            region.map[y][x].building !== undefined && region.map[y][x].building.name === "Town House" &&
+                            region.map[y][x].houseBuildable === true) {
                             bonus += 0.02;
                             pop += 1;
                         }
@@ -104,8 +109,9 @@ export class Building {
                 }
                 return "Increases the Town's population by " + pop + " and economy by " + Math.floor(tier * bonus * 100) + "%, based on nearby Town Houses.";
             case "Road":
+                var disconnectedText = tile.roadConnected === true ? "" : " This road is disconnected and gives no bonuses."
                 return "Most buildings must be built adjacent to roads. Production buildings get a boost being adjacent to a road, and " +
-                    "produce nothing when more than " + tier + " tiles away.";
+                    "produce nothing when more than " + tier + " tiles away." + disconnectedText;
             case "Docks":
                 var dockEff = region._getDockEfficiency(tile.x, tile.y, potential);
                 var bonus = tier * Statics.DOCK_BASE_ECON * region.townData.economyMulti * dockEff;
