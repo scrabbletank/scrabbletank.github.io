@@ -250,7 +250,7 @@ export class RegionScene extends SceneUIBase {
                 break;
             case "build":
                 var player = new PlayerData();
-                var tier = Math.floor(this.region.regionLevel);
+                var tier = Math.floor(Math.min(7, this.region.regionLevel));
                 if (Common.canCraft(blob.building.resourceCosts, player.resources[tier]) === true &&
                     blob.building.goldCost <= player.gold) {
                     player.spendResource(blob.building.resourceCosts, tier);
@@ -266,7 +266,7 @@ export class RegionScene extends SceneUIBase {
                     break;
                 }
                 var player = new PlayerData();
-                var tier = Math.floor(this.region.regionLevel);
+                var tier = Math.floor(Math.min(7, this.region.regionLevel));
                 if (Common.canCraft(blob.tile.building.resourceCosts, player.resources[tier]) === true &&
                     blob.tile.building.goldCost <= player.gold && this._canUpgrade(blob.tile)) {
                     player.spendResource(blob.tile.building.resourceCosts, tier);
