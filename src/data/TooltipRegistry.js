@@ -421,6 +421,9 @@ export class TooltipRegistry {
                 return { sprite: "icons", tile: 44 };
             case Statics.TRAIT_BESERK:
                 return { sprite: "icons", tile: 45 };
+            case Statics.TRAIT_FIRSTSTRIKE:
+                return { sprite: "icons", tile: 56 };
+                break;
         }
     }
 
