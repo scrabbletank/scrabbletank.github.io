@@ -58,7 +58,7 @@ export class DynamicSettings {
         this.productionMulti = 1;
         this.spendFriendship = false;
         this.friendshipToProduction = false;
-        this.invasionTimer = Statics.MAX_SIGHTING_SECONDS;
+        this.invasionTimer = Statics.MIN_SIGHTING_SECONDS;
         this.invasionLevelBonus = 0;
         this.invasionsIncreaseDifficulty = false;
     }
