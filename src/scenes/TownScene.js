@@ -70,8 +70,9 @@ export class TownScene extends SceneUIBase {
         var region = WorldData.instance.getCurrentRegion();
         var gold = TownData.getTechGoldCost(tech, region.townData.tier);
         var resource = TownData.getTechResourceCost(tech, region.townData.tier);
+        var tier = Math.min(7, region.townData.tier - 1);
         var player = new PlayerData();
-        if (player.gold >= gold && Common.canCraft(resource, player.resources[region.townData.tier - 1]) === true &&
+        if (player.gold >= gold && Common.canCraft(resource, player.resources[tier]) === true &&
             region.townData.friendshipLevel >= tech.level) {
             // If we are spending friendship, we spend the current level of friendship needed. Level 0 requires no friendship,
             // so don't calculate that here.
@@ -83,7 +84,7 @@ export class TownScene extends SceneUIBase {
                 region.townData.spendFriendship(friendshipCost);
             }
             player.addGold(-gold);
-            player.spendResource(resource, region.townData.tier - 1);
+            player.spendResource(resource, tier);
             region.townData.increaseTechLevel(tech);
             this._updateStatus();
         }

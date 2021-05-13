@@ -26,10 +26,19 @@ export class GearRuneWindow {
         this.socketTitle = sceneContext.add.bitmapText(x + 5, y + 5, "courier20", "SOCKETS").setOrigin(0, 0).setDepth(999);
         this.runeTitle = sceneContext.add.bitmapText(x + 260, y + 5, "courier20", "RUNES").setOrigin(0, 0).setDepth(999);
         this.cancelBtn = new TextButton(this.scene, this.x + 575, this.y + 475, 120, 20, "Cancel", 999);
+        this.sortNameBtn = new TextButton(this.scene, this.x + 350, this.y + 5, 35, 20, "A-Z", 999)
+            .onClickHandler(() => { this._sortRunes(0); });
+        this.sortLevelBtn = new TextButton(this.scene, this.x + 390, this.y + 5, 35, 20, "Lv", 999)
+            .onClickHandler(() => { this._sortRunes(1); });
 
         this.gearRuneImages = [];
         this.runeBonuses = [];
         this.runeInventory = [];
+        this._setupViews();
+    }
+
+    _sortRunes(sortType) {
+        PlayerData.getInstance().sortRunes(sortType);
         this._setupViews();
     }
 
@@ -154,6 +163,8 @@ export class GearRuneWindow {
         this.socketTitle.destroy();
         this.runeTitle.destroy();
         this.cancelBtn.destroy();
+        this.sortNameBtn.destroy();
+        this.sortLevelBtn.destroy();
         for (var i = 0; i < this.gearRuneImages.length; i++) {
             this.gearRuneImages[i].destroy();
         }

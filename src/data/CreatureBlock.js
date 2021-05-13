@@ -366,9 +366,7 @@ export class CreatureBlock {
                     break;
                 case Statics.TRAIT_DEADLY:
                     this.critChance = this.critChance * 2;
-                    extraStats.damageMin += this.DamageMin() * (0.05 * trait.level);
-                    extraStats.damageMax += this.DamageMax() * (0.05 * trait.level);
-                    extraStats.critPower += this.CritPower() * (0.05 * trait.level);
+                    extraStats.critPower += this.CritPower() * (0.3 * trait.level);
                     break;
                 case Statics.TRAIT_BESERK:
                     extraStats.hit += this.Hit() * (0.2 * trait.level);

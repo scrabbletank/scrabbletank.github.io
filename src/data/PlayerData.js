@@ -579,6 +579,16 @@ export class PlayerData {
         }
         this.runes.splice(idx, 1);
     }
+    sortRunes(sortType) {
+        switch (sortType) {
+            case 0: // BY NAME
+                this.runes.sort((a, b) => { return a.word.localeCompare(b.word); });
+                break;
+            case 1: // BY LEVEL
+                this.runes.sort((a, b) => { return b.level - a.level; });
+                break;
+        }
+    }
 
     equip(gear) {
         switch (gear.slotType) {

@@ -23,6 +23,10 @@ export class DynamicSettings {
             this.spendFriendship = false;
             this.friendshipToProduction = false;
 
+            // game settings
+            this.openCombatOnExplore = true;
+            this.autoExploreWeakestFirst = true;
+
             DynamicSettings.instance = this;
         }
 
@@ -54,6 +58,9 @@ export class DynamicSettings {
         this.productionMulti = 1;
         this.spendFriendship = false;
         this.friendshipToProduction = false;
+        this.invasionTimer = Statics.MAX_SIGHTING_SECONDS;
+        this.invasionLevelBonus = 0;
+        this.invasionsIncreaseDifficulty = false;
     }
 
     setupChallenge(challenge) {
@@ -73,6 +80,12 @@ export class DynamicSettings {
                 this.minGateRegion = challenge.completions;
                 this.exploreSpeed = 1 / 25;
                 this.fixedTraits = [{ type: Statics.TRAIT_MONSTROUS, level: 2 + challenge.completions * 2 }];
+                break;
+            case "Invasion":
+                this.minGateRegion = 0 + challenge.completions;
+                this.invasionTimer = 30 - 4 * challenge.completions;
+                this.invasionLevelBonus = 5 + 5 * challenge.completions;
+                this.invasionsIncreaseDifficulty = true;
                 break;
             case "Lazy Townsfolk":
                 this.minGateRegion = 2 + challenge.completions;
@@ -113,7 +126,12 @@ export class DynamicSettings {
             ft: this.fixedTraits,
             pm: this.productionMulti,
             sf: this.spendFriendship,
-            ftp: this.friendshipToProduction
+            ftp: this.friendshipToProduction,
+            it: this.invasionTimer,
+            ilb: this.invasionLevelBonus,
+            iid: this.invasionsIncreaseDifficulty,
+            sce: this.openCombatOnExplore,
+            saeo: this.autoExploreOptions
         }
 
         return saveObj;
@@ -133,8 +151,13 @@ export class DynamicSettings {
         this.challengeName = saveObj.cn;
         this.startingTraits = saveObj.st;
         this.fixedTraits = saveObj.ft;
-        this.productionMulti = saveObj.pm ? saveObj.pm : 1;
-        this.spendFriendship = saveObj.sf ? saveObj.sf : false;
-        this.friendshipToProduction = saveObj.ftp ? saveObj.ftp : false;
+        this.productionMulti = saveObj.pm !== undefined ? saveObj.pm : 1;
+        this.spendFriendship = saveObj.sf !== undefined ? saveObj.sf : false;
+        this.friendshipToProduction = saveObj.ftp !== undefined ? saveObj.ftp : false;
+        this.invasionTimer = saveObj.it !== undefined ? saveObj.it : Statics.MIN_SIGHTING_SECONDS;
+        this.invasionLevelBonus = saveObj.ilb !== undefined ? saveObj.ilb : 0;
+        this.invasionsIncreaseDifficulty = saveObj.iid !== undefined ? saveObj.iid : false;
+        this.openCombatOnExplore = saveObj.sce !== undefined ? saveObj.sce : true;
+        this.autoExploreOptions = saveObj.saeo !== undefined ? saveObj.saeo : Statics.AUTOEXPLORE_WEAKEST;
     }
 }

@@ -26,6 +26,8 @@ export class CombatManager {
         this.playerDefeatCallback = undefined;
         this.exploreCallback = undefined;
         this.combatCallback = undefined;
+        this.invasionEndCallback = undefined;
+        this.fromAutoExplore = false;
     }
 
     registerEvent(event, callback) {
@@ -53,6 +55,9 @@ export class CombatManager {
                 break;
             case "onCombatStart":
                 this.combatCallback = callback;
+                break;
+            case "onInvasionEnd":
+                this.invasionEndCallback = callback;
                 break;
         }
         return this;
@@ -106,7 +111,8 @@ export class CombatManager {
         }
     }
 
-    initFight() {
+    initFight(fromAutoExplore) {
+        this.fromAutoExplore = fromAutoExplore;
         this.combatActive = true;
         this.monsters = this.activeTile.generateMonsters();
         for (var i = 0; i < this.monsters.length; i++) {
@@ -137,7 +143,7 @@ export class CombatManager {
     _handleRewards() {
         this.fightCooldown = Statics.COMBAT_COOLDOWN;
         var rewards = {
-            tier: this.activeTile.parent.regionLevel,
+            tier: Math.min(7, this.activeTile.parent.regionLevel),
             resource: [0, 0, 0, 0, 0, 0],
             shade: 0,
             gold: 0,
@@ -187,10 +193,18 @@ export class CombatManager {
                     "will be super impressed if you bring this dumb stone back and call it that.\n\n" +
                     "Oh, you can probably try putting it on your weapon if you really wanted to. It's up to you.");
             }
-            rewards.motes += 1 + MoonlightData.getInstance().moonperks.heartofdarkness.level;
+            if (MoonlightData.getInstance().challenges.invasion.completions > 0 &&
+                MoonlightData.getInstance().challenges.invasion.completions < 5 && this.fromAutoExplore === true) {
+                rewards.motes += (1 + MoonlightData.getInstance().moonperks.heartofdarkness.level) * 0.25;
+            } else {
+                rewards.motes += 1 + MoonlightData.getInstance().moonperks.heartofdarkness.level;
+            }
             this.activeTile.invasionFights -= 1;
             if (this.activeTile.invasionFights <= 0) {
                 this.activeTile.parent.endSighting(this.activeTile.x, this.activeTile.y);
+                if (this.invasionEndCallback !== undefined) {
+                    this.invasionEndCallback();
+                }
             }
         }
 
@@ -220,7 +234,7 @@ export class CombatManager {
 
                 var poison = this.monsters[i].findTrait(Statics.TRAIT_POISONED);
                 if (poison !== undefined) {
-                    player.statBlock.takeDamage(this.monsters[i].DamageMax() * 0.03 * poison.level * (delta / 1000), false, Statics.DMG_TRUE);
+                    player.statBlock.takeDamage(this.monsters[i].DamageMax() * 0.05 * poison.level * (delta / 1000), false, Statics.DMG_TRUE);
                 }
 
                 if (this.monsters[i].canAttack() === true) {
@@ -300,7 +314,7 @@ export class CombatManager {
                 this.exploreCallback(this.activeTile, exploreResult);
             }
             if (this.fightCooldown <= 0) {
-                this.initFight();
+                this.initFight(this.fromAutoExplore);
             }
         }
     }

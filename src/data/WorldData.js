@@ -80,12 +80,18 @@ export class WorldData {
             traits.push({ type: settings.fixedTraits[i].type, level: settings.fixedTraits[i].level });
         }
         for (var i = 0; i < count + settings.startingTraits; i++) {
-            var traitType = Common.randint(1, 8);
-            var temp = traits.find(t => t.type === traitType);
-            if (temp !== undefined) {
-                temp.level += 1;
+            // only allow a max of 5 traits
+            if (traits.length >= 5) {
+                var inc = Common.randint(0, traits.length);
+                traits[inc].level += 1;
             } else {
-                traits.push({ type: traitType, level: 1 });
+                var traitType = Common.randint(1, 8);
+                var temp = traits.find(t => t.type === traitType);
+                if (temp !== undefined) {
+                    temp.level += 1;
+                } else {
+                    traits.push({ type: traitType, level: 1 });
+                }
             }
         }
         traits = traits.sort((a, b) => { return b.level - a.level });
@@ -93,12 +99,11 @@ export class WorldData {
     }
 
     generateRegionChoices() {
-        var numChoices = Common.randint(2, 5);
         var choices = ["temperate", "mountains", "desert", "forest", "hills"];
         this.nextRegions = [];
-        for (var i = 0; i < numChoices; i++) {
+        for (var i = 0; i < 3; i++) {
             var choice = Common.randint(0, choices.length);
-            var totalTraits = Math.floor((this.regionList.length) / 2);
+            var totalTraits = this.regionList.length - 1;
             this.nextRegions.push({
                 type: choices[choice],
                 traits: this._randomizeTraits(totalTraits)
@@ -143,6 +148,7 @@ export class WorldData {
                         case "A Matter of Years":
                             MoonlightData.getInstance().challenges.forge.unlocked = true;
                             MoonlightData.getInstance().challenges.explore.unlocked = true;
+                            MoonlightData.getInstance().challenges.invasion.unlocked = true;
                             MoonlightData.getInstance().challengePoints += 2;
                             break;
                         case "Forged Ahead":
@@ -151,13 +157,19 @@ export class WorldData {
                         case "Giant Lands":
                             MoonlightData.getInstance().challengePoints += 3;
                             break;
-                        case "Lazy Townsfolk":
+                        case "Invasion":
                             MoonlightData.getInstance().challengePoints += 3;
+                            break;
+                        case "Lazy Townsfolk":
+                            MoonlightData.getInstance().challengePoints += 4;
                             break;
                         case "Talentless":
                             MoonlightData.getInstance().challengePoints += 4;
                             break;
                         case "Mega Monsters":
+                            MoonlightData.getInstance().challengePoints += 5;
+                            break;
+                        case "Outcast":
                             MoonlightData.getInstance().challengePoints += 5;
                             break;
                     }
@@ -220,5 +232,8 @@ export class WorldData {
         this.nextRegions = saveObj.nr;
         this.timeAtRunStart = saveObj.st;
         this.time.load(saveObj.time, ver);
+        if (this.nextRegions.length > 0 && this.nextRegions.length !== 3) {
+            this.generateRegionChoices();
+        }
     }
 }

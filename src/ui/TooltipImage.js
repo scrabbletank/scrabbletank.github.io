@@ -17,10 +17,16 @@ export class TooltipImage {
         this.width = width;
         this.height = height;
         this.tooltip = Common.processText(tooltip, 40);
+        this.clickCallback = undefined;
 
-        this.backRect.setInteractive()
+        this.backRect.setInteractive({ useHandCursor: true })
+            .on("pointerdown", () => { if (this.clickCallback !== undefined) { this.clickCallback(); } })
             .on("pointerover", () => { this._showTooltip(); })
             .on("pointerout", () => { this._removeTooltip(); });
+    }
+
+    onClickHandler(callback) {
+        this.clickCallback = callback;
     }
 
     setPosition(x, y) {

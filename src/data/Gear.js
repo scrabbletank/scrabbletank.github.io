@@ -17,10 +17,11 @@ export class Gear {
         this.runes = [];
         this.compiledRunes = [];
         this._runeBonuses = {};
+        this.rampingCostMulti = 1;
 
         for (const prop in this.statBonuses) {
             if (prop !== 'critChance') {
-                this.statsPerLevel[prop] = this.statBonuses[prop] * 0.25;
+                this.statsPerLevel[prop] = this.statBonuses[prop] * (0.25 + MoonlightData.getInstance().moonperks.soulbound.level * 0.01);
             }
         }
 
@@ -38,8 +39,12 @@ export class Gear {
                     this.statBonuses[prop] += this.statsPerLevel[prop] * Math.ceil((i + 1) / 5);
                 }
             }
+            // to prevent cost increase from happening at level 1, every 25 levels item costs increase by 50
+            if (i > 10 && i % 25 === 0) {
+                this.rampingCostMulti = this.rampingCostMulti * Statics.SCALING_GEAR_MULTIPLIER;
+            }
             for (var t = 0; t < this.costs.length; t++) {
-                this.costs[t] += this.costsPerLevel[t] * (i + 1);
+                this.costs[t] += this.costsPerLevel[t] * (i + 1) * this.rampingCostMulti;
             }
         }
         this.level = level;
@@ -110,6 +115,11 @@ export class Gear {
     }
 
     load(saveObj, __ver) {
+        for (const prop in this.statBonuses) {
+            if (prop !== 'critChance') {
+                this.statsPerLevel[prop] = this.statBonuses[prop] * (0.25 + MoonlightData.getInstance().moonperks.soulbound.level * 0.01);
+            }
+        }
         this.motesFused = saveObj.mote;
         this.runes = saveObj.rn === undefined ? [] : saveObj.rn;
         this.bringToLevel(saveObj.lv);

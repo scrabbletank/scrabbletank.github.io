@@ -36,7 +36,6 @@ export class TownData {
 
         this.currentPopulation = 50;
         this.maxPopulation = 100;
-        this.tavernPopulation = 0;
         this.tier = tier;
         this.economyMulti = 1;
         this.bountyMulti = 1;
@@ -124,9 +123,6 @@ export class TownData {
                 break;
         }
     }
-    increaseMaxPop(value) {
-        this.maxPopulation += value;
-    }
 
     calculateEconMulti(bonus) {
         this.economyMulti = 1 + bonus + (this.upgrades.banking.level * 0.05);
@@ -143,7 +139,7 @@ export class TownData {
             this.economyMulti * (1 + player.getTalentLevel("governance") * 0.04);
     }
     getMaxPopulation() {
-        return this.maxPopulation + this.tavernPopulation;
+        return this.maxPopulation;
     }
     getMarketLevel() {
         return this.upgrades.market.level;
@@ -151,8 +147,8 @@ export class TownData {
     getTavernLevel() {
         return this.upgrades.tavern.level;
     }
-    setTavernPopulation(pop) {
-        this.tavernPopulation = pop;
+    setMaxPopulation(pop) {
+        this.maxPopulation = pop;
     }
     setTilesExplored(explored) {
         this.tilesExplored = explored;
@@ -207,7 +203,11 @@ export class TownData {
 
     endOfWeek() {
         if (this.townExplored === true) {
-            this.currentPopulation = Math.min(this.getMaxPopulation(), this.currentPopulation * Statics.POPULATION_GROWTH);
+            if (this.currentPopulation > this.maxPopulation) {
+                this.currentPopulation = Math.max(this.getMaxPopulation(), this.currentPopulation * 0.9);
+            } else {
+                this.currentPopulation = Math.min(this.getMaxPopulation(), this.currentPopulation * Statics.POPULATION_GROWTH);
+            }
             PlayerData.getInstance().addGold(this.getTownIncome());
             PlayerData.getInstance().addShade(this.currentPopulation * 0.1 *
                 MoonlightData.getInstance().moonperks.shadow3.level);

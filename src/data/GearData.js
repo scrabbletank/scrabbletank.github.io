@@ -550,8 +550,8 @@ export class GearData {
             defense: 0, accuracy: 0, hit: 30, evasion: 0,
             critPower: 0, critResistance: 0, critChance: 0.14, healthRegen: 0, armor: 0
         };
-        var cost = [0, 0, 25, 0, 10, 5];
-        var costlvl = [0, 10, 0, 17, 0, 8];
+        var cost = [15, 0, 40, 0, 0, 10];
+        var costlvl = [8, 0, 22, 0, 0, 15];
         this.gear.push(new Gear("Ardent Blade", 3, Statics.GEAR_WEAPON, stat, cost, costlvl));
 
         var stat = {

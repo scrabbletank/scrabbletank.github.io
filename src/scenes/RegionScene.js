@@ -9,6 +9,9 @@ import { PlayerData } from "../data/PlayerData";
 import { RebirthDialog } from "../ui/RebirthDialog";
 import { TextButton } from "../ui/TextButton";
 import { ProgressBar } from "../ui/ProgressBar";
+import { BuildingRegistry } from "../data/BuildingRegistry";
+import { RegionRegistry } from "../data/RegionRegistry";
+import { MoonlightData } from "../data/MoonlightData";
 
 var toPhaserColor = (clr) => { return Phaser.Display.Color.GetColor(clr[0], clr[1], clr[2]); };
 
@@ -32,9 +35,20 @@ export class RegionScene extends SceneUIBase {
         this.rebirthDialog = undefined;
 
         this.autoExploreActive = false;
+        this.autoInvadeActive = false;
         this.updateBuildings = false;
 
         this.upgradeKey = undefined;
+        this.houseKey = undefined;
+        this.roadKey = undefined;
+        this.productionKey = undefined;
+        this.exploreKey = undefined;
+        this.woodKey = undefined;
+        this.leatherKey = undefined;
+        this.metalKey = undefined;
+        this.fiberKey = undefined;
+        this.stoneKey = undefined;
+        this.crystalKey = undefined;
         this.hoveredTile = [-1, -1];
         this.regionTiles = [];
         this.regionStats = undefined;
@@ -77,8 +91,8 @@ export class RegionScene extends SceneUIBase {
         if (WorldData.getInstance().regionList.length > 1) {
             this.regionTiles.push(this.add.bitmapText(this.relativeX(660), this.relativeY(10), "courier20", "Regions:"));
             for (var i = 0; i < WorldData.getInstance().regionList.length; i++) {
-                var x = this.relativeX(660 + i * 20);
-                var y = this.relativeY(35);
+                var x = this.relativeX(660 + (i % 10) * 20);
+                var y = this.relativeY(35 + Math.floor(i / 10) * 20);
                 this.regionTiles.push(this._setupRegionButton(i, x, y));
             }
         }
@@ -95,7 +109,7 @@ export class RegionScene extends SceneUIBase {
             for (var i = 0; i < resources.length; i++) {
                 txt += " " + Statics.RESOURCE_NAMES[i] + ": " + (Math.floor(resources[i] * 100) / 100) + "\n";
             }
-            this.regionStats = this.add.bitmapText(this.relativeX(660), this.relativeY(250), "courier20", txt);
+            this.regionStats = this.add.bitmapText(this.relativeX(660), this.relativeY(280), "courier20", txt);
         }
     }
 
@@ -250,9 +264,9 @@ export class RegionScene extends SceneUIBase {
                 break;
             case "build":
                 var player = new PlayerData();
-                var tier = Math.floor(this.region.regionLevel);
+                var tier = Math.floor(Math.min(7, this.region.regionLevel));
                 if (Common.canCraft(blob.building.resourceCosts, player.resources[tier]) === true &&
-                    blob.building.goldCost <= player.gold) {
+                    blob.building.goldCost <= player.gold && this.region._canBuild(blob.tile, blob.building)) {
                     player.spendResource(blob.building.resourceCosts, tier);
                     player.addGold(-blob.building.goldCost);
                     this.region.placeBuilding(blob.tile.x, blob.tile.y, blob.building);
@@ -266,7 +280,7 @@ export class RegionScene extends SceneUIBase {
                     break;
                 }
                 var player = new PlayerData();
-                var tier = Math.floor(this.region.regionLevel);
+                var tier = Math.floor(Math.min(7, this.region.regionLevel));
                 if (Common.canCraft(blob.tile.building.resourceCosts, player.resources[tier]) === true &&
                     blob.tile.building.goldCost <= player.gold && this._canUpgrade(blob.tile)) {
                     player.spendResource(blob.tile.building.resourceCosts, tier);
@@ -348,24 +362,12 @@ export class RegionScene extends SceneUIBase {
             activeRegion.exploreTile(tile.x, tile.y);
             this.progression.registerTileExplored();
 
-            if (this.autoExploreActive === true) {
-                var pos = activeRegion.nextWeakestTile();
-                if (pos[0] !== -1) {
-                    if (activeRegion.map[pos[1]][pos[0]].name === "Town") {
-                        this._exploreTown(tile.x, tile.y);
-                        var pos = activeRegion.nextWeakestTile();
-                        if (pos[0] === -1) {
-                            return;
-                        }
-                    }
-                    this._exploreTile(activeRegion.map[pos[1]][pos[0]], true);
-                }
-            }
+            this.triggerAutoExplore(tile, tier);
         }
     }
 
     _updateTile(tile) {
-        this.scene.get("TownScene").updateResearchButton();
+        this.scene.get("TownScene").refresh();
         var clr = toPhaserColor(tile.color);
         var border = toPhaserColor(tile.borderColor);
         if (tile.revealed === false) {
@@ -415,6 +417,23 @@ export class RegionScene extends SceneUIBase {
             if (this.tileElements[tile.y][tile.x].building !== undefined) {
                 this.tileElements[tile.y][tile.x].building.destroy();
                 this.tileElements[tile.y][tile.x].building = undefined;
+            }
+        }
+    }
+
+    triggerAutoExplore(tile, tier) {
+        var activeRegion = WorldData.getInstance().regionList[tier];
+        if (this.autoExploreActive === true) {
+            var pos = activeRegion.nextWeakestTile(this.autoInvadeActive);
+            if (pos[0] !== -1) {
+                if (activeRegion.map[pos[1]][pos[0]].name === "Town") {
+                    this._exploreTown(tile.x, tile.y);
+                    var pos = activeRegion.nextWeakestTile(this.autoInvadeActive);
+                    if (pos[0] === -1) {
+                        return;
+                    }
+                }
+                this._exploreTile(activeRegion.map[pos[1]][pos[0]], true);
             }
         }
     }
@@ -472,6 +491,8 @@ export class RegionScene extends SceneUIBase {
         this.invasionLabel.setVisible(this.progression.unlocks.buildings);
         this.autoExploreLabel.setVisible(this.progression.persistentUnlocks.autoExplore);
         this.autoExploreButton.setVisible(this.progression.persistentUnlocks.autoExplore);
+        this.autoInvadeLabel.setVisible(MoonlightData.getInstance().challenges.invasion.completions > 0);
+        this.autoInvadeButton.setVisible(MoonlightData.getInstance().challenges.invasion.completions > 0);
         this._updateRegionStats();
     }
 
@@ -483,6 +504,16 @@ export class RegionScene extends SceneUIBase {
         } else {
             this.autoExploreButton.setText("OFF");
             this.autoExploreButton.setTextColor(Phaser.Display.Color.GetColor(175, 0, 140));
+        }
+    }
+    _toggleAutoInvade() {
+        this.autoInvadeActive = !this.autoInvadeActive;
+        if (this.autoInvadeActive === true) {
+            this.autoInvadeButton.setText("ON");
+            this.autoInvadeButton.setTextColor(Phaser.Display.Color.GetColor(255, 255, 255));
+        } else {
+            this.autoInvadeButton.setText("OFF");
+            this.autoInvadeButton.setTextColor(Phaser.Display.Color.GetColor(175, 0, 140));
         }
     }
 
@@ -497,7 +528,7 @@ export class RegionScene extends SceneUIBase {
         this.invasionLabel = this.add.bitmapText(this.relativeX(720), this.relativeY(90), "courier20", "Invasion", 20, 1);
         this.invasionLabel.setVisible(this.progression.unlocks.buildings);
         var invasionPercent = this.region.invasionCounter / Statics.INVASION_THRESHOLD;
-        this.invasionLabel.setTint(Phaser.Display.Color.GetColor(40 + invasionPercent * 215, 40 + invasionPercent * 215, 40 + invasionPercent * 215));
+        this.invasionLabel.setTint(Phaser.Display.Color.GetColor(255, 255, 255));
 
         this.offlineLabel = this.add.bitmapText(this.relativeX(660), this.relativeY(140), "courier20", "Offline Time: " + WorldData.instance.time.getOfflineTimeString());
         this.speed1xButton = new TextButton(this, this.relativeX(795), this.relativeY(160), 30, 20, "1x")
@@ -511,12 +542,18 @@ export class RegionScene extends SceneUIBase {
         this.autoExploreButton = new TextButton(this, this.relativeX(795), this.relativeY(190), 40, 20, "OFF")
             .onClickHandler(() => { this._toggleAutoExplore() });
         this.autoExploreButton.setTextColor(Phaser.Display.Color.GetColor(175, 0, 140));
+        this.autoInvadeLabel = this.add.bitmapText(this.relativeX(660), this.relativeY(220), "courier20", "Auto Invade:");
+        this.autoInvadeButton = new TextButton(this, this.relativeX(795), this.relativeY(220), 40, 20, "OFF")
+            .onClickHandler(() => { this._toggleAutoInvade() });
+        this.autoInvadeButton.setTextColor(Phaser.Display.Color.GetColor(175, 0, 140));
 
         this.autoExploreLabel.setVisible(this.progression.persistentUnlocks.autoExplore);
         this.autoExploreButton.setVisible(this.progression.persistentUnlocks.autoExplore);
+        this.autoInvadeLabel.setVisible(MoonlightData.getInstance().challenges.invasion.completions > 0);
+        this.autoInvadeButton.setVisible(MoonlightData.getInstance().challenges.invasion.completions > 0);
 
-        this.exploreLabel = this.add.bitmapText(this.relativeX(660), this.relativeY(220), "courier20", "Exploring:");
-        this.exploreProgressBar = new ProgressBar(this, this.relativeX(765), this.relativeY(220), 130, 20,
+        this.exploreLabel = this.add.bitmapText(this.relativeX(660), this.relativeY(250), "courier20", "Exploring:");
+        this.exploreProgressBar = new ProgressBar(this, this.relativeX(765), this.relativeY(250), 130, 20,
             Phaser.Display.Color.GetColor(0, 0, 255), Phaser.Display.Color.GetColor(32, 32, 64));
         this.exploreProgressBar.setFillPercent(0);
 
@@ -546,16 +583,27 @@ export class RegionScene extends SceneUIBase {
         this.region.onSighting((x) => { this.scene.get("DarkWorld").notifyRegion(); });
 
         this.upgradeKey = this.input.keyboard.addKey(Phaser.Input.Keyboard.KeyCodes.U);
+        this.houseKey = this.input.keyboard.addKey(Phaser.Input.Keyboard.KeyCodes.H);
+        this.roadKey = this.input.keyboard.addKey(Phaser.Input.Keyboard.KeyCodes.R);
+        this.productionKey = this.input.keyboard.addKey(Phaser.Input.Keyboard.KeyCodes.P);
+        this.exploreKey = this.input.keyboard.addKey(Phaser.Input.Keyboard.KeyCodes.E);
+        this.woodKey = this.input.keyboard.addKey(Phaser.Input.Keyboard.KeyCodes.ONE);
+        this.leatherKey = this.input.keyboard.addKey(Phaser.Input.Keyboard.KeyCodes.TWO);
+        this.metalKey = this.input.keyboard.addKey(Phaser.Input.Keyboard.KeyCodes.THREE);
+        this.fiberKey = this.input.keyboard.addKey(Phaser.Input.Keyboard.KeyCodes.FOUR);
+        this.stoneKey = this.input.keyboard.addKey(Phaser.Input.Keyboard.KeyCodes.FIVE);
+        this.crystalKey = this.input.keyboard.addKey(Phaser.Input.Keyboard.KeyCodes.SIX);
         this._updateRegionStats();
         this._onRegionChanged();
     }
 
     update(__time, delta) {
         this.offlineLabel.setText("Offline Time: " + WorldData.instance.time.getOfflineTimeString());
+        var invasionPercent = this.region.invasionCounter / Statics.INVASION_THRESHOLD;
+        this.invasionLabel.setText("Invasion\n" + Math.floor(invasionPercent * 100) + "%");
+        this.invasionLabel.setTint(Common.colorLerp(
+            Phaser.Display.Color.GetColor(255, 255, 255), Phaser.Display.Color.GetColor(255, 0, 255), invasionPercent));
         if (this.region.sightings.length > 0) {
-            var invasionPercent = this.region.invasionCounter / Statics.INVASION_THRESHOLD;
-            this.invasionLabel.setText("Invasion\n" + Math.floor(invasionPercent * 100) + "%");
-            this.invasionLabel.setTint(Phaser.Display.Color.GetColor(40 + invasionPercent * 215, 40 + invasionPercent * 215, 40 + invasionPercent * 215));
             this.sightingVal = (this.sightingVal + delta) % 2000;
             var lerp = Math.sin((this.sightingVal / 2000) * Math.PI * 2) * 0.5 + 0.5;
             for (var i = 0; i < this.region.sightings.length; i++) {
@@ -567,6 +615,53 @@ export class RegionScene extends SceneUIBase {
 
         if (Phaser.Input.Keyboard.JustUp(this.upgradeKey) && this.hoveredTile[0] !== -1) {
             this._tileActionHandler("upgrade", { tile: this.region.map[this.hoveredTile[1]][this.hoveredTile[0]] });
+        } else if (Phaser.Input.Keyboard.JustUp(this.houseKey) && this.hoveredTile[0] !== -1) {
+            this._tileActionHandler("build", {
+                tile: this.region.map[this.hoveredTile[1]][this.hoveredTile[0]],
+                building: BuildingRegistry.getBuildingByName('house')
+            });
+        } else if (Phaser.Input.Keyboard.JustUp(this.roadKey) && this.hoveredTile[0] !== -1) {
+            this._tileActionHandler("build", {
+                tile: this.region.map[this.hoveredTile[1]][this.hoveredTile[0]],
+                building: BuildingRegistry.getBuildingByName('road')
+            });
+        } else if (Phaser.Input.Keyboard.JustUp(this.exploreKey) && this.hoveredTile[0] !== -1) {
+            this._tileActionHandler("explore", { tile: this.region.map[this.hoveredTile[1]][this.hoveredTile[0]] });
+        } else if (Phaser.Input.Keyboard.JustUp(this.productionKey) && this.hoveredTile[0] !== -1) {
+            this._tileActionHandler("build", {
+                tile: this.region.map[this.hoveredTile[1]][this.hoveredTile[0]],
+                building: BuildingRegistry.getBuildingByName(RegionRegistry.TILE_TYPES[this.region.map[this.hoveredTile[1]][this.hoveredTile[0]].regName].preferredBuilding)
+            });
+        } else if (Phaser.Input.Keyboard.JustUp(this.woodKey) && this.hoveredTile[0] !== -1) {
+            this._tileActionHandler("build", {
+                tile: this.region.map[this.hoveredTile[1]][this.hoveredTile[0]],
+                building: BuildingRegistry.getBuildingByName('wood')
+            });
+        } else if (Phaser.Input.Keyboard.JustUp(this.leatherKey) && this.hoveredTile[0] !== -1) {
+            this._tileActionHandler("build", {
+                tile: this.region.map[this.hoveredTile[1]][this.hoveredTile[0]],
+                building: BuildingRegistry.getBuildingByName('leather')
+            });
+        } else if (Phaser.Input.Keyboard.JustUp(this.metalKey) && this.hoveredTile[0] !== -1) {
+            this._tileActionHandler("build", {
+                tile: this.region.map[this.hoveredTile[1]][this.hoveredTile[0]],
+                building: BuildingRegistry.getBuildingByName('metal')
+            });
+        } else if (Phaser.Input.Keyboard.JustUp(this.fiberKey) && this.hoveredTile[0] !== -1) {
+            this._tileActionHandler("build", {
+                tile: this.region.map[this.hoveredTile[1]][this.hoveredTile[0]],
+                building: BuildingRegistry.getBuildingByName('fiber')
+            });
+        } else if (Phaser.Input.Keyboard.JustUp(this.stoneKey) && this.hoveredTile[0] !== -1) {
+            this._tileActionHandler("build", {
+                tile: this.region.map[this.hoveredTile[1]][this.hoveredTile[0]],
+                building: BuildingRegistry.getBuildingByName('stone')
+            });
+        } else if (Phaser.Input.Keyboard.JustUp(this.crystalKey) && this.hoveredTile[0] !== -1) {
+            this._tileActionHandler("build", {
+                tile: this.region.map[this.hoveredTile[1]][this.hoveredTile[0]],
+                building: BuildingRegistry.getBuildingByName('crystal')
+            });
         }
 
         if (this.updateBuildings === true) {

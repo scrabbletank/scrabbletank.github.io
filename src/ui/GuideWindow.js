@@ -12,24 +12,10 @@ export class GuideWindow {
         this.scene = scene;
         this.x = x;
         this.y = y;
-        this.unlocks = {
-            // Tabs
-            gearTab: false,
-            exploreTab: false,
-            combatTab: false,
-            townTab: false,
-            talentsTab: false,
-            worldTab: false,
-            // Mechanics
-            infuseUI: false,
-            resourceUI: false,
-            craftingUI: false,
-            buildings: false,
-            motes: false,
-            runes: false
-        };
         this.titleLabel = scene.add.bitmapText(x + 375, y + 10, "courier20", "Darkworld's Book of What to Do").setOrigin(0.5, 0);
         var by = y + 40;
+        this.hotkeyBtn = new TextButton(scene, x + 5, by, 120, 20, "Gear").onClickHandler(() => { this._setGuide(-1); });
+        by += 22;
         this.gearBtn = ProgressionStore.getInstance().unlocks.gearTab === true ?
             new TextButton(scene, x + 5, by, 120, 20, "Gear").onClickHandler(() => { this._setGuide(0); }) :
             new TextButton(scene, x + 5, by, 120, 20, "???");
@@ -82,7 +68,7 @@ export class GuideWindow {
             new TextButton(scene, x + 5, by, 120, 20, "Challenges").onClickHandler(() => { this._setGuide(12); }) :
             new TextButton(scene, x + 5, by, 120, 20, "???");
         by += 22;
-        this.btns = [this.gearBtn, this.exploreBtn, this.combatBtn, this.townBtn, this.talentsBtn, this.worldBtn, this.infuseBtn,
+        this.btns = [this.hotkeyBtn, this.gearBtn, this.exploreBtn, this.combatBtn, this.townBtn, this.talentsBtn, this.worldBtn, this.infuseBtn,
         this.resourceBtn, this.craftingBtn, this.buildingsBtn, this.moteBtn, this.runeBtn, this.challengeBtn];
         this.guideTexts = [];
         this.closeButton = new TextButton(scene, x + 630, y + 620, 110, 20, "Back");
@@ -94,6 +80,20 @@ export class GuideWindow {
         }
         this.guideTexts = [];
         switch (num) {
+            case -1:
+                this.guideTexts.push(this.scene.add.bitmapText(this.x + 150, this.y + 45, "courier20", "Hotkeys"));
+                var helptxt = "Why do I have to click so many times? What kind of idle game is this where it takes 3 clicks to build " +
+                    "a building that you need HUNDREDS of? Well say no more. Have some sweet sweet hotkeys to rest your delicate wrists. " +
+                    "But seriously, please use the hotkeys, clicking that much can't be good for you. While hovering over a tile in the " +
+                    "Region tab, press:\n\n" +
+                    "* 'R' to build a road\n" +
+                    "* 'H' to build a house\n" +
+                    "* 'P' to build a production building matching the tile (eg: Mountains build mines)\n" +
+                    "* '1' - '6' to build a specific production building (Wood -> Leather - > Metal -> Fiber - > Stone -> Crystal)\n" +
+                    "* 'U' to upgrade a building\n" +
+                    "* 'E' to explore a tile\n";
+                this.guideTexts.push(this.scene.add.bitmapText(this.x + 150, this.y + 70, "courier16", Common.processText(helptxt, 72)));
+                break;
             case 0:
                 this.guideTexts.push(this.scene.add.bitmapText(this.x + 150, this.y + 45, "courier20", "Gear"));
                 var helptxt = "This one's pretty simple, you can equip any gear you find here. You can only have 3 items equipped " +

@@ -9,6 +9,9 @@ import { TextButton } from "../ui/TextButton";
 import { WorldData } from "../data/WorldData";
 import { CombatManager } from "../data/CombatManager";
 import { PlayerData } from "../data/PlayerData";
+import { MoonlightData } from "../data/MoonlightData";
+import { Statics } from "../data/Statics";
+import { DynamicSettings } from "../data/DynamicSettings";
 
 //width 800x600
 
@@ -36,7 +39,8 @@ export class CombatScene extends SceneUIBase {
             .registerEvent("onReward", (x, y) => { this._rewardCallback(x, y); })
             .registerEvent("onPlayerDefeat", () => { this._playerDefeatCallback(); })
             .registerEvent("onExplore", (x, y) => { this._exploreCallback(x, y); })
-            .registerEvent("onCombatStart", (x) => { this._onCombatCallback(x); });
+            .registerEvent("onCombatStart", (x) => { this._onCombatCallback(x); })
+            .registerEvent('onInvasionEnd', () => { this._onInvasionEndCallback(); });
     }
 
     enableScene() {
@@ -75,6 +79,12 @@ export class CombatScene extends SceneUIBase {
     _rewardCallback(tile, rewards) {
         this._hideEnemyDisplays();
         this.restButton.setVisible(true);
+
+        if (DynamicSettings.getInstance().autoExploreOptions === Statics.AUTOEXPLORE_HOLD &&
+            this.scene.get("RegionScene").autoInvadeActive === true && this.combatManager.activeTile.isInvaded === false) {
+            this.scene.get("RegionScene").triggerAutoExplore(this.combatManager.activeTile,
+                this.combatManager.activeTile.parent.regionLevel);
+        }
 
         for (var i = 0; i < this.onRewardHandlers.length; i++) {
             this.onRewardHandlers[i](tile, rewards);
@@ -147,7 +157,7 @@ export class CombatScene extends SceneUIBase {
         }
     }
 
-    initFight(tile) {
+    initFight(tile, fromAutoExplore) {
         const letters = ['A', 'B', 'C', 'D', 'E', 'F', 'G', 'H', 'I', 'J', 'K', 'L', 'M', 'N', 'O', 'P', 'Q'];
         const tileName = letters[tile.y] + "" + (tile.x + 1) + " - " + tile.name;
         if (tile.amountExplored >= tile.explorationNeeded) {
@@ -160,7 +170,7 @@ export class CombatScene extends SceneUIBase {
         this.invasionCounter.setVisible(tile.isInvaded);
         this.invasionCounter.setText("Invaders: " + (tile.invasionFights * 3));
         this.combatManager.setTile(tile);
-        this.combatManager.initFight();
+        this.combatManager.initFight(fromAutoExplore);
         this.regionTier = tile.parent.regionLevel;
     }
 
@@ -242,6 +252,13 @@ export class CombatScene extends SceneUIBase {
         this.invasionCounter.setText("Invaders: " + (this.combatManager.activeTile.invasionFights * 3));
         this.restButton.setVisible(false);
         this.playerDisplay.initWithCreature(this.player.statBlock);
+    }
+
+    _onInvasionEndCallback() {
+        if (this.scene.get("RegionScene").autoInvadeActive === true) {
+            this.scene.get("RegionScene").triggerAutoExplore(this.combatManager.activeTile,
+                this.combatManager.activeTile.parent.regionLevel);
+        }
     }
 
     isInCombat() { return this.combatManager.isInCombat(); }
