@@ -148,12 +148,16 @@ export class WorldData {
                         case "A Matter of Years":
                             MoonlightData.getInstance().challenges.forge.unlocked = true;
                             MoonlightData.getInstance().challenges.explore.unlocked = true;
+                            MoonlightData.getInstance().challenges.invasion.unlocked = true;
                             MoonlightData.getInstance().challengePoints += 2;
                             break;
                         case "Forged Ahead":
                             MoonlightData.getInstance().challengePoints += 2;
                             break;
                         case "Giant Lands":
+                            MoonlightData.getInstance().challengePoints += 3;
+                            break;
+                        case "Invasion":
                             MoonlightData.getInstance().challengePoints += 3;
                             break;
                         case "Lazy Townsfolk":

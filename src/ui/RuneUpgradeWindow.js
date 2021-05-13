@@ -23,6 +23,10 @@ export class RuneUpgradeWindow {
 
         this.upgradeTitle = sceneContext.add.bitmapText(x + 5, y + 5, "courier20", "UPGRADE").setOrigin(0, 0).setDepth(999);
         this.runeTitle = sceneContext.add.bitmapText(x + 260, y + 5, "courier20", "RUNES").setOrigin(0, 0).setDepth(999);
+        this.sortNameBtn = new TextButton(this.scene, this.x + 350, this.y + 5, 35, 20, "A-Z", 999)
+            .onClickHandler(() => { this._sortRunes(0); });
+        this.sortLevelBtn = new TextButton(this.scene, this.x + 390, this.y + 5, 35, 20, "Lv", 999)
+            .onClickHandler(() => { this._sortRunes(1); });
 
         this.runeInventory = [];
         this.upgradeRune = this.scene.add.image(x + 125, y + 50, "runeicons", 0).setOrigin(0.5).setDepth(999);
@@ -70,6 +74,12 @@ export class RuneUpgradeWindow {
             this.upgradeUI[i].setVisible(false);
         }
     }
+
+    _sortRunes(sortType) {
+        PlayerData.getInstance().sortRunes(sortType);
+        this._setupViews();
+    }
+
     _setupViews() {
         for (var i = 0; i < this.runeInventory.length; i++) {
             this.runeInventory[i].destroy();
@@ -206,6 +216,8 @@ export class RuneUpgradeWindow {
         this.runeTitle.destroy();
         this.cancelBtn.destroy();
         this.upgradeRune.destroy();
+        this.sortNameBtn.destroy();
+        this.sortLevelBtn.destroy();
         for (var i = 0; i < this.runeInventory.length; i++) {
             this.runeInventory[i].destroy();
         }
