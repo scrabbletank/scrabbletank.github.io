@@ -14,7 +14,7 @@ export class GuideWindow {
         this.y = y;
         this.titleLabel = scene.add.bitmapText(x + 375, y + 10, "courier20", "Darkworld's Book of What to Do").setOrigin(0.5, 0);
         var by = y + 40;
-        this.hotkeyBtn = new TextButton(scene, x + 5, by, 120, 20, "Gear").onClickHandler(() => { this._setGuide(-1); });
+        this.hotkeyBtn = new TextButton(scene, x + 5, by, 120, 20, "Hotkeys").onClickHandler(() => { this._setGuide(-1); });
         by += 22;
         this.gearBtn = ProgressionStore.getInstance().unlocks.gearTab === true ?
             new TextButton(scene, x + 5, by, 120, 20, "Gear").onClickHandler(() => { this._setGuide(0); }) :

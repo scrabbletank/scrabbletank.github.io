@@ -50,7 +50,7 @@ export class ChallengeWindow {
     _challengeClickHandler(challenge) {
         this.challengeBox.setText(Common.processText(TooltipRegistry.getChallengeDescription(challenge), 57));
         this.selectedChallenge = challenge;
-        this.acceptBtn.setEnable(true);
+        this.acceptBtn.setEnable(challenge.completions < challenge.maxCompletions);
     }
 
     destroy() {

@@ -393,21 +393,25 @@ export class RegionScene extends SceneUIBase {
             // if this is a road we need to update neighbouring roads
             if (tile.building.name === "Road") {
                 if (tile.x > 0 && this.region.map[tile.y][tile.x - 1].building !== undefined &&
+                    this.tileElements[tile.y][tile.x - 1].building !== undefined &&
                     this.region.map[tile.y][tile.x - 1].building.name === "Road") {
                     var rtxt = this._getBuildingImage(tile.x - 1, tile.y);
                     this.tileElements[tile.y][tile.x - 1].building.setTexture(rtxt.sprite, rtxt.tile);
                 }
                 if (tile.x < this.region.width - 1 && this.region.map[tile.y][tile.x + 1].building !== undefined &&
+                    this.tileElements[tile.y][tile.x + 1].building !== undefined &&
                     this.region.map[tile.y][tile.x + 1].building.name === "Road") {
                     var rtxt = this._getBuildingImage(tile.x + 1, tile.y);
                     this.tileElements[tile.y][tile.x + 1].building.setTexture(rtxt.sprite, rtxt.tile);
                 }
                 if (tile.y > 0 && this.region.map[tile.y - 1][tile.x].building !== undefined &&
+                    this.tileElements[tile.y - 1][tile.x].building !== undefined &&
                     this.region.map[tile.y - 1][tile.x].building.name === "Road") {
                     var rtxt = this._getBuildingImage(tile.x, tile.y - 1);
                     this.tileElements[tile.y - 1][tile.x].building.setTexture(rtxt.sprite, rtxt.tile);
                 }
                 if (tile.y < this.region.height - 1 && this.region.map[tile.y + 1][tile.x].building !== undefined &&
+                    this.tileElements[tile.y + 1][tile.x].building !== undefined &&
                     this.region.map[tile.y + 1][tile.x].building.name === "Road") {
                     var rtxt = this._getBuildingImage(tile.x, tile.y + 1);
                     this.tileElements[tile.y + 1][tile.x].building.setTexture(rtxt.sprite, rtxt.tile);
