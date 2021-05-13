@@ -131,7 +131,7 @@ export class DynamicSettings {
             ilb: this.invasionLevelBonus,
             iid: this.invasionsIncreaseDifficulty,
             sce: this.openCombatOnExplore,
-            sewf: this.autoExploreWeakestFirst
+            saeo: this.autoExploreOptions
         }
 
         return saveObj;
@@ -158,6 +158,6 @@ export class DynamicSettings {
         this.invasionLevelBonus = saveObj.ilb !== undefined ? saveObj.ilb : 0;
         this.invasionsIncreaseDifficulty = saveObj.iid !== undefined ? saveObj.iid : false;
         this.openCombatOnExplore = saveObj.sce !== undefined ? saveObj.sce : true;
-        this.autoExploreWeakestFirst = saveObj.sewf !== undefined ? saveObj.sewf : true;
+        this.autoExploreOptions = saveObj.saeo !== undefined ? saveObj.saeo : Statics.AUTOEXPLORE_WEAKEST;
     }
 }

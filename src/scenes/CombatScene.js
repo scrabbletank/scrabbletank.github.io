@@ -10,6 +10,8 @@ import { WorldData } from "../data/WorldData";
 import { CombatManager } from "../data/CombatManager";
 import { PlayerData } from "../data/PlayerData";
 import { MoonlightData } from "../data/MoonlightData";
+import { Statics } from "../data/Statics";
+import { DynamicSettings } from "../data/DynamicSettings";
 
 //width 800x600
 
@@ -77,6 +79,12 @@ export class CombatScene extends SceneUIBase {
     _rewardCallback(tile, rewards) {
         this._hideEnemyDisplays();
         this.restButton.setVisible(true);
+
+        if (DynamicSettings.getInstance().autoExploreOptions === Statics.AUTOEXPLORE_HOLD &&
+            this.scene.get("RegionScene").autoInvadeActive === true && this.combatManager.activeTile.isInvaded === false) {
+            this.scene.get("RegionScene").triggerAutoExplore(this.combatManager.activeTile,
+                this.combatManager.activeTile.parent.regionLevel);
+        }
 
         for (var i = 0; i < this.onRewardHandlers.length; i++) {
             this.onRewardHandlers[i](tile, rewards);
@@ -247,7 +255,7 @@ export class CombatScene extends SceneUIBase {
     }
 
     _onInvasionEndCallback() {
-        if (MoonlightData.getInstance().challenges.invasion.completions > 0) {
+        if (this.scene.get("RegionScene").autoInvadeActive === true) {
             this.scene.get("RegionScene").triggerAutoExplore(this.combatManager.activeTile,
                 this.combatManager.activeTile.parent.regionLevel);
         }

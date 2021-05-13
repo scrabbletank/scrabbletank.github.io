@@ -500,7 +500,7 @@ creatureDefs['lootgoblin'] = {
     },
     attackSpeed: 1400,
     critChance: 0.4,
-    shadeBase: 125,
+    shadeBase: 190,
     rewardBase: 15,
     icon: { sprite: "enemyicons", tile: 14 }
 };

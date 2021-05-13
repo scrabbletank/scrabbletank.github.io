@@ -29,10 +29,10 @@ export class BuildingRegistry {
                     [25, 0, 0, 0, 40, 0], 40, 5);
             case "market":
                 return new Building("Market", "market", 1, BuildingTypes.ECON, { sprite: "bldicons", tile: 32, w: 32, h: 32 },
-                    [20, 10, 0, 10, 10, 10], 50, 5);
+                    [20, 10, 0, 10, 10, 10], 100, 5);
             case "tavern":
                 return new Building("Tavern", "tavern", 1, BuildingTypes.HOUSE, { sprite: "bldicons", tile: 33, w: 32, h: 32 },
-                    [20, 5, 0, 15, 0, 5], 50, 5);
+                    [25, 5, 0, 15, 0, 10], 100, 5);
             case "road":
                 return new Building("Road", "road", 1, BuildingTypes.ROAD, { sprite: "roadicons", tile: 0, w: 32, h: 32 },
                     [5, 0, 0, 0, 3, 0], 5, 7);
@@ -47,7 +47,7 @@ export class BuildingRegistry {
                     [10, 0, 20, 0, 10, 15], 150, 5);
             case "warehouse":
                 return new Building("Warehouse", "warehouse", 1, BuildingTypes.OTHER, { sprite: "bldicons", tile: 36, w: 32, h: 32 },
-                    [25, 5, 0, 5, 25, 0], 75, 5);
+                    [50, 10, 0, 10, 50, 0], 75, 5);
         }
     }
 }

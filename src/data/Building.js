@@ -124,7 +124,7 @@ export class Building {
             case "Alchemy Lab":
                 var drain = [1, 5, 13, 33, 77];
                 var gain = [0.05, 0.3, 0.9, 3, 8];
-                var amount = Math.floor(gain[tier - 1] * (1 + MoonlightData.getInstance().moonperks.mysticcauldron.level) * 100) / 100;
+                var amount = Math.floor(gain[tier - 1] * (1 + MoonlightData.getInstance().moonperks.mysticcauldron.level * 0.1) * 100) / 100;
                 return "Through strange magic converts " + drain[tier - 1] + " of all resources into " + amount + " of resources " +
                     "of the next highest tier each day.";
             case "Warehouse":

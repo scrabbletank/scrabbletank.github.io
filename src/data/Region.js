@@ -807,11 +807,11 @@ export class Region {
             econBonus += bonus * tier;
         }
         //warehouses add to road bonus for all adjacent buildings
-        for (var i = 1; i < this.warehouses.length; i++) {
-            var bonus = 1 + this.map[this.warehouses[i][0]][this.warehouses[i][1]].building.tier * 0.20;
+        for (var i = 0; i < this.warehouses.length; i++) {
+            var bonus = this.map[this.warehouses[i][0]][this.warehouses[i][1]].building.tier * 0.20;
             for (var y = Math.max(0, this.warehouses[i][0] - 1); y < Math.min(this.height, this.warehouses[i][0] + 2); y++) {
                 for (var x = Math.max(0, this.warehouses[i][1] - 1); x < Math.min(this.width, this.warehouses[i][1] + 2); x++) {
-                    this.map[y][x].roadBonus += this.map[y][x].roadBonus * bonus;
+                    this.map[y][x].roadBonus += bonus;
                 }
             }
         }
@@ -889,9 +889,11 @@ export class Region {
     }
 
     _canBuild(tile, building) {
-        if (tile.building !== undefined || tile.regName === 'mysticgate' || tile.regName === 'town') {
+        if (tile.building !== undefined || tile.regName === 'mysticgate' || tile.regName === 'town' ||
+            tile.explored === false) {
             return false;
         }
+        var yieldSum = tile.yields.reduce((a, b) => { return a + b; });
         switch (building.name) {
             case "Lumberyard":
                 return tile.yields[0] > 0;
@@ -906,16 +908,16 @@ export class Region {
             case "Crystal Loom":
                 return tile.yields[5] > 0;
             case "Town House":
-                return tile.houseBuildable;
+            case "Warehouse":
+                return tile.houseBuildable && yieldSum > 0;
+            case "Market":
             case "Road":
-                return tile.roadBuildable;
+                return tile.roadBuildable && yieldSum > 0;
             case "Docks":
                 return tile.dockBuildable;
             case "Watch Tower":
             case "Tavern":
-            case "Market":
-            case "Warehouse":
-                var yieldSum = tile.yields.reduce((a, b) => { return a + b; });
+            case "Alchemy Lab":
                 return yieldSum > 0;
         }
     }
@@ -1034,16 +1036,17 @@ export class Region {
         return pos;
     }
 
-    nextWeakestTile() {
-        if (MoonlightData.getInstance().challenges.invasion.completions > 0 && this.sightings.length > 0) {
+    nextWeakestTile(autoInvasion) {
+        if (autoInvasion === true && this.sightings.length > 0) {
             // sightings are stored (y,x) while this function expects (x,y)
             return [this.sightings[0][1], this.sightings[0][0]];
         }
-        if (DynamicSettings.getInstance().autoExploreWeakestFirst === true) {
+        if (DynamicSettings.getInstance().autoExploreOptions === Statics.AUTOEXPLORE_WEAKEST) {
             return this._findWeakestTile();
-        } else {
+        } else if (DynamicSettings.getInstance().autoExploreOptions === Statics.AUTOEXPLORE_STRONGEST) {
             return this._findStrongestTile();
         }
+        return [-1, -1];
     }
 
     handleReinforcedHouses() {

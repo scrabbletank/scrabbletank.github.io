@@ -11,6 +11,7 @@ import { TextButton } from "../ui/TextButton";
 import { ProgressBar } from "../ui/ProgressBar";
 import { BuildingRegistry } from "../data/BuildingRegistry";
 import { RegionRegistry } from "../data/RegionRegistry";
+import { MoonlightData } from "../data/MoonlightData";
 
 var toPhaserColor = (clr) => { return Phaser.Display.Color.GetColor(clr[0], clr[1], clr[2]); };
 
@@ -34,6 +35,7 @@ export class RegionScene extends SceneUIBase {
         this.rebirthDialog = undefined;
 
         this.autoExploreActive = false;
+        this.autoInvadeActive = false;
         this.updateBuildings = false;
 
         this.upgradeKey = undefined;
@@ -107,7 +109,7 @@ export class RegionScene extends SceneUIBase {
             for (var i = 0; i < resources.length; i++) {
                 txt += " " + Statics.RESOURCE_NAMES[i] + ": " + (Math.floor(resources[i] * 100) / 100) + "\n";
             }
-            this.regionStats = this.add.bitmapText(this.relativeX(660), this.relativeY(250), "courier20", txt);
+            this.regionStats = this.add.bitmapText(this.relativeX(660), this.relativeY(280), "courier20", txt);
         }
     }
 
@@ -422,11 +424,11 @@ export class RegionScene extends SceneUIBase {
     triggerAutoExplore(tile, tier) {
         var activeRegion = WorldData.getInstance().regionList[tier];
         if (this.autoExploreActive === true) {
-            var pos = activeRegion.nextWeakestTile();
+            var pos = activeRegion.nextWeakestTile(this.autoInvadeActive);
             if (pos[0] !== -1) {
                 if (activeRegion.map[pos[1]][pos[0]].name === "Town") {
                     this._exploreTown(tile.x, tile.y);
-                    var pos = activeRegion.nextWeakestTile();
+                    var pos = activeRegion.nextWeakestTile(this.autoInvadeActive);
                     if (pos[0] === -1) {
                         return;
                     }
@@ -489,6 +491,8 @@ export class RegionScene extends SceneUIBase {
         this.invasionLabel.setVisible(this.progression.unlocks.buildings);
         this.autoExploreLabel.setVisible(this.progression.persistentUnlocks.autoExplore);
         this.autoExploreButton.setVisible(this.progression.persistentUnlocks.autoExplore);
+        this.autoInvadeLabel.setVisible(MoonlightData.getInstance().challenges.invasion.completions > 0);
+        this.autoInvadeButton.setVisible(MoonlightData.getInstance().challenges.invasion.completions > 0);
         this._updateRegionStats();
     }
 
@@ -500,6 +504,16 @@ export class RegionScene extends SceneUIBase {
         } else {
             this.autoExploreButton.setText("OFF");
             this.autoExploreButton.setTextColor(Phaser.Display.Color.GetColor(175, 0, 140));
+        }
+    }
+    _toggleAutoInvade() {
+        this.autoInvadeActive = !this.autoInvadeActive;
+        if (this.autoInvadeActive === true) {
+            this.autoInvadeButton.setText("ON");
+            this.autoInvadeButton.setTextColor(Phaser.Display.Color.GetColor(255, 255, 255));
+        } else {
+            this.autoInvadeButton.setText("OFF");
+            this.autoInvadeButton.setTextColor(Phaser.Display.Color.GetColor(175, 0, 140));
         }
     }
 
@@ -528,12 +542,18 @@ export class RegionScene extends SceneUIBase {
         this.autoExploreButton = new TextButton(this, this.relativeX(795), this.relativeY(190), 40, 20, "OFF")
             .onClickHandler(() => { this._toggleAutoExplore() });
         this.autoExploreButton.setTextColor(Phaser.Display.Color.GetColor(175, 0, 140));
+        this.autoInvadeLabel = this.add.bitmapText(this.relativeX(660), this.relativeY(220), "courier20", "Auto Invade:");
+        this.autoInvadeButton = new TextButton(this, this.relativeX(795), this.relativeY(220), 40, 20, "OFF")
+            .onClickHandler(() => { this._toggleAutoInvade() });
+        this.autoInvadeButton.setTextColor(Phaser.Display.Color.GetColor(175, 0, 140));
 
         this.autoExploreLabel.setVisible(this.progression.persistentUnlocks.autoExplore);
         this.autoExploreButton.setVisible(this.progression.persistentUnlocks.autoExplore);
+        this.autoInvadeLabel.setVisible(MoonlightData.getInstance().challenges.invasion.completions > 0);
+        this.autoInvadeButton.setVisible(MoonlightData.getInstance().challenges.invasion.completions > 0);
 
-        this.exploreLabel = this.add.bitmapText(this.relativeX(660), this.relativeY(220), "courier20", "Exploring:");
-        this.exploreProgressBar = new ProgressBar(this, this.relativeX(765), this.relativeY(220), 130, 20,
+        this.exploreLabel = this.add.bitmapText(this.relativeX(660), this.relativeY(250), "courier20", "Exploring:");
+        this.exploreProgressBar = new ProgressBar(this, this.relativeX(765), this.relativeY(250), 130, 20,
             Phaser.Display.Color.GetColor(0, 0, 255), Phaser.Display.Color.GetColor(32, 32, 64));
         this.exploreProgressBar.setFillPercent(0);
 

@@ -1,4 +1,5 @@
 import { DynamicSettings } from "../data/DynamicSettings";
+import { Statics } from "../data/Statics";
 import { Common } from "../utils/Common";
 import { TextButton } from "./TextButton";
 
@@ -35,7 +36,18 @@ export class OptionsDialog {
         this.combatBtn = new TextButton(scene, x + 120, y + 295, 110, 20, txt)
             .onClickHandler(() => { this._toggleCombatOnExplore(); });
         this.exploreLabel = scene.add.bitmapText(x + 175, y + 320, "courier16", "Auto Explore Mode").setOrigin(0.5, 0);
-        txt = DynamicSettings.getInstance().autoExploreWeakestFirst ? "Weakest" : "Strongest";
+        var txt = "";
+        switch (DynamicSettings.getInstance().autoExploreOptions) {
+            case Statics.AUTOEXPLORE_WEAKEST:
+                txt = "Weakest";
+                break;
+            case Statics.AUTOEXPLORE_HOLD:
+                txt = "Hold";
+                break;
+            case Statics.AUTOEXPLORE_STRONGEST:
+                txt = "Strongest";
+                break;
+        }
         this.exploreBtn = new TextButton(scene, x + 120, y + 345, 110, 20, txt)
             .onClickHandler(() => { this._toggleAutoExploreMode(); });
 
@@ -49,8 +61,19 @@ export class OptionsDialog {
     }
 
     _toggleAutoExploreMode() {
-        DynamicSettings.getInstance().autoExploreWeakestFirst = DynamicSettings.getInstance().autoExploreWeakestFirst === true ? false : true;
-        var txt = DynamicSettings.getInstance().autoExploreWeakestFirst ? "Weakest" : "Strongest";
+        DynamicSettings.getInstance().autoExploreOptions = (DynamicSettings.getInstance().autoExploreOptions + 1) % 3;
+        var txt = "";
+        switch (DynamicSettings.getInstance().autoExploreOptions) {
+            case Statics.AUTOEXPLORE_WEAKEST:
+                txt = "Weakest";
+                break;
+            case Statics.AUTOEXPLORE_HOLD:
+                txt = "Hold";
+                break;
+            case Statics.AUTOEXPLORE_STRONGEST:
+                txt = "Strongest";
+                break;
+        }
         this.exploreBtn.setText(txt);
     }
 

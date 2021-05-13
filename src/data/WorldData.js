@@ -161,12 +161,15 @@ export class WorldData {
                             MoonlightData.getInstance().challengePoints += 3;
                             break;
                         case "Lazy Townsfolk":
-                            MoonlightData.getInstance().challengePoints += 3;
+                            MoonlightData.getInstance().challengePoints += 4;
                             break;
                         case "Talentless":
                             MoonlightData.getInstance().challengePoints += 4;
                             break;
                         case "Mega Monsters":
+                            MoonlightData.getInstance().challengePoints += 5;
+                            break;
+                        case "Outcast":
                             MoonlightData.getInstance().challengePoints += 5;
                             break;
                     }
