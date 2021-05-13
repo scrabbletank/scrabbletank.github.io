@@ -9,6 +9,8 @@ import { PlayerData } from "../data/PlayerData";
 import { RebirthDialog } from "../ui/RebirthDialog";
 import { TextButton } from "../ui/TextButton";
 import { ProgressBar } from "../ui/ProgressBar";
+import { BuildingRegistry } from "../data/BuildingRegistry";
+import { RegionRegistry } from "../data/RegionRegistry";
 
 var toPhaserColor = (clr) => { return Phaser.Display.Color.GetColor(clr[0], clr[1], clr[2]); };
 
@@ -35,6 +37,16 @@ export class RegionScene extends SceneUIBase {
         this.updateBuildings = false;
 
         this.upgradeKey = undefined;
+        this.houseKey = undefined;
+        this.roadKey = undefined;
+        this.productionKey = undefined;
+        this.exploreKey = undefined;
+        this.woodKey = undefined;
+        this.leatherKey = undefined;
+        this.metalKey = undefined;
+        this.fiberKey = undefined;
+        this.stoneKey = undefined;
+        this.crystalKey = undefined;
         this.hoveredTile = [-1, -1];
         this.regionTiles = [];
         this.regionStats = undefined;
@@ -252,7 +264,7 @@ export class RegionScene extends SceneUIBase {
                 var player = new PlayerData();
                 var tier = Math.floor(Math.min(7, this.region.regionLevel));
                 if (Common.canCraft(blob.building.resourceCosts, player.resources[tier]) === true &&
-                    blob.building.goldCost <= player.gold) {
+                    blob.building.goldCost <= player.gold && this.region._canBuild(blob.tile, blob.building)) {
                     player.spendResource(blob.building.resourceCosts, tier);
                     player.addGold(-blob.building.goldCost);
                     this.region.placeBuilding(blob.tile.x, blob.tile.y, blob.building);
@@ -348,19 +360,7 @@ export class RegionScene extends SceneUIBase {
             activeRegion.exploreTile(tile.x, tile.y);
             this.progression.registerTileExplored();
 
-            if (this.autoExploreActive === true) {
-                var pos = activeRegion.nextWeakestTile();
-                if (pos[0] !== -1) {
-                    if (activeRegion.map[pos[1]][pos[0]].name === "Town") {
-                        this._exploreTown(tile.x, tile.y);
-                        var pos = activeRegion.nextWeakestTile();
-                        if (pos[0] === -1) {
-                            return;
-                        }
-                    }
-                    this._exploreTile(activeRegion.map[pos[1]][pos[0]], true);
-                }
-            }
+            this.triggerAutoExplore(tile, tier);
         }
     }
 
@@ -415,6 +415,23 @@ export class RegionScene extends SceneUIBase {
             if (this.tileElements[tile.y][tile.x].building !== undefined) {
                 this.tileElements[tile.y][tile.x].building.destroy();
                 this.tileElements[tile.y][tile.x].building = undefined;
+            }
+        }
+    }
+
+    triggerAutoExplore(tile, tier) {
+        var activeRegion = WorldData.getInstance().regionList[tier];
+        if (this.autoExploreActive === true) {
+            var pos = activeRegion.nextWeakestTile();
+            if (pos[0] !== -1) {
+                if (activeRegion.map[pos[1]][pos[0]].name === "Town") {
+                    this._exploreTown(tile.x, tile.y);
+                    var pos = activeRegion.nextWeakestTile();
+                    if (pos[0] === -1) {
+                        return;
+                    }
+                }
+                this._exploreTile(activeRegion.map[pos[1]][pos[0]], true);
             }
         }
     }
@@ -546,6 +563,16 @@ export class RegionScene extends SceneUIBase {
         this.region.onSighting((x) => { this.scene.get("DarkWorld").notifyRegion(); });
 
         this.upgradeKey = this.input.keyboard.addKey(Phaser.Input.Keyboard.KeyCodes.U);
+        this.houseKey = this.input.keyboard.addKey(Phaser.Input.Keyboard.KeyCodes.H);
+        this.roadKey = this.input.keyboard.addKey(Phaser.Input.Keyboard.KeyCodes.R);
+        this.productionKey = this.input.keyboard.addKey(Phaser.Input.Keyboard.KeyCodes.P);
+        this.exploreKey = this.input.keyboard.addKey(Phaser.Input.Keyboard.KeyCodes.E);
+        this.woodKey = this.input.keyboard.addKey(Phaser.Input.Keyboard.KeyCodes.ONE);
+        this.leatherKey = this.input.keyboard.addKey(Phaser.Input.Keyboard.KeyCodes.TWO);
+        this.metalKey = this.input.keyboard.addKey(Phaser.Input.Keyboard.KeyCodes.THREE);
+        this.fiberKey = this.input.keyboard.addKey(Phaser.Input.Keyboard.KeyCodes.FOUR);
+        this.stoneKey = this.input.keyboard.addKey(Phaser.Input.Keyboard.KeyCodes.FIVE);
+        this.crystalKey = this.input.keyboard.addKey(Phaser.Input.Keyboard.KeyCodes.SIX);
         this._updateRegionStats();
         this._onRegionChanged();
     }
@@ -568,6 +595,53 @@ export class RegionScene extends SceneUIBase {
 
         if (Phaser.Input.Keyboard.JustUp(this.upgradeKey) && this.hoveredTile[0] !== -1) {
             this._tileActionHandler("upgrade", { tile: this.region.map[this.hoveredTile[1]][this.hoveredTile[0]] });
+        } else if (Phaser.Input.Keyboard.JustUp(this.houseKey) && this.hoveredTile[0] !== -1) {
+            this._tileActionHandler("build", {
+                tile: this.region.map[this.hoveredTile[1]][this.hoveredTile[0]],
+                building: BuildingRegistry.getBuildingByName('house')
+            });
+        } else if (Phaser.Input.Keyboard.JustUp(this.roadKey) && this.hoveredTile[0] !== -1) {
+            this._tileActionHandler("build", {
+                tile: this.region.map[this.hoveredTile[1]][this.hoveredTile[0]],
+                building: BuildingRegistry.getBuildingByName('road')
+            });
+        } else if (Phaser.Input.Keyboard.JustUp(this.exploreKey) && this.hoveredTile[0] !== -1) {
+            this._tileActionHandler("explore", { tile: this.region.map[this.hoveredTile[1]][this.hoveredTile[0]] });
+        } else if (Phaser.Input.Keyboard.JustUp(this.productionKey) && this.hoveredTile[0] !== -1) {
+            this._tileActionHandler("build", {
+                tile: this.region.map[this.hoveredTile[1]][this.hoveredTile[0]],
+                building: BuildingRegistry.getBuildingByName(RegionRegistry.TILE_TYPES[this.region.map[this.hoveredTile[1]][this.hoveredTile[0]].regName].preferredBuilding)
+            });
+        } else if (Phaser.Input.Keyboard.JustUp(this.woodKey) && this.hoveredTile[0] !== -1) {
+            this._tileActionHandler("build", {
+                tile: this.region.map[this.hoveredTile[1]][this.hoveredTile[0]],
+                building: BuildingRegistry.getBuildingByName('wood')
+            });
+        } else if (Phaser.Input.Keyboard.JustUp(this.leatherKey) && this.hoveredTile[0] !== -1) {
+            this._tileActionHandler("build", {
+                tile: this.region.map[this.hoveredTile[1]][this.hoveredTile[0]],
+                building: BuildingRegistry.getBuildingByName('leather')
+            });
+        } else if (Phaser.Input.Keyboard.JustUp(this.metalKey) && this.hoveredTile[0] !== -1) {
+            this._tileActionHandler("build", {
+                tile: this.region.map[this.hoveredTile[1]][this.hoveredTile[0]],
+                building: BuildingRegistry.getBuildingByName('metal')
+            });
+        } else if (Phaser.Input.Keyboard.JustUp(this.fiberKey) && this.hoveredTile[0] !== -1) {
+            this._tileActionHandler("build", {
+                tile: this.region.map[this.hoveredTile[1]][this.hoveredTile[0]],
+                building: BuildingRegistry.getBuildingByName('fiber')
+            });
+        } else if (Phaser.Input.Keyboard.JustUp(this.stoneKey) && this.hoveredTile[0] !== -1) {
+            this._tileActionHandler("build", {
+                tile: this.region.map[this.hoveredTile[1]][this.hoveredTile[0]],
+                building: BuildingRegistry.getBuildingByName('stone')
+            });
+        } else if (Phaser.Input.Keyboard.JustUp(this.crystalKey) && this.hoveredTile[0] !== -1) {
+            this._tileActionHandler("build", {
+                tile: this.region.map[this.hoveredTile[1]][this.hoveredTile[0]],
+                building: BuildingRegistry.getBuildingByName('crystal')
+            });
         }
 
         if (this.updateBuildings === true) {

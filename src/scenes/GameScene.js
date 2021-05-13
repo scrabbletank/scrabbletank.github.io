@@ -23,7 +23,7 @@ import { Common } from "../utils/Common";
 import { ImageButton } from "../ui/ImageButton";
 import { DynamicSettings } from "../data/DynamicSettings";
 import LZString from "lz-string";
-import { ExportDialog } from "../ui/ExportDialog";
+import { OptionsDialog } from "../ui/OptionsDialog";
 import { GuideWindow } from "../ui/GuideWindow";
 
 export class GameScene extends SceneUIBase {
@@ -518,11 +518,11 @@ export class GameScene extends SceneUIBase {
 
     _handleTileClick(tile, fromAutoExplore = false) {
         if (tile.parent.isExplorable(tile.x, tile.y)) {
-            if (fromAutoExplore === false) {
+            if (fromAutoExplore === false && DynamicSettings.getInstance().openCombatOnExplore === true) {
                 this.scene.bringToTop("CombatScene");
                 this.scene.bringToTop("DarkWorld");
             }
-            this.combatScene.initFight(tile);
+            this.combatScene.initFight(tile, fromAutoExplore);
         }
     }
 
@@ -570,7 +570,7 @@ export class GameScene extends SceneUIBase {
 
     _openExportDialog() {
         this._closeExportDialog();
-        this.exportDialog = new ExportDialog(this, 485, 250);
+        this.exportDialog = new OptionsDialog(this, 485, 120);
         this.exportDialog.onCloseHandler(() => { this._closeExportDialog(); });
     }
     _closeExportDialog() {

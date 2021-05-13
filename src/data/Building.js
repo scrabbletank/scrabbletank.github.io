@@ -88,7 +88,11 @@ export class Building {
             case "Watch Tower":
                 return "Increases the defense of all tiles within 2 tiles of this watch tower by " + (tier * 2) + ".";
             case "Market":
-                var closest = Common.nearestPointInList(tile.x, tile.y, region.markets, true);
+                var points = []
+                for (var i = 0; i < region.markets.length; i++) {
+                    points.push({ x: region.markets[i][1], y: region.markets[i][0] });
+                }
+                var closest = Common.nearestPointInList(tile.x, tile.y, points, true);
                 var max = 5 + MoonlightData.getInstance().moonperks.nightmarket.level;
                 var bonus = Math.max(0, Math.min(max, (closest[1] / Statics.TRADE_HOUSE_MAX_DISTANCE) * max)) * tier / 100;
                 return "Increases the Town's economy by " + Math.floor(bonus * 10000) / 100 + "%, based on distance to " +
@@ -109,7 +113,7 @@ export class Building {
                 }
                 return "Increases the Town's population by " + pop + " and economy by " + Math.floor(tier * bonus * 100) + "%, based on nearby Town Houses.";
             case "Road":
-                var disconnectedText = tile.roadConnected === true ? "" : " This road is disconnected and gives no bonuses."
+                var disconnectedText = tile.roadConnected === true || potential === true ? "" : " This road is disconnected and gives no bonuses."
                 return "Most buildings must be built adjacent to roads. Production buildings get a boost being adjacent to a road, and " +
                     "produce nothing when more than " + tier + " tiles away." + disconnectedText;
             case "Docks":

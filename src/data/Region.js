@@ -120,6 +120,9 @@ export class TileData {
     }
 
     invade(destroy = true) {
+        if (DynamicSettings.getInstance().invasionsIncreaseDifficulty === true) {
+            this.difficulty += DynamicSettings.getInstance().invasionLevelBonus;
+        }
         this.isInvaded = false;
         this.invasionPower = 0;
         this.amountExplored = 0;
@@ -162,10 +165,11 @@ export class TileData {
     generateMonsters() {
         var enemyList = [];
         if (this.isInvaded === true) {
+            var bonusDif = DynamicSettings.getInstance().invasionLevelBonus;
             var bossDif = this.difficulty + this.getInvasionMulti();
-            enemyList.push(CreatureRegistry.GetCreatureByName(this.enemies[Common.randint(0, this.enemies.length)], bossDif));
-            enemyList.push(CreatureRegistry.GetCreatureByName(this.enemies[Common.randint(0, this.enemies.length)], this.difficulty - 1));
-            enemyList.push(CreatureRegistry.GetCreatureByName(this.enemies[Common.randint(0, this.enemies.length)], this.difficulty - 1));
+            enemyList.push(CreatureRegistry.GetCreatureByName(this.enemies[Common.randint(0, this.enemies.length)], bossDif + bonusDif));
+            enemyList.push(CreatureRegistry.GetCreatureByName(this.enemies[Common.randint(0, this.enemies.length)], this.difficulty - 1 + bonusDif));
+            enemyList.push(CreatureRegistry.GetCreatureByName(this.enemies[Common.randint(0, this.enemies.length)], this.difficulty - 1 + bonusDif));
         } else {
             var min = this.difficulty < 30 ? 1 : 2;
             var max = (this.difficulty < 5 ? 2 : 3) + (this.difficulty > 15 ? 1 : 0)
@@ -552,7 +556,8 @@ export class Region {
     }
 
     _addSighting() {
-        var a = Math.min(Statics.MIN_SIGHTING_SECONDS * (1 + this.sightings.length * Statics.SIGHTING_MULTI_PER_SIGHTING), Statics.MAX_SIGHTING_SECONDS);
+        var a = Math.min(DynamicSettings.getInstance().invasionTimer * (1 + this.sightings.length * Statics.SIGHTING_MULTI_PER_SIGHTING),
+            Statics.MAX_SIGHTING_SECONDS);
         var b = Math.min(a * 2, Statics.MAX_SIGHTING_SECONDS);
         this.sightingsDelay = Common.randint(a, b) * 1000;
         var invadeList = [];
@@ -605,7 +610,7 @@ export class Region {
 
     _init() {
         this.roads = [];
-        this.markets = [{ x: Math.floor(this.width / 2), y: this.height - 3 }];
+        this.markets = [[this.height - 3, Math.floor(this.width / 2)]];
         this.taverns = [];
         this.productionBuildings = [];
         this.warehouses = [];
@@ -616,7 +621,7 @@ export class Region {
                     if (this.map[i][t].building.name === "Road" || this.map[i][t].building.name === "Town") {
                         this.roads.push([i, t]);
                     } else if (this.map[i][t].building.name === "Market") {
-                        this.markets.push({ x: t, y: i });
+                        this.markets.push([i, t]);
                     } else if (this.map[i][t].building.name === "Tavern") {
                         this.taverns.push([i, t]);
                     } else if (this.map[i][t].building.name === "Warehouse") {
@@ -772,11 +777,17 @@ export class Region {
         }
 
         //get market bonuses
+        var points = []
+        for (var i = 0; i < this.markets.length; i++) {
+            points.push({ x: this.markets[i][1], y: this.markets[i][0] });
+        }
         for (var i = 1; i < this.markets.length; i++) {
-            var max = 5 + MoonlightData.getInstance().moonperks.nightmarket.level;
-            var tier = this.map[this.markets[i].y][this.markets[i].x].building.tier;
-            var closest = Common.nearestPointInList(this.markets[i].x, this.markets[i].y, this.markets, true);
-            econBonus += Math.max(0, Math.min(max, (closest[1] / Statics.TRADE_HOUSE_MAX_DISTANCE) * max)) * tier / 100;
+            if (this.map[this.markets[i][0]][this.markets[i][1]].houseBuildable === true) {
+                var max = 5 + MoonlightData.getInstance().moonperks.nightmarket.level;
+                var tier = this.map[this.markets[i][0]][this.markets[i][1]].building.tier;
+                var closest = Common.nearestPointInList(this.markets[i][1], this.markets[i][0], points, true);
+                econBonus += Math.max(0, Math.min(max, (closest[1] / Statics.TRADE_HOUSE_MAX_DISTANCE) * max)) * tier / 100;
+            }
         }
         //get tavern bonuses
         for (var i = 0; i < this.taverns.length; i++) {
@@ -797,10 +808,10 @@ export class Region {
         }
         //warehouses add to road bonus for all adjacent buildings
         for (var i = 1; i < this.warehouses.length; i++) {
-            var bonus = this.map[this.warehouses[i][0]][this.warehouses[i][1]].building.tier * 0.15;
+            var bonus = 1 + this.map[this.warehouses[i][0]][this.warehouses[i][1]].building.tier * 0.20;
             for (var y = Math.max(0, this.warehouses[i][0] - 1); y < Math.min(this.height, this.warehouses[i][0] + 2); y++) {
                 for (var x = Math.max(0, this.warehouses[i][1] - 1); x < Math.min(this.width, this.warehouses[i][1] + 2); x++) {
-                    this.map[y][x].roadBonus += bonus;
+                    this.map[y][x].roadBonus += this.map[y][x].roadBonus * bonus;
                 }
             }
         }
@@ -877,6 +888,38 @@ export class Region {
         this.townData.calculateEconMulti(econBonus);
     }
 
+    _canBuild(tile, building) {
+        if (tile.building !== undefined || tile.regName === 'mysticgate' || tile.regName === 'town') {
+            return false;
+        }
+        switch (building.name) {
+            case "Lumberyard":
+                return tile.yields[0] > 0;
+            case "Hunter's Lodge":
+                return tile.yields[1] > 0;
+            case "Mine":
+                return tile.yields[2] > 0;
+            case "Herbalist's Hut":
+                return tile.yields[3] > 0;
+            case "Quarry":
+                return tile.yields[4] > 0;
+            case "Crystal Loom":
+                return tile.yields[5] > 0;
+            case "Town House":
+                return tile.houseBuildable;
+            case "Road":
+                return tile.roadBuildable;
+            case "Docks":
+                return tile.dockBuildable;
+            case "Watch Tower":
+            case "Tavern":
+            case "Market":
+            case "Warehouse":
+                var yieldSum = tile.yields.reduce((a, b) => { return a + b; });
+                return yieldSum > 0;
+        }
+    }
+
     _addBuilding(tile) {
         tile.defense += MoonlightData.getInstance().moonperks.hardenedvillagers.level +
             this.townData.upgrades.reinforcedhouses.level;
@@ -904,10 +947,10 @@ export class Region {
                 }
                 break;
             case "Market":
-                this.markets.push({ x: tile.x, y: tile.y });
+                this.markets.push([tile.y, tile.x]);
                 break;
             case "Town House":
-                this.houses.push({ x: tile.x, y: tile.y });
+                this.houses.push([tile.y, tile.x]);
                 break;
             case "Tavern":
                 this.taverns.push([tile.y, tile.x]);
@@ -962,7 +1005,7 @@ export class Region {
         }
     }
 
-    nextWeakestTile() {
+    _findWeakestTile() {
         var pos = [-1, -1];
         var min = this.regionLevel * DynamicSettings.getInstance().regionDifficultyIncrease + 9999;
         for (var y = 0; y < this.height; y++) {
@@ -975,6 +1018,32 @@ export class Region {
             }
         }
         return pos;
+    }
+    _findStrongestTile() {
+        var pos = [-1, -1];
+        var min = this.regionLevel * DynamicSettings.getInstance().regionDifficultyIncrease - 10;
+        for (var y = 0; y < this.height; y++) {
+            for (var x = 0; x < this.width; x++) {
+                if (this.map[y][x].explored === false && this.map[y][x].revealed === true &&
+                    this.map[y][x].difficulty > min) {
+                    pos = [x, y];
+                    min = this.map[y][x].difficulty;
+                }
+            }
+        }
+        return pos;
+    }
+
+    nextWeakestTile() {
+        if (MoonlightData.getInstance().challenges.invasion.completions > 0 && this.sightings.length > 0) {
+            // sightings are stored (y,x) while this function expects (x,y)
+            return [this.sightings[0][1], this.sightings[0][0]];
+        }
+        if (DynamicSettings.getInstance().autoExploreWeakestFirst === true) {
+            return this._findWeakestTile();
+        } else {
+            return this._findStrongestTile();
+        }
     }
 
     handleReinforcedHouses() {
@@ -1057,7 +1126,8 @@ export class Region {
             var s = this.sightings[i];
             //TODO Add ramping strength from land/building
             this.map[s[0]][s[1]].incInvasionPower(this.regionLevel * DynamicSettings.getInstance().regionDifficultyIncrease);
-            this.invasionCounter += this.map[s[0]][s[1]].getInvasionMulti() * (1 / (1 + player.getTalentLevel("guardian") * 0.25));
+            this.invasionCounter += this.map[s[0]][s[1]].getInvasionMulti() * (1 / (1 + player.getTalentLevel("guardian") * 0.25)) *
+                (1 / (1 + MoonlightData.getInstance().challenges.invasion.completions * 0.25));
         }
 
         if (this.invasionCounter > Statics.INVASION_THRESHOLD) {

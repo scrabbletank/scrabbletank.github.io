@@ -41,10 +41,10 @@ export class Common {
 
     static nearestPointInList(x, y, list, ignoreSelf = false) {
         var idx = 0;
-        var min = this.getDistance(x, y, list[0].x, list[0].y);
+        var min = Common.getDistance(x, y, list[0].x, list[0].y);
 
         for (var i = 1; i < list.length; i++) {
-            var dist = this.getDistance(x, y, list[i].x, list[i].y);
+            var dist = Common.getDistance(x, y, list[i].x, list[i].y);
             // kind of hacky, but we shouldn't have cases points overlap
             if (dist < min) {
                 if (ignoreSelf === true && dist === 0) {

@@ -1,9 +1,10 @@
+import { DynamicSettings } from "../data/DynamicSettings";
 import { Common } from "../utils/Common";
 import { TextButton } from "./TextButton";
 
-export class ExportDialog {
+export class OptionsDialog {
     constructor(scene, x, y) {
-        this.backingRect = scene.add.rectangle(x, y, 350, 300, Phaser.Display.Color.GetColor(0, 0, 0))
+        this.backingRect = scene.add.rectangle(x, y, 350, 500, Phaser.Display.Color.GetColor(0, 0, 0))
             .setOrigin(0, 0).setInteractive();
         this.backingRect.isStroked = true;
         this.backingRect.strokeColor = Phaser.Display.Color.GetColor(255, 255, 255);
@@ -18,8 +19,8 @@ export class ExportDialog {
         this.descLabel = scene.add.bitmapText(x + 10, y + 40, "courier16", txt);
 
         this.manualSaveLabel = scene.add.bitmapText(x + 175, y + 150, "courier20", "Manual Save").setOrigin(0.5, 0);
-        var txt = Common.processText("Click to manually save your game.", 42);
-        this.mSaveDescLabel = scene.add.bitmapText(x + 10, y + 180, "courier16", txt);
+        txt = Common.processText("Click to manually save your game.", 42);
+        this.mSaveDescLabel = scene.add.bitmapText(x + 175, y + 180, "courier16", txt).setOrigin(0.5, 0);;
 
         this.exportButton = new TextButton(scene, x + 43, y + 100, 110, 20, "Export")
             .onClickHandler(() => { this._export(); });
@@ -27,7 +28,30 @@ export class ExportDialog {
             .onClickHandler(() => { this._import(); });
         this.saveButton = new TextButton(scene, x + 120, y + 210, 110, 20, "Save")
             .onClickHandler(() => { this._save(); });
-        this.closeButton = new TextButton(scene, x + 230, y + 270, 110, 20, "Back");
+
+        this.optLabel = scene.add.bitmapText(x + 175, y + 245, "courier20", "Options").setOrigin(0.5, 0);
+        this.combatLabel = scene.add.bitmapText(x + 175, y + 270, "courier16", "Show Combat Tab on Explore").setOrigin(0.5, 0);
+        txt = DynamicSettings.getInstance().openCombatOnExplore ? "True" : "False";
+        this.combatBtn = new TextButton(scene, x + 120, y + 295, 110, 20, txt)
+            .onClickHandler(() => { this._toggleCombatOnExplore(); });
+        this.exploreLabel = scene.add.bitmapText(x + 175, y + 320, "courier16", "Auto Explore Mode").setOrigin(0.5, 0);
+        txt = DynamicSettings.getInstance().autoExploreWeakestFirst ? "Weakest" : "Strongest";
+        this.exploreBtn = new TextButton(scene, x + 120, y + 345, 110, 20, txt)
+            .onClickHandler(() => { this._toggleAutoExploreMode(); });
+
+        this.closeButton = new TextButton(scene, x + 230, y + 470, 110, 20, "Back");
+    }
+
+    _toggleCombatOnExplore() {
+        DynamicSettings.getInstance().openCombatOnExplore = DynamicSettings.getInstance().openCombatOnExplore === true ? false : true;
+        var txt = DynamicSettings.getInstance().openCombatOnExplore ? "True" : "False";
+        this.combatBtn.setText(txt);
+    }
+
+    _toggleAutoExploreMode() {
+        DynamicSettings.getInstance().autoExploreWeakestFirst = DynamicSettings.getInstance().autoExploreWeakestFirst === true ? false : true;
+        var txt = DynamicSettings.getInstance().autoExploreWeakestFirst ? "Weakest" : "Strongest";
+        this.exploreBtn.setText(txt);
     }
 
     _save() {
@@ -54,6 +78,11 @@ export class ExportDialog {
         this.importButton.destroy();
         this.saveButton.destroy();
         this.closeButton.destroy();
+        this.optLabel.destroy();
+        this.combatLabel.destroy();
+        this.combatBtn.destroy();
+        this.exploreLabel.destroy();
+        this.exploreBtn.destroy();
     }
 
     onCloseHandler(callback) {

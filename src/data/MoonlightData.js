@@ -181,6 +181,7 @@ export class MoonlightData {
                 time: { name: "A Matter of Years", completions: 0, maxCompletions: 5, unlocked: true, fastestTime: 0 },
                 forge: { name: "Forged Ahead", completions: 0, maxCompletions: 5, unlocked: false, fastestTime: 0 },
                 explore: { name: "Giant Lands", completions: 0, maxCompletions: 5, unlocked: false, fastestTime: 0 },
+                invasion: { name: "Invasion", completions: 0, maxCompletions: 5, unlocked: false, fastestTime: 0 },
                 buildings: { name: "Lazy Townsfolk", completions: 0, maxCompletions: 5, unlocked: false, fastestTime: 0 },
                 talent: { name: "Talentless", completions: 0, maxCompletions: 5, unlocked: false, fastestTime: 0 },
                 megamonsters: { name: "Mega Monsters", completions: 0, maxCompletions: 5, unlocked: false, fastestTime: 0 },
@@ -212,6 +213,8 @@ export class MoonlightData {
                 return this.challenges.forge;
             case "Giant Lands":
                 return this.challenges.explore;
+            case "Invasion":
+                return this.challenges.invasion;
             case "Lazy Townsfolk":
                 return this.challenges.buildings;
             case "Talentless":
@@ -276,6 +279,9 @@ export class MoonlightData {
             this.challenges[saveObj.c[i][0]].completions = saveObj.c[i][1];
             this.challenges[saveObj.c[i][0]].unlocked = saveObj.c[i][2];
             this.challenges[saveObj.c[i][0]].fastestTime = saveObj.c[i][3];
+        }
+        if (this.challenges.time.completions > 0) {
+            this.challenges.invasion.unlocked = true;
         }
     }
 }
