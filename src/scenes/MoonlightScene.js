@@ -118,7 +118,7 @@ export class MoonlightScene extends SceneUIBase {
                 .onAbandonHandler(() => { this._abandonChallenge(); })
                 .onCancelHandler(() => { this._removeChallengeWindow(); });
         } else {
-            this.challengeBox = new ChallengeWindow(this, 150, 100)
+            this.challengeBox = new ChallengeWindow(this, 150, 100, this.canLevelPerks === false)
                 .onAcceptHandler((c) => { this._beginChallenge(c); })
                 .onCancelHandler(() => { this._removeChallengeWindow(); });
         }
@@ -130,12 +130,11 @@ export class MoonlightScene extends SceneUIBase {
         }
     }
     _beginChallenge(challenge) {
-        if (this.canLevelPerks === true) {
-            DynamicSettings.getInstance().setupChallenge(challenge);
-            var game = this.scene.get("DarkWorld");
-            this.canLevelPerks = false;
-            game.rebirth();
-        }
+        this.exitButton.setText("BACK");
+        DynamicSettings.getInstance().setupChallenge(challenge);
+        var game = this.scene.get("DarkWorld");
+        this.canLevelPerks = false;
+        game.rebirth();
         if (this.challengeBox !== undefined) {
             this.challengeBox.destroy();
             this.challengeBox = undefined;
@@ -146,6 +145,8 @@ export class MoonlightScene extends SceneUIBase {
             this.challengeBox.destroy();
             this.challengeBox = undefined;
         }
+        this.exitButton.setText("REBIRTH");
+        DynamicSettings.getInstance().reset();
         this.canLevelPerks = true;
     }
 
