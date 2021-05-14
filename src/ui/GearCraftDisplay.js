@@ -1,8 +1,8 @@
-import { Common } from "../utils/Common";
 import { TextButton } from "./TextButton";
 import { ProgressionStore } from "../data/ProgressionStore";
 import { PlayerData } from "../data/PlayerData";
 import { ImageButton } from "./ImageButton";
+import { TooltipRegistry } from "../data/TooltipRegistry";
 
 export class GearCraftDisplay {
     constructor(sceneContext, x, y, gear) {
@@ -48,7 +48,7 @@ export class GearCraftDisplay {
         const resourceTier = Math.max(0, gear.tier - 1);
         for (const prop in bonus) {
             if (bonus[prop] !== 0) {
-                txt += Common.getBonusText(prop, bonus[prop]) + "\n";
+                txt += TooltipRegistry.getBonusText(prop, bonus[prop]) + "\n";
             }
         }
         this.statLabels.push(sceneContext.add.bitmapText(x + 5, y + 45, "courier16", txt));
@@ -58,7 +58,7 @@ export class GearCraftDisplay {
             var idx = 0;
             for (var i = 0; i < gear.costs.length; i++) {
                 if (gear.costs[i] !== 0) {
-                    txt = Common.getCostText(i, Math.floor(gear.costs[i] * craftCostMulti));
+                    txt = TooltipRegistry.getCostText(i, Math.floor(gear.costs[i] * craftCostMulti));
                     var clr = player.resources[resourceTier][i] >= gear.costs[i] * craftCostMulti ?
                         Phaser.Display.Color.GetColor(255, 255, 255) : Phaser.Display.Color.GetColor(255, 80, 80);
                     var label = sceneContext.add.bitmapText(x + 148, y + 45 + (17 * idx), "courier16", txt);

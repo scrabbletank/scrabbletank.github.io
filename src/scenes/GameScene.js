@@ -262,6 +262,7 @@ export class GameScene extends SceneUIBase {
         });
         this.player.registerEvent("onResourcesChanged", () => { this._updateResources(); });
         this.player.registerEvent("onTalentChanged", () => { this.updateStatIcons(); });
+        this.player.registerEvent("onClassSelected", () => { this._handleClassSelected(); });
 
         if (this.progression.unlocks.gearTab === false) {
             this.loreScene.addText("You open your eyes and see a vast wilderness before you. " +
@@ -309,6 +310,14 @@ export class GameScene extends SceneUIBase {
         this.statIcons[4].setTooltip(this.player.recTooltip());
         this.statIcons[5].setTooltip(this.player.defTooltip());
         this.statIcons[6].setTooltip(this.player.accTooltip());
+    }
+
+    _handleClassSelected() {
+        if (this.player.playerClass === Statics.CLASS_WIZARD) {
+            this.statIcons[5].setImage({ sprite: "icons", tile: 62 });
+            this.statIcons[6].setImage({ sprite: "icons", tile: 63 });
+        }
+        this.updateStatIcons();
     }
 
     _handleProgressionEvents(type, count, text) {
@@ -405,9 +414,9 @@ export class GameScene extends SceneUIBase {
 
     _updateGear() {
         var text = "" +
-            Common.processText("W: " + (this.player.weapon === undefined ? "None" : this.player.weapon.name + " Lv" + this.player.weapon.level), 20) + "\n" +
-            Common.processText("A: " + (this.player.armor === undefined ? "None" : this.player.armor.name + " Lv" + this.player.armor.level), 20) + "\n" +
-            Common.processText("T: " + (this.player.trinket === undefined ? "None" : this.player.trinket.name + " Lv" + this.player.trinket.level), 20);
+            Common.processText(this.player.weapon === undefined ? "None" : this.player.weapon.name + " Lv" + this.player.weapon.level, 20) + "\n" +
+            Common.processText(this.player.armor === undefined ? "None" : this.player.armor.name + " Lv" + this.player.armor.level, 20) + "\n" +
+            Common.processText(this.player.trinket === undefined ? "None" : this.player.trinket.name + " Lv" + this.player.trinket.level, 20);
 
         this.gearLabels.setText(text);
     }
@@ -622,6 +631,10 @@ export class GameScene extends SceneUIBase {
         this.regionScene.rebirth();
         this.combatScene.rebirth();
         this.townScene.rebirth();
+
+        //reset images back to adventurer
+        this.statIcons[5].setImage({ sprite: "icons", tile: 5 });
+        this.statIcons[6].setImage({ sprite: "icons", tile: 6 });
 
         this.scene.bringToTop("LoreScene");
         this.scene.bringToTop();

@@ -181,7 +181,8 @@ export class ProgressionStore {
 
             this.persistentUnlocks = {
                 challenges: false,
-                autoExplore: false
+                autoExplore: false,
+                wizardClass: true
             }
 
             this.totalCounts = {
@@ -394,6 +395,8 @@ export class ProgressionStore {
         this.deathUnlocked = saveObj.dun;
         this.counts = saveObj.count;
         this.totalCounts = saveObj.tcount;
-        this.persistentUnlocks = saveObj.pun;
+        for (const prop in saveObj.pun) {
+            this.persistentUnlocks[prop] = saveObj.pun[prop];
+        }
     }
 }

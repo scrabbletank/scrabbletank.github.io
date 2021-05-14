@@ -1,5 +1,6 @@
 import { Statics } from "./Statics";
 import { AdventurerBlock } from "./AdventurerBlock";
+import { WizardBlock } from "./WizardBlock";
 import { WorldData } from "./WorldData";
 import { GearData } from "./GearData";
 import { MoonlightData } from "./MoonlightData";
@@ -13,6 +14,7 @@ export class PlayerData {
             this.statChangedHandlers = [];
             this.resourceChangedHandlers = [];
             this.talentChangedHandlers = [];
+            this.classSelectedHandlers = [];
 
             this._init();
             this.statBlock = new AdventurerBlock(this);
@@ -106,8 +108,8 @@ export class PlayerData {
                     EVA_PER_AGILITY: 5,
                     HP_PER_ENDURANCE: 3,
                     REGEN_PER_RECOVERY: 0.15,
-                    ARMOR_PER_BARRIER: 0.06,
-                    SHIELD_PER_BARRIER: 3,
+                    ARMOR_PER_WARD: 0.06,
+                    SHIELD_PER_WARD: 3,
                     GEAR_ARMOR_TO_SHIELD: 2,
                     GEAR_DAMAGE_TO_MAGIC: 0.5,
                     SPELL_POWER_PER_POWER: 1,
@@ -171,7 +173,7 @@ export class PlayerData {
         this.gold = 0;
         this.motes = 0;
         this.challengeExploreMulti = 1 + (MoonlightData.getInstance().challenges.explore.completions * 0.25);
-        this.playerClass = Statics.CLASS_WIZARD;
+        this.playerClass = Statics.CLASS_ADVENTURER;
         this._setClassStatics();
         this.classChosen = false;
 
@@ -248,6 +250,7 @@ export class PlayerData {
             exploreSpeed: 0,
             friendshipMulti: 0,
             critChance: 0,
+            critPower: 0,
             lootFlat: 0,
             lootTalent: 0,
             moteChance: 0,
@@ -263,6 +266,40 @@ export class PlayerData {
         }
 
         this.runes = [];
+    }
+
+    selectClass(selectedClass) {
+        this.playerClass = selectedClass;
+        this.classChosen = true;
+        this._setClassStatics(selectedClass);
+
+        var newBlock;
+        switch (selectedClass) {
+            case Statics.CLASS_ADVENTURER:
+                newBlock = this.statBlock;
+            case Statics.CLASS_WIZARD:
+                newBlock = new WizardBlock(this);
+                newBlock.convert(this.statBlock);
+                console.log(newBlock.stats);
+                console.log(newBlock.statBonuses);
+                if (this.weapon !== undefined) {
+                    newBlock.equip(this.weapon);
+                }
+                if (this.armor !== undefined) {
+                    newBlock.equip(this.armor);
+                }
+                if (this.trinket !== undefined) {
+                    newBlock.equip(this.trinket);
+                }
+        }
+        this.statBlock = newBlock;
+        this._onClassSelected();
+    }
+
+    reduceCraftingCosts(tier, amount) {
+        for (var i = 0; i < Math.min(tier, 7); i++) {
+            this.craftingCosts[i] = Math.max(0.1, this.craftingCosts[i] * amount);
+        }
     }
 
     rebirth() {
@@ -379,8 +416,8 @@ export class PlayerData {
                 return "";
             case Statics.CLASS_WIZARD:
                 return "Ward determines your magical protections. Each point increases your armor by " +
-                    (Math.floor(this.classStatics.ARMOR_PER_BARRIER * 100) / 100) +
-                    " and increases your start of combat shield by " + this.classStatics.SHIELD_PER_BARRIER + ".";
+                    (Math.floor(this.classStatics.ARMOR_PER_WARD * 100) / 100) +
+                    " and increases your start of combat shield by " + this.classStatics.SHIELD_PER_WARD + ".";
         }
     }
     accTooltip() {
@@ -414,6 +451,11 @@ export class PlayerData {
             this.talentChangedHandlers[i]();
         }
     }
+    _onClassSelected() {
+        for (var i = 0; i < this.classSelectedHandlers.length; i++) {
+            this.classSelectedHandlers[i]();
+        }
+    }
 
     registerEvent(event, callback) {
         if (event === "onStatChanged") {
@@ -424,6 +466,9 @@ export class PlayerData {
         }
         else if (event === "onTalentChanged") {
             this.talentChangedHandlers.push(callback);
+        }
+        else if (event === "onClassSelected") {
+            this.classSelectedHandlers.push(callback);
         }
     }
 
@@ -460,18 +505,22 @@ export class PlayerData {
         }
         switch (name) {
             case "str":
+            case "wizstr":
             case "cleave":
             case "stun":
                 return this.talents[name].level + this.runeBonuses.strTalents;
             case "dex":
+            case "wizdex":
             case "hit":
             case "followthrough":
                 return this.talents[name].level + this.runeBonuses.dexTalents;
             case "agi":
+            case "wizagi":
             case "evasion":
             case "dodge":
                 return this.talents[name].level + this.runeBonuses.agiTalents;
             case "end":
+            case "wizend":
             case "resilient":
             case "defydeath":
                 return this.talents[name].level + this.runeBonuses.endTalents;
@@ -567,7 +616,7 @@ export class PlayerData {
         this._onResourcesChanged();
     }
     addShade(amount) {
-        this.shade += amount;
+        this.shade += amount * 100;
     }
 
     addRune(rune) {
@@ -665,6 +714,7 @@ export class PlayerData {
             rtr: this.resourceTierReached,
             crf: this.craftingCosts,
             pc: this.playerClass,
+            cc: this.classChosen,
             gold: this.gold,
             mote: this.motes,
             talents: this.talents,
@@ -690,6 +740,7 @@ export class PlayerData {
         this.resourceTierReached = saveObj.rtr;
         this.craftingCosts = saveObj.crf;
         this.playerClass = saveObj.pc === undefined ? Statics.CLASS_ADVENTURER : saveObj.pc;
+        this.classChosen = saveObj.cc === undefined ? true : saveObj.cc;
         this.gold = saveObj.gold;
         this.motes = saveObj.mote;
         this.runes = saveObj.runes === undefined ? [] : saveObj.runes;

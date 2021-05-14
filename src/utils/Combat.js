@@ -12,16 +12,25 @@ export class Combat {
         var animInfo = [];
         switch (key) {
             case "claws":
+            case "clawscrit":
+            case "barrier":
+            case "mace":
                 animInfo.push({ frameId: 0, duration: 80 });
                 animInfo.push({ frameId: 1, duration: 80 });
                 animInfo.push({ frameId: 2, duration: 80 });
                 animInfo.push({ frameId: 3, duration: 80 });
                 break;
-            case "clawscrit":
-                animInfo.push({ frameId: 0, duration: 80 });
-                animInfo.push({ frameId: 1, duration: 80 });
-                animInfo.push({ frameId: 2, duration: 80 });
-                animInfo.push({ frameId: 3, duration: 80 });
+            case "magicmissile":
+                animInfo.push({ frameId: 0, duration: 64 });
+                animInfo.push({ frameId: 1, duration: 64 });
+                animInfo.push({ frameId: 2, duration: 64 });
+                animInfo.push({ frameId: 3, duration: 64 });
+                animInfo.push({ frameId: 4, duration: 64 });
+                break;
+            case "entangle":
+                animInfo.push({ frameId: 0, duration: 105 });
+                animInfo.push({ frameId: 1, duration: 105 });
+                animInfo.push({ frameId: 2, duration: 105 });
                 break;
         }
         return animInfo;

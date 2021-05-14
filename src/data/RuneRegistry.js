@@ -15,7 +15,7 @@ var RuneWords = {
                     return {
                         strTalents: level,
                         strPercent: 0.05 * level,
-                        weaponScaling: 0.01 * level
+                        weaponScaling: 0.0025 * level
                     };
                 }
             }
@@ -88,7 +88,7 @@ var RuneWords = {
                     return {
                         accTalents: level,
                         accPercent: 0.05 * level,
-                        critScaling: 0.01 * level
+                        critChance: 0.01 * level
                     };
                 }
             }
@@ -231,7 +231,7 @@ var RuneWords = {
         Eid: {
             getBonus: (level) => {
                 return {
-                    agilityScaling: 0.01 * level
+                    agilityScaling: 0.005 * level
                 };
             }
         }
@@ -307,7 +307,7 @@ var RuneWords = {
                     return {
                         defTalents: level,
                         defPercent: 0.05 * level,
-                        armorScaling: 0.01 * level
+                        armorScaling: 0.0025 * level
                     };
                 }
             }
@@ -399,12 +399,12 @@ export class RuneRegistry {
     }
 
     static getUpgradeCost(rune) {
-        return Math.round((100 + (Math.floor(Math.pow(rune.level - 1, 1.5)) * 200)) *
+        return Math.round((100 + (Math.floor(Math.pow(rune.level - 1, 1.85)) * 250)) *
             Math.pow(0.93, MoonlightData.getInstance().moonperks.runes3.level));
     }
 
     static getSellCost(rune) {
-        return Math.round((100 + (Math.floor(Math.pow(rune.level - 1, 1.5)) * 200)) * 0.2);
+        return Math.round((100 + (Math.floor(Math.pow(rune.level - 1, 1.85)) * 250)) * 0.2);
     }
 
     static getRandomRuneAtLevel(level) {

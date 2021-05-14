@@ -167,19 +167,22 @@ export class TileData {
         if (this.isInvaded === true) {
             var bonusDif = DynamicSettings.getInstance().invasionLevelBonus;
             var bossDif = this.difficulty + this.getInvasionMulti();
-            enemyList.push(CreatureRegistry.GetCreatureByName(this.enemies[Common.randint(0, this.enemies.length)], bossDif + bonusDif));
-            enemyList.push(CreatureRegistry.GetCreatureByName(this.enemies[Common.randint(0, this.enemies.length)], this.difficulty - 1 + bonusDif));
-            enemyList.push(CreatureRegistry.GetCreatureByName(this.enemies[Common.randint(0, this.enemies.length)], this.difficulty - 1 + bonusDif));
+            enemyList.push(CreatureRegistry.GetCreatureByName(this.enemies[Common.randint(0, this.enemies.length)],
+                bossDif + bonusDif, this.parent.regionLevel));
+            enemyList.push(CreatureRegistry.GetCreatureByName(this.enemies[Common.randint(0, this.enemies.length)],
+                this.difficulty - 1 + bonusDif, this.parent.regionLevel));
+            enemyList.push(CreatureRegistry.GetCreatureByName(this.enemies[Common.randint(0, this.enemies.length)],
+                this.difficulty - 1 + bonusDif, this.parent.regionLevel));
         } else {
             var min = this.difficulty < 30 ? 1 : 2;
             var max = (this.difficulty < 5 ? 2 : 3) + (this.difficulty > 15 ? 1 : 0)
             var numCreatures = this.difficulty > 0 ? Common.randint(min, max) : 1;
             for (var i = 0; i < numCreatures; i++) {
                 if (Math.random() <= PlayerData.getInstance().getTalentLevel("lootgoblin") * 0.005) {
-                    enemyList.push(CreatureRegistry.GetCreatureByName("lootgoblin", this.difficulty));
+                    enemyList.push(CreatureRegistry.GetCreatureByName("lootgoblin", this.difficulty, this.parent.regionLevel));
                 } else {
                     var num = Common.randint(0, this.enemies.length);
-                    enemyList.push(CreatureRegistry.GetCreatureByName(this.enemies[num], this.difficulty));
+                    enemyList.push(CreatureRegistry.GetCreatureByName(this.enemies[num], this.difficulty, this.parent.regionLevel));
                 }
             }
         }
@@ -499,7 +502,7 @@ export class Region {
             this.townData.addFriendship(10 * MoonlightData.getInstance().moonperks.discovery.level);
             if (this.map[y][x].hasRune === true) {
                 this.map[y][x].hasRune = false;
-                var rune = RuneRegistry.getRandomRuneAtLevel(this.regionLevel + 1);
+                var rune = RuneRegistry.getRandomRuneAtLevel((this.regionLevel / 2) + 1);
                 PlayerData.getInstance().addRune(rune);
             }
             if (this.map[y][x].name === "Town") {

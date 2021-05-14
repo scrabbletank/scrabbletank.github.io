@@ -29,6 +29,10 @@ export class TooltipImage {
         this.clickCallback = callback;
     }
 
+    setImage(img) {
+        this.img.setTexture(img.sprite, img.tile);
+    }
+
     setPosition(x, y) {
         this.x = x;
         this.y = y;

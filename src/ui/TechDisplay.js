@@ -25,7 +25,7 @@ export class TechDisplay {
         var resourceCosts = TownData.getTechResourceCost(tech, townTier);
         for (var i = 0; i < resourceCosts.length; i++) {
             if (resourceCosts[i] > 0) {
-                costText += ", " + Common.getCostText(i, resourceCosts[i]);
+                costText += ", " + TooltipRegistry.getCostText(i, resourceCosts[i]);
             }
         }
         costText += ", Friend Level " + tech.level;

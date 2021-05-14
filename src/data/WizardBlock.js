@@ -3,7 +3,7 @@ import { Statics } from "./Statics";
 import { MoonlightData } from "./MoonlightData";
 import { Common } from "../utils/Common";
 
-export class AdventurerBlock extends CreatureBlock {
+export class WizardBlock extends CreatureBlock {
     constructor(player) {
         super();
         this.player = player;
@@ -13,13 +13,13 @@ export class AdventurerBlock extends CreatureBlock {
 
     convert(block) {
         this.stats = {
-            strength: block.strength,
-            dexterity: block.dexterity,
-            agility: block.agility,
-            endurance: block.endurance,
-            recovery: block.recovery,
-            ward: block.defense,
-            power: block.accuracy,
+            strength: block.stats.strength,
+            dexterity: block.stats.dexterity,
+            agility: block.stats.agility,
+            endurance: block.stats.endurance,
+            recovery: block.stats.recovery,
+            defense: block.stats.defense,
+            accuracy: block.stats.accuracy,
             hit: 40,
             evasion: 30,
             spellPower: 0,
@@ -57,6 +57,10 @@ export class AdventurerBlock extends CreatureBlock {
         this.fourthCounter = 0;
         this.fifthCounter = 0;
         this.hasteAttacks = 0;
+
+        //copy over event handlers because setting that back up sucks
+        this.healthChangedHandlers = block.healthChangedHandlers;
+        this.attackCooldownChangedHandlers = block.attackCooldownChangedHandlers;
     }
 
     rebirth() {
@@ -71,46 +75,46 @@ export class AdventurerBlock extends CreatureBlock {
     }
     Strength() {
         var ret = this.stats.strength + this.statBonuses.strength + this.player.runeBonuses.strFlat;
-        ret = ret * (1 + (this.moonData.moonperks.str.level + MoonlightData.getInstance().challengePoints) * 0.01);
+        ret = ret * (1 + (this.moonData.moonperks.str.level + MoonlightData.getInstance().challengePoints) * 0.005);
         ret += ret * (this.player.runeBonuses.strPercent + this.player.runeBonuses.allPercent);
         ret += this.Dexterity() * this.player.runeBonuses.dexToStr;
         return Math.floor(ret);
     }
     Dexterity() {
         var ret = this.stats.dexterity + this.statBonuses.dexterity + this.player.runeBonuses.dexFlat;
-        ret = ret * (1 + (this.moonData.moonperks.dex.level + MoonlightData.getInstance().challengePoints) * 0.01);
+        ret = ret * (1 + (this.moonData.moonperks.dex.level + MoonlightData.getInstance().challengePoints) * 0.005);
         ret += ret * (this.player.runeBonuses.dexPercent + this.player.runeBonuses.allPercent);
         return Math.floor(ret);
     }
     Agility() {
         var ret = this.stats.agility + this.statBonuses.agility + this.player.runeBonuses.agiFlat;
-        ret = ret * (1 + (this.moonData.moonperks.agi.level + MoonlightData.getInstance().challengePoints) * 0.01);
+        ret = ret * (1 + (this.moonData.moonperks.agi.level + MoonlightData.getInstance().challengePoints) * 0.005);
         ret += ret * (this.player.runeBonuses.agiPercent + this.player.runeBonuses.allPercent);
         return Math.floor(ret);
     }
     Endurance() {
         var ret = this.stats.endurance + this.statBonuses.endurance + this.player.runeBonuses.endFlat;
-        ret = ret * (1 + (this.moonData.moonperks.end.level + MoonlightData.getInstance().challengePoints) * 0.01);
+        ret = ret * (1 + (this.moonData.moonperks.end.level + MoonlightData.getInstance().challengePoints) * 0.005);
         ret += ret * (this.player.runeBonuses.endPercent + this.player.runeBonuses.allPercent);
         return Math.floor(ret);
     }
     Recovery() {
         var ret = this.stats.recovery + this.statBonuses.recovery + this.player.runeBonuses.recFlat;
-        ret = ret * (1 + (this.moonData.moonperks.rec.level + MoonlightData.getInstance().challengePoints) * 0.01);
+        ret = ret * (1 + (this.moonData.moonperks.rec.level + MoonlightData.getInstance().challengePoints) * 0.005);
         ret += ret * (this.player.runeBonuses.recPercent + this.player.runeBonuses.allPercent);
         ret += this.Endurance() * this.player.runeBonuses.endToRec;
         return Math.floor(ret);
     }
     Defense() {
         var ret = this.stats.defense + this.statBonuses.defense + this.player.runeBonuses.defFlat;
-        ret = ret * (1 + (this.moonData.moonperks.def.level + MoonlightData.getInstance().challengePoints) * 0.01);
+        ret = ret * (1 + (this.moonData.moonperks.def.level + MoonlightData.getInstance().challengePoints) * 0.005);
         ret += ret * (this.player.runeBonuses.defPercent + this.player.runeBonuses.allPercent);
         ret += this.Agility() * this.player.runeBonuses.agiToDef;
         return Math.floor(ret);
     }
     Accuracy() {
         var ret = this.stats.accuracy + this.statBonuses.accuracy + this.player.runeBonuses.accFlat;
-        ret = ret * (1 + (this.moonData.moonperks.acc.level + MoonlightData.getInstance().challengePoints) * 0.01);
+        ret = ret * (1 + (this.moonData.moonperks.acc.level + MoonlightData.getInstance().challengePoints) * 0.005);
         ret += ret * (this.player.runeBonuses.accPercent + this.player.runeBonuses.allPercent);
         return Math.floor(ret);
     }
@@ -158,7 +162,11 @@ export class AdventurerBlock extends CreatureBlock {
         return Math.floor(ret * 10) / 10;
     }
     Armor() {
-        var ret = this.Defense() * this.player.classStatics.ARMOR_PER_DEFENSE + this.statBonuses.armor;
+        var ret = this.Defense() * this.player.classStatics.ARMOR_PER_WARD + this.statBonuses.armor;
+        return Math.floor(ret);
+    }
+    Shield() {
+        var ret = this.Defense() * this.player.classStatics.SHIELD_PER_WARD;
         return Math.floor(ret);
     }
     AttackSpeed() {
@@ -169,14 +177,33 @@ export class AdventurerBlock extends CreatureBlock {
     equip(gear) {
         var bonus = gear.getStatBonuses();
         for (const prop in bonus) {
-            this.statBonuses[prop] += bonus[prop];
+            switch (prop) {
+                case 'critPower':
+                    this.statBonuses['spellPower'] += Math.floor(bonus[prop] / 3);
+                    break;
+                default:
+                    this.statBonuses[prop] += bonus[prop];
+                    break;
+            }
         }
     }
     unequip(gear) {
         var bonus = gear.getStatBonuses();
         for (const prop in bonus) {
-            this.statBonuses[prop] -= bonus[prop];
+            switch (prop) {
+                case 'critPower':
+                    this.statBonuses['spellPower'] -= Math.floor(bonus[prop] / 3);
+                    break;
+                default:
+                    this.statBonuses[prop] -= bonus[prop];
+                    break;
+            }
         }
+    }
+
+    initCombat() {
+        this.attackCooldown = 0;
+        this.shieldValue = this.Shield();
     }
 
     takeDamage(damage, isCrit, dmgType) {
@@ -204,20 +231,20 @@ export class AdventurerBlock extends CreatureBlock {
         this.attackCooldown = 0;
         if (this.hasteAttacks > 0) {
             this.hasteAttacks -= 1;
-            this.attackCooldown = this.AttackSpeed() * 0.075 * this.player.getTalentLevel("haste").level;
+            this.attackCooldown = this.AttackSpeed() * 0.075 * this.player.getTalentLevel("haste");
         }
         this._onAttackCooldownChanged();
     }
 
     _castPowerWordKill(creature) {
-        var max = this.CritPower() * (1 + this.player.getTalentLevel('powerwordkill').level * 0.25) + 1;
+        var max = this.CritPower() * (1 + this.player.getTalentLevel('powerwordkill') * 0.25) + 1;
         var dmg = Common.randint(1, max);
 
-        if (this.player.getTalentLevel('powerwordstun').level > 0 &&
-            dmg / max > 0.8 - this.player.getTalentLevel('powerwordstun').level * 0.07) {
+        if (this.player.getTalentLevel('powerwordstun') > 0 &&
+            dmg / max > 0.8 - this.player.getTalentLevel('powerwordstun') * 0.07) {
             creature.stunTimer = 2000;
         }
-        var dmg = creature.takeDamage(rawDmg, isCrit, Statics.DMG_MAGIC);
+        var dmg = creature.takeDamage(rawDmg, false, Statics.DMG_MAGIC);
         this.fifthCounter = 9;
         return dmg;
     }
@@ -228,10 +255,10 @@ export class AdventurerBlock extends CreatureBlock {
     }
     _castFireball(creature) {
         this.fifthCounter = 5;
-        var dmg = this.CritPower() * (0.1 * this.player.getTalentLevel('fireball').level) + 1;
-        var dmg = creature.takeDamage(rawDmg, isCrit, Statics.DMG_MAGIC);
-        if (this.player.getTalentLevel('ignite').level > 0) {
-            creature.igniteTimer = 1000 + 500 * this.player.getTalentLevel('ignite').level;
+        var dmg = this.CritPower() * (0.1 * this.player.getTalentLevel('fireball')) + 1;
+        var dmg = creature.takeDamage(rawDmg, false, Statics.DMG_MAGIC);
+        if (this.player.getTalentLevel('ignite') > 0) {
+            creature.igniteTimer = 1000 + 500 * this.player.getTalentLevel('ignite');
             creature.igniteDamage = dmg * 0.15;
             if (creature.shieldValue > 0) {
                 creature.igniteDamage = creature.igniteDamage / 2;
@@ -241,46 +268,55 @@ export class AdventurerBlock extends CreatureBlock {
     }
     _castBarrier(creature) {
         this.secondCounter = 13;
-        this.shieldValue += this.Defense() * this.player.getTalentLevel('barrier').level * 0.25;
+        this.playAnimation("barrier");
+        this.shieldValue += this.Defense() * this.player.getTalentLevel('barrier') * 0.25;
         return 0;
     }
     _castEntangle(creature) {
         this.firstCounter = 4;
-        creature.slowTimer = 2000 + 250 * this.player.getTalentLevel('entangle').level;
+        creature.playAnimation("entangle");
+        creature.slowTimer = 2000 + 250 * this.player.getTalentLevel('entangle');
         creature.slowPercent = 0.3;
-        creature.slowDamage = this.GetEvasion() * this.player.getTalentLevel('thorns').level * 0.05;
+        creature.slowDamage = this.Evasion() * this.player.getTalentLevel('thorns') * 0.05;
         if (creature.shieldValue > 0) {
             creature.slowDamage = creature.slowDamage / 2;
         }
         return 0;
     }
     _castCantrip(creature) {
-        var dmg = this.CritPower() * (0.2 + this.player.getTalentLevel('cantrip').level * 0.08) + 1;
-        var dmg = creature.takeDamage(rawDmg, isCrit, Statics.DMG_MAGIC);
-        return dmg;
+        var rawDmg = this.CritPower() * (0.2 + this.player.getTalentLevel('cantrip') * 0.08) + 1;
+        creature.playAnimation("magicmissile");
+        return creature.takeDamage(rawDmg, false, Statics.DMG_MAGIC);
     }
 
     canCastFireball() { return this.fifthCounter > 0 && this.fourthCounter > 0 && this.thirdCounter <= 0; }
 
     attack(creature, isCrit = false) {
         var dmg = 0;
-        if (this.player.getTalentLevel("fifth").level >= 5 && this.player.getTalentLevel('powerwordkill').level > 0 &&
+        var didCast = false;
+        if (this.player.getTalentLevel("fifth") >= 5 && this.player.getTalentLevel('powerwordkill') > 0 &&
             this.fifthCounter <= 0) {
             dmg = this._castPowerWordKill(creature);
-        } else if (this.player.getTalentLevel("fourth").level >= 4 && this.player.getTalentLevel('haste').level > 0 &&
+            didCast = true;
+        } else if (this.player.getTalentLevel("fourth") >= 4 && this.player.getTalentLevel('haste') > 0 &&
             this.fourthCounter <= 0) {
             dmg = this._castHaste(creature);
-        } else if (this.player.getTalentLevel("third").level >= 3 && this.player.getTalentLevel('fireball').level > 0 &&
+            didCast = true;
+        } else if (this.player.getTalentLevel("third") >= 3 && this.player.getTalentLevel('fireball') > 0 &&
             this.thirdCounter <= 0) {
             dmg = this._castFireball(creature);
-        } else if (this.player.getTalentLevel("second").level >= 2 && this.player.getTalentLevel('barrier').level > 0 &&
+            didCast = true;
+        } else if (this.player.getTalentLevel("second") >= 2 && this.player.getTalentLevel('barrier') > 0 &&
             this.secondCounter <= 0) {
             dmg = this._castBarrier(creature);
-        } else if (this.player.getTalentLevel("first").level >= 1 && this.player.getTalentLevel('entangle').level > 0 &&
+            didCast = true;
+        } else if (this.player.getTalentLevel("first") >= 1 && this.player.getTalentLevel('entangle') > 0 &&
             this.firstCounter <= 0) {
             dmg = this._castEntangle(creature);
-        } else if (this.player.getTalentLevel("cantrip").level > 0) {
+            didCast = true;
+        } else if (this.player.getTalentLevel("cantrip") > 0) {
             dmg = this._castCantrip(creature);
+            didCast = true;
         }
         this.fifthCounter -= 1;
         this.fourthCounter -= 1;
@@ -289,6 +325,9 @@ export class AdventurerBlock extends CreatureBlock {
         this.firstCounter -= 1;
         var rawDmg = this.rollDamage();
         dmg += creature.takeDamage(rawDmg, false, Statics.DMG_NORMAL);
+        if (didCast === false) {
+            creature.playAnimation("mace");
+        }
         this._endAttack();
         return dmg;
     }

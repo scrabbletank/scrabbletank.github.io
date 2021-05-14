@@ -99,10 +99,7 @@ export class TownData {
 
         switch (tech.name) {
             case "Forge":
-                var player = new PlayerData();
-                for (var i = 0; i < this.tier; i++) {
-                    player.craftingCosts[i] = player.craftingCosts[i] * Statics.FORGE_REDUCTION;
-                }
+                PlayerData.getInstance().reduceCraftingCosts(this.tier, Statics.FORGE_REDUCTION);
                 break;
             case "Guilds":
                 this.productionMulti += 0.1;

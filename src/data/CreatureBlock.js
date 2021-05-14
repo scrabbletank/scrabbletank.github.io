@@ -72,6 +72,7 @@ export class CreatureBlock {
 
         this.healthChangedHandlers = [];
         this.attackCooldownChangedHandlers = [];
+        this.animationChangedHandlers = [];
     }
 
     MaxHealth() {
@@ -155,6 +156,8 @@ export class CreatureBlock {
             this.healthChangedHandlers.push(callback);
         } else if (event === 'onAttackCooldownChanged') {
             this.attackCooldownChangedHandlers.push(callback);
+        } else if (event === 'onAnimationChanged') {
+            this.animationChangedHandlers.push(callback);
         }
     }
 
@@ -166,6 +169,18 @@ export class CreatureBlock {
     _onAttackCooldownChanged() {
         for (var i = 0; i < this.attackCooldownChangedHandlers.length; i++) {
             this.attackCooldownChangedHandlers[i](this.attackCooldown);
+        }
+    }
+    _onAnimationChanged(animKey) {
+        for (var i = 0; i < this.animationChangedHandlers.length; i++) {
+            this.animationChangedHandlers[i](animKey);
+        }
+    }
+
+    initCombat() {
+        this.currentHealth = this.MaxHealth();
+        if (this.findTrait({ type: Statics.TRAIT_FIRSTSTRIKE }) !== undefined) {
+            this.attackCooldown = this.AttackSpeed() * 0.95;
         }
     }
 
@@ -241,6 +256,7 @@ export class CreatureBlock {
             rawDmg = rawDmg * this.CritDamage(creature.CritResistance());
         }
         var dmg = creature.takeDamage(rawDmg, isCrit, Statics.DMG_NORMAL);
+        creature.playAnimation(isCrit === true ? this.critAnim : this.hitAnim);
         this.attackCooldown = 0;
         //handle beserk trait, giving attack speed refresh
         var beserk = this.findTrait(Statics.TRAIT_BESERK);
@@ -252,6 +268,9 @@ export class CreatureBlock {
 
         this._onAttackCooldownChanged();
         return dmg;
+    }
+    playAnimation(anim) {
+        this._onAnimationChanged(anim);
     }
 
     equip(gear) {
@@ -269,7 +288,7 @@ export class CreatureBlock {
 
 
     // used for monsters to add scaling based on level
-    setMonsterStats(name, scaleBlock, attackSpeed, critChance, level, shadeBase, rewardBase, icon) {
+    setMonsterStats(name, scaleBlock, attackSpeed, critChance, level, tier, shadeBase, rewardBase, icon) {
         this.level = level;
         // offset by 1, level 0 should have no bonuses
         var rLvl = level - 1;
@@ -277,7 +296,8 @@ export class CreatureBlock {
         var sLvl = Math.max(0, rLvl);
         // monster stat bonuses
         var flatStat = rLvl * Statics.MONSTER_STAT_PER_LEVEL;
-        var scaleStat = Math.pow(Statics.MONSTER_STATSCALE_PER_LEVEL, sLvl);
+        var scaleStat = Math.pow(Statics.MONSTER_STATSCALE_PER_LEVEL, sLvl) * Math.pow(Statics.MONSTER_STATSCALE_PER_REGION, tier);
+        var scaleXp = Math.pow(Statics.MONSTER_XPSCALE_PER_REGION, tier)
 
         this.stats.strength = (this.stats.strength + flatStat) * scaleBlock.strength * scaleStat;
         this.stats.dexterity = (this.stats.dexterity + flatStat) * scaleBlock.dexterity * scaleStat;
@@ -302,7 +322,7 @@ export class CreatureBlock {
         this.name = level < 1 ? "Weak " + name : name;
         var shade = shadeBase + (MoonlightData.getInstance().moonperks.shadow2.level * 2);
         this.xpReward = shade + (shade / 4) * rLvl;
-        this.xpReward = this.xpReward * (1 + MoonlightData.getInstance().challenges.megamonsters.completions * 0.05);
+        this.xpReward = this.xpReward * (1 + MoonlightData.getInstance().challenges.megamonsters.completions * 0.05) * scaleXp;
         this.dropBase = rewardBase;
         this.icon = icon;
     }
