@@ -4,12 +4,13 @@ import { Common } from "../utils/Common";
 import { TooltipRegistry } from "../data/TooltipRegistry";
 
 export class ChallengeWindow {
-    constructor(scene, x, y) {
+    constructor(scene, x, y, runActive) {
         this.backingRect = scene.add.rectangle(x, y, 800, 600, Phaser.Display.Color.GetColor(0, 0, 0))
             .setOrigin(0, 0).setInteractive();
         this.backingRect.isStroked = true;
         this.backingRect.strokeColor = Phaser.Display.Color.GetColor(255, 255, 255);
         this.backingRect.lineWidth = 4;
+        this.runActive = runActive;
 
         this.title = scene.add.bitmapText(x + 400, y + 5, "courier20", "CHALLENGES").setOrigin(0.5, 0);
 
@@ -20,6 +21,7 @@ export class ChallengeWindow {
                 x + 10, y + 30 + (idx * 25)));
             idx += 1;
         }
+
 
         this.challengeBox = scene.add.bitmapText(x + 220, y + 30, "courier20", "");
 
@@ -48,7 +50,8 @@ export class ChallengeWindow {
     }
 
     _challengeClickHandler(challenge) {
-        this.challengeBox.setText(Common.processText(TooltipRegistry.getChallengeDescription(challenge), 57));
+        var txt = this.runActive === true ? "\n\nAccepting Will Reset your current run, earning you no Moonlight." : "";
+        this.challengeBox.setText(Common.processText(TooltipRegistry.getChallengeDescription(challenge) + txt, 57));
         this.selectedChallenge = challenge;
         this.acceptBtn.setEnable(challenge.completions < challenge.maxCompletions);
     }
