@@ -286,6 +286,7 @@ export class PlayerData {
     rebirth() {
         this._init();
         var block = new AdventurerBlock(this);
+        block.rebirth();
         block.copyHandlers(this.statBlock);
         this.statBlock = block;
     }
