@@ -27,6 +27,9 @@ export class TalentScene extends SceneUIBase {
     }
 
     rebirth() {
+        if (this.classSelectWindow !== undefined) {
+            this.classSelectWindow.destroy();
+        }
         if (this.player.classChosen === false) {
             this.classSelectWindow = new ClassSelectWindow(this, this.relativeX(60), this.relativeY(10));
             this.classSelectWindow.onSelectHandler((x) => { this._onSelectHandler(x); });

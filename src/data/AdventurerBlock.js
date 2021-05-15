@@ -89,13 +89,11 @@ export class AdventurerBlock extends CreatureBlock {
             accuracy: 0,
             hit: 0,
             evasion: 0,
-            spellPower: 0,
+            critPower: 0,
             critResistance: 0,
             critChance: 0,
             healthRegen: 0,
-            armor: 0,
-            shield: 0,
-            magicDamage: 0
+            armor: 0
         };
         this.level = 0;
         this.currentHealth = Math.min(this.MaxHealth(), block.currentHealth);
