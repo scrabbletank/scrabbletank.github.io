@@ -86,7 +86,7 @@ export class TooltipRegistry {
                     "you're willing to make.";
             // WIZARD TALENTS
             case "Cantrip":
-                return "Only one spell will cast per attack. Every attack you deal " + (20 + lvl * 8) + "% + (8%) of your spellpower in magic damage.";
+                return "Only one spell will cast per attack. Every attack you deal " + (20 + lvl * 9) + "% + (9%) of your spellpower in magic damage.";
             case "First Level Spell":
                 return "Study the Arcane Arts! This talent must be maxed to cast Entangle. Gives a modest " + (lvl) + "% + (1%) to your max spellpower.";
             case "Second Level Spell":
@@ -98,17 +98,17 @@ export class TooltipRegistry {
             case "Fifth Level Spell":
                 return "Study Empowered Evocations! This talent must be maxed to cast Power Word Kill. Gives a modest " + (lvl) + "% + (1%) to your max spellpower.";
             case "Entagle":
-                return "Only one spell will cast per attack. Every 4th attack you slow a creature's attack speed by 30% for " +
+                return "Only one spell will cast per attack. Every 4th attack you slow a creature's attack speed by 40% for " +
                     (2 + lvl * 0.25) + " + (0.25) seconds.";
             case "Thorns":
-                return "In their feeble attempt to catch you, monsters take " + (lvl * 5) + "% + (5%) of your evasion in magic damage per second while slowed.";
+                return "In their feeble attempt to catch you, monsters take " + (lvl * 10) + "% + (10%) of your Agility in magic damage per second while slowed.";
             case "Barrier":
                 return "Only one spell will cast per attack. Every 13th attack you add " + (25 * lvl) + "% + (25%) of your ward to your shield.";
             case "Shell":
                 return "Who needs endurance when you have magic? Increases your Crit Resistance by " + (15 * lvl) + "% + (15%) while your shield is up.";
             case "Fireball":
-                return "Only one spell will cast per attack. Every 5th attack you cast the only spell that matters, dealing " + (10 * lvl) +
-                    "% + (10%) of your spellpower to all monster in magic damage. You didn't ask how big the room is, you said 'I cast Fireball'.";
+                return "Only one spell will cast per attack. Every 5th attack you cast the only spell that matters, dealing " + (7 * lvl) +
+                    "% + (7%) of your spellpower to all monster in magic damage. You didn't ask how big the room is, you said 'I cast Fireball'.";
             case "Ignite":
                 return "Watch the monsters burn. Fun! Your fireballs ignite monsters, dealing 15% of its damage per second for " + (1 + lvl * 0.5) +
                     " + (0.5) seconds.";
@@ -116,7 +116,7 @@ export class TooltipRegistry {
                 return "Only one spell will cast per attack. Every 6th attack you gain haste for 3 attacks. While hasted your attack bar starts " + (7.5 * lvl) +
                     "% + (7.5%) full.";
             case "Quicken":
-                return "You've remembered that haste also makes you move faster! While haste is active your evasion is increased by " + (5 * lvl) +
+                return "You've remembered that haste also makes you move faster! While haste is active your Evasion is increased by " + (5 * lvl) +
                     "% + (5%).";
             case "Power Word Kill":
                 return "Only one spell may cast per attack. Every 9th attack you command a monster to play dead, dealing anywhere from 0% - " + (100 + lvl * 25) + "% + (25%) of your spellpower in magic damage.";
@@ -131,11 +131,17 @@ export class TooltipRegistry {
             case "Elective Studies: Dexterity":
                 return "Learn how to cast more spells more faster. Increases hit chance from Dexterity by " + (lvl) + " + (1).";
             case "Elective Studies: Agility":
-                return "You never skipped cardio day in Wizard PE. Increases evasion from Agility by " + (lvl * 0.7) + " + (0.7).";
+                return "You never skipped cardio day in Wizard PE. Increases evasion from Agility by " + ((lvl * 7) / 10) + " + (0.7).";
             case "Elective Studies: Endurance":
-                return "The only way wizards could survive long enough to cast the really cool spells. Increases health from Endurance by" + (lvl * 0.5) + " + (0.5).";
+                return "The only way wizards could survive long enough to cast the really cool spells. Increases health from Endurance by " + ((lvl * 7.5) / 10) + " + (0.75).";
             case "Runemancy":
                 return "Harness the runic magic to empower your spells. Each socketed run in your equipment increases your spellpower by " + (lvl) + "% + (1%).";
+            case "Magic Armor":
+                return "You didn't spend 10 years at wizard school to use yuvky, non-magical armor. Add " + (lvl * 20) + "% + (20%) " +
+                    "of your gears armor to your Shield at the start of combat.";
+            case "Magic Weapon":
+                return "Magic Weapons, from a more civilized time. Add " + (lvl * 10) + "% + (10%) " +
+                    "of your gears damage to your Spell Power.";
         }
     }
 

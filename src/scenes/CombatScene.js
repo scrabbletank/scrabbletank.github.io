@@ -196,6 +196,9 @@ export class CombatScene extends SceneUIBase {
         this.load.spritesheet("magicmissile", "./../../assets/anims/magicanim.png", { frameWidth: 32, frameHeight: 32 });
         this.load.spritesheet("entangle", "./../../assets/anims/entangleanim.png", { frameWidth: 32, frameHeight: 32 });
         this.load.spritesheet("barrier", "./../../assets/anims/barrieranim.png", { frameWidth: 32, frameHeight: 32 });
+        this.load.spritesheet("fireball", "./../../assets/anims/fireanim.png", { frameWidth: 32, frameHeight: 32 });
+        this.load.spritesheet("haste", "./../../assets/anims/hasteanim.png", { frameWidth: 32, frameHeight: 32 });
+        this.load.spritesheet("skull", "./../../assets/anims/killanim.png", { frameWidth: 32, frameHeight: 32 });
     }
 
     create() {
@@ -220,6 +223,7 @@ export class CombatScene extends SceneUIBase {
 
         this.restButton = new TextButton(this, this.relativeX(800), this.relativeY(40), 80, 20, "Rest")
             .onClickHandler(() => { this._restHandler(); });
+        this.restButton.setVisible(false);
 
         this.player.statBlock.registerEvent("onHealthChanged", (x) => { this._playerHealthCallback(x); });
         this.player.statBlock.registerEvent("onAttackCooldownChanged", (x) => { this._playerAttackCooldownCallback(x); });

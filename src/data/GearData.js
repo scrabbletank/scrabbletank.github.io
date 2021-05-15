@@ -55,17 +55,6 @@ export class GearData {
         }
     }
 
-    _isEquipedItem(gear) {
-        switch (gear.slotType) {
-            case Statics.GEAR_WEAPON:
-                return PlayerData.getInstance().weapon !== undefined && gear.name === PlayerData.getInstance().weapon.name;
-            case Statics.GEAR_ARMOR:
-                return PlayerData.getInstance().armor !== undefined && gear.name === PlayerData.getInstance().armor.name;
-            case Statics.GEAR_TRINKET:
-                return PlayerData.getInstance().trinket !== undefined && gear.name === PlayerData.getInstance().trinket.name;
-        }
-    }
-
     upgradeGear(gear) {
         var player = PlayerData.getInstance();
         var craftCostMulti = gear.tier <= 0 ? 1 : player.craftingCosts[gear.tier - 1];
@@ -77,7 +66,7 @@ export class GearData {
             return;
         }
         player.spendResource(res, Math.max(0, gear.tier - 1));
-        if (this._isEquipedItem(gear)) {
+        if (player.isEquipedItem(gear)) {
             player.unequip(gear.slotType);
             gear.bringToLevel(gear.level + 1);
             player.equip(gear);
@@ -88,7 +77,7 @@ export class GearData {
 
     fuseGear(gear, motes) {
         var player = PlayerData.getInstance();
-        if (this._isEquipedItem(gear)) {
+        if (player.isEquipedItem(gear)) {
             player.unequip(gear.slotType);
             gear.fuseMotes(motes);
             player.equip(gear);
@@ -1511,7 +1500,7 @@ export class GearData {
             critPower: 0.4, critResistance: 0, critChance: 0.3, healthRegen: 0, armor: 0
         };
         var cost = [55, 0, 70, 90, 0, 0];
-        var costlvl = [0, 0, 47, 59, 0, 27];
+        var costlvl = [37, 0, 47, 59, 0, 27];
         this.gear.push(new Gear("Chthonic Dagger", 8, Statics.GEAR_WEAPON, stat, cost, costlvl));
 
         var stat = {

@@ -2,7 +2,7 @@ export class ProgressBar {
     constructor(sceneContext, x, y, width, height, barColor, barBackgroundColor, text) {
         this.backgroundRect = sceneContext.add.rectangle(x, y, width, height, barBackgroundColor).setOrigin(0, 0);
         this.fillRect = sceneContext.add.rectangle(x + 1, y + 1, width - 2, height - 2, barColor).setOrigin(0, 0);
-        this.fillRect2 = sceneContext.add.rectangle(x + 1, y + 1, width - 2, height - 2, Phaser.Display.Color.GetColor(255, 255, 255)).setOrigin(0, 0);
+        this.fillRect2 = sceneContext.add.rectangle(x + 1, y + 1, width - 2, height - 2, Phaser.Display.Color.GetColor(100, 75, 200)).setOrigin(0, 0);
         this.fillRect2.displayWidth = 0;
         this.width = width;
         this.height = height;
@@ -21,6 +21,10 @@ export class ProgressBar {
         this.fillRect.setVisible(visible);
         this.fillRect2.setVisible(visible);
         this.progressText.setVisible(visible);
+    }
+
+    setTextColor(clr) {
+        this.progressText.setTint(clr);
     }
 
     setFillPercent(percent, text = "") {

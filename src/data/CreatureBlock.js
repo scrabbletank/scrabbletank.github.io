@@ -141,7 +141,7 @@ export class CreatureBlock {
         return Math.floor(ret * 10) / 10;
     }
     Armor() {
-        var ret = this.Defense() * Statics.ARMOR_PER_DEFENSE + this.statBonuses.armor * (1 + this.Defense() * Statics.SCALING_ARMOR_PER_DEFENSE);
+        var ret = this.Defense() * Statics.ARMOR_PER_DEFENSE + this.statBonuses.armor;
         return Math.floor(ret);
     }
     AttackSpeed() {
@@ -188,20 +188,22 @@ export class CreatureBlock {
 
     takeDamage(damage, __isCrit, dmgType) {
         var dmg = damage;
-        if (dmgType = Statics.DMG_NORMAL) {
+        if (dmgType === Statics.DMG_NORMAL) {
             if (this.shieldValue > 0) {
                 var shieldDmg = Math.min(this.shieldValue, dmg);
                 this.shieldValue -= shieldDmg;
                 dmg -= shieldDmg;
             }
-            dmg = Math.max(1, dmg - this.Armor());
-        } else if (dmgType = Statics.DMG_MAGIC) {
+            if (dmg > 0) {
+                dmg = Math.max(1, dmg - this.Armor());
+            }
+        } else if (dmgType === Statics.DMG_MAGIC) {
             // magic damage ignores 90% of armor but does half damage to shields
             var shieldDmg = Math.min(this.shieldValue, dmg / 2);
             this.shieldValue -= shieldDmg;
             dmg -= shieldDmg * 2;
             dmg = Math.max(1, dmg - this.Armor() * 0.1);
-        } else if (dmgType = Statics.DMG_TRUE) {
+        } else if (dmgType === Statics.DMG_TRUE) {
             //true damage bypasses shields?
         }
         this.currentHealth -= dmg;
@@ -237,11 +239,12 @@ export class CreatureBlock {
         }
         if (this.igniteTimer > 0) {
             this.igniteTimer -= delta * multi;
-            this.takeDamage(this.igniteDamage * (delta * multi / 1000));
+            this.takeDamage(this.igniteDamage * (delta * multi / 1000), false, Statics.DMG_TRUE);
         }
         if (this.slowTimer > 0) {
             this.slowTimer -= delta * multi;
-            this.takeDamage(this.slowDamage * (delta * multi / 1000));
+            console.log(Statics.DMG_TRUE);
+            this.takeDamage(this.slowDamage * (delta * multi / 1000), false, Statics.DMG_TRUE);
             delta = delta * (1 - this.slowPercent);
         }
         var oldVal = this.attackCooldown;

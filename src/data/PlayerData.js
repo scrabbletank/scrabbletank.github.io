@@ -5,6 +5,7 @@ import { WorldData } from "./WorldData";
 import { GearData } from "./GearData";
 import { MoonlightData } from "./MoonlightData";
 import { DynamicSettings } from "./DynamicSettings";
+import { ProgressionStore } from "./ProgressionStore";
 
 
 
@@ -42,13 +43,12 @@ export class PlayerData {
                     HP_PER_ENDURANCE: 5,
                     REGEN_PER_RECOVERY: 0.15,
                     ARMOR_PER_DEFENSE: 0.2,
-                    SCALING_ARMOR_PER_DEFENSE: 0.01,
-                    SCALING_DAMAGE_PER_STRENGTH: 0.01,
+                    SCALING_DIMINISHING_MULTIPLIER: 0.01,
                     CRITPOWER_PER_ACCURACY: 3,
                     CRITRESISTANCE_PER_ENDURANCE: 3,
                     AGI_EXPLORE_POWER: 0.44,
                     AGI_EXPLORE_MULTI: 0.03,
-                    SCALING_DIMINISHING_POWER: 0.65
+                    SCALING_DIMINISHING_POWER: 0.6
                 }
                 this.talents = {
                     str: { name: "Strength", level: 0, maxLevel: -1, requires: [], texture: { sprite: "icons", tile: 0 } },
@@ -91,13 +91,12 @@ export class PlayerData {
                     HP_PER_ENDURANCE: 5,
                     REGEN_PER_RECOVERY: 0.15,
                     ARMOR_PER_DEFENSE: 0.2,
-                    SCALING_ARMOR_PER_DEFENSE: 0.01,
-                    SCALING_DAMAGE_PER_STRENGTH: 0.01,
+                    SCALING_DIMINISHING_MULTIPLIER: 0.01,
                     CRITPOWER_PER_ACCURACY: 3,
                     CRITRESISTANCE_PER_ENDURANCE: 3,
                     AGI_EXPLORE_POWER: 0.44,
                     AGI_EXPLORE_MULTI: 0.03,
-                    SCALING_DIMINISHING_POWER: 0.65
+                    SCALING_DIMINISHING_POWER: 0.6
                 }
                 break;
             case Statics.CLASS_WIZARD:
@@ -115,7 +114,9 @@ export class PlayerData {
                     SPELL_POWER_PER_POWER: 1,
                     CRITRESISTANCE_PER_ENDURANCE: 3,
                     AGI_EXPLORE_POWER: 0.44,
-                    AGI_EXPLORE_MULTI: 0.03
+                    AGI_EXPLORE_MULTI: 0.03,
+                    SCALING_DIMINISHING_MULTIPLIER: 0.01,
+                    SCALING_DIMINISHING_POWER: 0.5
                 }
                 this.talents = {
                     cantrip: { name: "Cantrip", level: 0, maxLevel: -1, requires: [], texture: { sprite: "talenticons", tile: 0 } },
@@ -140,6 +141,8 @@ export class PlayerData {
                     wizend: { name: "Elective Studies: Endurance", level: 0, maxLevel: -1, requires: ["cantrip"], texture: { sprite: "icons", tile: 3 } },
                     alchemy: { name: "Alchemy", level: 0, maxLevel: -1, requires: ["cantrip"], texture: { sprite: "talenticons", tile: 8 } },
                     runemancy: { name: "Runemancy", level: 0, maxLevel: -1, requires: ["cantrip"], texture: { sprite: "talenticons", tile: 16 } },
+                    magicarmor: { name: "Magic Armor", level: 0, maxLevel: -1, requires: ["runemancy"], texture: { sprite: "talenticons", tile: 25 } },
+                    magicweapon: { name: "Magic Weapon", level: 0, maxLevel: -1, requires: ["runemancy"], texture: { sprite: "talenticons", tile: 24 } },
                     bounty: { name: "Bounty", level: 0, maxLevel: -1, requires: [], texture: { sprite: "icons", tile: 7 } },
                     explorer: { name: "Explorer", level: 0, maxLevel: -1, requires: [], texture: { sprite: "icons", tile: 15 } },
                     guardian: { name: "Guardian", level: 0, maxLevel: -1, requires: [], texture: { sprite: "icons", tile: 39 } },
@@ -180,38 +183,6 @@ export class PlayerData {
         this.weapon = undefined;
         this.armor = undefined;
         this.trinket = undefined;
-
-        // this.talents = {
-        //     str: { name: "Strength", level: 0, maxLevel: -1, requires: [], texture: { sprite: "icons", tile: 0 } },
-        //     dex: { name: "Dexterity", level: 0, maxLevel: -1, requires: [], texture: { sprite: "icons", tile: 1 } },
-        //     agi: { name: "Agility", level: 0, maxLevel: -1, requires: [], texture: { sprite: "icons", tile: 2 } },
-        //     end: { name: "Endurance", level: 0, maxLevel: -1, requires: [], texture: { sprite: "icons", tile: 3 } },
-        //     rec: { name: "Recovery", level: 0, maxLevel: -1, requires: [], texture: { sprite: "icons", tile: 4 } },
-        //     def: { name: "Defense", level: 0, maxLevel: -1, requires: [], texture: { sprite: "icons", tile: 5 } },
-        //     acc: { name: "Accuracy", level: 0, maxLevel: -1, requires: [], texture: { sprite: "icons", tile: 6 } },
-        //     cleave: { name: "Cleave", level: 0, maxLevel: 5, requires: ["str"], texture: { sprite: "icons", tile: 8 } },
-        //     hit: { name: "Hit", level: 0, maxLevel: -1, requires: ["dex"], texture: { sprite: "icons", tile: 9 } },
-        //     evasion: { name: "Evasion", level: 0, maxLevel: -1, requires: ["agi"], texture: { sprite: "icons", tile: 10 } },
-        //     resilient: { name: "Resilient", level: 0, maxLevel: -1, requires: ["end"], texture: { sprite: "icons", tile: 11 } },
-        //     quickrecovery: { name: "Quick Recovery", level: 0, maxLevel: -1, requires: ["rec"], texture: { sprite: "icons", tile: 12 } },
-        //     block: { name: "Block", level: 0, maxLevel: -1, requires: ["def"], texture: { sprite: "icons", tile: 13 } },
-        //     crit: { name: "Critical", level: 0, maxLevel: -1, requires: ["acc"], texture: { sprite: "icons", tile: 14 } },
-        //     stun: { name: "Stunning Hit", level: 0, maxLevel: 5, requires: ["cleave"], texture: { sprite: "icons", tile: 16 } },
-        //     followthrough: { name: "Follow Through", level: 0, maxLevel: 5, requires: ["hit"], texture: { sprite: "icons", tile: 17 } },
-        //     dodge: { name: "Dodge", level: 0, maxLevel: 5, requires: ["evasion"], texture: { sprite: "icons", tile: 18 } },
-        //     defydeath: { name: "Defy Death", level: 0, maxLevel: 5, requires: ["resilient"], texture: { sprite: "icons", tile: 19 } },
-        //     secondwind: { name: "Second Wind", level: 0, maxLevel: 5, requires: ["quickrecovery"], texture: { sprite: "icons", tile: 20 } },
-        //     parry: { name: "Parry", level: 0, maxLevel: 5, requires: ["block"], texture: { sprite: "icons", tile: 21 } },
-        //     doublecrit: { name: "Double Crit", level: 0, maxLevel: -1, requires: ["crit"], texture: { sprite: "icons", tile: 22 } },
-        //     bounty: { name: "Bounty", level: 0, maxLevel: -1, requires: [], texture: { sprite: "icons", tile: 7 } },
-        //     explorer: { name: "Explorer", level: 0, maxLevel: -1, requires: [], texture: { sprite: "icons", tile: 15 } },
-        //     guardian: { name: "Guardian", level: 0, maxLevel: -1, requires: [], texture: { sprite: "icons", tile: 39 } },
-        //     governance: { name: "Governance", level: 0, maxLevel: -1, requires: [], texture: { sprite: "icons", tile: 38 } },
-        //     lootgoblin: { name: "Loot Goblin", level: 0, maxLevel: 10, requires: ["bounty"], texture: { sprite: "icons", tile: 51 } },
-        //     bundle: { name: "Bundle", level: 0, maxLevel: -1, requires: ["explorer"], texture: { sprite: "icons", tile: 52 } },
-        //     charisma: { name: "Charisma", level: 0, maxLevel: -1, requires: ["governance"], texture: { sprite: "icons", tile: 53 } },
-        //     townguard: { name: "Town Guard", level: 0, maxLevel: -1, requires: ["guardian"], texture: { sprite: "icons", tile: 50 } }
-        // }
 
         this.runeBonuses = {
             strPercent: 0,
@@ -276,12 +247,8 @@ export class PlayerData {
         var newBlock;
         switch (selectedClass) {
             case Statics.CLASS_ADVENTURER:
-                newBlock = this.statBlock;
-            case Statics.CLASS_WIZARD:
-                newBlock = new WizardBlock(this);
+                newBlock = new AdventurerBlock(this);
                 newBlock.convert(this.statBlock);
-                console.log(newBlock.stats);
-                console.log(newBlock.statBonuses);
                 if (this.weapon !== undefined) {
                     newBlock.equip(this.weapon);
                 }
@@ -291,6 +258,20 @@ export class PlayerData {
                 if (this.trinket !== undefined) {
                     newBlock.equip(this.trinket);
                 }
+                break;
+            case Statics.CLASS_WIZARD:
+                newBlock = new WizardBlock(this);
+                newBlock.convert(this.statBlock);
+                if (this.weapon !== undefined) {
+                    newBlock.equip(this.weapon);
+                }
+                if (this.armor !== undefined) {
+                    newBlock.equip(this.armor);
+                }
+                if (this.trinket !== undefined) {
+                    newBlock.equip(this.trinket);
+                }
+                break;
         }
         this.statBlock = newBlock;
         this._onClassSelected();
@@ -303,8 +284,10 @@ export class PlayerData {
     }
 
     rebirth() {
-        this.statBlock.rebirth();
         this._init();
+        var block = new AdventurerBlock(this);
+        block.copyHandlers(this.statBlock);
+        this.statBlock = block;
     }
 
     increaseStat(stat, val) {
@@ -346,7 +329,8 @@ export class PlayerData {
                     (Math.floor(this.classStatics.STRENGTH_DMG_MIN * ((1 + this.getTalentLevel("str") * 0.07) * 100)) / 100) +
                     ", max Damage by " +
                     (Math.floor(this.classStatics.STRENGTH_DMG_MAX * ((1 + this.getTalentLevel("str") * 0.07) * 100)) / 100) +
-                    ", and increases damage from gear by ~1% (diminishing returns).";
+                    ". Your Strength increases damage from gear by " +
+                    Math.floor((this.statBlock._getScale(this.statBlock.Strength()) - 1) * 100) + "%.";
             case Statics.CLASS_BESERKER:
                 return "";
             case Statics.CLASS_WIZARD:
@@ -354,56 +338,73 @@ export class PlayerData {
                     (Math.floor(this.classStatics.STRENGTH_DMG_MIN * ((1 + this.getTalentLevel("wizstr") * 0.05) * 100)) / 100) +
                     ", max Damage by " +
                     (Math.floor(this.classStatics.STRENGTH_DMG_MAX * ((1 + this.getTalentLevel("wizstr") * 0.05) * 100)) / 100) +
-                    ".";
+                    ". Your Strength increases damage from gear by " +
+                    Math.floor((this.statBlock._getScale(this.statBlock.Strength()) - 1) * 100) + "%.";
         }
     }
     dexTooltip() {
         switch (this.playerClass) {
             case Statics.CLASS_ADVENTURER:
                 return "Dexterity determines your ability to hit enemies. Each point increases your Hit by " +
-                    (this.classStatics.HIT_PER_DEXTERITY + this.getTalentLevel('dex')) + ".";
+                    (this.classStatics.HIT_PER_DEXTERITY + this.getTalentLevel('dex')) +
+                    ". Your Dexterity increases Hit from gear by " +
+                    Math.floor((this.statBlock._getScale(this.statBlock.Dexterity()) - 1) * 100) + "%.";
             case Statics.CLASS_BESERKER:
                 return "";
             case Statics.CLASS_WIZARD:
                 return "Dexterity determines your ability to hit enemies. Each point increases your Hit by " +
-                    (this.classStatics.HIT_PER_DEXTERITY + this.getTalentLevel('wizdex')) + ".";
+                    (this.classStatics.HIT_PER_DEXTERITY + this.getTalentLevel('wizdex')) +
+                    ". Your Dexterity increases Hit from gear by " +
+                    Math.floor((this.statBlock._getScale(this.statBlock.Dexterity()) - 1) * 100) + "%.";
         }
     }
     agiTooltip() {
         switch (this.playerClass) {
             case Statics.CLASS_ADVENTURER:
                 return "Agility determines how hard you are to hit. Each point increases your Evasion by " +
-                    (this.classStatics.EVA_PER_AGILITY + this.getTalentLevel('agi')) + " and gives a small boost to explore speed.";
+                    (this.classStatics.EVA_PER_AGILITY + this.getTalentLevel('agi')) + " and gives a small boost to explore speed. " +
+                    "Your Agility increases Evasion from gear by " +
+                    Math.floor((this.statBlock._getScale(this.statBlock.Agility()) - 1) * 100) + "%.";
             case Statics.CLASS_BESERKER:
                 return "";
             case Statics.CLASS_WIZARD:
                 return "Agility determines how hard you are to hit. Each point increases your Evasion by " +
                     (Math.floor((this.classStatics.EVA_PER_AGILITY + this.getTalentLevel('wizagi') * 0.7) * 10) / 10) +
-                    " and gives a small boost to explore speed.";
+                    " and gives a small boost to explore speed. " +
+                    "Your Agility increases Evasion from gear by " +
+                    Math.floor((this.statBlock._getScale(this.statBlock.Agility()) - 1) * 100) + "%.";
         }
     }
     endTooltip() {
         switch (this.playerClass) {
             case Statics.CLASS_ADVENTURER:
                 return "Endurance determines your health and resistance against criticals. Each point increases your max Health by " +
-                    (this.classStatics.HP_PER_ENDURANCE + this.getTalentLevel('end')) + " and Crit Resistance by 3.";
+                    (this.classStatics.HP_PER_ENDURANCE + this.getTalentLevel('end')) + " and Crit Resistance by 3." +
+                    "Your Endurance increases Health and Crit Resistance from gear by " +
+                    Math.floor((this.statBlock._getScale(this.statBlock.Endurance()) - 1) * 100) + "%.";
             case Statics.CLASS_BESERKER:
                 return "";
             case Statics.CLASS_WIZARD:
                 return "Endurance determines your health and resistance against criticals. Each point increases your max Health by " +
-                    (this.classStatics.HP_PER_ENDURANCE + this.getTalentLevel('wizend') * 0.5) + " and Crit Resistance by 3.";
+                    (this.classStatics.HP_PER_ENDURANCE + this.getTalentLevel('wizend') * 0.5) + " and Crit Resistance by 3." +
+                    "Your Endurance increases Health and Crit Resistance from gear by " +
+                    Math.floor((this.statBlock._getScale(this.statBlock.Endurance()) - 1) * 100) + "%.";
         }
     }
     recTooltip() {
         switch (this.playerClass) {
             case Statics.CLASS_ADVENTURER:
                 return "Recovery determines how easily you heal your wounds. Each point increases your Health Regen by " +
-                    (Math.floor(this.classStatics.REGEN_PER_RECOVERY * ((1 + this.getTalentLevel("rec") * 0.08) * 100)) / 100) + "/s.";
+                    (Math.floor(this.classStatics.REGEN_PER_RECOVERY * ((1 + this.getTalentLevel("rec") * 0.08) * 100)) / 100) + "/s." +
+                    "Your Recovery increases Health Regen from gear by " +
+                    Math.floor((this.statBlock._getScale(this.statBlock.Recovery()) - 1) * 100) + "%.";
             case Statics.CLASS_BESERKER:
                 return "";
             case Statics.CLASS_WIZARD:
                 return "Recovery determines how easily you heal your wounds. Each point increases your Health Regen by " +
-                    (Math.floor(this.classStatics.REGEN_PER_RECOVERY * 100) / 100) + "/s.";
+                    (Math.floor(this.classStatics.REGEN_PER_RECOVERY * 100) / 100) + "/s." +
+                    "Your Recovery increases Health Regen from gear by " +
+                    Math.floor((this.statBlock._getScale(this.statBlock.Recovery()) - 1) * 100) + "%.";
         }
     }
     defTooltip() {
@@ -411,20 +412,25 @@ export class PlayerData {
             case Statics.CLASS_ADVENTURER:
                 return "Defense determines how durable your body is. Each point increases your armor by " +
                     (Math.floor(this.classStatics.ARMOR_PER_DEFENSE * ((1 + this.getTalentLevel("def") * 0.13) * 100)) / 100) +
-                    " and increases armor from gear by ~1% (diminishing returns).";
+                    ". Your Defense increases armor from gear by " +
+                    Math.floor((this.statBlock._getScale(this.statBlock.Defense()) - 1) * 100) + "%.";
             case Statics.CLASS_BESERKER:
                 return "";
             case Statics.CLASS_WIZARD:
                 return "Ward determines your magical protections. Each point increases your armor by " +
                     (Math.floor(this.classStatics.ARMOR_PER_WARD * 100) / 100) +
-                    " and increases your start of combat shield by " + this.classStatics.SHIELD_PER_WARD + ".";
+                    " and increases your start of combat shield by " + this.classStatics.SHIELD_PER_WARD +
+                    ". Your Ward increases armor from gear by " +
+                    Math.floor((this.statBlock._getScale(this.statBlock.Defense()) - 1) * 100) + "%.";
         }
     }
     accTooltip() {
         switch (this.playerClass) {
             case Statics.CLASS_ADVENTURER:
                 return "Accuracy determines your ability to strike weak points. Each point increases your Crit Power by " +
-                    (this.classStatics.CRITPOWER_PER_ACCURACY + this.getTalentLevel('acc') * 0.5) + ".";
+                    (this.classStatics.CRITPOWER_PER_ACCURACY + this.getTalentLevel('acc') * 0.5) +
+                    ". Your Accuracy increases Crit Power from gear by " +
+                    Math.floor((this.statBlock._getScale(this.statBlock.Accuracy()) - 1) * 100) + "%.";
             case Statics.CLASS_BESERKER:
                 return "";
             case Statics.CLASS_WIZARD:
@@ -432,7 +438,29 @@ export class PlayerData {
                     (1 + this.getTalentLevel('second') * 0.01) * (1 + this.getTalentLevel('third') * 0.01) * (1 + this.getTalentLevel('fourth') * 0.01) *
                     (1 + this.getTalentLevel('fifth') * 0.01) * (1 + this.getTalentLevel('runemancy') * this.getTotalSocketedRunes() * 0.01) *
                     (1 + this.statBlock.CritChance());
-                return "Power determines your magical might. Each point increases your Spell Power by " + (Math.floor(spellpower * 100) / 100) + ".";
+                return "Power determines your magical might. Each point increases your Spell Power by " + (Math.floor(spellpower * 100) / 100) +
+                    ". Your Power increases Spell Power from gear by " +
+                    Math.floor((this.statBlock._getScale(this.statBlock.Accuracy()) - 1) * 100) + "%.";
+        }
+    }
+    critTooltip() {
+        switch (this.playerClass) {
+            case Statics.CLASS_ADVENTURER:
+                return "Crit Chance. The chance any hit is a critical hit, dealing extra damage.";
+            case Statics.CLASS_BESERKER:
+                return "";
+            case Statics.CLASS_WIZARD:
+                return "Power Multiplier. Your spell power is increased by this value.";
+        }
+    }
+    critPowerTooltip() {
+        switch (this.playerClass) {
+            case Statics.CLASS_ADVENTURER:
+                return "Crit Power. Increases your crit damage, but is reduced by the targets Crit Resistance.";
+            case Statics.CLASS_BESERKER:
+                return "";
+            case Statics.CLASS_WIZARD:
+                return "Spell Power. Governs the damage dealt by the majority of your spells.";
         }
     }
 
@@ -575,12 +603,23 @@ export class PlayerData {
         }
     }
     buyTalent(buyAmount) {
-        var challengeMod = MoonlightData.getInstance().challenges.talent.completions > 0 ? 0.02 : 0;
+        var challengeMod = MoonlightData.getInstance().challenges.talent.completions * 0.008;
         for (var i = 0; i < buyAmount; i++) {
             this.talentPoints += 1;
             this.shade -= this.nextTalentCost;
             this.nextTalentCost = Statics.TALENT_COST_BASE * Math.pow(Statics.TALENT_COST_POWER - challengeMod, this.talentLevel);
             this.talentLevel += 1;
+        }
+        if (this.talentLevel >= 50 && ProgressionStore.getInstance().persistentUnlocks.wizardClass === false) {
+            ProgressionStore.getInstance().persistentUnlocks.wizardClass = true;
+            ProgressionStore.getInstance().registerFeatureUnlocked(Statics.UNLOCK_GENERIC,
+                "Your long training session of several minutes is over. Infusing the last bits of shade directly into your veins " +
+                "you are approached by a mysterious man in robes and a pointy hat! He speaks to you.\n\n" +
+                "\"My, you have become quite talented! I think it time you look for different paths. Broaden your horizons, " +
+                "only then will you gain mastery of the world around you.\"\n\n" +
+                "He then vainishes into thin air, leaving only his robe and hat. Your not sure what the crazy old man was talking " +
+                "about, but you aren't about to let these sweet digs go to waste. You put on your robe and wizard hat. Oh yeah, " +
+                "it's all coming together. Stylish, and you can take them through the portal! You've unlocked the Wizard Class!");
         }
         this._onTalentChanged();
     }
@@ -616,7 +655,7 @@ export class PlayerData {
         this._onResourcesChanged();
     }
     addShade(amount) {
-        this.shade += amount * 100;
+        this.shade += amount;
     }
 
     addRune(rune) {
@@ -636,6 +675,17 @@ export class PlayerData {
             case 1: // BY LEVEL
                 this.runes.sort((a, b) => { return b.level - a.level; });
                 break;
+        }
+    }
+
+    isEquipedItem(gear) {
+        switch (gear.slotType) {
+            case Statics.GEAR_WEAPON:
+                return this.weapon !== undefined && gear.name === this.weapon.name;
+            case Statics.GEAR_ARMOR:
+                return this.armor !== undefined && gear.name === this.armor.name;
+            case Statics.GEAR_TRINKET:
+                return this.trinket !== undefined && gear.name === this.trinket.name;
         }
     }
 
@@ -740,17 +790,18 @@ export class PlayerData {
         this.resourceTierReached = saveObj.rtr;
         this.craftingCosts = saveObj.crf;
         this.playerClass = saveObj.pc === undefined ? Statics.CLASS_ADVENTURER : saveObj.pc;
-        this.classChosen = saveObj.cc === undefined ? true : saveObj.cc;
         this.gold = saveObj.gold;
         this.motes = saveObj.mote;
         this.runes = saveObj.runes === undefined ? [] : saveObj.runes;
 
+        this.selectClass(this.playerClass);
         var keys = Object.keys(saveObj.talents);
         for (var i = 0; i < keys.length; i++) {
             if (this.talents[keys[i]] !== undefined) {
                 this.talents[keys[i]].level = saveObj.talents[keys[i]].level;
             }
         }
+        this.classChosen = saveObj.cc === undefined ? true : saveObj.cc;
 
         var gearData = GearData.getInstance();
         if (saveObj.w !== "") {

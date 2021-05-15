@@ -271,6 +271,9 @@ export class GameScene extends SceneUIBase {
                 "you're also naked so you take what you can get.\n\n" +
                 "After putting these on you should go exploring.");
         }
+        // our class is set during load, however by that point we have no UI and haven't hooked up events, so
+        // we make sure we handle class specific UI here.
+        this._handleClassSelected();
         this._layoutStats();
         this._setBuyAmount(1, 0);
     }
@@ -310,6 +313,8 @@ export class GameScene extends SceneUIBase {
         this.statIcons[4].setTooltip(this.player.recTooltip());
         this.statIcons[5].setTooltip(this.player.defTooltip());
         this.statIcons[6].setTooltip(this.player.accTooltip());
+        this.detailsIcons[6].setTooltip(this.player.critTooltip());
+        this.detailsIcons[7].setTooltip(this.player.critPowerTooltip());
     }
 
     _handleClassSelected() {

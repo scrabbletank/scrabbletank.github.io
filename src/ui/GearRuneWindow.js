@@ -92,10 +92,14 @@ export class GearRuneWindow {
 
     _slotRune(idx) {
         if (this.selectedRune !== -1) {
-            PlayerData.getInstance().unequip(this.gear.slotType);
-            this.gear.addRune(PlayerData.getInstance().runes[this.selectedRune], idx);
+            if (PlayerData.getInstance().isEquipedItem(this.gear)) {
+                PlayerData.getInstance().unequip(this.gear.slotType);
+                this.gear.addRune(PlayerData.getInstance().runes[this.selectedRune], idx);
+                PlayerData.getInstance().equip(this.gear);
+            } else {
+                this.gear.addRune(PlayerData.getInstance().runes[this.selectedRune], idx);
+            }
             PlayerData.getInstance().removeRune(this.selectedRune);
-            PlayerData.getInstance().equip(this.gear);
             this._setupViews();
             this.selectedRune = -1;
         }

@@ -27,6 +27,7 @@ export class CombatManager {
         this.invasionEndCallback = undefined;
         this.animationChangedCallback = undefined;
         this.fromAutoExplore = false;
+        this.totalKills = 0;
     }
 
     registerEvent(event, callback) {
@@ -156,6 +157,12 @@ export class CombatManager {
         }
         var player = PlayerData.getInstance();
 
+        //handle wizard gold gain here
+        if (Math.floor((this.totalKills + this.monsters.length) / 10) > Math.floor(this.totalKills / 10)) {
+            rewards.gold += player.getTalentLevel("alchemy") * 5 * this.activeTile.parent.townData.economyMulti;
+        }
+        this.totalKills += this.monsters.length;
+
         for (var i = 0; i < this.monsters.length; i++) {
             rewards.gold += 1 + (Math.max(1, this.monsters[i].level) / 14) + MoonlightData.getInstance().moonperks.gold.level * 0.25;
             rewards.shade += this.monsters[i].xpReward + player.runeBonuses.shadeFlat;
@@ -257,9 +264,7 @@ export class CombatManager {
                 var crit = player.statBlock.CritChance() > Math.random();
                 if (player.statBlock.canCastFireball !== undefined &&
                     player.statBlock.canCastFireball() === true) {
-                    for (var i = 0; i < this.monsters.length; i++) {
-                        var dmg = player.statBlock._castFireball(this.monsters[i]);
-                    }
+                    player.statBlock._castFireball(this.monsters);
                 } else {
                     player.statBlock.attack(this.monsters[this.target], crit);
                 }

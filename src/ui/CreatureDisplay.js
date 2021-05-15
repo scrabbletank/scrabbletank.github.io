@@ -47,8 +47,15 @@ export class CreatureDisplay {
         this.evasionLabel.setText("Evasion: " + Common.numberString(Math.floor(creature.Evasion())));
         this.backingRect.strokeColor = Phaser.Display.Color.GetColor(200, 0, 0);
 
-        this.healthBar.setFillPercent(creature.currentHealth / creature.MaxHealth(),
-            Common.numberString(Math.ceil(creature.currentHealth)) + "/" + Common.numberString(creature.MaxHealth()));
+        var fillTxt = "";
+        if (creature.shieldValue > 0) {
+            fillTxt = Common.numberString(Math.ceil(creature.currentHealth)) + "+(" + Common.numberString(Math.ceil(creature.shieldValue)) + ")/" +
+                Common.numberString(creature.MaxHealth());
+            this.setShieldBar(creature.shieldValue / creature.MaxHealth());
+        } else {
+            fillTxt = Common.numberString(Math.ceil(creature.currentHealth)) + "/" + Common.numberString(creature.MaxHealth())
+        }
+        this.healthBar.setFillPercent(creature.currentHealth / creature.MaxHealth(), fillTxt);
         this.attackBar.setFillPercent(creature.attackCooldown / creature.attackSpeed,
             Math.floor(creature.attackCooldown / creature.attackSpeed * 100) + "%");
         this.image.setTexture(creature.icon.sprite, creature.icon.tile);

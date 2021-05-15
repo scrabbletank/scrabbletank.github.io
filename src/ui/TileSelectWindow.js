@@ -64,6 +64,9 @@ export class TileSelectWindow {
                 var bld = [];
                 if (yieldSum !== 0 && tile.roadBuildable === true) {
                     bld.push("road");
+                    if (region.townData.getMarketLevel() > 0) {
+                        bld.push("market");
+                    }
                 }
                 if (DynamicSettings.getInstance().buildingsAllowed === true) {
                     if (tile.yields[0] > 0) {
@@ -91,9 +94,6 @@ export class TileSelectWindow {
                 if (yieldSum > 0) {
                     if (tile.houseBuildable) {
                         bld.push("house");
-                        if (region.townData.getMarketLevel() > 0) {
-                            bld.push("market");
-                        }
                         if (region.townData.alchemyEnabled === true) {
                             bld.push("alchemy");
                         }

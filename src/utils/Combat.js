@@ -15,12 +15,15 @@ export class Combat {
             case "clawscrit":
             case "barrier":
             case "mace":
+            case "skull":
                 animInfo.push({ frameId: 0, duration: 80 });
                 animInfo.push({ frameId: 1, duration: 80 });
                 animInfo.push({ frameId: 2, duration: 80 });
                 animInfo.push({ frameId: 3, duration: 80 });
                 break;
             case "magicmissile":
+            case "fireball":
+            case "haste":
                 animInfo.push({ frameId: 0, duration: 64 });
                 animInfo.push({ frameId: 1, duration: 64 });
                 animInfo.push({ frameId: 2, duration: 64 });

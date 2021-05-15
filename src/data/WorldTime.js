@@ -7,8 +7,9 @@ export class WorldTime {
         this.frameDelta = 0;
         this.delta = 0;
         this.timescale = 1;
-        this.onDayEndHandlers = [],
-            this.onWeekEndHandlers = []
+        this.onDayEndHandlers = [];
+        this.onWeekEndHandlers = [];
+        this.pauseTimestamp = -1;
     }
 
     getYears() { return Math.floor(this.time / Statics.TIME_PER_YEAR); }
@@ -42,6 +43,17 @@ export class WorldTime {
     }
 
     setTimeScale(scale) {
+        if (scale === 0 && this.timescale !== 0) {
+            this.timescale = scale;
+            this.pauseTimestamp = Date.now();
+            return;
+        }
+
+        if (this.pauseTimestamp !== -1) {
+            this.addOfflineTime(Date.now() - this.pauseTimestamp);
+            this.pauseTimestamp = -1;
+        }
+
         if (this.offlineTime <= 0) {
             return;
         }

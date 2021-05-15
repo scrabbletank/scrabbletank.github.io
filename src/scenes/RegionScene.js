@@ -535,12 +535,15 @@ export class RegionScene extends SceneUIBase {
         this.invasionLabel.setTint(Phaser.Display.Color.GetColor(255, 255, 255));
 
         this.offlineLabel = this.add.bitmapText(this.relativeX(660), this.relativeY(140), "courier20", "Offline Time: " + WorldData.instance.time.getOfflineTimeString());
+        this.speed0xButton = new TextButton(this, this.relativeX(760), this.relativeY(160), 30, 20, "0x")
+            .onClickHandler(() => { this._setTimeScale(0); });
         this.speed1xButton = new TextButton(this, this.relativeX(795), this.relativeY(160), 30, 20, "1x")
-            .onClickHandler(() => { WorldData.instance.time.setTimeScale(1); });
+            .onClickHandler(() => { this._setTimeScale(1); });
+        this.speed1xButton.setTextColor(Phaser.Display.Color.GetColor(255, 255, 0));
         this.speed2xButton = new TextButton(this, this.relativeX(830), this.relativeY(160), 30, 20, "2x")
-            .onClickHandler(() => { WorldData.instance.time.setTimeScale(2); });
+            .onClickHandler(() => { this._setTimeScale(2); });
         this.speed5xButton = new TextButton(this, this.relativeX(865), this.relativeY(160), 30, 20, "5x")
-            .onClickHandler(() => { WorldData.instance.time.setTimeScale(5); });
+            .onClickHandler(() => { this._setTimeScale(5); });
 
         this.autoExploreLabel = this.add.bitmapText(this.relativeX(660), this.relativeY(190), "courier20", "Auto Explore:");
         this.autoExploreButton = new TextButton(this, this.relativeX(795), this.relativeY(190), 40, 20, "OFF")
@@ -599,6 +602,28 @@ export class RegionScene extends SceneUIBase {
         this.crystalKey = this.input.keyboard.addKey(Phaser.Input.Keyboard.KeyCodes.SIX);
         this._updateRegionStats();
         this._onRegionChanged();
+    }
+
+    _setTimeScale(value) {
+        WorldData.instance.time.setTimeScale(value);
+        this.speed0xButton.setTextColor(Phaser.Display.Color.GetColor(255, 255, 255));
+        this.speed1xButton.setTextColor(Phaser.Display.Color.GetColor(255, 255, 255));
+        this.speed2xButton.setTextColor(Phaser.Display.Color.GetColor(255, 255, 255));
+        this.speed5xButton.setTextColor(Phaser.Display.Color.GetColor(255, 255, 255));
+        switch (value) {
+            case 0:
+                this.speed0xButton.setTextColor(Phaser.Display.Color.GetColor(255, 255, 0));
+                break;
+            case 1:
+                this.speed1xButton.setTextColor(Phaser.Display.Color.GetColor(255, 255, 0));
+                break;
+            case 2:
+                this.speed2xButton.setTextColor(Phaser.Display.Color.GetColor(255, 255, 0));
+                break;
+            case 5:
+                this.speed5xButton.setTextColor(Phaser.Display.Color.GetColor(255, 255, 0));
+                break;
+        }
     }
 
     update(__time, delta) {

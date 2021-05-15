@@ -785,7 +785,7 @@ export class Region {
             points.push({ x: this.markets[i][1], y: this.markets[i][0] });
         }
         for (var i = 1; i < this.markets.length; i++) {
-            if (this.map[this.markets[i][0]][this.markets[i][1]].houseBuildable === true) {
+            if (this.map[this.markets[i][0]][this.markets[i][1]].roadBuildable === true) {
                 var max = 5 + MoonlightData.getInstance().moonperks.nightmarket.level;
                 var tier = this.map[this.markets[i][0]][this.markets[i][1]].building.tier;
                 var closest = Common.nearestPointInList(this.markets[i][1], this.markets[i][0], points, true);

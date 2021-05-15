@@ -6,7 +6,7 @@ var RuneWords = {
         dropRate: 30,
         getBonus: (level) => {
             return {
-                weaponPercent: 0.03 * level
+                weaponPercent: 0.04 * level
             };
         },
         Eld: {
@@ -15,7 +15,7 @@ var RuneWords = {
                     return {
                         strTalents: level,
                         strPercent: 0.05 * level,
-                        weaponScaling: 0.0025 * level
+                        weaponPercent: 0.05 * level
                     };
                 }
             }
@@ -307,7 +307,7 @@ var RuneWords = {
                     return {
                         defTalents: level,
                         defPercent: 0.05 * level,
-                        armorScaling: 0.0025 * level
+                        armorPercent: 0.05 * level
                     };
                 }
             }
