@@ -25,6 +25,8 @@ import { DynamicSettings } from "../data/DynamicSettings";
 import LZString from "lz-string";
 import { OptionsDialog } from "../ui/OptionsDialog";
 import { GuideWindow } from "../ui/GuideWindow";
+import { WorldTime } from "../data/WorldTime";
+import { FadingNumberLabel } from "../ui/FadingNumberLabel";
 
 export class GameScene extends SceneUIBase {
     constructor(position, name) {
@@ -48,6 +50,7 @@ export class GameScene extends SceneUIBase {
         this.talentCost = 0;
         this.statCost = 0;
         this.lastFrame = 0;
+        this.showTimeThisRun = false;
 
         //try loading save data if it exists
         this.loadGame();
@@ -160,6 +163,14 @@ export class GameScene extends SceneUIBase {
             "Gold. Your current gold cap is equal to (Flat bonuses + population) * Economy Multiplier."));
         this.resourceIcons.push(new TooltipImage(this, 20, 170, 16, 16, { sprite: "icons", tile: 39 },
             "Motes of Darkness. Fuse these onto weapons to improve their power."));
+        this.resourceIncLabels = [];
+        this.resourceIncLabels.push(new FadingNumberLabel(this, 100, 170, 1200, Phaser.Display.Color.GetColor(80, 200, 80), "courier16", 16));
+        this.resourceIncLabels.push(new FadingNumberLabel(this, 100, 170, 1200, Phaser.Display.Color.GetColor(80, 200, 80), "courier16", 16));
+        this.resourceIncLabels.push(new FadingNumberLabel(this, 100, 170, 1200, Phaser.Display.Color.GetColor(80, 200, 80), "courier16", 16));
+        this.resourceIncLabels.push(new FadingNumberLabel(this, 100, 170, 1200, Phaser.Display.Color.GetColor(80, 200, 80), "courier16", 16));
+        this.resourceIncLabels.push(new FadingNumberLabel(this, 100, 170, 1200, Phaser.Display.Color.GetColor(80, 200, 80), "courier16", 16));
+        this.resourceIncLabels.push(new FadingNumberLabel(this, 100, 170, 1200, Phaser.Display.Color.GetColor(80, 200, 80), "courier16", 16));
+
 
         this.buyButtons = [];
         this.buyButtons.push(new TextButton(this, 10, 780, 30, 18, "x1")
@@ -205,6 +216,10 @@ export class GameScene extends SceneUIBase {
             .onClickHandler(() => { this.scene.bringToTop("TownScene"); this.scene.bringToTop("DarkWorld"); });
         this.worldButton = new TextButton(this, 962, 60, 122, 20, "World")
             .onClickHandler(() => { this.scene.bringToTop("WorldScene"); this.scene.bringToTop("DarkWorld"); });
+        this.worldTimeBacking = this.add.rectangle(500, 80, 300, 20, Phaser.Display.Color.GetColor(0, 0, 0))
+            .setOrigin(0, 0).setInteractive()
+            .on("pointerover", () => { this.showTimeThisRun = true; })
+            .on("pointerout", () => { this.showTimeThisRun = false; });
         this.worldTimeLabel = this.add.bitmapText(650, 80, "courier20", "").setOrigin(0.5, 0);
         this.moonlightButton = new ImageButton(this, 965, 12, 32, 32, { sprite: "moonicons", tile: 12 })
             .onClickHandler(() => { this.scene.bringToTop("MoonlightScene"); });
@@ -260,7 +275,10 @@ export class GameScene extends SceneUIBase {
         this.player.registerEvent("onStatChanged", () => {
             this._layoutStats();
         });
-        this.player.registerEvent("onResourcesChanged", () => { this._updateResources(); });
+        this.player.registerEvent("onResourcesChanged", (res, gold, tier) => {
+            this._updateResources();
+            this._updateFadingResourceLabels(res, gold, tier);
+        });
         this.player.registerEvent("onTalentChanged", () => { this.updateStatIcons(); });
         this.player.registerEvent("onClassSelected", () => { this._handleClassSelected(); });
 
@@ -452,6 +470,23 @@ export class GameScene extends SceneUIBase {
             Common.numberString(this.player.statBlock.CritResistance()) + ""));
     }
 
+    _updateFadingResourceLabels(res, gold, tier) {
+        if (this.progression.unlocks.resourceUI === false) {
+            return;
+        }
+        if (tier === this.resourceTierSelected) {
+            for (var i = 0; i < res.length; i++) {
+                if (res[i] > 0) {
+                    this.resourceIncLabels[i].setValue(Math.floor(res[i]));
+                }
+            }
+        }
+        // For now don't show gold, it doesn't fit well with even base gold values
+        // if (gold > 0 && this.progression.unlocks.townTab === true) {
+        //     this.resourceIncLabels[6].setValue(Math.floor(gold));
+        // }
+    }
+
     _updateResources() {
         this.resourceLabel.setPosition(10, this.resourceStart);
         this.resourceLabel.setVisible(this.progression.unlocks.resourceUI);
@@ -463,6 +498,9 @@ export class GameScene extends SceneUIBase {
         for (var i = 0; i < this.resourceIcons.length; i++) {
             this.resourceIcons[i].setPosition(20, this.resourceStart + 40 + (i * 20));
             this.resourceIcons[i].setVisible(this.progression.unlocks.resourceUI);
+        }
+        for (var i = 0; i < this.resourceIncLabels.length; i++) {
+            this.resourceIncLabels[i].setPosition(100, this.resourceStart + 40 + (i * 20));
         }
         for (var i = 0; i < this.resourceTierButtons.length; i++) {
             this.resourceTierButtons[i].setPosition(20 + (i * 20), this.resourceStart + 20);
@@ -676,18 +714,31 @@ export class GameScene extends SceneUIBase {
     }
 
     update(time, __delta) {
-        this.worldData.time.setFrameDelta(Math.min(500, time - this.lastFrame));
+        var lastFrameTime = time - this.lastFrame;
+        if (lastFrameTime > 15000) {
+            this.worldData.time.addOfflineTime(lastFrameTime);
+        }
+        this.worldData.time.setFrameDelta(Math.min(500, lastFrameTime));
         this.lastFrame = time;
         var fDelta = this.worldData.time.frameDelta;
         this.worldData.update(fDelta);
         this.player.statBlock.tickRegen(fDelta, this.combatScene.isInCombat());
-        this.worldTimeLabel.setText(this.worldData.time.getText());
+        if (this.showTimeThisRun === true) {
+            var runTime = WorldData.getInstance().time.time - WorldData.getInstance().timeAtRunStart;
+            this.worldTimeLabel.setText(new WorldTime(runTime).getTimespanText());
+        } else {
+            this.worldTimeLabel.setText(this.worldData.time.getText());
+        }
 
         if (this.progression.unlocks.gearTab !== true) {
             this.gearShowTimer -= fDelta;
             if (this.gearShowTimer <= 0) {
                 this.progression.registerFeatureUnlocked(Statics.UNLOCK_GEAR_TAB);
             }
+        }
+
+        for (var i = 0; i < this.resourceIncLabels.length; i++) {
+            this.resourceIncLabels[i].update(fDelta);
         }
 
         // regardless of time dialation we still only want to save every minute

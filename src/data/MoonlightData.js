@@ -221,6 +221,8 @@ export class MoonlightData {
                 return this.challenges.talent;
             case "Mega Monsters":
                 return this.challenges.megamonsters;
+            case "Outcast":
+                return this.challenges.outcast;
         }
     }
 

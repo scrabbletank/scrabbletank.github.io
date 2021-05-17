@@ -6,6 +6,7 @@ import { GearData } from "./GearData";
 import { MoonlightData } from "./MoonlightData";
 import { DynamicSettings } from "./DynamicSettings";
 import { ProgressionStore } from "./ProgressionStore";
+import { TooltipRegistry } from "./TooltipRegistry";
 
 
 
@@ -35,6 +36,7 @@ export class PlayerData {
     _setClassStatics() {
         switch (this.playerClass) {
             case Statics.CLASS_ADVENTURER:
+                TooltipRegistry.setDefaultNames();
                 this.classStatics = {
                     STRENGTH_DMG_MIN: 0.4,
                     STRENGTH_DMG_MAX: 1,
@@ -100,6 +102,7 @@ export class PlayerData {
                 }
                 break;
             case Statics.CLASS_WIZARD:
+                TooltipRegistry.setWizardNames();
                 this.classStatics = {
                     STRENGTH_DMG_MIN: 0.2,
                     STRENGTH_DMG_MAX: 0.5,
@@ -143,6 +146,7 @@ export class PlayerData {
                     runemancy: { name: "Runemancy", level: 0, maxLevel: -1, requires: ["cantrip"], texture: { sprite: "talenticons", tile: 16 } },
                     magicarmor: { name: "Magic Armor", level: 0, maxLevel: -1, requires: ["runemancy"], texture: { sprite: "talenticons", tile: 25 } },
                     magicweapon: { name: "Magic Weapon", level: 0, maxLevel: -1, requires: ["runemancy"], texture: { sprite: "talenticons", tile: 24 } },
+                    codex: { name: "Chromatic Codex", level: 0, maxLevel: -1, requires: ["fifth"], texture: { sprite: "talenticons", tile: 26 } },
                     bounty: { name: "Bounty", level: 0, maxLevel: -1, requires: [], texture: { sprite: "icons", tile: 7 } },
                     explorer: { name: "Explorer", level: 0, maxLevel: -1, requires: [], texture: { sprite: "icons", tile: 15 } },
                     guardian: { name: "Guardian", level: 0, maxLevel: -1, requires: [], texture: { sprite: "icons", tile: 39 } },
@@ -438,7 +442,7 @@ export class PlayerData {
                 var spellpower = this.classStatics.SPELL_POWER_PER_POWER * (1 + this.getTalentLevel('first') * 0.01) *
                     (1 + this.getTalentLevel('second') * 0.01) * (1 + this.getTalentLevel('third') * 0.01) * (1 + this.getTalentLevel('fourth') * 0.01) *
                     (1 + this.getTalentLevel('fifth') * 0.01) * (1 + this.getTalentLevel('runemancy') * this.getTotalSocketedRunes() * 0.01) *
-                    (1 + this.statBlock.CritChance());
+                    (1 + this.statBlock.CritChance()) * (1 + this.getTalentLevel('codex') * 0.06);
                 return "Power determines your magical might. Each point increases your Spell Power by " + (Math.floor(spellpower * 100) / 100) +
                     ". Your Power increases Spell Power from gear by " +
                     Math.floor((this.statBlock._getScale(this.statBlock.Accuracy()) - 1) * 100) + "%.";
@@ -461,7 +465,7 @@ export class PlayerData {
             case Statics.CLASS_BESERKER:
                 return "";
             case Statics.CLASS_WIZARD:
-                return "Spell Power. Governs the damage dealt by the majority of your spells.";
+                return "Spell Power. Increases the damage dealt by the majority of your spells.";
         }
     }
 
@@ -470,9 +474,9 @@ export class PlayerData {
             this.statChangedHandlers[i]();
         }
     }
-    _onResourcesChanged() {
+    _onResourcesChanged(res, gold, tier) {
         for (var i = 0; i < this.resourceChangedHandlers.length; i++) {
-            this.resourceChangedHandlers[i]();
+            this.resourceChangedHandlers[i](res, gold, tier);
         }
     }
     _onTalentChanged() {
@@ -638,22 +642,22 @@ export class PlayerData {
         for (var i = 0; i < list.length; i++) {
             this.resources[tier][i] += list[i];
         }
-        this._onResourcesChanged();
+        this._onResourcesChanged(list, 0, tier);
     }
     spendResource(list, tier) {
         for (var i = 0; i < list.length; i++) {
             this.resources[tier][i] = Math.max(0, this.resources[tier][i] - list[i]);
         }
-        this._onResourcesChanged();
+        this._onResourcesChanged([0, 0, 0, 0, 0, 0], 0, tier);
     }
     addGold(amount) {
         var worldData = new WorldData();
         this.gold = Math.min(worldData.getGoldCap(), this.gold + amount);
-        this._onResourcesChanged();
+        this._onResourcesChanged([0, 0, 0, 0, 0, 0], amount, 0);
     }
     addMote(amount) {
         this.motes += amount;
-        this._onResourcesChanged();
+        this._onResourcesChanged([0, 0, 0, 0, 0, 0], 0, 0);
     }
     addShade(amount) {
         this.shade += amount;

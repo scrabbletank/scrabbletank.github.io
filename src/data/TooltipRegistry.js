@@ -3,6 +3,19 @@ import { Statics } from "./Statics";
 import { WorldTime } from "./WorldTime";
 
 export class TooltipRegistry {
+
+    static setDefaultNames() {
+        TooltipRegistry.critPowerName = "Crit Power";
+        TooltipRegistry.defenseName = "Defense";
+        TooltipRegistry.accuracyName = "Accuracy";
+    }
+
+    static setWizardNames() {
+        TooltipRegistry.critPowerName = "Spell Power";
+        TooltipRegistry.defenseName = "Ward";
+        TooltipRegistry.accuracyName = "Power";
+    }
+
     static getTalentTooltip(talent, lvl) {
         switch (talent.name) {
             case "Strength":
@@ -101,16 +114,16 @@ export class TooltipRegistry {
                 return "Only one spell will cast per attack. Every 4th attack you slow a creature's attack speed by 40% for " +
                     (2 + lvl * 0.25) + " + (0.25) seconds.";
             case "Thorns":
-                return "In their feeble attempt to catch you, monsters take " + (lvl * 10) + "% + (10%) of your Agility in magic damage per second while slowed.";
+                return "In their feeble attempt to catch you, monsters take " + (lvl * 3) + "% + (3%) of your Evasion in magic damage per second while slowed.";
             case "Barrier":
-                return "Only one spell will cast per attack. Every 13th attack you add " + (25 * lvl) + "% + (25%) of your ward to your shield.";
+                return "Only one spell will cast per attack. Every 13th attack you add " + (40 * lvl) + "% + (40%) of your ward to your shield.";
             case "Shell":
                 return "Who needs endurance when you have magic? Increases your Crit Resistance by " + (15 * lvl) + "% + (15%) while your shield is up.";
             case "Fireball":
                 return "Only one spell will cast per attack. Every 5th attack you cast the only spell that matters, dealing " + (7 * lvl) +
                     "% + (7%) of your spellpower to all monster in magic damage. You didn't ask how big the room is, you said 'I cast Fireball'.";
             case "Ignite":
-                return "Watch the monsters burn. Fun! Your fireballs ignite monsters, dealing 15% of its damage per second for " + (1 + lvl * 0.5) +
+                return "Watch the monsters burn. Fun! Your fireballs ignite monsters, dealing 25% of its damage per second for " + (1 + lvl * 0.5) +
                     " + (0.5) seconds.";
             case "Haste":
                 return "Only one spell will cast per attack. Every 6th attack you gain haste for 3 attacks. While hasted your attack bar starts " + (7.5 * lvl) +
@@ -142,6 +155,9 @@ export class TooltipRegistry {
             case "Magic Weapon":
                 return "Magic Weapons, from a more civilized time. Add " + (lvl * 10) + "% + (10%) " +
                     "of your gears damage to your Spell Power.";
+            case "Chromatic Codex":
+                return "You've mastered the ancient scrolls and now you can read from the Chromatic Codex. It's pretty underwhelming, " +
+                    "but it increases your spellpower by " + (lvl * 6) + "% + (6%).";
         }
     }
 
@@ -174,25 +190,25 @@ export class TooltipRegistry {
         switch (moonlight.name) {
             case "Moon's Strength":
                 return "Increases your starting Strength by " + (moonlight.level) + " + (1) and increases Strength from all sources by " +
-                    (moonlight.level) + "% + (0.5%).";
+                    (moonlight.level * 0.5) + "% + (0.5%).";
             case "Moon's Dexterity":
                 return "Increases your starting Dexterity by " + (moonlight.level) + " + (1) and increases Dexterity from all sources by " +
-                    (moonlight.level) + "% + (0.5%).";
+                    (moonlight.level * 0.5) + "% + (0.5%).";
             case "Moon's Agility":
                 return "Increases your starting Agility by " + (moonlight.level) + " + (1) and increases Agility from all sources by " +
-                    (moonlight.level) + "% + (0.5%).";
+                    (moonlight.level * 0.5) + "% + (0.5%).";
             case "Moon's Endurance":
                 return "Increases your starting Endurance by " + (moonlight.level) + " + (1) and increases Endurance from all sources by " +
-                    (moonlight.level) + "% + (0.5%).";
+                    (moonlight.level * 0.5) + "% + (0.5%).";
             case "Moon's Recovery":
                 return "Increases your starting Recovery by " + (moonlight.level) + " + (1) and increases Recovery from all sources by " +
-                    (moonlight.level) + "% + (0.5%).";
+                    (moonlight.level * 0.5) + "% + (0.5%).";
             case "Moon's Defense":
                 return "Increases your starting Defense by " + (moonlight.level) + " + (1) and increases Defense from all sources by " +
-                    (moonlight.level) + "% + (0.5%).";
+                    (moonlight.level * 0.5) + "% + (0.5%).";
             case "Moon's Accuracy":
                 return "Increases your starting Accuracy by " + (moonlight.level) + " + (1) and increases Accuracy from all sources by " +
-                    (moonlight.level) + "% + (0.5%).";
+                    (moonlight.level * 0.5) + "% + (0.5%).";
             case "Hero's Vault":
                 return "Increases the base income per villager by " + (moonlight.level * 0.1) + " + (0.1) gold.";
             case "Moonwine":
@@ -382,6 +398,21 @@ export class TooltipRegistry {
                     "                     +5 Challenge Points\n\n" +
                     "Completions: " + challenge.completions + "/" + challenge.maxCompletions + "\n" +
                     "Fastest Time: " + new WorldTime(challenge.fastestTime).getTimespanText();
+            case "The Tower of Ultimate Wizard-y":
+                return "Oh no! Evil wizards are attacking the Towers of Ultimate Wizardy! Is that a mispelling? A reference? Who knows! " +
+                    "You must seek out the ancient spires and keep them safe while you research the ultimate spell. Each tower, once " +
+                    "revealed, contributes to your knowledge. Mastering the spell will summon a Mystic Gate, enter it to complete the" +
+                    "challenge.\n\n" +
+                    "Restrictions: Region spans " + (60 + (completions * 10)) + " levels.\n" +
+                    "              Invasions are more frequent and lead by an evil wizard that deals magic damage.\n" +
+                    "              Invasions can happen anywhere.\n" +
+                    "              Invasions gradually get stronger.\n" +
+                    "              Losing all 4 Spires fails the challenge and immediately causes a rebirth.\n\n" +
+                    "On Every Completion: Wizard starts with +2 Talent Points.\n" +
+                    "                     +5 Challenge Points\n\n" +
+                    "On Final Completion: Unlocks the Spire building.\n" +
+                    "Completions: " + challenge.completions + "/" + challenge.maxCompletions + "\n" +
+                    "Fastest Time: " + new WorldTime(challenge.fastestTime).getTimespanText();
         }
     }
 
@@ -468,15 +499,15 @@ export class TooltipRegistry {
             case "recTalents":
                 return sign + Math.floor(value) + " Recovery Talents";
             case "defPercent":
-                return sign + Math.round(value * 100) + "% Defense";
+                return sign + Math.round(value * 100) + "% " + TooltipRegistry.defenseName;
             case "defFlat":
-                return sign + Math.floor(value) + " Defense";
+                return sign + Math.floor(value) + " " + TooltipRegistry.defenseName;
             case "defTalents":
                 return sign + Math.floor(value) + " Defense Talents";
             case "accPercent":
-                return sign + Math.round(value * 100) + "% Accuracy";
+                return sign + Math.round(value * 100) + "% " + TooltipRegistry.accuracyName;
             case "accFlat":
-                return sign + Math.floor(value) + " Accuracy";
+                return sign + Math.floor(value) + " " + TooltipRegistry.accuracyName;
             case "accTalents":
                 return sign + Math.floor(value) + " Accuracy Talents";
             case "hitPercent":
@@ -488,7 +519,7 @@ export class TooltipRegistry {
             case "armorPercent":
                 return sign + Math.round(value * 100) + "% Gear Armor";
             case "critPercent":
-                return sign + Math.round(value * 100) + "% Crit Power";
+                return sign + Math.round(value * 100) + "% " + TooltipRegistry.critPowerName;
             case "healthPercent":
                 return sign + Math.round(value * 100) + "% Health";
             case "regenPercent":
@@ -557,15 +588,19 @@ export class TooltipRegistry {
             case "recovery":
                 return sign + Common.numberString(Math.floor(value)) + " Recovery";
             case "defense":
-                return sign + Common.numberString(Math.floor(value)) + " Defense";
+                return sign + Common.numberString(Math.floor(value)) + " " + TooltipRegistry.defenseName;
             case "accuracy":
-                return sign + Common.numberString(Math.floor(value)) + " Accuracy";
+                return sign + Common.numberString(Math.floor(value)) + " " + TooltipRegistry.accuracyName;
             case "hit":
                 return sign + Common.numberString(Math.floor(value)) + " Hit";
             case "evasion":
                 return sign + Common.numberString(Math.floor(value)) + " Evasion";
             case "critPower":
-                return sign + Common.numberString(Math.floor(value)) + " Crit Power";
+                // this is trash don't look plz
+                if (TooltipRegistry.critPowerName === "Spell Power") {
+                    return sign + Common.numberString(Math.floor(value / 3)) + " " + TooltipRegistry.critPowerName;
+                }
+                return sign + Common.numberString(Math.floor(value)) + " " + TooltipRegistry.critPowerName;
             case "critResistance":
                 return sign + Common.numberString(Math.floor(value)) + " Crit Resist";
             case "critChance":
@@ -594,3 +629,9 @@ export class TooltipRegistry {
         }
     }
 }
+
+// static fuckery
+
+TooltipRegistry.critPowerName = "Crit Power";
+TooltipRegistry.defenseName = "Defense";
+TooltipRegistry.accuracyName = "Accuracy";

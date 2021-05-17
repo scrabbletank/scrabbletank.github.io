@@ -107,7 +107,8 @@ export class WizardBlock extends AdventurerBlock {
             acc * this.player.classStatics.SPELL_POWER_PER_POWER * (1 + this.player.getTalentLevel('first') * 0.01) *
             (1 + this.player.getTalentLevel('second') * 0.01) * (1 + this.player.getTalentLevel('third') * 0.01) *
             (1 + this.player.getTalentLevel('fourth') * 0.01) * (1 + this.player.getTalentLevel('fifth') * 0.01) *
-            (1 + this.player.getTalentLevel('runemancy') * this.player.getTotalSocketedRunes() * 0.01);
+            (1 + this.player.getTalentLevel('runemancy') * this.player.getTotalSocketedRunes() * 0.01) *
+            (1 + this.player.getTalentLevel('codex') * 0.06);
         ret += this.statBonuses.damageMax * (1 + this.player.runeBonuses.weaponPercent) *
             this._getScale(this.Strength()) * this.player.getTalentLevel('magicweapon') * 0.1;
         ret += ret * this.player.runeBonuses.critPercent;
@@ -240,7 +241,7 @@ export class WizardBlock extends AdventurerBlock {
             var dmg = creatureList[i].takeDamage(rawDmg, false, Statics.DMG_MAGIC);
             if (this.player.getTalentLevel('ignite') > 0) {
                 creatureList[i].igniteTimer = 1000 + 500 * this.player.getTalentLevel('ignite');
-                creatureList[i].igniteDamage = dmg * 0.15;
+                creatureList[i].igniteDamage = dmg * 0.25;
                 if (creatureList[i].shieldValue > 0) {
                     creatureList[i].igniteDamage = creatureList[i].igniteDamage / 2;
                 }
@@ -253,7 +254,8 @@ export class WizardBlock extends AdventurerBlock {
     _castBarrier(creature) {
         this.secondCounter = 13;
         this.playAnimation("barrier");
-        this.shieldValue += this.Defense() * this.player.getTalentLevel('barrier') * 0.25;
+        this.shieldValue += this.Defense() * this.player.getTalentLevel('barrier') * 0.4;
+        this._onHealthChanged();
         return 0;
     }
     _castEntangle(creature) {
@@ -261,7 +263,7 @@ export class WizardBlock extends AdventurerBlock {
         creature.playAnimation("entangle");
         creature.slowTimer = 2000 + 250 * this.player.getTalentLevel('entangle');
         creature.slowPercent = 0.4;
-        creature.slowDamage = this.Agility() * this.player.getTalentLevel('thorns') * 0.10;
+        creature.slowDamage = this.Evasion() * this.player.getTalentLevel('thorns') * 0.03;
         if (creature.shieldValue > 0) {
             creature.slowDamage = creature.slowDamage / 2;
         }
@@ -274,9 +276,7 @@ export class WizardBlock extends AdventurerBlock {
     }
 
     canCastFireball() {
-        return (this.player.getTalentLevel("fifth") >= 5 && this.player.getTalentLevel('powerwordkill') > 0 &&
-            this.fifthCounter <= 0) !== true && (this.player.getTalentLevel("fourth") >= 4 && this.player.getTalentLevel('haste') > 0 &&
-                this.fourthCounter <= 0) !== true && this.thirdCounter <= 0;
+        return (this.player.getTalentLevel("third") >= 3 && this.player.getTalentLevel('fireball') > 0 && this.thirdCounter <= 0);
     }
 
     attack(creature, isCrit = false) {

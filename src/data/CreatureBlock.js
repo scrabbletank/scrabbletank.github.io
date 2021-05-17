@@ -238,13 +238,13 @@ export class CreatureBlock {
             return;
         }
         if (this.igniteTimer > 0) {
-            this.igniteTimer -= delta * multi;
-            this.takeDamage(this.igniteDamage * (delta * multi / 1000), false, Statics.DMG_TRUE);
+            this.igniteTimer -= delta;
+            this.takeDamage(this.igniteDamage * (delta / 1000), false, Statics.DMG_TRUE);
         }
         if (this.slowTimer > 0) {
-            this.slowTimer -= delta * multi;
+            this.slowTimer -= delta;
             console.log(Statics.DMG_TRUE);
-            this.takeDamage(this.slowDamage * (delta * multi / 1000), false, Statics.DMG_TRUE);
+            this.takeDamage(this.slowDamage * (delta / 1000), false, Statics.DMG_TRUE);
             delta = delta * (1 - this.slowPercent);
         }
         var oldVal = this.attackCooldown;

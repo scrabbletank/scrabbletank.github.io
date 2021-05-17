@@ -17,7 +17,8 @@ export class TownScene extends SceneUIBase {
     }
 
     refresh() {
-        this.changeRegion();
+        this._updateStatus();
+        this.updateResearchButton();
     }
 
     rebirth() {
