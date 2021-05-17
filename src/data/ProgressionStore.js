@@ -182,7 +182,7 @@ export class ProgressionStore {
             this.persistentUnlocks = {
                 challenges: false,
                 autoExplore: false,
-                wizardClass: true
+                wizardClass: false
             }
 
             this.totalCounts = {
