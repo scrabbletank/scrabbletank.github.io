@@ -18,31 +18,25 @@ export class CombatManager {
         this.dropTotals = 0;
 
         this.activeTile = undefined;
-        this.playerHitCallback = undefined;
         this.creatureHealthCallback = undefined;
         this.creatureAttackCallback = undefined;
-        this.creatureHitCallback = undefined;
         this.rewardCallback = undefined;
         this.playerDefeatCallback = undefined;
         this.exploreCallback = undefined;
         this.combatCallback = undefined;
         this.invasionEndCallback = undefined;
+        this.animationChangedCallback = undefined;
         this.fromAutoExplore = false;
+        this.totalKills = 0;
     }
 
     registerEvent(event, callback) {
         switch (event) {
-            case "onPlayerHit":
-                this.playerHitCallback = callback;
-                break;
             case "onCreatureHealthChanged":
                 this.creatureHealthCallback = callback;
                 break;
             case "onCreatureAttackChanged":
                 this.creatureAttackCallback = callback;
-                break;
-            case "onCreatureHit":
-                this.creatureHitCallback = callback;
                 break;
             case "onReward":
                 this.rewardCallback = callback;
@@ -58,6 +52,9 @@ export class CombatManager {
                 break;
             case "onInvasionEnd":
                 this.invasionEndCallback = callback;
+                break;
+            case "onAnimationChanged":
+                this.animationChangedCallback = callback;
                 break;
         }
         return this;
@@ -87,6 +84,7 @@ export class CombatManager {
     _creatureWorkaround(i) {
         this.monsters[i].registerEvent('onHealthChanged', (x) => { this._creatureHealthChanged(x, i); });
         this.monsters[i].registerEvent('onAttackCooldownChanged', (x) => { this._creatureAttackChanged(x, i); });
+        this.monsters[i].registerEvent('onAnimationChanged', (anim) => { this._animationChangedHandler(i, anim); });
     }
 
     _creatureHealthChanged(x, i) {
@@ -97,6 +95,11 @@ export class CombatManager {
     _creatureAttackChanged(x, i) {
         if (this.creatureAttackCallback !== undefined) {
             this.creatureAttackCallback(x, i);
+        }
+    }
+    _animationChangedHandler(i, anim) {
+        if (this.animationChangedCallback !== undefined) {
+            this.animationChangedCallback(i, anim);
         }
     }
 
@@ -117,8 +120,10 @@ export class CombatManager {
         this.monsters = this.activeTile.generateMonsters();
         for (var i = 0; i < this.monsters.length; i++) {
             // to save context on i when calling functions, because scope fuckery.
+            this.monsters[i].initCombat();
             this._creatureWorkaround(i);
         }
+        PlayerData.getInstance().statBlock.initCombat();
         this.target = this._getTarget();
         if (this.combatCallback !== undefined) {
             this.combatCallback(this.activeTile.isInvaded);
@@ -152,6 +157,12 @@ export class CombatManager {
         }
         var player = PlayerData.getInstance();
 
+        //handle wizard gold gain here
+        if (Math.floor((this.totalKills + this.monsters.length) / 10) > Math.floor(this.totalKills / 10)) {
+            rewards.gold += player.getTalentLevel("alchemy") * 5 * this.activeTile.parent.townData.economyMulti;
+        }
+        this.totalKills += this.monsters.length;
+
         for (var i = 0; i < this.monsters.length; i++) {
             rewards.gold += 1 + (Math.max(1, this.monsters[i].level) / 14) + MoonlightData.getInstance().moonperks.gold.level * 0.25;
             rewards.shade += this.monsters[i].xpReward + player.runeBonuses.shadeFlat;
@@ -171,7 +182,7 @@ export class CombatManager {
             rewards.friendship += this.activeTile.getFriendshipReward();
         }
         if (player.getTalentLevel('bundle') > 0) {
-            var totalBundle = this.monsters.length * player.getTalentLevel('bundle') * 0.03;
+            var totalBundle = this.monsters.length * player.getTalentLevel('bundle') * 0.02;
             var townProd = this.activeTile.parent._getResourcesPerDay();
             for (var i = 0; i < townProd.length; i++) {
                 rewards.resource[i] += townProd[i] * totalBundle;
@@ -234,17 +245,13 @@ export class CombatManager {
 
                 var poison = this.monsters[i].findTrait(Statics.TRAIT_POISONED);
                 if (poison !== undefined) {
-                    player.statBlock.takeDamage(this.monsters[i].DamageMax() * 0.05 * poison.level * (delta / 1000), false, true);
+                    player.statBlock.takeDamage(this.monsters[i].DamageMax() * 0.05 * poison.level * (delta / 1000), false, Statics.DMG_TRUE);
                 }
 
                 if (this.monsters[i].canAttack() === true) {
                     var crit = this.monsters[i].CritChance() > Math.random();
                     var dmg = this.monsters[i].attack(player.statBlock, crit);
                     this.globalAttackCooldown = Statics.GLOBAL_ATTACK_COOLDOWN;
-
-                    if (this.playerHitCallback !== undefined) {
-                        this.playerHitCallback(this.monsters[i], crit);
-                    }
                     break;
                 }
             }
@@ -255,7 +262,12 @@ export class CombatManager {
 
             if (player.statBlock.canAttack() === true) {
                 var crit = player.statBlock.CritChance() > Math.random();
-                player.statBlock.attack(this.monsters[this.target], crit);
+                if (player.statBlock.canCastFireball !== undefined &&
+                    player.statBlock.canCastFireball() === true) {
+                    player.statBlock._castFireball(this.monsters);
+                } else {
+                    player.statBlock.attack(this.monsters[this.target], crit);
+                }
                 if (this.monsters[this.target].currentHealth <= 0) {
                     player.statBlock.heal(player.statBlock.HealthRegen() * player.runeBonuses.regenOnKill);
                 }
@@ -274,13 +286,7 @@ export class CombatManager {
                         if (this.monsters[newTarget].currentHealth <= 0) {
                             player.statBlock.heal(player.statBlock.HealthRegen() * player.runeBonuses.regenOnKill);
                         }
-                        if (this.creatureHitCallback !== undefined) {
-                            this.creatureHitCallback(newTarget, crit);
-                        }
                     }
-                }
-                if (this.creatureHitCallback !== undefined) {
-                    this.creatureHitCallback(this.target, crit);
                 }
 
                 this.target = this._getTarget();

@@ -96,7 +96,7 @@ export class DynamicSettings {
                 this.talentsEnabled = false;
                 break;
             case "Mega Monsters":
-                this.minGateRegion = 3 + challenge.completions;
+                this.minGateRegion = 4 + challenge.completions;
                 this.startingTraits = 4 + challenge.completions * 2;
                 break;
             case "Outcast":
@@ -104,6 +104,7 @@ export class DynamicSettings {
                 this.spendFriendship = true;
                 this.friendshipToProduction = true;
                 this.regionDifficultyIncrease = 40 + (5 * challenge.completions);
+                this.minGateRegion = 4 + challenge.completions;
                 break;
         }
     }

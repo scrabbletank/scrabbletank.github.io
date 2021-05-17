@@ -1,6 +1,4 @@
-import { Common } from "../utils/Common";
-import { ProgressionStore } from "../data/ProgressionStore";
-import { GearData } from "../data/GearData";
+import { TooltipRegistry } from "../data/TooltipRegistry";
 
 export class GearDisplay {
     constructor(sceneContext, x, y, gear) {
@@ -12,14 +10,14 @@ export class GearDisplay {
         }
         else {
             this.nameLabel = sceneContext.add.bitmapText(x + 5, y + 5, "courier20", gear.name + " Lv" + gear.level);
-    
+
             var types = ["Weapon", "Armor", "Trinket"]
             this.typeLabel = sceneContext.add.bitmapText(x + 5, y + 25, "courier16", "Tier " + gear.tier + " " + types[gear.slotType]);
 
             var txt = "";
             var bonus = gear.getStatBonuses();
             for (const prop in bonus) {
-                txt += Common.getBonusText(prop, bonus[prop]) + "\n";
+                txt += TooltipRegistry.getBonusText(prop, bonus[prop]) + "\n";
             }
             this.statLabel = sceneContext.add.bitmapText(x + 5, y + 45, "courier16", txt);
         }

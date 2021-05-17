@@ -25,6 +25,8 @@ import { DynamicSettings } from "../data/DynamicSettings";
 import LZString from "lz-string";
 import { OptionsDialog } from "../ui/OptionsDialog";
 import { GuideWindow } from "../ui/GuideWindow";
+import { WorldTime } from "../data/WorldTime";
+import { FadingNumberLabel } from "../ui/FadingNumberLabel";
 
 export class GameScene extends SceneUIBase {
     constructor(position, name) {
@@ -48,6 +50,7 @@ export class GameScene extends SceneUIBase {
         this.talentCost = 0;
         this.statCost = 0;
         this.lastFrame = 0;
+        this.showTimeThisRun = false;
 
         //try loading save data if it exists
         this.loadGame();
@@ -57,6 +60,7 @@ export class GameScene extends SceneUIBase {
         this.load.bitmapFont("courier16", "./../../assets/font/anonpro16.png", "./../../assets/font/anonpro16.xml");
         this.load.bitmapFont("courier20", "./../../assets/font/anonpro20.png", "./../../assets/font/anonpro20.xml");
         this.load.spritesheet("icons", "./../../assets/icons/icons.png", { frameWidth: 16, frameHeight: 16 });
+        this.load.spritesheet("talenticons", "./../../assets/icons/talenticons.png", { frameWidth: 16, frameHeight: 16 });
         this.load.spritesheet("bldicons", "./../../assets/icons/buildingicons.png", { frameWidth: 16, frameHeight: 16 });
         this.load.spritesheet("roadicons", "./../../assets/icons/roadicons.png", { frameWidth: 50, frameHeight: 50 });
         this.load.spritesheet("moonicons", "./../../assets/icons/moonicons.png", { frameWidth: 16, frameHeight: 16 });
@@ -78,21 +82,13 @@ export class GameScene extends SceneUIBase {
         this.statLabels = [];
         this.statIcons = [];
         this.statIncButtons = [];
-        this.statIcons.push(new TooltipImage(this, 20, 20, 16, 16, { sprite: "icons", tile: 0 },
-            "Strength determines how hard you hit. Each point increases your min Damage by 0.4, max Damage by 1, and increases damage " +
-            "from gear by ~1% (diminishing returns)."));
-        this.statIcons.push(new TooltipImage(this, 20, 40, 16, 16, { sprite: "icons", tile: 1 },
-            "Dexterity determines your ability to hit enemies. Each point increases your Hit by 7."));
-        this.statIcons.push(new TooltipImage(this, 20, 60, 16, 16, { sprite: "icons", tile: 2 },
-            "Agility determines how hard you are to hit. Each point increases your Evasion by 7 and gives a small boost to explore speed."));
-        this.statIcons.push(new TooltipImage(this, 20, 80, 16, 16, { sprite: "icons", tile: 3 },
-            "Endurance determines your health resistance against criticals. Each point increases your max Health by 5 and Crit Resistance by 3."));
-        this.statIcons.push(new TooltipImage(this, 20, 100, 16, 16, { sprite: "icons", tile: 4 },
-            "Recovery determines how easily you heal your wounds. Each point increases your Health Regen by 0.15/s."));
-        this.statIcons.push(new TooltipImage(this, 20, 120, 16, 16, { sprite: "icons", tile: 5 },
-            "Defense determines how durable your body is. Each point increases your armor by 0.2 and increases armor from gear by ~1% (diminishing returns)."));
-        this.statIcons.push(new TooltipImage(this, 20, 140, 16, 16, { sprite: "icons", tile: 6 },
-            "Accuracy determines your ability to strike weak points. Each point increases your Crit Power by 3."));
+        this.statIcons.push(new TooltipImage(this, 20, 20, 16, 16, { sprite: "icons", tile: 0 }, this.player.strTooltip()));
+        this.statIcons.push(new TooltipImage(this, 20, 40, 16, 16, { sprite: "icons", tile: 1 }, this.player.dexTooltip()));
+        this.statIcons.push(new TooltipImage(this, 20, 60, 16, 16, { sprite: "icons", tile: 2 }, this.player.agiTooltip()));
+        this.statIcons.push(new TooltipImage(this, 20, 80, 16, 16, { sprite: "icons", tile: 3 }, this.player.endTooltip()));
+        this.statIcons.push(new TooltipImage(this, 20, 100, 16, 16, { sprite: "icons", tile: 4 }, this.player.recTooltip()));
+        this.statIcons.push(new TooltipImage(this, 20, 120, 16, 16, { sprite: "icons", tile: 5 }, this.player.defTooltip()));
+        this.statIcons.push(new TooltipImage(this, 20, 140, 16, 16, { sprite: "icons", tile: 6 }, this.player.accTooltip()));
 
         this.statIncButtons.push(new TextButton(this, 150, 20, 16, 16, '+')
             .onClickHandler(() => { this._increaseStat('str'); }));
@@ -167,6 +163,14 @@ export class GameScene extends SceneUIBase {
             "Gold. Your current gold cap is equal to (Flat bonuses + population) * Economy Multiplier."));
         this.resourceIcons.push(new TooltipImage(this, 20, 170, 16, 16, { sprite: "icons", tile: 39 },
             "Motes of Darkness. Fuse these onto weapons to improve their power."));
+        this.resourceIncLabels = [];
+        this.resourceIncLabels.push(new FadingNumberLabel(this, 100, 170, 1200, Phaser.Display.Color.GetColor(80, 200, 80), "courier16", 16));
+        this.resourceIncLabels.push(new FadingNumberLabel(this, 100, 170, 1200, Phaser.Display.Color.GetColor(80, 200, 80), "courier16", 16));
+        this.resourceIncLabels.push(new FadingNumberLabel(this, 100, 170, 1200, Phaser.Display.Color.GetColor(80, 200, 80), "courier16", 16));
+        this.resourceIncLabels.push(new FadingNumberLabel(this, 100, 170, 1200, Phaser.Display.Color.GetColor(80, 200, 80), "courier16", 16));
+        this.resourceIncLabels.push(new FadingNumberLabel(this, 100, 170, 1200, Phaser.Display.Color.GetColor(80, 200, 80), "courier16", 16));
+        this.resourceIncLabels.push(new FadingNumberLabel(this, 100, 170, 1200, Phaser.Display.Color.GetColor(80, 200, 80), "courier16", 16));
+
 
         this.buyButtons = [];
         this.buyButtons.push(new TextButton(this, 10, 780, 30, 18, "x1")
@@ -212,6 +216,10 @@ export class GameScene extends SceneUIBase {
             .onClickHandler(() => { this.scene.bringToTop("TownScene"); this.scene.bringToTop("DarkWorld"); });
         this.worldButton = new TextButton(this, 962, 60, 122, 20, "World")
             .onClickHandler(() => { this.scene.bringToTop("WorldScene"); this.scene.bringToTop("DarkWorld"); });
+        this.worldTimeBacking = this.add.rectangle(500, 80, 300, 20, Phaser.Display.Color.GetColor(0, 0, 0))
+            .setOrigin(0, 0).setInteractive()
+            .on("pointerover", () => { this.showTimeThisRun = true; })
+            .on("pointerout", () => { this.showTimeThisRun = false; });
         this.worldTimeLabel = this.add.bitmapText(650, 80, "courier20", "").setOrigin(0.5, 0);
         this.moonlightButton = new ImageButton(this, 965, 12, 32, 32, { sprite: "moonicons", tile: 12 })
             .onClickHandler(() => { this.scene.bringToTop("MoonlightScene"); });
@@ -267,7 +275,12 @@ export class GameScene extends SceneUIBase {
         this.player.registerEvent("onStatChanged", () => {
             this._layoutStats();
         });
-        this.player.registerEvent("onResourcesChanged", () => { this._updateResources(); });
+        this.player.registerEvent("onResourcesChanged", (res, gold, tier) => {
+            this._updateResources();
+            this._updateFadingResourceLabels(res, gold, tier);
+        });
+        this.player.registerEvent("onTalentChanged", () => { this.updateStatIcons(); });
+        this.player.registerEvent("onClassSelected", () => { this._handleClassSelected(); });
 
         if (this.progression.unlocks.gearTab === false) {
             this.loreScene.addText("You open your eyes and see a vast wilderness before you. " +
@@ -276,6 +289,9 @@ export class GameScene extends SceneUIBase {
                 "you're also naked so you take what you can get.\n\n" +
                 "After putting these on you should go exploring.");
         }
+        // our class is set during load, however by that point we have no UI and haven't hooked up events, so
+        // we make sure we handle class specific UI here.
+        this._handleClassSelected();
         this._layoutStats();
         this._setBuyAmount(1, 0);
     }
@@ -305,6 +321,26 @@ export class GameScene extends SceneUIBase {
     }
     notifyRegion() {
         this.regionButton.setNotification();
+    }
+
+    updateStatIcons() {
+        this.statIcons[0].setTooltip(this.player.strTooltip());
+        this.statIcons[1].setTooltip(this.player.dexTooltip());
+        this.statIcons[2].setTooltip(this.player.agiTooltip());
+        this.statIcons[3].setTooltip(this.player.endTooltip());
+        this.statIcons[4].setTooltip(this.player.recTooltip());
+        this.statIcons[5].setTooltip(this.player.defTooltip());
+        this.statIcons[6].setTooltip(this.player.accTooltip());
+        this.detailsIcons[6].setTooltip(this.player.critTooltip());
+        this.detailsIcons[7].setTooltip(this.player.critPowerTooltip());
+    }
+
+    _handleClassSelected() {
+        if (this.player.playerClass === Statics.CLASS_WIZARD) {
+            this.statIcons[5].setImage({ sprite: "icons", tile: 62 });
+            this.statIcons[6].setImage({ sprite: "icons", tile: 63 });
+        }
+        this.updateStatIcons();
     }
 
     _handleProgressionEvents(type, count, text) {
@@ -401,9 +437,9 @@ export class GameScene extends SceneUIBase {
 
     _updateGear() {
         var text = "" +
-            Common.processText("W: " + (this.player.weapon === undefined ? "None" : this.player.weapon.name + " Lv" + this.player.weapon.level), 20) + "\n" +
-            Common.processText("A: " + (this.player.armor === undefined ? "None" : this.player.armor.name + " Lv" + this.player.armor.level), 20) + "\n" +
-            Common.processText("T: " + (this.player.trinket === undefined ? "None" : this.player.trinket.name + " Lv" + this.player.trinket.level), 20);
+            Common.processText(this.player.weapon === undefined ? "None" : this.player.weapon.name + " Lv" + this.player.weapon.level, 20) + "\n" +
+            Common.processText(this.player.armor === undefined ? "None" : this.player.armor.name + " Lv" + this.player.armor.level, 20) + "\n" +
+            Common.processText(this.player.trinket === undefined ? "None" : this.player.trinket.name + " Lv" + this.player.trinket.level, 20);
 
         this.gearLabels.setText(text);
     }
@@ -434,6 +470,23 @@ export class GameScene extends SceneUIBase {
             Common.numberString(this.player.statBlock.CritResistance()) + ""));
     }
 
+    _updateFadingResourceLabels(res, gold, tier) {
+        if (this.progression.unlocks.resourceUI === false) {
+            return;
+        }
+        if (tier === this.resourceTierSelected) {
+            for (var i = 0; i < res.length; i++) {
+                if (res[i] > 0) {
+                    this.resourceIncLabels[i].setValue(Math.floor(res[i]));
+                }
+            }
+        }
+        // For now don't show gold, it doesn't fit well with even base gold values
+        // if (gold > 0 && this.progression.unlocks.townTab === true) {
+        //     this.resourceIncLabels[6].setValue(Math.floor(gold));
+        // }
+    }
+
     _updateResources() {
         this.resourceLabel.setPosition(10, this.resourceStart);
         this.resourceLabel.setVisible(this.progression.unlocks.resourceUI);
@@ -445,6 +498,9 @@ export class GameScene extends SceneUIBase {
         for (var i = 0; i < this.resourceIcons.length; i++) {
             this.resourceIcons[i].setPosition(20, this.resourceStart + 40 + (i * 20));
             this.resourceIcons[i].setVisible(this.progression.unlocks.resourceUI);
+        }
+        for (var i = 0; i < this.resourceIncLabels.length; i++) {
+            this.resourceIncLabels[i].setPosition(100, this.resourceStart + 40 + (i * 20));
         }
         for (var i = 0; i < this.resourceTierButtons.length; i++) {
             this.resourceTierButtons[i].setPosition(20 + (i * 20), this.resourceStart + 20);
@@ -600,6 +656,7 @@ export class GameScene extends SceneUIBase {
         var lore = new LoreStore();
         lore.rebirth();
         this.resourceTierSelected = 0;
+        this.worldData.time.setTimeScale(1);
 
         this.gearButton.setVisible(this.progression.unlocks.gearTab);
         this.regionButton.setVisible(this.progression.unlocks.exploreTab);
@@ -618,6 +675,10 @@ export class GameScene extends SceneUIBase {
         this.regionScene.rebirth();
         this.combatScene.rebirth();
         this.townScene.rebirth();
+
+        //reset images back to adventurer
+        this.statIcons[5].setImage({ sprite: "icons", tile: 5 });
+        this.statIcons[6].setImage({ sprite: "icons", tile: 6 });
 
         this.scene.bringToTop("LoreScene");
         this.scene.bringToTop();
@@ -654,18 +715,31 @@ export class GameScene extends SceneUIBase {
     }
 
     update(time, __delta) {
-        this.worldData.time.setFrameDelta(Math.min(500, time - this.lastFrame));
+        var lastFrameTime = time - this.lastFrame;
+        if (lastFrameTime > 15000) {
+            this.worldData.time.addOfflineTime(lastFrameTime);
+        }
+        this.worldData.time.setFrameDelta(Math.min(500, lastFrameTime));
         this.lastFrame = time;
         var fDelta = this.worldData.time.frameDelta;
         this.worldData.update(fDelta);
         this.player.statBlock.tickRegen(fDelta, this.combatScene.isInCombat());
-        this.worldTimeLabel.setText(this.worldData.time.getText());
+        if (this.showTimeThisRun === true) {
+            var runTime = WorldData.getInstance().time.time - WorldData.getInstance().timeAtRunStart;
+            this.worldTimeLabel.setText("Current Run: " + new WorldTime(runTime).getTimespanText());
+        } else {
+            this.worldTimeLabel.setText(this.worldData.time.getText());
+        }
 
         if (this.progression.unlocks.gearTab !== true) {
             this.gearShowTimer -= fDelta;
             if (this.gearShowTimer <= 0) {
                 this.progression.registerFeatureUnlocked(Statics.UNLOCK_GEAR_TAB);
             }
+        }
+
+        for (var i = 0; i < this.resourceIncLabels.length; i++) {
+            this.resourceIncLabels[i].update(fDelta);
         }
 
         // regardless of time dialation we still only want to save every minute

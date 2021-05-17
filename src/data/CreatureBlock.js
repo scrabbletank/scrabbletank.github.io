@@ -64,9 +64,15 @@ export class CreatureBlock {
         this.traits = [];
         this.shieldValue = 0;
         this.shieldCooldown = 0;
+        this.slowTimer = 0;
+        this.slowPercent = 0;
+        this.slowDamage = 0;
+        this.igniteTimer = 0;
+        this.igniteDamage = 0;
 
         this.healthChangedHandlers = [];
         this.attackCooldownChangedHandlers = [];
+        this.animationChangedHandlers = [];
     }
 
     MaxHealth() {
@@ -135,7 +141,7 @@ export class CreatureBlock {
         return Math.floor(ret * 10) / 10;
     }
     Armor() {
-        var ret = this.Defense() * Statics.ARMOR_PER_DEFENSE + this.statBonuses.armor * (1 + this.Defense() * Statics.SCALING_ARMOR_PER_DEFENSE);
+        var ret = this.Defense() * Statics.ARMOR_PER_DEFENSE + this.statBonuses.armor;
         return Math.floor(ret);
     }
     AttackSpeed() {
@@ -150,6 +156,8 @@ export class CreatureBlock {
             this.healthChangedHandlers.push(callback);
         } else if (event === 'onAttackCooldownChanged') {
             this.attackCooldownChangedHandlers.push(callback);
+        } else if (event === 'onAnimationChanged') {
+            this.animationChangedHandlers.push(callback);
         }
     }
 
@@ -163,18 +171,40 @@ export class CreatureBlock {
             this.attackCooldownChangedHandlers[i](this.attackCooldown);
         }
     }
+    _onAnimationChanged(animKey) {
+        for (var i = 0; i < this.animationChangedHandlers.length; i++) {
+            this.animationChangedHandlers[i](animKey);
+        }
+    }
+
+    initCombat() {
+        this.currentHealth = this.MaxHealth();
+        if (this.findTrait({ type: Statics.TRAIT_FIRSTSTRIKE }) !== undefined) {
+            this.attackCooldown = this.AttackSpeed() * 0.95;
+        }
+    }
 
     canAttack() { return this.attackCooldown >= this.AttackSpeed(); }
 
-    takeDamage(damage, __isCrit, trueDamage = false) {
+    takeDamage(damage, __isCrit, dmgType) {
         var dmg = damage;
-        if (this.shieldValue > 0) {
-            var shieldDmg = Math.min(this.shieldValue, dmg);
+        if (dmgType === Statics.DMG_NORMAL) {
+            if (this.shieldValue > 0) {
+                var shieldDmg = Math.min(this.shieldValue, dmg);
+                this.shieldValue -= shieldDmg;
+                dmg -= shieldDmg;
+            }
+            if (dmg > 0) {
+                dmg = Math.max(1, dmg - this.Armor());
+            }
+        } else if (dmgType === Statics.DMG_MAGIC) {
+            // magic damage ignores 90% of armor but does half damage to shields
+            var shieldDmg = Math.min(this.shieldValue, dmg / 2);
             this.shieldValue -= shieldDmg;
-            dmg -= shieldDmg;
-        }
-        if (trueDamage === false) {
-            dmg = Math.max(1, dmg - this.Armor());
+            dmg -= shieldDmg * 2;
+            dmg = Math.max(1, dmg - this.Armor() * 0.1);
+        } else if (dmgType === Statics.DMG_TRUE) {
+            //true damage bypasses shields?
         }
         this.currentHealth -= dmg;
         this._onHealthChanged();
@@ -207,6 +237,16 @@ export class CreatureBlock {
             this.stunTimer -= delta;
             return;
         }
+        if (this.igniteTimer > 0) {
+            this.igniteTimer -= delta;
+            this.takeDamage(this.igniteDamage * (delta / 1000), false, Statics.DMG_TRUE);
+        }
+        if (this.slowTimer > 0) {
+            this.slowTimer -= delta;
+            console.log(Statics.DMG_TRUE);
+            this.takeDamage(this.slowDamage * (delta / 1000), false, Statics.DMG_TRUE);
+            delta = delta * (1 - this.slowPercent);
+        }
         var oldVal = this.attackCooldown;
         this.attackCooldown = Math.min(this.attackSpeed, this.attackCooldown + delta * multi);
         if (oldVal != this.attackCooldown) {
@@ -218,7 +258,8 @@ export class CreatureBlock {
         if (isCrit === true) {
             rawDmg = rawDmg * this.CritDamage(creature.CritResistance());
         }
-        var dmg = creature.takeDamage(rawDmg, isCrit);
+        var dmg = creature.takeDamage(rawDmg, isCrit, Statics.DMG_NORMAL);
+        creature.playAnimation(isCrit === true ? this.critAnim : this.hitAnim);
         this.attackCooldown = 0;
         //handle beserk trait, giving attack speed refresh
         var beserk = this.findTrait(Statics.TRAIT_BESERK);
@@ -230,6 +271,9 @@ export class CreatureBlock {
 
         this._onAttackCooldownChanged();
         return dmg;
+    }
+    playAnimation(anim) {
+        this._onAnimationChanged(anim);
     }
 
     equip(gear) {
@@ -247,7 +291,7 @@ export class CreatureBlock {
 
 
     // used for monsters to add scaling based on level
-    setMonsterStats(name, scaleBlock, attackSpeed, critChance, level, shadeBase, rewardBase, icon) {
+    setMonsterStats(name, scaleBlock, attackSpeed, critChance, level, tier, shadeBase, rewardBase, icon) {
         this.level = level;
         // offset by 1, level 0 should have no bonuses
         var rLvl = level - 1;
@@ -255,7 +299,8 @@ export class CreatureBlock {
         var sLvl = Math.max(0, rLvl);
         // monster stat bonuses
         var flatStat = rLvl * Statics.MONSTER_STAT_PER_LEVEL;
-        var scaleStat = Math.pow(Statics.MONSTER_STATSCALE_PER_LEVEL, sLvl);
+        var scaleStat = Math.pow(Statics.MONSTER_STATSCALE_PER_LEVEL, sLvl) * Math.pow(Statics.MONSTER_STATSCALE_PER_REGION, tier);
+        var scaleXp = Math.pow(Statics.MONSTER_XPSCALE_PER_REGION, tier)
 
         this.stats.strength = (this.stats.strength + flatStat) * scaleBlock.strength * scaleStat;
         this.stats.dexterity = (this.stats.dexterity + flatStat) * scaleBlock.dexterity * scaleStat;
@@ -280,7 +325,7 @@ export class CreatureBlock {
         this.name = level < 1 ? "Weak " + name : name;
         var shade = shadeBase + (MoonlightData.getInstance().moonperks.shadow2.level * 2);
         this.xpReward = shade + (shade / 4) * rLvl;
-        this.xpReward = this.xpReward * (1 + MoonlightData.getInstance().challenges.megamonsters.completions * 0.05);
+        this.xpReward = this.xpReward * (1 + MoonlightData.getInstance().challenges.megamonsters.completions * 0.05) * scaleXp;
         this.dropBase = rewardBase;
         this.icon = icon;
     }
@@ -316,6 +361,7 @@ export class CreatureBlock {
             xpReward: 0,
             motes: 0
         };
+        var firstStrike = false;
 
         for (var i = 0; i < this.traits.length; i++) {
             var trait = this.traits[i];
@@ -349,6 +395,10 @@ export class CreatureBlock {
                     extraStats.hit += this.Hit() * (0.2 * trait.level);
                     extraStats.healthRegen += this.HealthRegen() * (0.1 * trait.level);
                     break;
+                case Statics.TRAIT_FIRSTSTRIKE:
+                    firstStrike = true;
+                    extraStats.accuracy += this.Accuracy() * (0.25 * trait.level);
+                    break;
             }
             extraStats.xpReward += this.xpReward * (1 + MoonlightData.getInstance().challenges.megamonsters.completions * 0.01 * trait.level);
         }
@@ -359,6 +409,9 @@ export class CreatureBlock {
         this.xpReward += extraStats.xpReward;
         this.motes += extraStats.motes;
         this.currentHealth = this.MaxHealth();
+        if (firstStrike === true) {
+            this.attackCooldown = this.AttackSpeed() * 0.95;
+        }
     }
 
     addTrait(trait, level) {

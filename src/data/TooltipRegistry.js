@@ -1,7 +1,21 @@
+import { Common } from "../utils/Common";
 import { Statics } from "./Statics";
 import { WorldTime } from "./WorldTime";
 
 export class TooltipRegistry {
+
+    static setDefaultNames() {
+        TooltipRegistry.critPowerName = "Crit Power";
+        TooltipRegistry.defenseName = "Defense";
+        TooltipRegistry.accuracyName = "Accuracy";
+    }
+
+    static setWizardNames() {
+        TooltipRegistry.critPowerName = "Spell Power";
+        TooltipRegistry.defenseName = "Ward";
+        TooltipRegistry.accuracyName = "Power";
+    }
+
     static getTalentTooltip(talent, lvl) {
         switch (talent.name) {
             case "Strength":
@@ -51,7 +65,7 @@ export class TooltipRegistry {
                     (lvl * 5) + "% + (5%) chance that your attack bar starts half full, or half empty if you prefer.";
             case "Dodge":
                 return "All the Hit in the world can't touch you some of the time. You automatically dodge every " +
-                    (13 - lvl) + " - (1) Attacks against you.";
+                    Math.max(3, 13 - lvl) + " - (1) Attacks against you.";
             case "Defy Death":
                 return "Have you tried just... not dying? The next time you take lethal damage, you survive at 1 Health. Can be used again after " +
                     (8 - lvl) + " - (1) encounters. I didn't even know I tracked encounters!";
@@ -72,10 +86,10 @@ export class TooltipRegistry {
                     (lvl * 4) + "% + (4%). This effect is multiplicative, not additive.";
             case "Loot Goblin":
                 return "Your desire for loot is so strong you've summoned the Loot Goblin! Each enemy has a " +
-                    (lvl * 0.5) + "% + (0.5%) chance to be a Loot Goblin, giving 10x the usual reward.";
+                    (lvl * 0.5) + "% + (0.5%) chance to be a Loot Goblin, giving 10x the resources and shade.";
             case "Bundle":
                 return "The villagers say they don't have anymore money to pay you a better bounty, so have these rocks instead! While " +
-                    "exploring you earn " + (lvl * 3) + "% + (3%) of the Towns daily production per kill.";
+                    "exploring you earn " + (lvl * 2) + "% + (2%) of the Towns daily production per kill.";
             case "Charisma":
                 return "Your screams of terror while fighting the monsters has charmed the villagers. Gain " +
                     (lvl * 10) + "% + (10%) more friendship from killing monsters.";
@@ -83,7 +97,69 @@ export class TooltipRegistry {
                 return "Motivate the elderly to throw their bodies at enemy invasions! When the invasion counter reaches 100% you have a " +
                     (lvl * 0.5) + "% + (0.5%) chance per defense to not be invaded! You'll still lose population, but that's a sacrifice " +
                     "you're willing to make.";
+            // WIZARD TALENTS
+            case "Cantrip":
+                return "Only one spell will cast per attack. Every attack you deal " + (20 + lvl * 9) + "% + (9%) of your spellpower in magic damage.";
+            case "First Level Spell":
+                return "Study the Arcane Arts! This talent must be maxed to cast Entangle. Gives a modest " + (lvl) + "% + (1%) to your max spellpower.";
+            case "Second Level Spell":
+                return "Study Elegant Enchantments! This talent must be maxed to cast Barrier. Gives a modest " + (lvl) + "% + (1%) to your max spellpower.";
+            case "Third Level Spell":
+                return "Study the Wizardly Ways! This talent must be maxed to cast Fireball. Gives a modest " + (lvl) + "% + (1%) to your max spellpower.";
+            case "Fourth Level Spell":
+                return "Study Confusing Codices! This talent must be maxed to cast Haste. Gives a modest " + (lvl) + "% + (1%) to your max spellpower.";
+            case "Fifth Level Spell":
+                return "Study Empowered Evocations! This talent must be maxed to cast Power Word Kill. Gives a modest " + (lvl) + "% + (1%) to your max spellpower.";
+            case "Entagle":
+                return "Only one spell will cast per attack. Every 4th attack you slow a creature's attack speed by 40% for " +
+                    (2 + lvl * 0.25) + " + (0.25) seconds.";
+            case "Thorns":
+                return "In their feeble attempt to catch you, monsters take " + (lvl * 3) + "% + (3%) of your Evasion in magic damage per second while slowed.";
+            case "Barrier":
+                return "Only one spell will cast per attack. Every 13th attack you add " + (40 * lvl) + "% + (40%) of your ward to your shield.";
+            case "Shell":
+                return "Who needs endurance when you have magic? Increases your Crit Resistance by " + (15 * lvl) + "% + (15%) while your shield is up.";
+            case "Fireball":
+                return "Only one spell will cast per attack. Every 5th attack you cast the only spell that matters, dealing " + (7 * lvl) +
+                    "% + (7%) of your spellpower to all monster in magic damage. You didn't ask how big the room is, you said 'I cast Fireball'.";
+            case "Ignite":
+                return "Watch the monsters burn. Fun! Your fireballs ignite monsters, dealing 25% of its damage per second for " + (1 + lvl * 0.5) +
+                    " + (0.5) seconds.";
+            case "Haste":
+                return "Only one spell will cast per attack. Every 6th attack you gain haste for 3 attacks. While hasted your attack bar starts " + (7.5 * lvl) +
+                    "% + (7.5%) full.";
+            case "Quicken":
+                return "You've remembered that haste also makes you move faster! While haste is active your Evasion is increased by " + (5 * lvl) +
+                    "% + (5%).";
+            case "Power Word Kill":
+                return "Only one spell may cast per attack. Every 9th attack you command a monster to play dead, dealing anywhere from 0% - " + (100 + lvl * 25) + "% + (25%) of your spellpower in magic damage.";
+            case "Power Word Stun":
+                return "Your words leave them so dumbfounded that they forget to attack. If you deal at least " + (80 - lvl * 7) +
+                    "% - (7%) of its max damage the target is stunned for 2 seconds.";
+            case "Alchemy":
+                return "To pay for your crippling potion dependency you transmute monsters to gold! Gain " + (5 * lvl) +
+                    " + (5) gold every 10th kill, increased by the towns economy multiplier.";
+            case "Elective Studies: Strength":
+                return "Learn the ancient art of casting Fist. Increase damage from Strength by " + (5 * lvl) + "% + (5%).";
+            case "Elective Studies: Dexterity":
+                return "Learn how to cast more spells more faster. Increases hit chance from Dexterity by " + (lvl) + " + (1).";
+            case "Elective Studies: Agility":
+                return "You never skipped cardio day in Wizard PE. Increases evasion from Agility by " + ((lvl * 7) / 10) + " + (0.7).";
+            case "Elective Studies: Endurance":
+                return "The only way wizards could survive long enough to cast the really cool spells. Increases health from Endurance by " + ((lvl * 7.5) / 10) + " + (0.75).";
+            case "Runemancy":
+                return "Harness the runic magic to empower your spells. Each socketed run in your equipment increases your spellpower by " + (lvl) + "% + (1%).";
+            case "Magic Armor":
+                return "You didn't spend 10 years at wizard school to use yuvky, non-magical armor. Add " + (lvl * 20) + "% + (20%) " +
+                    "of your gears armor to your Shield at the start of combat.";
+            case "Magic Weapon":
+                return "Magic Weapons, from a more civilized time. Add " + (lvl * 10) + "% + (10%) " +
+                    "of your gears damage to your Spell Power.";
+            case "Chromatic Codex":
+                return "You've mastered the ancient scrolls and now you can read from the Chromatic Codex. It's pretty underwhelming, " +
+                    "but it increases your spellpower by " + (lvl * 6) + "% + (6%).";
         }
+        return talent.name + ": Missing Tooltip";
     }
 
     static getTechTooltip(tech, townTier) {
@@ -109,31 +185,32 @@ export class TooltipRegistry {
             case "Map Making":
                 return "Instead of wandering aimlessly, get some villagers to make some maps. Increases exploration speed by 10%.";
         }
+        return tech.name + ": Missing Tooltip";
     }
 
     static getMoonlightTooltip(moonlight) {
         switch (moonlight.name) {
             case "Moon's Strength":
                 return "Increases your starting Strength by " + (moonlight.level) + " + (1) and increases Strength from all sources by " +
-                    (moonlight.level) + "% + (1%).";
+                    (moonlight.level * 0.5) + "% + (0.5%).";
             case "Moon's Dexterity":
                 return "Increases your starting Dexterity by " + (moonlight.level) + " + (1) and increases Dexterity from all sources by " +
-                    (moonlight.level) + "% + (1%).";
+                    (moonlight.level * 0.5) + "% + (0.5%).";
             case "Moon's Agility":
                 return "Increases your starting Agility by " + (moonlight.level) + " + (1) and increases Agility from all sources by " +
-                    (moonlight.level) + "% + (1%).";
+                    (moonlight.level * 0.5) + "% + (0.5%).";
             case "Moon's Endurance":
                 return "Increases your starting Endurance by " + (moonlight.level) + " + (1) and increases Endurance from all sources by " +
-                    (moonlight.level) + "% + (1%).";
+                    (moonlight.level * 0.5) + "% + (0.5%).";
             case "Moon's Recovery":
                 return "Increases your starting Recovery by " + (moonlight.level) + " + (1) and increases Recovery from all sources by " +
-                    (moonlight.level) + "% + (1%).";
+                    (moonlight.level * 0.5) + "% + (0.5%).";
             case "Moon's Defense":
                 return "Increases your starting Defense by " + (moonlight.level) + " + (1) and increases Defense from all sources by " +
-                    (moonlight.level) + "% + (1%).";
+                    (moonlight.level * 0.5) + "% + (0.5%).";
             case "Moon's Accuracy":
                 return "Increases your starting Accuracy by " + (moonlight.level) + " + (1) and increases Accuracy from all sources by " +
-                    (moonlight.level) + "% + (1%).";
+                    (moonlight.level * 0.5) + "% + (0.5%).";
             case "Hero's Vault":
                 return "Increases the base income per villager by " + (moonlight.level * 0.1) + " + (0.1) gold.";
             case "Moonwine":
@@ -193,7 +270,7 @@ export class TooltipRegistry {
             case "Mystic Cauldron":
                 return "Alchemy Labs create " + (moonlight.level * 10) + "% + (10%) more resources from the same inputs.";
             case "Shadow's Harvest":
-                return "Each day you gain " + (moonlight.level * 0.1) + " + (0.1) shade per villager. This bonus is increased by Shadow's Blessing.";
+                return "Each day you gain " + (moonlight.level) / 10 + " + (0.1) shade per villager. This bonus is increased by Shadow's Blessing.";
             case "Shadow Wolf Charm":
                 return "Unlocks the Shadow Wolf Charm trinket which grants Strength and Damage. Available up to tier " + (moonlight.level) + " + (1)";
             case "Moonlight Circlet":
@@ -211,6 +288,7 @@ export class TooltipRegistry {
             case "Night Labour":
                 return "Unlocks Night Labour for Towns. When active, villagers gold income is reduced by 50% while all production is increased by " + (moonlight.level * 10) + "% + (10%).";
         }
+        return moonlight.name + ": Missing Tooltip";
     }
 
     static getRegionTooltip(regionName) {
@@ -228,6 +306,7 @@ export class TooltipRegistry {
             case "hills":
                 return "Rolling hills with few plains between them. Full of wild beasts, plants, and the Gnoll's who hunt them.";
         }
+        return regionName + ": Missing Tooltip";
     }
 
     static getRegionImage(regionName) {
@@ -323,13 +402,29 @@ export class TooltipRegistry {
                     "                     +5 Challenge Points\n\n" +
                     "Completions: " + challenge.completions + "/" + challenge.maxCompletions + "\n" +
                     "Fastest Time: " + new WorldTime(challenge.fastestTime).getTimespanText();
+            case "The Tower of Ultimate Wizard-y":
+                return "Oh no! Evil wizards are attacking the Towers of Ultimate Wizardy! Is that a mispelling? A reference? Who knows! " +
+                    "You must seek out the ancient spires and keep them safe while you research the ultimate spell. Each tower, once " +
+                    "revealed, contributes to your knowledge. Mastering the spell will summon a Mystic Gate, enter it to complete the" +
+                    "challenge.\n\n" +
+                    "Restrictions: Region spans " + (60 + (completions * 10)) + " levels.\n" +
+                    "              Invasions are more frequent and lead by an evil wizard that deals magic damage.\n" +
+                    "              Invasions can happen anywhere.\n" +
+                    "              Invasions gradually get stronger.\n" +
+                    "              Losing all 4 Spires fails the challenge and immediately causes a rebirth.\n\n" +
+                    "On Every Completion: Wizard starts with +2 Talent Points.\n" +
+                    "                     +5 Challenge Points\n\n" +
+                    "On Final Completion: Unlocks the Spire building.\n" +
+                    "Completions: " + challenge.completions + "/" + challenge.maxCompletions + "\n" +
+                    "Fastest Time: " + new WorldTime(challenge.fastestTime).getTimespanText();
         }
+        return challenge.name + ": Missing Tooltip";
     }
 
     static getTraitTooltip(trait) {
         switch (trait.type) {
             case Statics.TRAIT_DIRE:
-                return "Dire " + trait.level + ": Core stats are increased by " + trait.level * 20 + "%, drops motes and gives " +
+                return "Dire " + trait.level + ": Core stats are increased by " + trait.level * 20 + "%, drops motes, and gives " +
                     trait.level * 75 + "% more experience.";
             case Statics.TRAIT_POISONED:
                 return "Poisoned " + trait.level + ": Deals " + trait.level * 5 + "% of its max damage per second as true damage.";
@@ -346,6 +441,9 @@ export class TooltipRegistry {
             case Statics.TRAIT_BESERK:
                 return "Beserk " + trait.level + ": Hit chance is increased by " + trait.level * 20 + "%, health regen by " +
                     trait.level * 10 + "% and has a " + Math.floor(((1 - Math.pow(0.92, trait.level)) * 100)) + "% chance to trigger Follow Through.";
+            case Statics.TRAIT_FIRSTSTRIKE:
+                return "First Strike " + trait.level + ": Starts combat with their attack bar filled to 95% and gain " +
+                    trait.level * 25 + "% more Accuracy.";
         }
         return trait.type + ": Missing Tooltip. Better report this to the dev.";
     }
@@ -366,7 +464,10 @@ export class TooltipRegistry {
                 return { sprite: "icons", tile: 44 };
             case Statics.TRAIT_BESERK:
                 return { sprite: "icons", tile: 45 };
+            case Statics.TRAIT_FIRSTSTRIKE:
+                return { sprite: "icons", tile: 56 };
         }
+        return { sprite: "icons", tile: 0 };
     }
 
     static getRuneBonusText(prop, value) {
@@ -403,15 +504,15 @@ export class TooltipRegistry {
             case "recTalents":
                 return sign + Math.floor(value) + " Recovery Talents";
             case "defPercent":
-                return sign + Math.round(value * 100) + "% Defense";
+                return sign + Math.round(value * 100) + "% " + TooltipRegistry.defenseName;
             case "defFlat":
-                return sign + Math.floor(value) + " Defense";
+                return sign + Math.floor(value) + " " + TooltipRegistry.defenseName;
             case "defTalents":
                 return sign + Math.floor(value) + " Defense Talents";
             case "accPercent":
-                return sign + Math.round(value * 100) + "% Accuracy";
+                return sign + Math.round(value * 100) + "% " + TooltipRegistry.accuracyName;
             case "accFlat":
-                return sign + Math.floor(value) + " Accuracy";
+                return sign + Math.floor(value) + " " + TooltipRegistry.accuracyName;
             case "accTalents":
                 return sign + Math.floor(value) + " Accuracy Talents";
             case "hitPercent":
@@ -423,15 +524,15 @@ export class TooltipRegistry {
             case "armorPercent":
                 return sign + Math.round(value * 100) + "% Gear Armor";
             case "critPercent":
-                return sign + Math.round(value * 100) + "% Crit Power";
+                return sign + Math.round(value * 100) + "% " + TooltipRegistry.critPowerName;
             case "healthPercent":
                 return sign + Math.round(value * 100) + "% Health";
             case "regenPercent":
                 return sign + Math.round(value * 100) + "% HP Regen";
             case "weaponScaling":
-                return sign + Math.round(value * 100) + " Gear Damage Scaling";
+                return sign + Math.round(value * 400) + " Gear Damage Scaling";
             case "armorScaling":
-                return sign + Math.round(value * 100) + " Gear Armor Scaling";
+                return sign + Math.round(value * 400) + " Gear Armor Scaling";
             case "baseAttackSpeed":
                 return sign + Math.round(value * 100) + "% Faster Attacks";
             case "OOCRegen":
@@ -467,8 +568,77 @@ export class TooltipRegistry {
             case "guardianTalent":
                 return sign + value + " Guardian Talent";
             case "agilityScaling":
-                return sign + Math.round(value * 100) + " Agility Explore Scaling";
+                return sign + Math.round(value * 200) + " Agility Explore Scaling";
+        }
+        return "";
+    }
+
+    static getBonusText(prop, value) {
+        var sign = value >= 0 ? "+" : "";
+        switch (prop) {
+            case "health":
+                return sign + Common.numberString(Math.floor(value)) + " Health";
+            case "damageMin":
+                return sign + Common.numberString(Math.floor(value)) + " Min Dmg";
+            case "damageMax":
+                return sign + Common.numberString(Math.floor(value)) + " Max Dmg";
+            case "strength":
+                return sign + Common.numberString(Math.floor(value)) + " Strength";
+            case "dexterity":
+                return sign + Common.numberString(Math.floor(value)) + " Dexterity";
+            case "agility":
+                return sign + Common.numberString(Math.floor(value)) + " Agility";
+            case "endurance":
+                return sign + Common.numberString(Math.floor(value)) + " Endurance";
+            case "recovery":
+                return sign + Common.numberString(Math.floor(value)) + " Recovery";
+            case "defense":
+                return sign + Common.numberString(Math.floor(value)) + " " + TooltipRegistry.defenseName;
+            case "accuracy":
+                return sign + Common.numberString(Math.floor(value)) + " " + TooltipRegistry.accuracyName;
+            case "hit":
+                return sign + Common.numberString(Math.floor(value)) + " Hit";
+            case "evasion":
+                return sign + Common.numberString(Math.floor(value)) + " Evasion";
+            case "critPower":
+                // this is trash don't look plz
+                if (TooltipRegistry.critPowerName === "Spell Power") {
+                    return sign + Common.numberString(Math.floor(value / 3)) + " " + TooltipRegistry.critPowerName;
+                }
+                return sign + Common.numberString(Math.floor(value)) + " " + TooltipRegistry.critPowerName;
+            case "critResistance":
+                return sign + Common.numberString(Math.floor(value)) + " Crit Resist";
+            case "critChance":
+                return sign + Common.numberString(Math.floor(value * 100)) + "% Crit Chance";
+            case "healthRegen":
+                return sign + Common.numberString(Math.floor(value * 10) / 10) + "/s HP Regen";
+            case "armor":
+                return sign + Common.numberString(Math.floor(value)) + " Armor";
+        }
+        return "";
+    }
+
+    static getCostText(type, value) {
+        switch (type) {
+            case 0:
+                return Common.numberString(Math.floor(value)) + " Wood";
+            case 1:
+                return Common.numberString(Math.floor(value)) + " Leather";
+            case 2:
+                return Common.numberString(Math.floor(value)) + " Metal";
+            case 3:
+                return Common.numberString(Math.floor(value)) + " Fiber";
+            case 4:
+                return Common.numberString(Math.floor(value)) + " Stone";
+            case 5:
+                return Common.numberString(Math.floor(value)) + " Crystal";
         }
         return "";
     }
 }
+
+// static fuckery
+
+TooltipRegistry.critPowerName = "Crit Power";
+TooltipRegistry.defenseName = "Defense";
+TooltipRegistry.accuracyName = "Accuracy";

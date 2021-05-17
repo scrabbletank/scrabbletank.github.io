@@ -30,12 +30,9 @@ export class CombatScene extends SceneUIBase {
         this.progression = new ProgressionStore();
 
         this.combatManager = new CombatManager()
-            .registerEvent("onPlayerHealthChanged", (x) => { this._playerHealthCallback(x); })
-            .registerEvent("onPlayerAttackChanged", (x) => { this._playerAttackCooldownCallback(x); })
-            .registerEvent("onPlayerHit", (x, i) => { this._setupPlayerAnim(x, i); })
+            .registerEvent("onAnimationChanged", (i, anim) => { this._setupAnim(i, anim); })
             .registerEvent("onCreatureHealthChanged", (x, i) => { this._monsterHealthCallback(x, i); })
             .registerEvent("onCreatureAttackChanged", (x, i) => { this._monsterAttackCooldownCallback(x, i); })
-            .registerEvent("onCreatureHit", (x, i) => { this._setupMonsterAnim(x, i); })
             .registerEvent("onReward", (x, y) => { this._rewardCallback(x, y); })
             .registerEvent("onPlayerDefeat", () => { this._playerDefeatCallback(); })
             .registerEvent("onExplore", (x, y) => { this._exploreCallback(x, y); })
@@ -50,8 +47,16 @@ export class CombatScene extends SceneUIBase {
     }
 
     _playerHealthCallback(health) {
-        this.playerDisplay.setHealthBar(health / this.player.statBlock.MaxHealth(),
-            Common.numberString(Math.ceil(health)) + "/" + Common.numberString(this.player.statBlock.MaxHealth()));
+        var shieldPercent = this.player.statBlock.shieldValue / this.player.statBlock.MaxHealth();
+        var fillTxt = "";
+        if (shieldPercent > 0) {
+            fillTxt = Common.numberString(Math.ceil(health)) + "+(" + Common.numberString(Math.ceil(this.player.statBlock.shieldValue)) + ")/" +
+                Common.numberString(this.player.statBlock.MaxHealth());
+        } else {
+            fillTxt = Common.numberString(Math.ceil(health)) + "/" + Common.numberString(this.player.statBlock.MaxHealth());
+        }
+        this.playerDisplay.setHealthBar(health / this.player.statBlock.MaxHealth(), fillTxt);
+        this.playerDisplay.setShieldBar(shieldPercent);
     }
     _playerAttackCooldownCallback(attackCooldown) {
         this.playerDisplay.setAttackBar(attackCooldown / this.player.statBlock.attackSpeed,
@@ -111,28 +116,33 @@ export class CombatScene extends SceneUIBase {
             this.monsterDiplays[i].setVisible(false);
         }
     }
-    _setupPlayerAnim(monster, crit = false) {
+    _setupAnim(idx, animKey) {
+        if (idx === -1) {
+            this._setupPlayerAnim(animKey);
+        } else {
+            this._setupMonsterAnim(idx, animKey);
+        }
+    }
+    _setupPlayerAnim(animKey) {
         if (this.playerHitAnim !== undefined) {
             this._removePlayerAnim();
         }
         var x = this.playerDisplay.getCenterX();
         var y = this.playerDisplay.getCenterY();
-        var sprite = crit === true ? monster.critAnim : monster.hitAnim;
-        this.playerHitAnim = new SpriteAnimation(this, x, y, sprite, Combat.getAnimInfoFromKey(sprite), () => { this._removePlayerAnim(); });
+        this.playerHitAnim = new SpriteAnimation(this, x, y, animKey, Combat.getAnimInfoFromKey(animKey), () => { this._removePlayerAnim(); });
     }
     _removePlayerAnim() {
         this.playerHitAnim.destroy();
         this.playerHitAnim = undefined;
     }
-    _setupMonsterAnim(i, crit = false) {
+    _setupMonsterAnim(idx, animKey) {
         // if an animation is already playing, cancel it
-        if (this.monsterHitAnim[i] !== undefined) {
-            this._removeMonsterAnim(i);
+        if (this.monsterHitAnim[idx] !== undefined) {
+            this._removeMonsterAnim(idx);
         }
-        var x = this.monsterDiplays[i].getCenterX();
-        var y = this.monsterDiplays[i].getCenterY();
-        var sprite = crit === true ? this.player.statBlock.critAnim : this.player.statBlock.hitAnim;
-        this.monsterHitAnim[i] = new SpriteAnimation(this, x, y, sprite, Combat.getAnimInfoFromKey(sprite), () => { this._removeMonsterAnim(i); });
+        var x = this.monsterDiplays[idx].getCenterX();
+        var y = this.monsterDiplays[idx].getCenterY();
+        this.monsterHitAnim[idx] = new SpriteAnimation(this, x, y, animKey, Combat.getAnimInfoFromKey(animKey), () => { this._removeMonsterAnim(idx); });
     }
     _removeMonsterAnim(i) {
         this.monsterHitAnim[i].destroy();
@@ -182,6 +192,13 @@ export class CombatScene extends SceneUIBase {
     preload() {
         this.load.spritesheet("claws", "./../../assets/anims/clawanim.png", { frameWidth: 128, frameHeight: 128 });
         this.load.spritesheet("clawscrit", "./../../assets/anims/clawanimcrit.png", { frameWidth: 128, frameHeight: 128 });
+        this.load.spritesheet("mace", "./../../assets/anims/maceanim.png", { frameWidth: 32, frameHeight: 32 });
+        this.load.spritesheet("magicmissile", "./../../assets/anims/magicanim.png", { frameWidth: 32, frameHeight: 32 });
+        this.load.spritesheet("entangle", "./../../assets/anims/entangleanim.png", { frameWidth: 32, frameHeight: 32 });
+        this.load.spritesheet("barrier", "./../../assets/anims/barrieranim.png", { frameWidth: 32, frameHeight: 32 });
+        this.load.spritesheet("fireball", "./../../assets/anims/fireanim.png", { frameWidth: 32, frameHeight: 32 });
+        this.load.spritesheet("haste", "./../../assets/anims/hasteanim.png", { frameWidth: 32, frameHeight: 32 });
+        this.load.spritesheet("skull", "./../../assets/anims/killanim.png", { frameWidth: 32, frameHeight: 32 });
     }
 
     create() {
@@ -206,9 +223,11 @@ export class CombatScene extends SceneUIBase {
 
         this.restButton = new TextButton(this, this.relativeX(800), this.relativeY(40), 80, 20, "Rest")
             .onClickHandler(() => { this._restHandler(); });
+        this.restButton.setVisible(false);
 
         this.player.statBlock.registerEvent("onHealthChanged", (x) => { this._playerHealthCallback(x); });
         this.player.statBlock.registerEvent("onAttackCooldownChanged", (x) => { this._playerAttackCooldownCallback(x); });
+        this.player.statBlock.registerEvent("onAnimationChanged", (x) => { this._setupAnim(-1, x); });
         this.player.registerEvent("onStatChanged", () => { this._updatePlayerBlock(); });
     }
 

@@ -167,19 +167,22 @@ export class TileData {
         if (this.isInvaded === true) {
             var bonusDif = DynamicSettings.getInstance().invasionLevelBonus;
             var bossDif = this.difficulty + this.getInvasionMulti();
-            enemyList.push(CreatureRegistry.GetCreatureByName(this.enemies[Common.randint(0, this.enemies.length)], bossDif + bonusDif));
-            enemyList.push(CreatureRegistry.GetCreatureByName(this.enemies[Common.randint(0, this.enemies.length)], this.difficulty - 1 + bonusDif));
-            enemyList.push(CreatureRegistry.GetCreatureByName(this.enemies[Common.randint(0, this.enemies.length)], this.difficulty - 1 + bonusDif));
+            enemyList.push(CreatureRegistry.GetCreatureByName(this.enemies[Common.randint(0, this.enemies.length)],
+                bossDif + bonusDif, this.parent.regionLevel));
+            enemyList.push(CreatureRegistry.GetCreatureByName(this.enemies[Common.randint(0, this.enemies.length)],
+                this.difficulty - 1 + bonusDif, this.parent.regionLevel));
+            enemyList.push(CreatureRegistry.GetCreatureByName(this.enemies[Common.randint(0, this.enemies.length)],
+                this.difficulty - 1 + bonusDif, this.parent.regionLevel));
         } else {
             var min = this.difficulty < 30 ? 1 : 2;
             var max = (this.difficulty < 5 ? 2 : 3) + (this.difficulty > 15 ? 1 : 0)
             var numCreatures = this.difficulty > 0 ? Common.randint(min, max) : 1;
             for (var i = 0; i < numCreatures; i++) {
                 if (Math.random() <= PlayerData.getInstance().getTalentLevel("lootgoblin") * 0.005) {
-                    enemyList.push(CreatureRegistry.GetCreatureByName("lootgoblin", this.difficulty));
+                    enemyList.push(CreatureRegistry.GetCreatureByName("lootgoblin", this.difficulty, this.parent.regionLevel));
                 } else {
                     var num = Common.randint(0, this.enemies.length);
-                    enemyList.push(CreatureRegistry.GetCreatureByName(this.enemies[num], this.difficulty));
+                    enemyList.push(CreatureRegistry.GetCreatureByName(this.enemies[num], this.difficulty, this.parent.regionLevel));
                 }
             }
         }
@@ -499,7 +502,7 @@ export class Region {
             this.townData.addFriendship(10 * MoonlightData.getInstance().moonperks.discovery.level);
             if (this.map[y][x].hasRune === true) {
                 this.map[y][x].hasRune = false;
-                var rune = RuneRegistry.getRandomRuneAtLevel(this.regionLevel + 1);
+                var rune = RuneRegistry.getRandomRuneAtLevel((this.regionLevel / 2) + 1);
                 PlayerData.getInstance().addRune(rune);
             }
             if (this.map[y][x].name === "Town") {
@@ -782,7 +785,7 @@ export class Region {
             points.push({ x: this.markets[i][1], y: this.markets[i][0] });
         }
         for (var i = 1; i < this.markets.length; i++) {
-            if (this.map[this.markets[i][0]][this.markets[i][1]].houseBuildable === true) {
+            if (this.map[this.markets[i][0]][this.markets[i][1]].roadBuildable === true) {
                 var max = 5 + MoonlightData.getInstance().moonperks.nightmarket.level;
                 var tier = this.map[this.markets[i][0]][this.markets[i][1]].building.tier;
                 var closest = Common.nearestPointInList(this.markets[i][1], this.markets[i][0], points, true);
@@ -890,35 +893,39 @@ export class Region {
 
     _canBuild(tile, building) {
         if (tile.building !== undefined || tile.regName === 'mysticgate' || tile.regName === 'town' ||
-            tile.explored === false) {
+            tile.explored === false || ProgressionStore.getInstance().unlocks.buildings === false) {
             return false;
         }
         var yieldSum = tile.yields.reduce((a, b) => { return a + b; });
         switch (building.name) {
             case "Lumberyard":
-                return tile.yields[0] > 0;
+                return tile.yields[0] > 0 && DynamicSettings.getInstance().buildingsAllowed === true;
             case "Hunter's Lodge":
-                return tile.yields[1] > 0;
+                return tile.yields[1] > 0 && DynamicSettings.getInstance().buildingsAllowed === true;
             case "Mine":
-                return tile.yields[2] > 0;
+                return tile.yields[2] > 0 && DynamicSettings.getInstance().buildingsAllowed === true;
             case "Herbalist's Hut":
-                return tile.yields[3] > 0;
+                return tile.yields[3] > 0 && DynamicSettings.getInstance().buildingsAllowed === true;
             case "Quarry":
-                return tile.yields[4] > 0;
+                return tile.yields[4] > 0 && DynamicSettings.getInstance().buildingsAllowed === true;
             case "Crystal Loom":
-                return tile.yields[5] > 0;
+                return tile.yields[5] > 0 && DynamicSettings.getInstance().buildingsAllowed === true;
             case "Town House":
-            case "Warehouse":
                 return tile.houseBuildable && yieldSum > 0;
+            case "Warehouse":
+                return tile.houseBuildable && yieldSum > 0 && MoonlightData.getInstance().challenges.buildings.completions > 0;
             case "Market":
+                return tile.roadBuildable && yieldSum > 0 && this.townData.getMarketLevel() > 0;
             case "Road":
                 return tile.roadBuildable && yieldSum > 0;
             case "Docks":
                 return tile.dockBuildable;
             case "Watch Tower":
-            case "Tavern":
-            case "Alchemy Lab":
                 return yieldSum > 0;
+            case "Alchemy Lab":
+                return yieldSum > 0 && this.townData.alchemyEnabled === true;
+            case "Tavern":
+                return yieldSum > 0 && this.townData.getTavernLevel() > 0;
         }
     }
 

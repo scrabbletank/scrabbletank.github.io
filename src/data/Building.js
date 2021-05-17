@@ -88,6 +88,9 @@ export class Building {
             case "Watch Tower":
                 return "Increases the defense of all tiles within 2 tiles of this watch tower by " + (tier * 2) + ".";
             case "Market":
+                if (tile.roadBuildable !== true && potential === false) {
+                    return "The market is too far from the road. It must be next to a road to increase the economy.";
+                }
                 var points = []
                 for (var i = 0; i < region.markets.length; i++) {
                     points.push({ x: region.markets[i][1], y: region.markets[i][0] });

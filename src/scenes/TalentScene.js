@@ -4,10 +4,22 @@ import { Common } from "../utils/Common";
 import { PlayerData } from "../data/PlayerData";
 import { FloatingTooltip } from "../ui/FloatingTooltip";
 import { ImageButton } from "../ui/ImageButton";
+import { Statics } from "../data/Statics";
+import { ClassSelectWindow } from "../ui/ClassSelectWindow";
 
 export class TalentScene extends SceneUIBase {
     constructor(position, name) {
         super(position, name);
+        this.adventurerArray = [[264, 288], [312, 240], [360, 216], [408, 192], [456, 216], [504, 240], [552, 288],
+        [216, 240], [264, 192], [336, 144], [408, 120], [480, 144], [552, 192], [600, 240],
+        [168, 192], [240, 120], [312, 72], [408, 48], [504, 72], [576, 120], [648, 192],
+        [408, 312], [480, 384], [336, 384], [408, 456], [336, 312], [480, 312], [480, 456], [336, 456]];
+
+        this.wizardArray = [[264, 240], [264, 168], [336, 168], [408, 168], [480, 168], [552, 168],
+        [264, 96], [264, 24], [336, 96], [336, 24], [408, 96], [408, 24], [480, 96], [480, 24], [552, 96], [552, 24],
+        [336, 240], [408, 240], [480, 240], [552, 240], [192, 312], [192, 240], [192, 168], [192, 96], [624, 168],
+        [408, 312], [480, 384], [336, 384], [408, 456], [336, 312], [480, 312], [480, 456], [336, 456]];
+        this.classSelectWindow = undefined;
     }
 
     refresh() {
@@ -15,22 +27,36 @@ export class TalentScene extends SceneUIBase {
     }
 
     rebirth() {
+        if (this.classSelectWindow !== undefined) {
+            this.classSelectWindow.destroy();
+        }
+        if (this.player.classChosen === false) {
+            this.classSelectWindow = new ClassSelectWindow(this, this.relativeX(60), this.relativeY(10));
+            this.classSelectWindow.onSelectHandler((x) => { this._onSelectHandler(x); });
+        }
         this.talentLabel.setText("Talent Points\n" + this.player.talentPoints);
-
-        var standardArray = [[264, 288], [312, 240], [360, 216], [408, 192], [456, 216], [504, 240], [552, 288],
-        [216, 240], [264, 192], [336, 144], [408, 120], [480, 144], [552, 192], [600, 240],
-        [168, 192], [240, 120], [312, 72], [408, 48], [504, 72], [576, 120], [648, 192],
-        [408, 312], [480, 384], [336, 384], [408, 456], [336, 312], [480, 312], [480, 456], [336, 456]];
 
         for (var i = 0; i < this.talentButtons.length; i++) {
             this.talentButtons[i].destroy();
         }
+        this._disableTooltip();
 
         this.talentButtons = [];
+        var talentArray = [];
+        switch (this.player.playerClass) {
+            case Statics.CLASS_ADVENTURER:
+                talentArray = this.adventurerArray;
+                break;
+            case Statics.CLASS_BESERKER:
+                break;
+            case Statics.CLASS_WIZARD:
+                talentArray = this.wizardArray;
+                break;
+        }
         var idx = 0;
         for (const prop in this.player.talents) {
-            var x = this.relativeX(standardArray[idx][0] + 18);
-            var y = this.relativeY(standardArray[idx][1] + 20);
+            var x = this.relativeX(talentArray[idx][0] + 18);
+            var y = this.relativeY(talentArray[idx][1] + 20);
             this._setupTalentButton(prop, x, y, idx);
             idx++;
         }
@@ -48,30 +74,15 @@ export class TalentScene extends SceneUIBase {
             "Talent Points\n" + this.player.talentPoints, 20, 1).setOrigin(0.5);
         this.talentButtons = [];
 
-        this._refreshView();
+        this.refresh();
 
         this.player.registerEvent("onTalentChanged", () => { this._onTalentChanged(); });
     }
 
-    _refreshView() {
-        var standardArray = [[264, 288], [312, 240], [360, 216], [408, 192], [456, 216], [504, 240], [552, 288],
-        [216, 240], [264, 192], [336, 144], [408, 120], [480, 144], [552, 192], [600, 240],
-        [168, 192], [240, 120], [312, 72], [408, 48], [504, 72], [576, 120], [648, 192],
-        [408, 312], [480, 384], [336, 384], [408, 456], [336, 312], [480, 312], [480, 456], [336, 456]];
-
-        for (var i = 0; i < this.talentButtons.length; i++) {
-            this.talentButtons[i].destroy();
-        }
-        this._disableTooltip();
-        this.talentButtons = [];
-
-        var idx = 0;
-        for (const prop in this.player.talents) {
-            var x = this.relativeX(standardArray[idx][0] + 18);
-            var y = this.relativeY(standardArray[idx][1] + 20);
-            this._setupTalentButton(prop, x, y, idx);
-            idx++;
-        }
+    _onSelectHandler(selectedClass) {
+        this.player.selectClass(selectedClass);
+        this.classSelectWindow.destroy();
+        this.refresh();
     }
 
     _setupTalentButton(talentName, x, y, index) {
@@ -80,7 +91,7 @@ export class TalentScene extends SceneUIBase {
                 this._levelUpTalent(this.player.talents[talentName]);
                 this._disableTooltip();
                 this._setTooltip(talentName, x, y);
-                this._refreshView();
+                this.refresh();
             })
             .onPointerOverHandler(() => { this._setTooltip(talentName, x, y); })
             .onPointerOutHandler(() => { this._disableTooltip(); }));

@@ -39,9 +39,12 @@ export class Gear {
                     this.statBonuses[prop] += this.statsPerLevel[prop] * Math.ceil((i + 1) / 5);
                 }
             }
-            // to prevent cost increase from happening at level 1, every 25 levels item costs increase by 50
+            // to prevent cost increase from happening at level 1, every 25 levels item costs increase, with a major increase every 100
             if (i > 10 && i % 25 === 0) {
                 this.rampingCostMulti = this.rampingCostMulti * Statics.SCALING_GEAR_MULTIPLIER;
+            }
+            if (i > 10 && i % 100 === 0) {
+                this.rampingCostMulti = this.rampingCostMulti * Statics.SCALING_GEAR_MULTIPLIER_2;
             }
             for (var t = 0; t < this.costs.length; t++) {
                 this.costs[t] += this.costsPerLevel[t] * (i + 1) * this.rampingCostMulti;

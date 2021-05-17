@@ -18,13 +18,13 @@ export class Common {
 
     static numberString(x) {
         var ret = new Intl.NumberFormat('en-US').format(x);
-        if (ret.length >= 20) {
+        if (ret.length >= 18) {
             ret = ret.substr(0, ret.length - 16) + "T";
-        } else if (ret.length >= 16) {
+        } else if (ret.length >= 14) {
             ret = ret.substr(0, ret.length - 12) + "B";
-        } else if (ret.length >= 12) {
+        } else if (ret.length >= 10) {
             ret = ret.substr(0, ret.length - 8) + "M";
-        } else if (ret.length >= 8) {
+        } else if (ret.length >= 6) {
             ret = ret.substr(0, ret.length - 4) + "K";
         }
         return ret;
@@ -72,63 +72,6 @@ export class Common {
             }
         }
         return true;
-    }
-
-    static getBonusText(prop, value) {
-        var sign = value >= 0 ? "+" : "";
-        switch (prop) {
-            case "health":
-                return sign + Common.numberString(Math.floor(value)) + " Health";
-            case "damageMin":
-                return sign + Common.numberString(Math.floor(value)) + " Min Dmg";
-            case "damageMax":
-                return sign + Common.numberString(Math.floor(value)) + " Max Dmg";
-            case "strength":
-                return sign + Common.numberString(Math.floor(value)) + " Strength";
-            case "dexterity":
-                return sign + Common.numberString(Math.floor(value)) + " Dexterity";
-            case "agility":
-                return sign + Common.numberString(Math.floor(value)) + " Agility";
-            case "endurance":
-                return sign + Common.numberString(Math.floor(value)) + " Endurance";
-            case "recovery":
-                return sign + Common.numberString(Math.floor(value)) + " Recovery";
-            case "defense":
-                return sign + Common.numberString(Math.floor(value)) + " Defense";
-            case "accuracy":
-                return sign + Common.numberString(Math.floor(value)) + " Accuracy";
-            case "hit":
-                return sign + Common.numberString(Math.floor(value)) + " Hit";
-            case "evasion":
-                return sign + Common.numberString(Math.floor(value)) + " Evasion";
-            case "critPower":
-                return sign + Common.numberString(Math.floor(value)) + " Crit Power";
-            case "critResistance":
-                return sign + Common.numberString(Math.floor(value)) + " Crit Resist";
-            case "critChance":
-                return sign + Common.numberString(Math.floor(value * 100)) + "% Crit Chance";
-            case "healthRegen":
-                return sign + Common.numberString(Math.floor(value * 10) / 10) + "/s HP Regen";
-            case "armor":
-                return sign + Common.numberString(Math.floor(value)) + " Armor";
-        }
-    }
-
-    static getCostText(type, value) {
-        switch (type) {
-            case 0:
-                return Common.numberString(Math.floor(value)) + " Wood";
-            case 1:
-                return Common.numberString(Math.floor(value)) + " Leather";
-            case 2:
-                return Common.numberString(Math.floor(value)) + " Metal";
-            case 3:
-                return Common.numberString(Math.floor(value)) + " Fiber";
-            case 4:
-                return Common.numberString(Math.floor(value)) + " Stone";
-            case 5:
-                return Common.numberString(Math.floor(value)) + " Crystal";
-        }
     }
 
     static processText(text, width) {

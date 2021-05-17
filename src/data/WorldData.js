@@ -80,12 +80,12 @@ export class WorldData {
             traits.push({ type: settings.fixedTraits[i].type, level: settings.fixedTraits[i].level });
         }
         for (var i = 0; i < count + settings.startingTraits; i++) {
-            // only allow a max of 5 traits
-            if (traits.length >= 5) {
+            // only allow a max of 3 traits
+            if (traits.length >= 3) {
                 var inc = Common.randint(0, traits.length);
                 traits[inc].level += 1;
             } else {
-                var traitType = Common.randint(1, 7);
+                var traitType = Common.randint(1, 8);
                 var temp = traits.find(t => t.type === traitType);
                 if (temp !== undefined) {
                     temp.level += 1;

@@ -506,10 +506,10 @@ creatureDefs['lootgoblin'] = {
 };
 
 export class CreatureRegistry {
-    static GetCreatureByName(name, level) {
+    static GetCreatureByName(name, level, tier) {
         var creature = new CreatureBlock();
         creature.setMonsterStats(creatureDefs[name].name, creatureDefs[name].scaleBlock, creatureDefs[name].attackSpeed,
-            creatureDefs[name].critChance, level, creatureDefs[name].shadeBase, creatureDefs[name].rewardBase, creatureDefs[name].icon);
+            creatureDefs[name].critChance, level, tier, creatureDefs[name].shadeBase, creatureDefs[name].rewardBase, creatureDefs[name].icon);
         return creature;
     }
 }
