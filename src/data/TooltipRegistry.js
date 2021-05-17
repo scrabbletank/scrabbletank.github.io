@@ -159,6 +159,7 @@ export class TooltipRegistry {
                 return "You've mastered the ancient scrolls and now you can read from the Chromatic Codex. It's pretty underwhelming, " +
                     "but it increases your spellpower by " + (lvl * 6) + "% + (6%).";
         }
+        return talent.name + ": Missing Tooltip";
     }
 
     static getTechTooltip(tech, townTier) {
@@ -184,6 +185,7 @@ export class TooltipRegistry {
             case "Map Making":
                 return "Instead of wandering aimlessly, get some villagers to make some maps. Increases exploration speed by 10%.";
         }
+        return tech.name + ": Missing Tooltip";
     }
 
     static getMoonlightTooltip(moonlight) {
@@ -286,6 +288,7 @@ export class TooltipRegistry {
             case "Night Labour":
                 return "Unlocks Night Labour for Towns. When active, villagers gold income is reduced by 50% while all production is increased by " + (moonlight.level * 10) + "% + (10%).";
         }
+        return moonlight.name + ": Missing Tooltip";
     }
 
     static getRegionTooltip(regionName) {
@@ -303,6 +306,7 @@ export class TooltipRegistry {
             case "hills":
                 return "Rolling hills with few plains between them. Full of wild beasts, plants, and the Gnoll's who hunt them.";
         }
+        return regionName + ": Missing Tooltip";
     }
 
     static getRegionImage(regionName) {
@@ -414,6 +418,7 @@ export class TooltipRegistry {
                     "Completions: " + challenge.completions + "/" + challenge.maxCompletions + "\n" +
                     "Fastest Time: " + new WorldTime(challenge.fastestTime).getTimespanText();
         }
+        return challenge.name + ": Missing Tooltip";
     }
 
     static getTraitTooltip(trait) {
@@ -461,8 +466,8 @@ export class TooltipRegistry {
                 return { sprite: "icons", tile: 45 };
             case Statics.TRAIT_FIRSTSTRIKE:
                 return { sprite: "icons", tile: 56 };
-                break;
         }
+        return { sprite: "icons", tile: 0 };
     }
 
     static getRuneBonusText(prop, value) {
@@ -610,6 +615,7 @@ export class TooltipRegistry {
             case "armor":
                 return sign + Common.numberString(Math.floor(value)) + " Armor";
         }
+        return "";
     }
 
     static getCostText(type, value) {
@@ -627,6 +633,7 @@ export class TooltipRegistry {
             case 5:
                 return Common.numberString(Math.floor(value)) + " Crystal";
         }
+        return "";
     }
 }
 

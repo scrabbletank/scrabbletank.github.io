@@ -927,7 +927,7 @@ export class GearData {
             health: 0, damageMin: 36, damageMax: 54, strength: 5,
             dexterity: 0, agility: 5, endurance: 0, recovery: 0,
             defense: 0, accuracy: 0, hit: 200, evasion: 0,
-            critPower: 0, critResistance: 0, critChance: 0.21, healthRegen: 0, armor: 5
+            critPower: 0, critResistance: 0, critChance: 0.21, healthRegen: 0, armor: 0
         };
         var cost = [0, 30, 35, 45, 0, 0];
         var costlvl = [0, 17, 20, 27, 0, 16];

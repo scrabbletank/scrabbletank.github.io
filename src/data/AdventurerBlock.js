@@ -105,7 +105,7 @@ export class AdventurerBlock extends CreatureBlock {
         this.secondWindDuration = 0;
         this.hitCounter = 0;
         this.encounterCounter = 0;
-        
+
         this.copyHandlers(block);
     }
 
@@ -120,7 +120,7 @@ export class AdventurerBlock extends CreatureBlock {
         var ret = (this.statBonuses.health * this._getScale(end)) + end * this.player.classStatics.HP_PER_ENDURANCE;
         ret += end * this.player.getTalentLevel("end");
         ret += ret * this.player.runeBonuses.healthPercent;
-        return Math.floor(ret);
+        return Math.floor(Math.max(1, ret));
     }
     Strength() {
         var ret = this.stats.strength + this.statBonuses.strength + this.player.runeBonuses.strFlat;

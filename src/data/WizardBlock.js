@@ -73,7 +73,7 @@ export class WizardBlock extends AdventurerBlock {
         var ret = (this.statBonuses.health * this._getScale(end)) + end * this.player.classStatics.HP_PER_ENDURANCE;
         ret += end * this.player.getTalentLevel("wizend") * 0.75;
         ret += ret * this.player.runeBonuses.healthPercent;
-        return Math.floor(ret);
+        return Math.floor(Math.max(1, ret));
     }
     Hit() {
         var dex = this.Dexterity();

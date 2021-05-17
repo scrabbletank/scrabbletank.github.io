@@ -725,7 +725,7 @@ export class GameScene extends SceneUIBase {
         this.player.statBlock.tickRegen(fDelta, this.combatScene.isInCombat());
         if (this.showTimeThisRun === true) {
             var runTime = WorldData.getInstance().time.time - WorldData.getInstance().timeAtRunStart;
-            this.worldTimeLabel.setText(new WorldTime(runTime).getTimespanText());
+            this.worldTimeLabel.setText("Current Run: " + new WorldTime(runTime).getTimespanText());
         } else {
             this.worldTimeLabel.setText(this.worldData.time.getText());
         }

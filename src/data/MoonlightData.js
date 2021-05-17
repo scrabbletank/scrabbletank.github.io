@@ -124,7 +124,7 @@ export class MoonlightData {
                     texture: { sprite: "moonicons", tile: 8 }
                 },
                 soulbound: {
-                    name: "Soulbound", level: 0, maxLevel: -1, requires: ["blackirongear"], cost: [250, 150, 1.5],
+                    name: "Soulbound", level: 0, maxLevel: -1, requires: ["blackirongear"], cost: [400, 400, 1.5],
                     texture: { sprite: "moonicons", tile: 21 }
                 },
                 discovery: {
