@@ -65,7 +65,7 @@ export class TooltipRegistry {
                     (lvl * 5) + "% + (5%) chance that your attack bar starts half full, or half empty if you prefer.";
             case "Dodge":
                 return "All the Hit in the world can't touch you some of the time. You automatically dodge every " +
-                    (13 - lvl) + " - (1) Attacks against you.";
+                    Math.max(3, 13 - lvl) + " - (1) Attacks against you.";
             case "Defy Death":
                 return "Have you tried just... not dying? The next time you take lethal damage, you survive at 1 Health. Can be used again after " +
                     (8 - lvl) + " - (1) encounters. I didn't even know I tracked encounters!";
@@ -270,7 +270,7 @@ export class TooltipRegistry {
             case "Mystic Cauldron":
                 return "Alchemy Labs create " + (moonlight.level * 10) + "% + (10%) more resources from the same inputs.";
             case "Shadow's Harvest":
-                return "Each day you gain " + (moonlight.level * 0.1) + " + (0.1) shade per villager. This bonus is increased by Shadow's Blessing.";
+                return "Each day you gain " + (moonlight.level) / 10 + " + (0.1) shade per villager. This bonus is increased by Shadow's Blessing.";
             case "Shadow Wolf Charm":
                 return "Unlocks the Shadow Wolf Charm trinket which grants Strength and Damage. Available up to tier " + (moonlight.level) + " + (1)";
             case "Moonlight Circlet":

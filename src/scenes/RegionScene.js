@@ -449,6 +449,7 @@ export class RegionScene extends SceneUIBase {
 
     refresh() {
         this.rebirth();
+        this._onRegionChanged();
     }
 
     changeRegion() {
@@ -536,7 +537,6 @@ export class RegionScene extends SceneUIBase {
 
         this.invasionLabel = this.add.bitmapText(this.relativeX(720), this.relativeY(90), "courier20", "Invasion", 20, 1);
         this.invasionLabel.setVisible(this.progression.unlocks.buildings);
-        var invasionPercent = this.region.invasionCounter / Statics.INVASION_THRESHOLD;
         this.invasionLabel.setTint(Phaser.Display.Color.GetColor(255, 255, 255));
 
         this.offlineLabel = this.add.bitmapText(this.relativeX(660), this.relativeY(140), "courier20", "Offline Time: " + WorldData.instance.time.getOfflineTimeString());

@@ -245,7 +245,7 @@ export class AdventurerBlock extends CreatureBlock {
         if (this.player.getTalentLevel("dodge") > 0) {
             this.hitCounter -= 1;
             if (this.hitCounter <= 0) {
-                this.hitCounter = Statics.DODGE_COUNTER - this.player.getTalentLevel("dodge");
+                this.hitCounter = Math.max(3, Statics.DODGE_COUNTER - this.player.getTalentLevel("dodge"));
                 return 0;
             }
         }
