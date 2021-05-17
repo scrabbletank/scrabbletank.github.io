@@ -49,6 +49,11 @@ export class RegionScene extends SceneUIBase {
         this.fiberKey = undefined;
         this.stoneKey = undefined;
         this.crystalKey = undefined;
+        this.marketKey = undefined;
+        this.tavernKey = undefined;
+        this.warehouseKey = undefined;
+        this.alchemyKey = undefined;
+        this.destroyKey = undefined;
         this.hoveredTile = [-1, -1];
         this.regionTiles = [];
         this.regionStats = undefined;
@@ -293,7 +298,7 @@ export class RegionScene extends SceneUIBase {
                 this._updateRegionStats();
                 break;
             case "destroy":
-                if (PlayerData.instance.gold >= blob.tile.building.tier * Statics.DESTROY_BUILDING_COST) {
+                if (blob.tile.building.name !== "Town" && PlayerData.instance.gold >= blob.tile.building.tier * Statics.DESTROY_BUILDING_COST) {
                     PlayerData.instance.addGold(-blob.tile.building.tier * Statics.DESTROY_BUILDING_COST);
                     this.region.destroyBuilding(blob.tile.x, blob.tile.y);
                 }
@@ -594,6 +599,11 @@ export class RegionScene extends SceneUIBase {
         this.roadKey = this.input.keyboard.addKey(Phaser.Input.Keyboard.KeyCodes.R);
         this.productionKey = this.input.keyboard.addKey(Phaser.Input.Keyboard.KeyCodes.P);
         this.exploreKey = this.input.keyboard.addKey(Phaser.Input.Keyboard.KeyCodes.E);
+        this.marketKey = this.input.keyboard.addKey(Phaser.Input.Keyboard.KeyCodes.M);
+        this.tavernKey = this.input.keyboard.addKey(Phaser.Input.Keyboard.KeyCodes.T);
+        this.warehouseKey = this.input.keyboard.addKey(Phaser.Input.Keyboard.KeyCodes.W);
+        this.alchemyKey = this.input.keyboard.addKey(Phaser.Input.Keyboard.KeyCodes.A);
+        this.destroyKey = this.input.keyboard.addKey(Phaser.Input.Keyboard.KeyCodes.D);
         this.woodKey = this.input.keyboard.addKey(Phaser.Input.Keyboard.KeyCodes.ONE);
         this.leatherKey = this.input.keyboard.addKey(Phaser.Input.Keyboard.KeyCodes.TWO);
         this.metalKey = this.input.keyboard.addKey(Phaser.Input.Keyboard.KeyCodes.THREE);
@@ -690,6 +700,30 @@ export class RegionScene extends SceneUIBase {
             this._tileActionHandler("build", {
                 tile: this.region.map[this.hoveredTile[1]][this.hoveredTile[0]],
                 building: BuildingRegistry.getBuildingByName('crystal')
+            });
+        } else if (Phaser.Input.Keyboard.JustUp(this.marketKey) && this.hoveredTile[0] !== -1) {
+            this._tileActionHandler("build", {
+                tile: this.region.map[this.hoveredTile[1]][this.hoveredTile[0]],
+                building: BuildingRegistry.getBuildingByName('market')
+            });
+        } else if (Phaser.Input.Keyboard.JustUp(this.tavernKey) && this.hoveredTile[0] !== -1) {
+            this._tileActionHandler("build", {
+                tile: this.region.map[this.hoveredTile[1]][this.hoveredTile[0]],
+                building: BuildingRegistry.getBuildingByName('tavern')
+            });
+        } else if (Phaser.Input.Keyboard.JustUp(this.warehouseKey) && this.hoveredTile[0] !== -1) {
+            this._tileActionHandler("build", {
+                tile: this.region.map[this.hoveredTile[1]][this.hoveredTile[0]],
+                building: BuildingRegistry.getBuildingByName('warehouse')
+            });
+        } else if (Phaser.Input.Keyboard.JustUp(this.alchemyKey) && this.hoveredTile[0] !== -1) {
+            this._tileActionHandler("build", {
+                tile: this.region.map[this.hoveredTile[1]][this.hoveredTile[0]],
+                building: BuildingRegistry.getBuildingByName('alchemy')
+            });
+        } else if (Phaser.Input.Keyboard.JustUp(this.destroyKey) && this.hoveredTile[0] !== -1) {
+            this._tileActionHandler("destroy", {
+                tile: this.region.map[this.hoveredTile[1]][this.hoveredTile[0]]
             });
         }
 

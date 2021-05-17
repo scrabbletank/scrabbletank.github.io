@@ -893,35 +893,39 @@ export class Region {
 
     _canBuild(tile, building) {
         if (tile.building !== undefined || tile.regName === 'mysticgate' || tile.regName === 'town' ||
-            tile.explored === false) {
+            tile.explored === false || ProgressionStore.getInstance().unlocks.buildings === false) {
             return false;
         }
         var yieldSum = tile.yields.reduce((a, b) => { return a + b; });
         switch (building.name) {
             case "Lumberyard":
-                return tile.yields[0] > 0;
+                return tile.yields[0] > 0 && DynamicSettings.getInstance().buildingsAllowed === true;
             case "Hunter's Lodge":
-                return tile.yields[1] > 0;
+                return tile.yields[1] > 0 && DynamicSettings.getInstance().buildingsAllowed === true;
             case "Mine":
-                return tile.yields[2] > 0;
+                return tile.yields[2] > 0 && DynamicSettings.getInstance().buildingsAllowed === true;
             case "Herbalist's Hut":
-                return tile.yields[3] > 0;
+                return tile.yields[3] > 0 && DynamicSettings.getInstance().buildingsAllowed === true;
             case "Quarry":
-                return tile.yields[4] > 0;
+                return tile.yields[4] > 0 && DynamicSettings.getInstance().buildingsAllowed === true;
             case "Crystal Loom":
-                return tile.yields[5] > 0;
+                return tile.yields[5] > 0 && DynamicSettings.getInstance().buildingsAllowed === true;
             case "Town House":
-            case "Warehouse":
                 return tile.houseBuildable && yieldSum > 0;
+            case "Warehouse":
+                return tile.houseBuildable && yieldSum > 0 && MoonlightData.getInstance().challenges.buildings.completions > 0;
             case "Market":
+                return tile.roadBuildable && yieldSum > 0 && this.townData.getMarketLevel() > 0;
             case "Road":
                 return tile.roadBuildable && yieldSum > 0;
             case "Docks":
                 return tile.dockBuildable;
             case "Watch Tower":
-            case "Tavern":
-            case "Alchemy Lab":
                 return yieldSum > 0;
+            case "Alchemy Lab":
+                return yieldSum > 0 && this.townData.alchemyEnabled === true;
+            case "Tavern":
+                return yieldSum > 0 && this.townData.getTavernLevel() > 0;
         }
     }
 

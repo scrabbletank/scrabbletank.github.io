@@ -656,6 +656,7 @@ export class GameScene extends SceneUIBase {
         var lore = new LoreStore();
         lore.rebirth();
         this.resourceTierSelected = 0;
+        this.worldData.time.setTimeScale(1);
 
         this.gearButton.setVisible(this.progression.unlocks.gearTab);
         this.regionButton.setVisible(this.progression.unlocks.exploreTab);

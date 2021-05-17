@@ -88,6 +88,11 @@ export class GuideWindow {
                     "Region tab, press:\n\n" +
                     "* 'R' to build a road\n" +
                     "* 'H' to build a house\n" +
+                    "* 'M' to build a market\n" +
+                    "* 'T' to build a tavern\n" +
+                    "* 'W' to build a warehouse\n" +
+                    "* 'A' to build a alchemy lab\n" +
+                    "* 'D' to destroy a building\n" +
                     "* 'P' to build a production building matching the tile (eg: Mountains build mines)\n" +
                     "* '1' - '6' to build a specific production building (Wood -> Leather - > Metal -> Fiber - > Stone -> Crystal)\n" +
                     "* 'U' to upgrade a building\n" +
