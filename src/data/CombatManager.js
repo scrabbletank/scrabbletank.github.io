@@ -153,7 +153,8 @@ export class CombatManager {
             shade: 0,
             gold: 0,
             motes: 0,
-            friendship: 0
+            friendship: 0,
+            regionLevel: this.activeTile.parent.regionLevel
         }
         var player = PlayerData.getInstance();
 

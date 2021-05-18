@@ -619,7 +619,7 @@ export class GameScene extends SceneUIBase {
         this.progression.registerResourceGain(rewards.resource);
         if (this.progression.unlocks.townTab === true) {
             this.player.addGold(rewards.gold);
-            WorldData.getInstance().getCurrentRegion().townData.addFriendship(rewards.friendship);
+            WorldData.getInstance().getRegion(rewards.regionLevel).townData.addFriendship(rewards.friendship);
             this.townScene._updateStatus();
         }
     }
