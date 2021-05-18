@@ -122,6 +122,14 @@ var RegionRegistry = {
             explorationNeeded: 30000,
             yields: [0, 0, 0, 0, 0, 0],
             preferredBuilding: "metal"
+        },
+        crypt: {
+            name: "Ancient Crypt",
+            enemies: ["lizard", "goblin", "slime", "drake"],
+            clr: [153, 50, 204],
+            explorationNeeded: 30000,
+            yields: [0, 0, 0, 0, 0, 0],
+            preferredBuilding: "metal"
         }
     },
     REGION_TYPES: {

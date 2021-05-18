@@ -421,6 +421,14 @@ export class Region {
             this.map[gatePos[0]][gatePos[1]].init("mysticgate", maxDiff, minDiff, this);
         }
 
+        // for unlocking dungeons, we need to place a single crypt tile in region 5
+        if (DynamicSettings.getInstance().challengeName === "" &&
+            ProgressionStore.getInstance().persistentUnlocks.dungeons === false && this.regionlevel === 4) {
+            // place the crypt on a random tile 5 rows from the top
+            var x = Common.randint(0, this.width);
+            this.map[this.height - 5][x].init("crypt", maxDiff, minDiff, this);
+        }
+
         //if runes appear on the map, add spawn locations here
         var runeCount = MoonlightData.getInstance().moonperks.runes.level > 0 ? 5 : 0;
         runeCount += MoonlightData.getInstance().moonperks.runelands.level;
@@ -526,6 +534,21 @@ export class Region {
             if (x < this.width - 1) {
                 this.map[y][x + 1].revealed = true;
                 this._onTileChanged(this.map[y][x + 1]);
+            }
+            if (this.map[y][x].name === "Ancient Crypt" && ProgressionStore.getInstance().persistentUnlocks.dungeons === false) {
+                ProgressionStore.getInstance().persistentUnlocks.dungeons = true;
+                ProgressionStore.getInstance().registerFeatureUnlocked(Statics.UNLOCK_GENERIC,
+                    "As you clear the final floor of this ancient crypt you find an ornate key! Surely this key must lead to " +
+                    "some ancient treasure. As you leave the crypt thinking about how your going to get PAID you see a " +
+                    "villager carrying the same key as you.\n\n" +
+                    "\"What, this old thing? We find them all the time, it's so bad we end up just throwing them away. Apparently it " +
+                    "unlocks some old dungeon filled with treasure and unspeakable horrors. Anyway, I gotta go chuck this key " +
+                    "down into the crypt here.\"\n\n" +
+                    "This whole time there's been dungeons full of loot and the villagers are just telling you now? Well, you don't " +
+                    "have time to do the dungeons yourself, and it's not because your afraid of whatever unspeakable horrors are inside. " +
+                    "You're pretty sure the villagers can handle it, and if not it only takes a week for them to breed a fully adult " +
+                    "villager. What's with that anyway?\n" +
+                    "VILLAGER DUNEGONS UNLOCKED! On your next rebirth you'll find dungeons to throw your villagers in.");
             }
         }
         if (this.regionLevel > 0 && this.regionLevel <= 8 && WorldData.getInstance().getRegion(this.regionLevel - 1).townData.alchemyEnabled === false) {

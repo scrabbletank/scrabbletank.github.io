@@ -184,6 +184,10 @@ export class TooltipRegistry {
                     "cap by 50.";
             case "Map Making":
                 return "Instead of wandering aimlessly, get some villagers to make some maps. Increases exploration speed by 10%.";
+            case "Barracks":
+                return "Build a place for your villagers to practive fighting and show off how much they can lift. Increases Villager Power by 20% per level.";
+            case "Armory":
+                return "You found that if you give the villagers some scraps from the forge they die less. Increases Villager Health by 20% per level.";
         }
         return tech.name + ": Missing Tooltip";
     }

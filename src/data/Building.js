@@ -133,6 +133,9 @@ export class Building {
             case "Warehouse":
                 var bonus = tier * 20;
                 return "Stores goods for transport, increasing production of nearby buildings by " + bonus + "%.";
+            case "Dojo":
+                return "A place for your villagers to train. Each week it permanently increases Villager Power by " + (tier * 5) / 100 + " and " +
+                    "Villager Health by " + (tier * 0.5) + ".";
         }
     }
 }

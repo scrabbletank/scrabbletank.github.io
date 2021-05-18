@@ -3,6 +3,7 @@ import { Statics } from "./Statics";
 import { WorldData } from "./WorldData";
 import { MoonlightData } from "./MoonlightData";
 import { DynamicSettings } from "./DynamicSettings";
+import { ProgressionStore } from "./ProgressionStore";
 
 export class TownData {
     static getTechGoldCost(tech, tier) {
@@ -53,6 +54,10 @@ export class TownData {
         this.friendshipToNext = 25;
         this.tilesExplored = 0;
         this.nightLabourActive = false;
+        this.villagerPower = 1;
+        this.villagerHealth = 10;
+        this.villagerPowerMulti = 1;
+        this.villagerHealthMulti = 1;
 
         this.buildings = {
             forge: {
@@ -68,6 +73,17 @@ export class TownData {
                 goldCosts: [50, 30, 15], resources: [[15, 10, 8], [0, 0, 0], [0, 0, 0], [0, 0, 0], [10, 10, 5], [0, 0, 0]]
             }
         };
+
+        if (ProgressionStore.getInstance().persistentUnlocks.dungeons === true) {
+            this.buildings.barracks = {
+                name: "Barracks", level: 0, maxLevel: -1, requires: [],
+                goldCosts: [50, 30, 15], resources: [[15, 10, 8], [0, 0, 0], [0, 0, 0], [0, 0, 0], [10, 10, 5], [0, 0, 0]]
+            }
+            this.buildings.armory = {
+                name: "Armory", level: 0, maxLevel: -1, requires: [],
+                goldCosts: [50, 30, 15], resources: [[15, 10, 8], [0, 0, 0], [0, 0, 0], [0, 0, 0], [10, 10, 5], [0, 0, 0]]
+            }
+        }
 
         this.upgrades = {
             reinforcedhouses: {
@@ -117,6 +133,12 @@ export class TownData {
                 break;
             case "Map Making":
                 this.exploreMulti += 0.1;
+                break;
+            case "Barracks":
+                this.villagerPowerMulti += 0.2;
+                break;
+            case "Armory":
+                this.villagerHealthMulti += 0.2;
                 break;
         }
     }

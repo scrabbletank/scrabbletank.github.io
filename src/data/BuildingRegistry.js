@@ -48,6 +48,9 @@ export class BuildingRegistry {
             case "warehouse":
                 return new Building("Warehouse", "warehouse", 1, BuildingTypes.OTHER, { sprite: "bldicons", tile: 36, w: 32, h: 32 },
                     [50, 10, 0, 10, 50, 0], 75, 5);
+            case "dojo":
+                return new Building("Dojo", "dojo", 1, BuildingTypes.OTHER, { sprite: "bldicons", tile: 38, w: 32, h: 32 },
+                    [50, 10, 0, 10, 50, 0], 75, 5);
         }
     }
 }
