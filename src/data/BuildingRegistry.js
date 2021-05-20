@@ -50,7 +50,7 @@ export class BuildingRegistry {
                     [50, 10, 0, 10, 50, 0], 75, 5);
             case "dojo":
                 return new Building("Dojo", "dojo", 1, BuildingTypes.OTHER, { sprite: "bldicons", tile: 38, w: 32, h: 32 },
-                    [50, 10, 0, 10, 50, 0], 75, 5);
+                    [30, 0, 20, 20, 0, 10], 125, 5);
         }
     }
 }

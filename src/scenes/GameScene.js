@@ -216,7 +216,7 @@ export class GameScene extends SceneUIBase {
             .onClickHandler(() => { this.scene.bringToTop("TownScene"); this.scene.bringToTop("DarkWorld"); });
         this.worldButton = new TextButton(this, 962, 60, 122, 20, "World")
             .onClickHandler(() => { this.scene.bringToTop("WorldScene"); this.scene.bringToTop("DarkWorld"); });
-        this.worldTimeBacking = this.add.rectangle(500, 80, 300, 20, Phaser.Display.Color.GetColor(0, 0, 0))
+        this.worldTimeBacking = this.add.rectangle(500, 81, 300, 19, Phaser.Display.Color.GetColor(0, 0, 0))
             .setOrigin(0, 0).setInteractive()
             .on("pointerover", () => { this.showTimeThisRun = true; })
             .on("pointerout", () => { this.showTimeThisRun = false; });

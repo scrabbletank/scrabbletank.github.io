@@ -126,7 +126,7 @@ var RegionRegistry = {
         crypt: {
             name: "Ancient Crypt",
             enemies: ["lizard", "goblin", "slime", "drake"],
-            clr: [153, 50, 204],
+            clr: [255, 225, 90],
             explorationNeeded: 30000,
             yields: [0, 0, 0, 0, 0, 0],
             preferredBuilding: "metal"

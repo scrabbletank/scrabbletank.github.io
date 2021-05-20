@@ -185,7 +185,7 @@ export class TooltipRegistry {
             case "Map Making":
                 return "Instead of wandering aimlessly, get some villagers to make some maps. Increases exploration speed by 10%.";
             case "Barracks":
-                return "Build a place for your villagers to practive fighting and show off how much they can lift. Increases Villager Power by 20% per level.";
+                return "Build a place for your villagers to practice fighting and show off how much they can lift. Increases Villager Power by 20% per level.";
             case "Armory":
                 return "You found that if you give the villagers some scraps from the forge they die less. Increases Villager Health by 20% per level.";
         }
@@ -290,7 +290,14 @@ export class TooltipRegistry {
             case "Nightmare Pendant":
                 return "Unlocks the Nightmare Pendant trinket which grants Accuracy, Crit Chance and Crit Power. Available up to tier " + (moonlight.level) + " + (1)";
             case "Night Labour":
-                return "Unlocks Night Labour for Towns. When active, villagers gold income is reduced by 50% while all production is increased by " + (moonlight.level * 10) + "% + (10%).";
+                return "Unlocks Night Labour for Towns. When active, villagers gold income is reduced by 50% while all production is increased by " +
+                    (moonlight.level * 10) + "% + (10%).";
+            case "Devotion":
+                return "Increases Villager Power and Health by " + (moonlight.level * 10) + "% + (10%).";
+            case "Ninjas":
+                return "Dojo's give " + (moonlight.level * 25) + "% + (25%) more Villager Power and Health per week.";
+            case "Urbanization":
+                return "Town Houses can fit " + (moonlight.level) + " + (1) more population per level.";
         }
         return moonlight.name + ": Missing Tooltip";
     }
@@ -638,6 +645,123 @@ export class TooltipRegistry {
                 return Common.numberString(Math.floor(value)) + " Crystal";
         }
         return "";
+    }
+
+    static getDungeonRewardTooltip(reward) {
+        switch (reward.type) {
+            case Statics.DUNGEON.RESOURCES:
+                return "A stockpile of resources, enough for exactly " + reward.amount + " days of average production for all resources!";
+            case Statics.DUNGEON.SHADE:
+                return "You thought it was just a shadow, but it's really " + Common.numberString(reward.amount) + " of Shade. Nice!";
+            case Statics.DUNGEON.MOTES:
+                return "The final monster barfed up " + Common.numberString(reward.amount) + " Motes of Darkness.";
+            case Statics.DUNGEON.GOLD:
+                return "A 'Dragons Horde' worth of gold, or " + Common.numberString(reward.amount) + " pieces.";
+            case Statics.DUNGEON.GEAR_LEVELS:
+                return "Your not really sure how, but get " + Common.numberString(reward.amount) + " levels to your equiped gear.";
+            case Statics.DUNGEON.RUNES:
+                return "The monsters were guarding " + Common.numberString(reward.amount) + " random Runes. Nice!";
+            case Statics.DUNGEON.WOOD:
+                return "A design for a sweet woodcutting axe. Increase wood production by " + Math.floor(reward.amount * 100) + "% in every region.";
+            case Statics.DUNGEON.LEATHER:
+                return "A design for a sweet skinning knife. Increase wood production by " + Math.floor(reward.amount * 100) + "% in every region.";
+            case Statics.DUNGEON.METAL:
+                return "A design for a sweet pickaxe. Increase wood production by " + Math.floor(reward.amount * 100) + "% in every region.";
+            case Statics.DUNGEON.FIBER:
+                return "A design for a sweet loom.. thing? Increase wood production by " + Math.floor(reward.amount * 100) + "% in every region.";
+            case Statics.DUNGEON.STONE:
+                return "A design for a sweet stone cutter. Increase wood production by " + Math.floor(reward.amount * 100) + "% in every region.";
+            case Statics.DUNGEON.CRYSTAL:
+                return "A design for a sweet crystal spinner. Increase wood production by " + Math.floor(reward.amount * 100) + "% in every region.";
+            case Statics.DUNGEON.PRODUCTION:
+                return "Some mysterious device that keeps spinning. Apparently it can increase production by " +
+                    Math.floor(reward.amount * 100) + "%, but only in this town.";
+            case Statics.DUNGEON.ECONOMY:
+                return "Nothing. But some villagers came up with an idea to turn this into a tourist trap, increasing the economy by " +
+                    Math.floor(reward.amount * 100) + "%, but only in this town.";
+            case Statics.DUNGEON.STRENGTH:
+                return "A Swoling Potion. Increases your Strength by " + Math.floor(reward.amount * 100) + "%.";
+            case Statics.DUNGEON.DEXTERITY:
+                return "A Manual depecting all the ways to stab someone. Increases your Dexterity by " + Math.floor(reward.amount * 100) + "%.";
+            case Statics.DUNGEON.AGILITY:
+                return "A Potion of Moving Real Fast. Increases your Agility by " + Math.floor(reward.amount * 100) + "%.";
+            case Statics.DUNGEON.ENDURANCE:
+                return "Literally just steroids. Increases your Endurance by " + Math.floor(reward.amount * 100) + "%.";
+            case Statics.DUNGEON.RECOVERY:
+                return "Magical healing goop. Increases your Recovery by " + Math.floor(reward.amount * 100) + "%.";
+            case Statics.DUNGEON.DEFENSE:
+                return "A Potion of Hardening. Kinky! Increases your Defense by " + Math.floor(reward.amount * 100) + "%.";
+            case Statics.DUNGEON.ACCURACY:
+                return "A Magical Laser Pointer. Increases your Accuracy by " + Math.floor(reward.amount * 100) + "%.";
+            case Statics.DUNGEON.CRIT_CHANCE:
+                return "A Lucky Rock! Increases your Crit Chance by " + Math.floor(reward.amount * 100) + "%.";
+            case Statics.DUNGEON.MOONLIGHT:
+                return "Moon Dust. Increases Moonlight earned this rebirth by " + Math.floor(reward.amount * 100) + "%.";
+            case Statics.DUNGEON.TALENTS:
+                return "A wise old man who says he can teach you how to earn " + Math.floor(reward.amount * 100) + " talent points.";
+            case Statics.DUNGEON.PERM_VPOWER:
+                return "Body oil that makes the villagers muscles glisten, permanently increasing Villager Power by " + reward.amount + ".";
+            case Statics.DUNGEON.PERM_VHEALTH:
+                return "A pot of dubious looking stew, permanently increasing Villager Health by " + reward.amount + ".";
+        }
+    }
+
+    static getDungeonRewardImage(reward) {
+        switch (reward.type) {
+            case Statics.DUNGEON.RESOURCES:
+                return { sprite: "icons", tile: 52 };
+            case Statics.DUNGEON.SHADE:
+                return { sprite: "moonicons", tile: 12 };
+            case Statics.DUNGEON.MOTES:
+                return { sprite: "icons", tile: 47 };
+            case Statics.DUNGEON.GOLD:
+                return { sprite: "icons", tile: 46 };
+            case Statics.DUNGEON.GEAR_LEVELS:
+                return { sprite: "icons", tile: 28 };
+            case Statics.DUNGEON.RUNES:
+                return { sprite: "runeicons", tile: 1 };
+            case Statics.DUNGEON.WOOD:
+                return { sprite: "icons", tile: 32 };
+            case Statics.DUNGEON.LEATHER:
+                return { sprite: "icons", tile: 33 };
+            case Statics.DUNGEON.METAL:
+                return { sprite: "icons", tile: 34 };
+            case Statics.DUNGEON.FIBER:
+                return { sprite: "icons", tile: 35 };
+            case Statics.DUNGEON.STONE:
+                return { sprite: "icons", tile: 36 };
+            case Statics.DUNGEON.CRYSTAL:
+                return { sprite: "icons", tile: 37 };
+            case Statics.DUNGEON.PRODUCTION:
+                return { sprite: "icons", tile: 50 };
+            case Statics.DUNGEON.ECONOMY:
+                return { sprite: "bldicons", tile: 32 };
+            case Statics.DUNGEON.STRENGTH:
+                return { sprite: "icons", tile: 8 };
+            case Statics.DUNGEON.DEXTERITY:
+                return { sprite: "icons", tile: 9 };
+            case Statics.DUNGEON.AGILITY:
+                return { sprite: "icons", tile: 10 };
+            case Statics.DUNGEON.ENDURANCE:
+                return { sprite: "icons", tile: 11 };
+            case Statics.DUNGEON.RECOVERY:
+                return { sprite: "icons", tile: 12 };
+            case Statics.DUNGEON.DEFENSE:
+                return { sprite: "icons", tile: 13 };
+            case Statics.DUNGEON.ACCURACY:
+                return { sprite: "icons", tile: 14 };
+            case Statics.DUNGEON.CRIT_CHANCE:
+                return { sprite: "icons", tile: 45 };
+            case Statics.DUNGEON.MOONLIGHT:
+                return { sprite: "moonicons", tile: 20 };
+            case Statics.DUNGEON.TALENTS:
+                return { sprite: "icons", tile: 61 };
+            case Statics.DUNGEON.PERM_VPOWER:
+                return { sprite: "icons", tile: 24 };
+            case Statics.DUNGEON.PERM_VHEALTH:
+                return { sprite: "icons", tile: 26 };
+        }
+        return { sprite: "icons", tile: 0 };
     }
 }
 

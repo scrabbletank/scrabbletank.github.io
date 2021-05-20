@@ -81,7 +81,8 @@ export class Building {
                     Math.floor(eff * 100) + "% based on distance to roads and other buildings.";
             case "Town House":
                 if (tile.houseBuildable === true) {
-                    return "Increases the Town's max population by " + (tier * 5) + ".";
+                    return "Increases the Town's max population by " +
+                        (tier * (5 + MoonlightData.getInstance().moonperks.urbanization.level)) + ".";
                 } else {
                     return "This house is too far away from a road and has been abandoned.";
                 }
@@ -134,8 +135,12 @@ export class Building {
                 var bonus = tier * 20;
                 return "Stores goods for transport, increasing production of nearby buildings by " + bonus + "%.";
             case "Dojo":
-                return "A place for your villagers to train. Each week it permanently increases Villager Power by " + (tier * 5) / 100 + " and " +
-                    "Villager Health by " + (tier * 0.5) + ".";
+                var moonBonus = (1 + MoonlightData.getInstance().moonperks.devotion.level * 0.1) *
+                    (1 + MoonlightData.getInstance().moonperks.ninja.level * 0.25);
+                var pow = tier * 0.05 * region.townData.villagerPowerMulti * moonBonus;
+                var def = tier * 0.5 * region.townData.villagerPowerMulti * moonBonus;
+                return "A place for your villagers to train. Each week it permanently increases Villager Power by " + Math.floor(pow * 100) / 100 + " and " +
+                    "Villager Health by " + Math.floor(def * 100) / 100 + ".";
         }
     }
 }

@@ -218,6 +218,8 @@ export class Region {
         this.houses = [];
         this.alchemyDrain = 0;
         this.alchemyGain = 0;
+        this.villagerStatGain = [0, 0];
+        this.dungeonLocations = [];
 
         if (ignoreGen === true) {
             return true;
@@ -256,6 +258,10 @@ export class Region {
 
         this.generateTerrain(points);
         this._init();
+
+        this.townData.uncoverDungeon(this);
+        this.townData.uncoverDungeon(this);
+        this.townData.uncoverDungeon(this);
     }
 
     save() {
@@ -468,6 +474,25 @@ export class Region {
         this.map[townPoint[1]][townPoint[0]].building = BuildingRegistry.getBuildingByName("town");
         this.placeBuilding(townPoint[0], townPoint[1], BuildingRegistry.getBuildingByName("town"));
         this.map[spawnPoint[1]][spawnPoint[0]].revealed = true;
+
+        // calculate dungeon spawns
+        if (ProgressionStore.getInstance().persistentUnlocks.dungeons === true) {
+            var p = [Common.randint(0, Math.floor(this.height / 3)), Common.randint(0, this.width)]
+            while (this.map[p[0]][p[1]].regName === "town" || this.map[p[0]][p[1]].regName === 'mysticgate') {
+                p = [Common.randint(0, Math.floor(this.height / 3)), Common.randint(0, this.width)]
+            }
+            this.dungeonLocations.push(p);
+            var p = [Common.randint(Math.floor(this.height / 3), Math.floor(this.height / 3) * 2), Common.randint(0, this.width)]
+            while (this.map[p[0]][p[1]].regName === "town" || this.map[p[0]][p[1]].regName === 'mysticgate') {
+                p = [Common.randint(Math.floor(this.height / 3), Math.floor(this.height / 3) * 2), Common.randint(0, this.width)]
+            }
+            this.dungeonLocations.push(p);
+            var p = [Common.randint(Math.floor(this.height / 3) * 2, Math.floor(this.height / 3) * 3), Common.randint(0, this.width)]
+            while (this.map[p[0]][p[1]].regName === "town" || this.map[p[0]][p[1]].regName === 'mysticgate') {
+                p = [Common.randint(Math.floor(this.height / 3) * 2, Math.floor(this.height / 3) * 3), Common.randint(0, this.width)]
+            }
+            this.dungeonLocations.push(p);
+        }
     }
 
     getRegionImage() {
@@ -502,6 +527,15 @@ export class Region {
         return this.map[y][x].revealed;
     }
 
+    _tileIsDungeon(x, y) {
+        for (var i = 0; i < this.dungeonLocations.length; i++) {
+            if (this.dungeonLocations[i][0] === y && this.dungeonLocations[i][1] === x) {
+                return true;
+            }
+        }
+        return false;
+    }
+
     exploreTile(x, y) {
         if (this.map[y][x].revealed === true && this.map[y][x].explored !== true) {
             this.tilesExplored += 1;
@@ -534,6 +568,10 @@ export class Region {
             if (x < this.width - 1) {
                 this.map[y][x + 1].revealed = true;
                 this._onTileChanged(this.map[y][x + 1]);
+            }
+            if (this._tileIsDungeon(x, y)) {
+                this.dungeonLocations = this.dungeonLocations.filter(p => p[1] !== x || p[0] !== y);
+                this.townData.uncoverDungeon(this);
             }
             if (this.map[y][x].name === "Ancient Crypt" && ProgressionStore.getInstance().persistentUnlocks.dungeons === false) {
                 ProgressionStore.getInstance().persistentUnlocks.dungeons = true;
@@ -747,6 +785,7 @@ export class Region {
         this.resourcesPerDay = [0, 0, 0, 0, 0, 0];
         this.alchemyDrain = 0;
         this.alchemyGain = 0;
+        this.villagerStatGain = [0, 0];
         for (var i = 0; i < this.height; i++) {
             for (var t = 0; t < this.width; t++) {
                 this.map[i][t].roadDist = -1;
@@ -798,7 +837,8 @@ export class Region {
         //get house population
         for (var i = 0; i < this.houses.length; i++) {
             if (this.map[this.houses[i][0]][this.houses[i][1]].houseBuildable === true) {
-                maxPop += 5 * this.map[this.houses[i][0]][this.houses[i][1]].building.tier;
+                maxPop += (5 + MoonlightData.getInstance().moonperks.urbanization.level) *
+                    this.map[this.houses[i][0]][this.houses[i][1]].building.tier;
             }
         }
 
@@ -908,6 +948,11 @@ export class Region {
                     this.alchemyDrain += drain[tile.building.tier - 1];
                     this.alchemyGain += gain[tile.building.tier - 1];
                     break;
+                case "Dojo":
+                    var moonBonus = (1 + MoonlightData.getInstance().moonperks.ninja.level * 0.25);
+                    this.villagerStatGain[0] += tile.building.tier * 0.05 * moonBonus;
+                    this.villagerStatGain[1] += tile.building.tier * 0.5 * moonBonus;
+                    break;
             }
         }
         this.townData.setMaxPopulation(maxPop);
@@ -949,6 +994,8 @@ export class Region {
                 return yieldSum > 0 && this.townData.alchemyEnabled === true;
             case "Tavern":
                 return yieldSum > 0 && this.townData.getTavernLevel() > 0;
+            case "Dojo":
+                return yieldSum > 0 && tile.houseBuildable && ProgressionStore.getInstance().persistentUnlocks.dungeons === true;
         }
     }
 
@@ -964,6 +1011,7 @@ export class Region {
             case "Crystal Loom":
             case "Docks":
             case "Alchemy Lab":
+            case "Dojo":
                 this.productionBuildings.push([tile.y, tile.x]);
                 break;
             case "Town House":
@@ -1169,6 +1217,8 @@ export class Region {
     }
 
     updateWeek() {
+        this.townData.villagerPower += this.villagerStatGain[0];
+        this.townData.villagerHealth += this.villagerStatGain[1];
         this.townData.endOfWeek();
     }
 }

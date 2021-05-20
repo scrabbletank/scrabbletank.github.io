@@ -183,7 +183,7 @@ export class ProgressionStore {
                 challenges: false,
                 autoExplore: false,
                 wizardClass: false,
-                dungeons: false
+                dungeons: true
             }
 
             this.totalCounts = {
@@ -399,5 +399,6 @@ export class ProgressionStore {
         for (const prop in saveObj.pun) {
             this.persistentUnlocks[prop] = saveObj.pun[prop];
         }
+        this.persistentUnlocks.dungeons = true;
     }
 }
