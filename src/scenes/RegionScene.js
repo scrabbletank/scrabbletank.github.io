@@ -298,7 +298,8 @@ export class RegionScene extends SceneUIBase {
                 this._updateRegionStats();
                 break;
             case "destroy":
-                if (blob.tile.building.name !== "Town" && PlayerData.instance.gold >= blob.tile.building.tier * Statics.DESTROY_BUILDING_COST) {
+                if (blob.tile.building !== undefined && blob.tile.building.name !== "Town" &&
+                    PlayerData.instance.gold >= blob.tile.building.tier * Statics.DESTROY_BUILDING_COST) {
                     PlayerData.instance.addGold(-blob.tile.building.tier * Statics.DESTROY_BUILDING_COST);
                     this.region.destroyBuilding(blob.tile.x, blob.tile.y);
                 }
