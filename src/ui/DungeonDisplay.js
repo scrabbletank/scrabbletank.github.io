@@ -40,6 +40,11 @@ export class DungeonDisplay {
                 var clr = i < dungeon.completedRooms ? Phaser.Display.Color.GetColor(130, 110, 200) : Phaser.Display.Color.GetColor(0, 0, 0);
                 var rect;
                 if (i % 5 === 4) {
+                    var texture = i === dungeon.maxRooms - 1 ? { sprite: "icons2", tile: 1 } : { sprite: "icons2", tile: 0 };
+                    var img = sceneContext.add.image(px + 7, y + 57, texture.sprite, texture.tile).setOrigin(0, 0).setDepth(99);
+                    img.displayWidth = 16;
+                    img.displayHeight = 16;
+                    this.elements.push(img);
                     rect = sceneContext.add.rectangle(px, y + 50, 30, 30, clr).setOrigin(0, 0);
                     px += 35;
                 } else {

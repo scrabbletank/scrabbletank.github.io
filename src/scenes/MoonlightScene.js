@@ -104,10 +104,7 @@ export class MoonlightScene extends SceneUIBase {
     enableLeveling() {
         this.canLevelPerks = true;
         this.exitButton.setText("REBIRTH");
-        this.challengeBtn.setVisible(ProgressionStore.getInstance().persistentUnlocks.challenges);
-        this.challengePointIcon.setVisible(ProgressionStore.getInstance().persistentUnlocks.challenges);
-        this.challengePointLabel.setText(MoonlightData.getInstance().challengePoints + "");
-        this.challengePointLabel.setVisible(ProgressionStore.getInstance().persistentUnlocks.challenges);
+        this.refresh();
     }
 
     _setupChallengeWindow() {

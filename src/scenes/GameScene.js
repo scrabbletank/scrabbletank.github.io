@@ -60,6 +60,7 @@ export class GameScene extends SceneUIBase {
         this.load.bitmapFont("courier16", "./../../assets/font/anonpro16.png", "./../../assets/font/anonpro16.xml");
         this.load.bitmapFont("courier20", "./../../assets/font/anonpro20.png", "./../../assets/font/anonpro20.xml");
         this.load.spritesheet("icons", "./../../assets/icons/icons.png", { frameWidth: 16, frameHeight: 16 });
+        this.load.spritesheet("icons2", "./../../assets/icons/icons2.png", { frameWidth: 16, frameHeight: 16 });
         this.load.spritesheet("talenticons", "./../../assets/icons/talenticons.png", { frameWidth: 16, frameHeight: 16 });
         this.load.spritesheet("bldicons", "./../../assets/icons/buildingicons.png", { frameWidth: 16, frameHeight: 16 });
         this.load.spritesheet("roadicons", "./../../assets/icons/roadicons.png", { frameWidth: 50, frameHeight: 50 });
@@ -506,8 +507,7 @@ export class GameScene extends SceneUIBase {
             this.resourceTierButtons[i].setPosition(20 + (i * 20), this.resourceStart + 20);
             this.resourceTierButtons[i].setVisible(this.player.resourceTierReached >= 1 && i <= this.player.resourceTierReached);
         }
-        this.resourceIcons[6].setVisible(this.progression.unlocks.townTab);
-        this.resourceIcons[7].setVisible(this.progression.unlocks.motes);
+        this.resourceIcons[7].setVisible(this.progression.unlocks.motes || this.player.motes > 0);
         if (this.progression.unlocks.resourceUI === true) {
             var res = this.player.resources[this.resourceTierSelected];
             this.resourceLabels.push(this.add.bitmapText(40, this.resourceStart + 40, "courier16", Common.numberString(Math.floor(res[0]))));

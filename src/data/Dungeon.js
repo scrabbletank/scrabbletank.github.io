@@ -4,8 +4,8 @@ import { Statics } from "./Statics";
 import { WorldData } from "./WorldData";
 
 const dungeonPrefix = ['Starlit', 'Poisoned', 'Malevolent', 'Monstrous', 'Dank', 'Moody', 'Submerged', 'Burning', 'Ancient',
-    'Foggy', 'Winding', 'Whispering', 'Bloody'];
-const dungeonSuffix = ['Tomb', 'Crypt', 'Grove', 'Garden', 'Tower', 'Spire', 'Dungeon', 'Barrow', 'Mausoleum'];
+    'Foggy', 'Winding', 'Whispering', 'Bloody', 'Malignant', 'Baleful', 'Gloomy'];
+const dungeonSuffix = ['Tomb', 'Crypt', 'Grove', 'Garden', 'Tower', 'Spire', 'Dungeon', 'Barrow', 'Mausoleum', 'Catacomb', 'Prison'];
 
 export class Dungeon {
     constructor(level, difficulty, tier, regionLevel, maxRooms) {
@@ -24,22 +24,34 @@ export class Dungeon {
         return dungeonPrefix[Common.randint(0, dungeonPrefix.length)] + " " + dungeonSuffix[Common.randint(0, dungeonSuffix.length)];
     }
 
+    _rewardAlreadyPicked(rewardType) {
+        for (var i = 0; i < this.rewards.length; i++) {
+            if (rewardType === this.rewards.type) {
+                return true;
+            }
+        }
+        return false;
+    }
+
     _randomizeRewards() {
         this.rewards = [];
         for (var i = 0; i < 3; i++) {
             if (this.tier === 0) {
                 var num = Common.randint(0, 6);
+                while (this._rewardAlreadyPicked(num) === true) {
+                    var num = Common.randint(0, 6);
+                }
                 switch (num) {
                     case Statics.DUNGEON.RESOURCES:
                         this.rewards.push({ type: num, amount: 28 });
                         break;
                     case Statics.DUNGEON.SHADE:
-                        var shade = Math.floor((1500 + MoonlightData.getInstance().moonperks.shadow2.level * 70) * (1 + (this.level / 4)) *
+                        var shade = Math.floor((1600 + MoonlightData.getInstance().moonperks.shadow2.level * 75) * (1 + (this.level / 4)) *
                             MoonlightData.getInstance().getShadowBonus());
                         this.rewards.push({ type: num, amount: shade });
                         break;
                     case Statics.DUNGEON.MOTES:
-                        var motes = (1 + MoonlightData.getInstance().moonperks.heartofdarkness.level) * 30;
+                        var motes = (1 + MoonlightData.getInstance().moonperks.heartofdarkness.level) * 40;
                         this.rewards.push({ type: num, amount: motes });
                         break;
                     case Statics.DUNGEON.GOLD:
@@ -55,6 +67,9 @@ export class Dungeon {
                 }
             } else if (this.tier === 1) {
                 var num = Common.randint(10, 18);
+                while (this._rewardAlreadyPicked(num) === true) {
+                    var num = Common.randint(10, 18);
+                }
                 switch (num) {
                     case Statics.DUNGEON.WOOD:
                         this.rewards.push({ type: num, amount: 0.15 });
@@ -82,7 +97,10 @@ export class Dungeon {
                         break;
                 }
             } else {
-                var num = Common.randint(20, 32);
+                var num = Common.randint(20, 31);
+                while (this._rewardAlreadyPicked(num) === true) {
+                    var num = Common.randint(20, 31);
+                }
                 switch (num) {
                     case Statics.DUNGEON.STRENGTH:
                         this.rewards.push({ type: num, amount: 0.2 });
@@ -104,9 +122,6 @@ export class Dungeon {
                         break;
                     case Statics.DUNGEON.ACCURACY:
                         this.rewards.push({ type: num, amount: 0.2 });
-                        break;
-                    case Statics.DUNGEON.CRIT_CHANCE:
-                        this.rewards.push({ type: num, amount: 0.1 });
                         break;
                     case Statics.DUNGEON.MOONLIGHT:
                         this.rewards.push({ type: num, amount: 0.1 });

@@ -216,7 +216,7 @@ export class TooltipRegistry {
                 return "Increases your starting Accuracy by " + (moonlight.level) + " + (1) and increases Accuracy from all sources by " +
                     (moonlight.level * 0.5) + "% + (0.5%).";
             case "Hero's Vault":
-                return "Increases the base income per villager by " + (moonlight.level * 0.1) + " + (0.1) gold.";
+                return "Increases the base income per villager by " + (moonlight.level) / 10 + " + (0.1) gold.";
             case "Moonwine":
                 return "Taverns count Town Houses within " + (1 + moonlight.level) + " + (1) tiles for their bonus.";
             case "Hardened Villagers":
@@ -652,7 +652,7 @@ export class TooltipRegistry {
             case Statics.DUNGEON.RESOURCES:
                 return "A stockpile of resources, enough for exactly " + reward.amount + " days of average production for all resources!";
             case Statics.DUNGEON.SHADE:
-                return "You thought it was just a shadow, but it's really " + Common.numberString(reward.amount) + " of Shade. Nice!";
+                return "You thought it was just a shadow, but it's really " + Common.numberString(reward.amount) + " Shade. Nice!";
             case Statics.DUNGEON.MOTES:
                 return "The final monster barfed up " + Common.numberString(reward.amount) + " Motes of Darkness.";
             case Statics.DUNGEON.GOLD:
@@ -664,20 +664,20 @@ export class TooltipRegistry {
             case Statics.DUNGEON.WOOD:
                 return "A design for a sweet woodcutting axe. Increase wood production by " + Math.floor(reward.amount * 100) + "% in every region.";
             case Statics.DUNGEON.LEATHER:
-                return "A design for a sweet skinning knife. Increase wood production by " + Math.floor(reward.amount * 100) + "% in every region.";
+                return "A design for a sweet skinning knife. Increase leather production by " + Math.floor(reward.amount * 100) + "% in every region.";
             case Statics.DUNGEON.METAL:
-                return "A design for a sweet pickaxe. Increase wood production by " + Math.floor(reward.amount * 100) + "% in every region.";
+                return "A design for a sweet pickaxe. Increase metal production by " + Math.floor(reward.amount * 100) + "% in every region.";
             case Statics.DUNGEON.FIBER:
-                return "A design for a sweet loom.. thing? Increase wood production by " + Math.floor(reward.amount * 100) + "% in every region.";
+                return "A design for a sweet loom.. thing? Increase fiber production by " + Math.floor(reward.amount * 100) + "% in every region.";
             case Statics.DUNGEON.STONE:
-                return "A design for a sweet stone cutter. Increase wood production by " + Math.floor(reward.amount * 100) + "% in every region.";
+                return "A design for a sweet stone cutter. Increase stone production by " + Math.floor(reward.amount * 100) + "% in every region.";
             case Statics.DUNGEON.CRYSTAL:
-                return "A design for a sweet crystal spinner. Increase wood production by " + Math.floor(reward.amount * 100) + "% in every region.";
+                return "A design for a sweet crystal spinner. Increase crystal production by " + Math.floor(reward.amount * 100) + "% in every region.";
             case Statics.DUNGEON.PRODUCTION:
                 return "Some mysterious device that keeps spinning. Apparently it can increase production by " +
                     Math.floor(reward.amount * 100) + "%, but only in this town.";
             case Statics.DUNGEON.ECONOMY:
-                return "Nothing. But some villagers came up with an idea to turn this into a tourist trap, increasing the economy by " +
+                return "Nothing. But some villagers came up with an idea to turn this into a tourist trap increasing the economy by " +
                     Math.floor(reward.amount * 100) + "%, but only in this town.";
             case Statics.DUNGEON.STRENGTH:
                 return "A Swoling Potion. Increases your Strength by " + Math.floor(reward.amount * 100) + "%.";
@@ -693,16 +693,14 @@ export class TooltipRegistry {
                 return "A Potion of Hardening. Kinky! Increases your Defense by " + Math.floor(reward.amount * 100) + "%.";
             case Statics.DUNGEON.ACCURACY:
                 return "A Magical Laser Pointer. Increases your Accuracy by " + Math.floor(reward.amount * 100) + "%.";
-            case Statics.DUNGEON.CRIT_CHANCE:
-                return "A Lucky Rock! Increases your Crit Chance by " + Math.floor(reward.amount * 100) + "%.";
             case Statics.DUNGEON.MOONLIGHT:
                 return "Moon Dust. Increases Moonlight earned this rebirth by " + Math.floor(reward.amount * 100) + "%.";
             case Statics.DUNGEON.TALENTS:
-                return "A wise old man who says he can teach you how to earn " + Math.floor(reward.amount * 100) + " talent points.";
+                return "A wise old man who says he can teach you how to earn " + reward.amount + " talent points.";
             case Statics.DUNGEON.PERM_VPOWER:
-                return "Body oil that makes the villagers muscles glisten, permanently increasing Villager Power by " + reward.amount + ".";
+                return "Body oil that makes the villagers muscles glisten, permanently increasing Villager Power by " + Math.floor(reward.amount * 100) / 100 + ".";
             case Statics.DUNGEON.PERM_VHEALTH:
-                return "A pot of dubious looking stew, permanently increasing Villager Health by " + reward.amount + ".";
+                return "A pot of dubious looking stew, permanently increasing Villager Health by " + Math.floor(reward.amount * 100) / 100 + ".";
         }
     }
 
@@ -713,9 +711,9 @@ export class TooltipRegistry {
             case Statics.DUNGEON.SHADE:
                 return { sprite: "moonicons", tile: 12 };
             case Statics.DUNGEON.MOTES:
-                return { sprite: "icons", tile: 47 };
+                return { sprite: "icons", tile: 39 };
             case Statics.DUNGEON.GOLD:
-                return { sprite: "icons", tile: 46 };
+                return { sprite: "icons", tile: 38 };
             case Statics.DUNGEON.GEAR_LEVELS:
                 return { sprite: "icons", tile: 28 };
             case Statics.DUNGEON.RUNES:
@@ -750,8 +748,6 @@ export class TooltipRegistry {
                 return { sprite: "icons", tile: 13 };
             case Statics.DUNGEON.ACCURACY:
                 return { sprite: "icons", tile: 14 };
-            case Statics.DUNGEON.CRIT_CHANCE:
-                return { sprite: "icons", tile: 45 };
             case Statics.DUNGEON.MOONLIGHT:
                 return { sprite: "moonicons", tile: 20 };
             case Statics.DUNGEON.TALENTS:

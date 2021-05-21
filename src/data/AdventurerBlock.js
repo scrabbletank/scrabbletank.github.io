@@ -11,6 +11,7 @@ export class AdventurerBlock extends CreatureBlock {
         this.secondWindDuration = 0;
         this.hitCounter = 0;
         this.encounterCounter = 0;
+        this.rebirth();
     }
 
     _getScale(attr) {
@@ -54,7 +55,7 @@ export class AdventurerBlock extends CreatureBlock {
         this.hitAnim = "claws";
         this.critAnim = "clawscrit";
         this.level = 0;
-        this.currentHealth = 25;
+        this.currentHealth = this.MaxHealth();
         this.attackCooldown = 0;
         this.secondWindCooldown = 0;
         this.secondWindDuration = 0;
@@ -124,47 +125,54 @@ export class AdventurerBlock extends CreatureBlock {
     }
     Strength() {
         var ret = this.stats.strength + this.statBonuses.strength + this.player.runeBonuses.strFlat;
-        ret = ret * (1 + (this.moonData.moonperks.str.level + MoonlightData.getInstance().challengePoints) * 0.005);
+        ret = ret * (1 + (this.moonData.moonperks.str.level + MoonlightData.getInstance().challengePoints * 2) * 0.005);
         ret += ret * (this.player.runeBonuses.strPercent + this.player.runeBonuses.allPercent);
+        ret = ret * this.player.dungeonBonus.strength;
         ret += this.Dexterity() * this.player.runeBonuses.dexToStr;
         return Math.floor(ret);
     }
     Dexterity() {
         var ret = this.stats.dexterity + this.statBonuses.dexterity + this.player.runeBonuses.dexFlat;
-        ret = ret * (1 + (this.moonData.moonperks.dex.level + MoonlightData.getInstance().challengePoints) * 0.005);
+        ret = ret * (1 + (this.moonData.moonperks.dex.level + MoonlightData.getInstance().challengePoints * 2) * 0.005);
         ret += ret * (this.player.runeBonuses.dexPercent + this.player.runeBonuses.allPercent);
+        ret = ret * this.player.dungeonBonus.dexterity;
         return Math.floor(ret);
     }
     Agility() {
         var ret = this.stats.agility + this.statBonuses.agility + this.player.runeBonuses.agiFlat;
-        ret = ret * (1 + (this.moonData.moonperks.agi.level + MoonlightData.getInstance().challengePoints) * 0.005);
+        ret = ret * (1 + (this.moonData.moonperks.agi.level + MoonlightData.getInstance().challengePoints * 2) * 0.005);
         ret += ret * (this.player.runeBonuses.agiPercent + this.player.runeBonuses.allPercent);
+        ret = ret * this.player.dungeonBonus.agility;
         return Math.floor(ret);
     }
     Endurance() {
         var ret = this.stats.endurance + this.statBonuses.endurance + this.player.runeBonuses.endFlat;
-        ret = ret * (1 + (this.moonData.moonperks.end.level + MoonlightData.getInstance().challengePoints) * 0.005);
+        ret = ret * (1 + (this.moonData.moonperks.end.level + MoonlightData.getInstance().challengePoints * 2) * 0.005);
         ret += ret * (this.player.runeBonuses.endPercent + this.player.runeBonuses.allPercent);
+        ret = ret * this.player.dungeonBonus.endurance;
         return Math.floor(ret);
     }
     Recovery() {
         var ret = this.stats.recovery + this.statBonuses.recovery + this.player.runeBonuses.recFlat;
-        ret = ret * (1 + (this.moonData.moonperks.rec.level + MoonlightData.getInstance().challengePoints) * 0.005);
+        ret = ret * (1 + (this.moonData.moonperks.rec.level + MoonlightData.getInstance().challengePoints * 2) * 0.005);
         ret += ret * (this.player.runeBonuses.recPercent + this.player.runeBonuses.allPercent);
+        ret = ret * this.player.dungeonBonus.recovery;
         ret += this.Endurance() * this.player.runeBonuses.endToRec;
         return Math.floor(ret);
     }
     Defense() {
         var ret = this.stats.defense + this.statBonuses.defense + this.player.runeBonuses.defFlat;
-        ret = ret * (1 + (this.moonData.moonperks.def.level + MoonlightData.getInstance().challengePoints) * 0.005);
+        ret = ret * (1 + (this.moonData.moonperks.def.level + MoonlightData.getInstance().challengePoints * 2) * 0.005);
         ret += ret * (this.player.runeBonuses.defPercent + this.player.runeBonuses.allPercent);
+        ret = ret * this.player.dungeonBonus.defense;
         ret += this.Agility() * this.player.runeBonuses.agiToDef;
         return Math.floor(ret);
     }
     Accuracy() {
         var ret = this.stats.accuracy + this.statBonuses.accuracy + this.player.runeBonuses.accFlat;
-        ret = ret * (1 + (this.moonData.moonperks.acc.level + MoonlightData.getInstance().challengePoints) * 0.005);
+        ret = ret * (1 + (this.moonData.moonperks.acc.level + MoonlightData.getInstance().challengePoints * 2) * 0.005);
         ret += ret * (this.player.runeBonuses.accPercent + this.player.runeBonuses.allPercent);
+        ret = ret * this.player.dungeonBonus.accuracy;
         return Math.floor(ret);
     }
     Hit() {

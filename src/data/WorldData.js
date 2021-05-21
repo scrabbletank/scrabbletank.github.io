@@ -20,22 +20,6 @@ export class WorldData {
             this.time.registerEvent("onWeekEnd", () => { this.updateWeek(); });
             this.onRegionChangedHandlers = [];
 
-            this.dungeonBonus = {
-                strength: 1,
-                dexterity: 1,
-                agility: 1,
-                endurance: 1,
-                recovery: 1,
-                defense: 1,
-                accuracy: 1,
-                wood: 1,
-                leather: 1,
-                metal: 1,
-                fiber: 1,
-                stone: 1,
-                crystal: 1,
-                moonlight: 1
-            }
             WorldData.instance = this;
         }
 
@@ -138,8 +122,7 @@ export class WorldData {
     }
 
     handleRunCompletion() {
-        var moonlightEarned = PlayerData.getInstance().earnableMoonlight(this.getCurrentRegion().regionLevel + 1) *
-            (1 + 0.15 * MoonlightData.getInstance().challenges.time.completions);
+        var moonlightEarned = PlayerData.getInstance().earnableMoonlight(this.getCurrentRegion().regionLevel + 1);
         MoonlightData.getInstance().moonlight += moonlightEarned;
 
         if (this.getCurrentRegion().regionLevel >= 1) {

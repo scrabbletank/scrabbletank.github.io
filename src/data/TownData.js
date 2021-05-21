@@ -5,6 +5,7 @@ import { MoonlightData } from "./MoonlightData";
 import { DynamicSettings } from "./DynamicSettings";
 import { ProgressionStore } from "./ProgressionStore";
 import { Dungeon } from "./Dungeon";
+import { RuneRegistry } from "./RuneRegistry";
 
 export class TownData {
     static getTechGoldCost(tech, tier) {
@@ -43,6 +44,8 @@ export class TownData {
         this.bountyMulti = 1;
         this.productionMulti = 1;
         this.exploreMulti = 1;
+        this.dungeonEconMulti = 1;
+        this.dungeonProdMulti = 1;
         this.townDefenseBonus = 0;
         this.goldCapBonus = moonData.moonperks.heropouch.level * 100;
         this.baseIncome = Statics.BASE_TAX_INCOME + moonData.moonperks.vault.level * 0.1;
@@ -57,8 +60,8 @@ export class TownData {
         this.nightLabourActive = false;
 
         // dungeon variables
-        this.villagerPower = 30;
-        this.villagerHealth = 120;
+        this.villagerPower = PlayerData.getInstance().baseVillagerPower;
+        this.villagerHealth = PlayerData.getInstance().baseVillagerHealth;
         this.villagerPowerMulti = 1;
         this.villagerHealthMulti = 1;
         this.dungeons = [];
@@ -81,11 +84,11 @@ export class TownData {
         if (ProgressionStore.getInstance().persistentUnlocks.dungeons === true) {
             this.buildings.barracks = {
                 name: "Barracks", level: 0, maxLevel: -1, requires: [],
-                goldCosts: [50, 30, 15], resources: [[15, 10, 8], [0, 0, 0], [0, 0, 0], [0, 0, 0], [10, 10, 5], [0, 0, 0]]
+                goldCosts: [75, 40, 20], resources: [[25, 15, 10], [0, 0, 0], [0, 0, 0], [20, 10, 8], [0, 0, 0], [0, 0, 0]]
             }
             this.buildings.armory = {
                 name: "Armory", level: 0, maxLevel: -1, requires: [],
-                goldCosts: [50, 30, 15], resources: [[15, 10, 8], [0, 0, 0], [0, 0, 0], [0, 0, 0], [10, 10, 5], [0, 0, 0]]
+                goldCosts: [75, 40, 20], resources: [[0, 0, 0], [20, 10, 8], [25, 15, 10], [0, 0, 0], [0, 0, 0], [0, 0, 0]]
             }
         }
 
@@ -148,7 +151,7 @@ export class TownData {
     }
 
     calculateEconMulti(bonus) {
-        this.economyMulti = 1 + bonus + (this.upgrades.banking.level * 0.05);
+        this.economyMulti = (1 + bonus + (this.upgrades.banking.level * 0.05)) * this.dungeonEconMulti;
     }
     getTownIncome() {
         var player = new PlayerData();
@@ -165,7 +168,7 @@ export class TownData {
         var nightLabourBonus = this.nightLabourActive === true ? (1 + 0.1 * MoonlightData.getInstance().moonperks.nightlabour.level) : 1;
         var multi = this.productionMulti *
             (1 + this.friendshipLevel * 0.01 * MoonlightData.getInstance().moonperks.motivatedlabor.level) *
-            nightLabourBonus * DynamicSettings.getInstance().productionMulti;
+            nightLabourBonus * DynamicSettings.getInstance().productionMulti * this.dungeonProdMulti;
         if (DynamicSettings.getInstance().friendshipToProduction === true) {
             return multi + this.friendshipLevel * 0.05;
         } else {
@@ -238,62 +241,120 @@ export class TownData {
         this.dungeons.push(new Dungeon(lvl, difficulty, tier, region.regionLevel, 5 + tier * 5));
     }
 
+    areDungeonsComplete() {
+        if (this.dungeons.length != 3) {
+            return false;
+        }
+        for (var i = 0; i < this.dungeons.length; i++) {
+            if (this.dungeons[i].completedRooms < this.dungeons[i].maxRooms) {
+                return false;
+            }
+        }
+        return true;
+    }
+
     chooseReward(reward) {
         switch (reward.type) {
             case Statics.DUNGEON.RESOURCES:
-                return "A stockpile of resources, enough for exactly " + reward.amount + " days of average production for all resources!";
+                var region = WorldData.getInstance().getCurrentRegion();
+                var res = region.resourcesPerDay;
+                var avg = 0;
+                for (var i = 0; i < res.length; i++) {
+                    avg += res[i];
+                }
+                avg = Math.ceil(avg / res.length) * reward.amount;
+                PlayerData.getInstance().addResource([avg, avg, avg, avg, avg, avg], Math.min(7, region.regionLevel));
+                break;
             case Statics.DUNGEON.SHADE:
-                return "You thought it was just a shadow, but it's really " + Common.numberString(reward.amount) + " of Shade. Nice!";
+                PlayerData.getInstance().addShade(reward.amount);
+                break;
             case Statics.DUNGEON.MOTES:
-                return "The final monster barfed up " + Common.numberString(reward.amount) + " Motes of Darkness.";
+                PlayerData.getInstance().addMote(reward.amount);
+                break;
             case Statics.DUNGEON.GOLD:
-                return "A 'Dragons Horde' worth of gold, or " + Common.numberString(reward.amount) + " pieces.";
+                PlayerData.getInstance().addGold(reward.amount);
+                break;
             case Statics.DUNGEON.GEAR_LEVELS:
-                return "Your not really sure how, but get " + Common.numberString(reward.amount) + " levels to your equiped gear.";
+                var player = PlayerData.getInstance();
+                if (player.weapon !== undefined) {
+                    player.unequip(player.weapon.slotType);
+                    player.weapon.bringToLevel(player.weapon.level + reward.amount);
+                    player.equip(player.weapon);
+                }
+                if (player.armor !== undefined) {
+                    player.unequip(player.armor.slotType);
+                    player.armor.bringToLevel(player.armor.level + reward.amount);
+                    player.equip(player.armor);
+                }
+                if (player.trinket !== undefined) {
+                    player.unequip(player.trinket.slotType);
+                    player.trinket.bringToLevel(player.trinket.level + reward.amount);
+                    player.equip(player.trinket);
+                }
+                break;
             case Statics.DUNGEON.RUNES:
-                return "The monsters were guarding " + Common.numberString(reward.amount) + " random Runes. Nice!";
+                var runeLevel = 1 + Math.floor(WorldData.getInstance().getCurrentRegion().regionLevel / 2);
+                for (var i = 0; i < reward.amount; i++) {
+                    PlayerData.getInstance().addRune(RuneRegistry.getRandomRuneAtLevel(runeLevel));
+                }
+                break;
             case Statics.DUNGEON.WOOD:
-                return "A design for a sweet woodcutting axe. Increase wood production by " + Math.floor(reward.amount * 100) + "% in every region.";
+                PlayerData.getInstance().multiplyDungeonBonus('wood', 1 + reward.amount);
+                break;
             case Statics.DUNGEON.LEATHER:
-                return "A design for a sweet skinning knife. Increase wood production by " + Math.floor(reward.amount * 100) + "% in every region.";
+                PlayerData.getInstance().multiplyDungeonBonus('leather', 1 + reward.amount);
+                break;
             case Statics.DUNGEON.METAL:
-                return "A design for a sweet pickaxe. Increase wood production by " + Math.floor(reward.amount * 100) + "% in every region.";
+                PlayerData.getInstance().multiplyDungeonBonus('metal', 1 + reward.amount);
+                break;
             case Statics.DUNGEON.FIBER:
-                return "A design for a sweet loom.. thing? Increase wood production by " + Math.floor(reward.amount * 100) + "% in every region.";
+                PlayerData.getInstance().multiplyDungeonBonus('fiber', 1 + reward.amount);
+                break;
             case Statics.DUNGEON.STONE:
-                return "A design for a sweet stone cutter. Increase wood production by " + Math.floor(reward.amount * 100) + "% in every region.";
+                PlayerData.getInstance().multiplyDungeonBonus('stone', 1 + reward.amount);
+                break;
             case Statics.DUNGEON.CRYSTAL:
-                return "A design for a sweet crystal spinner. Increase wood production by " + Math.floor(reward.amount * 100) + "% in every region.";
+                PlayerData.getInstance().multiplyDungeonBonus('crystal', 1 + reward.amount);
+                break;
             case Statics.DUNGEON.PRODUCTION:
-                return "Some mysterious device that keeps spinning. Apparently it can increase production by " +
-                    Math.floor(reward.amount * 100) + "%, but only in this town.";
+                this.dungeonProdMulti += reward.amount;
+                break;
             case Statics.DUNGEON.ECONOMY:
-                return "Nothing. But some villagers came up with an idea to turn this into a tourist trap, increasing the economy by " +
-                    Math.floor(reward.amount * 100) + "%, but only in this town.";
+                this.dungeonEconMulti += reward.amount;
+                break;
             case Statics.DUNGEON.STRENGTH:
-                return "A Swoling Potion. Increases your Strength by " + Math.floor(reward.amount * 100) + "%.";
+                PlayerData.getInstance().multiplyDungeonBonus('strength', 1 + reward.amount);
+                break;
             case Statics.DUNGEON.DEXTERITY:
-                return "A Manual depecting all the ways to stab someone. Increases your Dexterity by " + Math.floor(reward.amount * 100) + "%.";
+                PlayerData.getInstance().multiplyDungeonBonus('dexterity', 1 + reward.amount);
+                break;
             case Statics.DUNGEON.AGILITY:
-                return "A Potion of Moving Real Fast. Increases your Agility by " + Math.floor(reward.amount * 100) + "%.";
+                PlayerData.getInstance().multiplyDungeonBonus('agility', 1 + reward.amount);
+                break;
             case Statics.DUNGEON.ENDURANCE:
-                return "Literally just steroids. Increases your Endurance by " + Math.floor(reward.amount * 100) + "%.";
+                PlayerData.getInstance().multiplyDungeonBonus('endurance', 1 + reward.amount);
+                break;
             case Statics.DUNGEON.RECOVERY:
-                return "Magical healing goop. Increases your Recovery by " + Math.floor(reward.amount * 100) + "%.";
+                PlayerData.getInstance().multiplyDungeonBonus('recovery', 1 + reward.amount);
+                break;
             case Statics.DUNGEON.DEFENSE:
-                return "A Potion of Hardening. Kinky! Increases your Defense by " + Math.floor(reward.amount * 100) + "%.";
+                PlayerData.getInstance().multiplyDungeonBonus('defense', 1 + reward.amount);
+                break;
             case Statics.DUNGEON.ACCURACY:
-                return "A Magical Laser Pointer. Increases your Accuracy by " + Math.floor(reward.amount * 100) + "%.";
-            case Statics.DUNGEON.CRIT_CHANCE:
-                return "A Lucky Rock! Increases your Crit Chance by " + Math.floor(reward.amount * 100) + "%.";
+                PlayerData.getInstance().multiplyDungeonBonus('accuracy', 1 + reward.amount);
+                break;
             case Statics.DUNGEON.MOONLIGHT:
-                return "Moon Dust. Increases Moonlight earned this rebirth by " + Math.floor(reward.amount * 100) + "%.";
+                PlayerData.getInstance().multiplyDungeonBonus('moonlight', 1 + reward.amount);
+                break;
             case Statics.DUNGEON.TALENTS:
-                return "A wise old man who says he can teach you how to earn " + Math.floor(reward.amount * 100) + " talent points.";
+                PlayerData.getInstance().addTalentPoints(reward.amount);
+                break;
             case Statics.DUNGEON.PERM_VPOWER:
-                return "Body oil that makes the villagers muscles glisten, permanently increasing Villager Power by " + reward.amount + ".";
+                PlayerData.getInstance().addBaseVillagerStats(reward.amount, 0);
+                break;
             case Statics.DUNGEON.PERM_VHEALTH:
-                return "A pot of dubious looking stew, permanently increasing Villager Health by " + reward.amount + ".";
+                PlayerData.getInstance().addBaseVillagerStats(0, reward.amount);
+                break;
         }
     }
 
@@ -346,7 +407,11 @@ export class TownData {
             fr: this.friendship,
             frl: this.friendshipLevel,
             alc: this.alchemyEnabled,
-            tl: this.tilesExplored
+            tl: this.tilesExplored,
+            vp: this.villagerPower,
+            vpm: this.villagerPowerMulti,
+            vh: this.villagerHealth,
+            vhm: this.villagerHealthMulti
         }
 
         return saveObj;
@@ -367,9 +432,15 @@ export class TownData {
         this.friendshipLevel = saveObj.frl;
         this.alchemyEnabled = saveObj.alc;
         this.tilesExplored = saveObj.tl ? saveObj.tl : 0;
+        this.villagerPower = saveObj.vp ? saveObj.vp : 1;
+        this.villagerPowerMulti = saveObj.vpm ? saveObj.vpm : 1;
+        this.villagerHealth = saveObj.vh ? saveObj.vh : 10;
+        this.villagerHealthMulti = saveObj.vhm ? saveObj.vhm : 1;
         this.friendshipToNext = TownData.calcFriendshipToLevel(this.friendshipLevel);
         for (var i = 0; i < saveObj.bld.length; i++) {
-            this.buildings[saveObj.bld[i][0]].level = saveObj.bld[i][1];
+            if (this.buildings[saveObj.bld[i][0]] !== undefined) {
+                this.buildings[saveObj.bld[i][0]].level = saveObj.bld[i][1];
+            }
         }
         for (var i = 0; i < saveObj.up.length; i++) {
             this.upgrades[saveObj.up[i][0]].level = saveObj.up[i][1];
@@ -379,6 +450,5 @@ export class TownData {
                 this.dungeons.push(Dungeon.loadFromFile(saveObj.dng[i], ver));
             }
         }
-        this.currentPopulation = 150;
     }
 }

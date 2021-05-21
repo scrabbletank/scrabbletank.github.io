@@ -199,11 +199,10 @@ var Statics = {
         RECOVERY: 24,
         DEFENSE: 25,
         ACCURACY: 26,
-        CRIT_CHANCE: 27,
-        MOONLIGHT: 28,
-        TALENTS: 29,
-        PERM_VPOWER: 30,
-        PERM_VHEALTH: 31
+        MOONLIGHT: 27,
+        TALENTS: 28,
+        PERM_VPOWER: 29,
+        PERM_VHEALTH: 30
     }
 };
 

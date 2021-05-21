@@ -243,7 +243,6 @@ export class CreatureBlock {
         }
         if (this.slowTimer > 0) {
             this.slowTimer -= delta;
-            console.log(Statics.DMG_TRUE);
             this.takeDamage(this.slowDamage * (delta / 1000), false, Statics.DMG_TRUE);
             delta = delta * (1 - this.slowPercent);
         }

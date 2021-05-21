@@ -32,8 +32,9 @@ export class TownScene extends SceneUIBase {
         } else {
             props.dungeon.rewards = [props.dungeon.rewards[props.reward]];
             var region = WorldData.getInstance().getRegion(props.dungeon.regionLevel);
-            region.townData.chooseReward(props.dungeon.rewards);
+            region.townData.chooseReward(props.dungeon.rewards[0]);
             this._updateStatus();
+            this._refreshTechs();
         }
     }
 
@@ -43,7 +44,7 @@ export class TownScene extends SceneUIBase {
             region.townData.getVillagerHealth(), region.townData.getArmySize());
         this.dungeonManager.exploreDungeon(dungeon, villagerBlock);
         this._setupActiveDungeonRooms(dungeon);
-        this._updateStatus();
+        this._refreshTechs();
     }
 
     _onCreatureChanged(villager, enemy) {
@@ -56,6 +57,7 @@ export class TownScene extends SceneUIBase {
         var region = WorldData.getInstance().getRegion(this.dungeonManager.activeDungeon.regionLevel);
         region.townData.killPopulation(this.dungeonManager.villagerBlock.armySize);
         this._updateStatus();
+        this._refreshTechs();
     }
 
     _setupActiveDungeonRooms(dungeon) {
@@ -70,6 +72,11 @@ export class TownScene extends SceneUIBase {
             var clr = i < dungeon.completedRooms ? Phaser.Display.Color.GetColor(130, 110, 200) : Phaser.Display.Color.GetColor(0, 0, 0);
             var rect;
             if (i % 5 === 4) {
+                var texture = i === dungeon.maxRooms - 1 ? { sprite: "icons2", tile: 1 } : { sprite: "icons2", tile: 0 };
+                var img = this.add.image(x + 4, this.relativeY(600) + 4, texture.sprite, texture.tile).setOrigin(0, 0).setDepth(99);
+                img.displayWidth = 32;
+                img.displayHeight = 32;
+                this.activeDungeonRooms.push(img);
                 rect = this.add.rectangle(x, this.relativeY(600), 40, 40, clr).setOrigin(0, 0);
                 x += 45;
             } else {
@@ -94,8 +101,8 @@ export class TownScene extends SceneUIBase {
             WorldData.getInstance().getRegion(dungeon.regionLevel).townData.killPopulation(this.dungeonManager.villagerBlock.armySize -
                 this.dungeonManager.villagerBlock.ArmySize());
         } else if (dungeon.completedRooms % 5 === 0) {
-            var shade = dungeon.level * 100 * MoonlightData.getInstance().getShadowBonus();
-            var motes = dungeon.tier * 5 * (1 + MoonlightData.getInstance().moonperks.heartofdarkness.level);
+            var shade = dungeon.level * 250 * MoonlightData.getInstance().getShadowBonus();
+            var motes = dungeon.tier * 10 * (1 + MoonlightData.getInstance().moonperks.heartofdarkness.level);
             PlayerData.getInstance().addShade(shade);
             PlayerData.getInstance().addMote(motes);
         } else {
@@ -104,7 +111,7 @@ export class TownScene extends SceneUIBase {
             PlayerData.getInstance().addResource(res, Math.min(7, dungeon.regionLevel));
         }
         this._setupActiveDungeonRooms(dungeon);
-        this._updateStatus();
+        this._refreshTechs();
     }
 
     refresh() {
@@ -115,6 +122,7 @@ export class TownScene extends SceneUIBase {
     rebirth() {
         this.selectedTab = 0;
         this._updateStatus();
+        this._refreshTechs();
         this.upgradesBtn.setVisible(false);
         this.dungeonsBtn.setVisible(false);
     }
@@ -168,8 +176,15 @@ export class TownScene extends SceneUIBase {
         this.dungeonBlockDisplays.push(new DungeonBlockDisplay(this, this.relativeX(260), this.relativeY(430)));
         this.dungeonBlockDisplays.push(new DungeonBlockDisplay(this, this.relativeX(580), this.relativeY(430), true));
         this.activeDungeonRooms = [];
+        this.dungeonsCompleteLabel = this.add.bitmapText(this.relativeX(550), this.relativeY(430), "courier20",
+            "With the Dungeons defeated, your brave villagers travel\n" +
+            "the lands teaching others to fight. Your Dojo's now \n" +
+            "give 20% of their production to the next region that\n" +
+            "hasn't conquered their Dungeons.", 20, 1).setOrigin(0.5, 0);
+        this.dungeonsCompleteLabel.setVisible(false);
 
         this._updateStatus();
+        this._refreshTechs();
         WorldData.getInstance().time.registerEvent("onDayEnd", () => { this._endOfDay(); });
     }
 
@@ -203,6 +218,7 @@ export class TownScene extends SceneUIBase {
             player.spendResource(resource, tier);
             region.townData.increaseTechLevel(tech);
             this._updateStatus();
+            this._updateTech();
         }
     }
 
@@ -219,7 +235,7 @@ export class TownScene extends SceneUIBase {
 
     _selectTab(value) {
         this.selectedTab = value;
-        this._updateStatus();
+        this._refreshTechs();
     }
 
     _updateStatus() {
@@ -238,8 +254,9 @@ export class TownScene extends SceneUIBase {
             "Friendship\nLevel: " + region.townData.friendshipLevel + " (+" + Math.round((region.townData.getFriendshipBonus() - 1) * 100) + "% Shade)\n" +
             "Daily Production:\n";
 
-        for (var i = 0; i < region.resourcesPerDay.length; i++) {
-            txt += "  " + Statics.RESOURCE_NAMES[i] + ": " + (Math.floor(region.resourcesPerDay[i] * prodBonus * govBonus * 100) / 100) + "\n";
+        var resources = region._getResourcesPerDay();
+        for (var i = 0; i < resources.length; i++) {
+            txt += "  " + Statics.RESOURCE_NAMES[i] + ": " + (Math.floor(resources[i] * prodBonus * govBonus * 100) / 100) + "\n";
         }
         if (region.alchemyDrain > 0) {
             txt += "  Alchemy Drain: " + region.alchemyDrain + "\n" +
@@ -275,7 +292,10 @@ export class TownScene extends SceneUIBase {
             this.nightLabourBtn.setPosition(this.relativeX(15), this.relativeY(h));
             this.nightLabourBtn.setVisible(true);
         }
+    }
 
+    _refreshTechs() {
+        var region = WorldData.instance.getCurrentRegion();
         this.dungeonsBtn.setVisible(region.townData.dungeons.length > 0);
 
         for (var i = 0; i < this.buildingDisplays.length; i++) {
@@ -312,6 +332,7 @@ export class TownScene extends SceneUIBase {
             for (var i = 0; i < this.dungeonBlockDisplays.length; i++) {
                 this.dungeonBlockDisplays[i].setVisible(this.dungeonManager.combatActive);
             }
+            this.dungeonsCompleteLabel.setVisible(this.dungeonManager.combatActive === false && region.townData.areDungeonsComplete() === true);
         }
     }
 

@@ -258,10 +258,6 @@ export class Region {
 
         this.generateTerrain(points);
         this._init();
-
-        this.townData.uncoverDungeon(this);
-        this.townData.uncoverDungeon(this);
-        this.townData.uncoverDungeon(this);
     }
 
     save() {
@@ -285,7 +281,8 @@ export class Region {
             ic: this.invasionCounter,
             wh: this.worldHeight,
             type: this.type,
-            tr: this.traits
+            tr: this.traits,
+            dl: this.dungeonLocations
         }
 
         return saveObj;
@@ -306,6 +303,7 @@ export class Region {
         region.worldHeight = saveObj.wh;
         region.type = saveObj.type;
         region.traits = saveObj.tr;
+        region.dungeonLocations = saveObj.dl === undefined ? [] : saveObj.dl;
         region.map = []
         for (var i = 0; i < saveObj.map.length; i++) {
             var row = [];
@@ -429,7 +427,7 @@ export class Region {
 
         // for unlocking dungeons, we need to place a single crypt tile in region 5
         if (DynamicSettings.getInstance().challengeName === "" &&
-            ProgressionStore.getInstance().persistentUnlocks.dungeons === false && this.regionlevel === 4) {
+            ProgressionStore.getInstance().persistentUnlocks.dungeons === false && this.regionLevel === 4) {
             // place the crypt on a random tile 5 rows from the top
             var x = Common.randint(0, this.width);
             this.map[this.height - 5][x].init("crypt", maxDiff, minDiff, this);
@@ -544,7 +542,7 @@ export class Region {
             this.townData.addFriendship(10 * MoonlightData.getInstance().moonperks.discovery.level);
             if (this.map[y][x].hasRune === true) {
                 this.map[y][x].hasRune = false;
-                var rune = RuneRegistry.getRandomRuneAtLevel((this.regionLevel / 2) + 1);
+                var rune = RuneRegistry.getRandomRuneAtLevel(Math.floor(this.regionLevel / 2) + 1);
                 PlayerData.getInstance().addRune(rune);
             }
             if (this.map[y][x].name === "Town") {
@@ -949,9 +947,11 @@ export class Region {
                     this.alchemyGain += gain[tile.building.tier - 1];
                     break;
                 case "Dojo":
-                    var moonBonus = (1 + MoonlightData.getInstance().moonperks.ninja.level * 0.25);
-                    this.villagerStatGain[0] += tile.building.tier * 0.05 * moonBonus;
-                    this.villagerStatGain[1] += tile.building.tier * 0.5 * moonBonus;
+                    if (tile.houseBuildable === true) {
+                        var moonBonus = (1 + MoonlightData.getInstance().moonperks.ninja.level * 0.25);
+                        this.villagerStatGain[0] += tile.building.tier * 0.05 * moonBonus;
+                        this.villagerStatGain[1] += tile.building.tier * 0.5 * moonBonus;
+                    }
                     break;
             }
         }
@@ -1170,6 +1170,12 @@ export class Region {
         for (var i = 0; i < this.resourcesPerDay.length; i++) {
             resource.push(Math.max(0, this.resourcesPerDay[i] * prodBonus));
         }
+        resource[0] *= PlayerData.getInstance().dungeonBonus.wood;
+        resource[1] *= PlayerData.getInstance().dungeonBonus.leather;
+        resource[2] *= PlayerData.getInstance().dungeonBonus.metal;
+        resource[3] *= PlayerData.getInstance().dungeonBonus.fiber;
+        resource[4] *= PlayerData.getInstance().dungeonBonus.stone;
+        resource[5] *= PlayerData.getInstance().dungeonBonus.crystal;
         return resource;
     }
 
@@ -1217,8 +1223,19 @@ export class Region {
     }
 
     updateWeek() {
-        this.townData.villagerPower += this.villagerStatGain[0];
-        this.townData.villagerHealth += this.villagerStatGain[1];
+        if (this.townData.areDungeonsComplete() === true) {
+            var regionList = WorldData.getInstance().regionList;
+            for (var i = this.regionLevel + 1; i < regionList.length; i++) {
+                if (regionList[i].townData.areDungeonsComplete() === false) {
+                    regionList[i].townData.villagerPower += this.villagerStatGain[0] * 0.2;
+                    regionList[i].townData.villagerHealth += this.villagerStatGain[1] * 0.2;
+                    break;
+                }
+            }
+        } else {
+            this.townData.villagerPower += this.villagerStatGain[0];
+            this.townData.villagerHealth += this.villagerStatGain[1];
+        }
         this.townData.endOfWeek();
     }
 }

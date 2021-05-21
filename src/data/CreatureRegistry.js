@@ -532,7 +532,7 @@ dungeonDefs['guardian'] = {
 };
 dungeonDefs['slime'] = {
     name: "Gelatinous Cube",
-    powerScale: 0.85,
+    powerScale: 0.925,
     healthScale: 1.5,
     icon: { sprite: "enemyicons", tile: 0 }
 };
@@ -550,7 +550,7 @@ dungeonDefs['shadow'] = {
 };
 dungeonDefs['void'] = {
     name: "Crystaline Void",
-    powerScale: 0.9,
+    powerScale: 0.95,
     healthScale: 1.5,
     icon: { sprite: "enemyicons", tile: 9 }
 };

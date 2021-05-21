@@ -83,22 +83,23 @@ export class DungeonManager {
     }
 
     _initMonster() {
-        var count = Common.randint(8 + Math.floor(this.activeDungeon.level / 12), 12 + Math.floor(this.activeDungeon.level / 8));
+        var count = Common.randint(6 + Math.floor(this.activeDungeon.level / 12), 10 + Math.floor(this.activeDungeon.level / 8));
         this.enemyBlock = CreatureRegistry.GetDungeonCreatureByName(MONSTERS[Common.randint(0, MONSTERS.length)],
             this.activeDungeon.difficulty, this.activeDungeon.difficulty * 10, count);
     }
 
     _initMiniBoss() {
-        var count = Common.randint(4 + Math.floor(this.activeDungeon.level / 24), 6 + Math.floor(this.activeDungeon.level / 16));
-        var tierBonus = [2.2, 2.5];
-        var diff = this.activeDungeon.difficulty * tierBonus[Math.round(this.activeDungeon.completedRooms / 5)];
+        var count = Common.randint(3 + Math.floor(this.activeDungeon.level / 24), 5 + Math.floor(this.activeDungeon.level / 16));
+        var tierBonus = [3, 4];
+        var diff = this.activeDungeon.difficulty * tierBonus[Math.floor(this.activeDungeon.completedRooms / 5)];
         this.enemyBlock = CreatureRegistry.GetDungeonCreatureByName(MONSTERS[Common.randint(0, MONSTERS.length)],
             Math.floor(diff), Math.floor(diff * 10), count);
+        this.enemyBlock.name = "Elite " + this.enemyBlock.name;
     }
 
     _initBoss() {
-        var count = Common.randint(8 + Math.floor(this.activeDungeon.level / 12), 12 + Math.floor(this.activeDungeon.level / 8));
-        var tierBonus = [1.1, 1.25, 1.5];
+        var count = Common.randint(6 + Math.floor(this.activeDungeon.level / 12), 10 + Math.floor(this.activeDungeon.level / 8));
+        var tierBonus = [2, 2.5, 3];
         var diff = count * tierBonus[this.activeDungeon.tier] * this.activeDungeon.difficulty;
         this.enemyBlock = CreatureRegistry.GetDungeonCreatureByName(BOSSES[Common.randint(0, BOSSES.length)],
             Math.floor(diff), Math.floor(diff * 10), 1);
