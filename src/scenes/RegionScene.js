@@ -114,7 +114,7 @@ export class RegionScene extends SceneUIBase {
             for (var i = 0; i < resources.length; i++) {
                 txt += " " + Statics.RESOURCE_NAMES[i] + ": " + (Math.floor(resources[i] * 100) / 100) + "\n";
             }
-            this.regionStats = this.add.bitmapText(this.relativeX(660), this.relativeY(280), "courier20", txt);
+            this.regionStats = this.add.bitmapText(this.relativeX(660), this.relativeY(400), "courier20", txt);
         }
     }
 
@@ -252,16 +252,6 @@ export class RegionScene extends SceneUIBase {
         this.tileSelectWindow.addOnActionHandler((action, blob) => { this._tileActionHandler(action, blob); });
     }
 
-    _canUpgrade(tile) {
-        if (tile.building.name === "Market") {
-            return tile.building.tier < this.region.townData.getMarketLevel();
-        }
-        if (tile.building.name === "Tavern") {
-            return tile.building.tier < this.region.townData.getTavernLevel();
-        }
-        return tile.building.tier < 3;
-    }
-
     _tileActionHandler(action, blob) {
         switch (action) {
             case "explore":
@@ -272,8 +262,6 @@ export class RegionScene extends SceneUIBase {
                 var tier = Math.floor(Math.min(7, this.region.regionLevel));
                 if (Common.canCraft(blob.building.resourceCosts, player.resources[tier]) === true &&
                     blob.building.goldCost <= player.gold && this.region._canBuild(blob.tile, blob.building)) {
-                    player.spendResource(blob.building.resourceCosts, tier);
-                    player.addGold(-blob.building.goldCost);
                     this.region.placeBuilding(blob.tile.x, blob.tile.y, blob.building);
                     blob.tile.building = blob.building;
                     this.scene.get("TownScene")._updateStatus();
@@ -284,12 +272,7 @@ export class RegionScene extends SceneUIBase {
                 if (blob.tile.building === undefined) {
                     break;
                 }
-                var player = new PlayerData();
-                var tier = Math.floor(Math.min(7, this.region.regionLevel));
-                if (Common.canCraft(blob.tile.building.resourceCosts, player.resources[tier]) === true &&
-                    blob.tile.building.goldCost <= player.gold && this._canUpgrade(blob.tile)) {
-                    player.spendResource(blob.tile.building.resourceCosts, tier);
-                    player.addGold(-blob.tile.building.goldCost);
+                if (this.region._canUpgrade(blob.tile) === true) {
                     this.region.upgradeBuilding(blob.tile.x, blob.tile.y);
                     this.tileElements[blob.tile.y][blob.tile.x].building.setTexture(blob.tile.building.texture.sprite,
                         blob.tile.building.texture.tile + 8 * (blob.tile.building.tier - 1));
@@ -504,6 +487,8 @@ export class RegionScene extends SceneUIBase {
         this.autoExploreButton.setVisible(this.progression.persistentUnlocks.autoExplore);
         this.autoInvadeLabel.setVisible(MoonlightData.getInstance().challenges.invasion.completions > 0);
         this.autoInvadeButton.setVisible(MoonlightData.getInstance().challenges.invasion.completions > 0);
+        this.autoUpgradeLabel.setVisible(MoonlightData.getInstance().challenges.outcast.completions > 0);
+        this.autoUpgradeButton.setVisible(MoonlightData.getInstance().challenges.outcast.completions > 0);
         this._updateRegionStats();
     }
 
@@ -525,6 +510,16 @@ export class RegionScene extends SceneUIBase {
         } else {
             this.autoInvadeButton.setText("OFF");
             this.autoInvadeButton.setTextColor(Phaser.Display.Color.GetColor(175, 0, 140));
+        }
+    }
+    _toggleAutoUpgrade() {
+        this.region.autoUpgrade = !this.region.autoUpgrade;
+        if (this.region.autoUpgrade === true) {
+            this.autoUpgradeButton.setText("ON");
+            this.autoUpgradeButton.setTextColor(Phaser.Display.Color.GetColor(255, 255, 255));
+        } else {
+            this.autoUpgradeButton.setText("OFF");
+            this.autoUpgradeButton.setTextColor(Phaser.Display.Color.GetColor(175, 0, 140));
         }
     }
 
@@ -559,14 +554,22 @@ export class RegionScene extends SceneUIBase {
         this.autoInvadeButton = new TextButton(this, this.relativeX(795), this.relativeY(220), 40, 20, "OFF")
             .onClickHandler(() => { this._toggleAutoInvade() });
         this.autoInvadeButton.setTextColor(Phaser.Display.Color.GetColor(175, 0, 140));
+        this.autoUpgradeLabel = this.add.bitmapText(this.relativeX(660), this.relativeY(250), "courier20", "Auto Upgrade:");
+        this.autoUpgradeButton = new TextButton(this, this.relativeX(795), this.relativeY(250), 40, 20,
+            this.region.autoUpgrade === true ? "ON" : "OFF")
+            .onClickHandler(() => { this._toggleAutoUpgrade() });
+        this.autoUpgradeButton.setTextColor(this.region.autoUpgrade === true ? Phaser.Display.Color.GetColor(255, 255, 255) :
+            Phaser.Display.Color.GetColor(175, 0, 140));
 
         this.autoExploreLabel.setVisible(this.progression.persistentUnlocks.autoExplore);
         this.autoExploreButton.setVisible(this.progression.persistentUnlocks.autoExplore);
         this.autoInvadeLabel.setVisible(MoonlightData.getInstance().challenges.invasion.completions > 0);
         this.autoInvadeButton.setVisible(MoonlightData.getInstance().challenges.invasion.completions > 0);
+        this.autoUpgradeLabel.setVisible(MoonlightData.getInstance().challenges.outcast.completions > 0);
+        this.autoUpgradeButton.setVisible(MoonlightData.getInstance().challenges.outcast.completions > 0);
 
-        this.exploreLabel = this.add.bitmapText(this.relativeX(660), this.relativeY(250), "courier20", "Exploring:");
-        this.exploreProgressBar = new ProgressBar(this, this.relativeX(765), this.relativeY(250), 130, 20,
+        this.exploreLabel = this.add.bitmapText(this.relativeX(660), this.relativeY(370), "courier20", "Exploring:");
+        this.exploreProgressBar = new ProgressBar(this, this.relativeX(765), this.relativeY(370), 130, 20,
             Phaser.Display.Color.GetColor(0, 0, 255), Phaser.Display.Color.GetColor(32, 32, 64));
         this.exploreProgressBar.setFillPercent(0);
 

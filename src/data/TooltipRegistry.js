@@ -406,8 +406,9 @@ export class TooltipRegistry {
                 return "You rely too much on others. Time to learn the true meaning of friendship.\n\n" +
                     "Restrictions: Building Production reduced by " + (50 + completions * 10) + "%.\n" +
                     "              Town Upgrades cost 1 level of friendship.\n" +
-                    "              Region spans " + (40 + (completions * 5)) + " levels.\n" +
-                    "              Reach Gate " + (5 + completions) + ".\n\n" +
+                    "              Region spans " + (30 + (completions * 5)) + " levels.\n" +
+                    "              Reach Gate " + (4 + completions) + ".\n\n" +
+                    "On First Completion: Unlocks Auto Upgrade.\n" +
                     "On Every Completion: Gain 10% more friendship.\n" +
                     "                     Friendship tiers scale slightly slower.\n" +
                     "                     +5 Challenge Points\n\n" +

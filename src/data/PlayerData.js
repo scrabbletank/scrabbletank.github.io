@@ -302,7 +302,7 @@ export class PlayerData {
     }
 
     reduceCraftingCosts(tier, amount) {
-        for (var i = 0; i < Math.min(tier, 7); i++) {
+        for (var i = 0; i < Math.min(tier, 8); i++) {
             this.craftingCosts[i] = Math.max(0.1, this.craftingCosts[i] * amount);
         }
     }

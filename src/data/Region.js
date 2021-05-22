@@ -220,6 +220,7 @@ export class Region {
         this.alchemyGain = 0;
         this.villagerStatGain = [0, 0];
         this.dungeonLocations = [];
+        this.autoUpgrade = false;
 
         if (ignoreGen === true) {
             return true;
@@ -282,7 +283,8 @@ export class Region {
             wh: this.worldHeight,
             type: this.type,
             tr: this.traits,
-            dl: this.dungeonLocations
+            dl: this.dungeonLocations,
+            au: this.autoUpgrade
         }
 
         return saveObj;
@@ -304,6 +306,7 @@ export class Region {
         region.type = saveObj.type;
         region.traits = saveObj.tr;
         region.dungeonLocations = saveObj.dl === undefined ? [] : saveObj.dl;
+        region.autoUpgrade = saveObj.au === undefined ? false : saveObj.au;
         region.map = []
         for (var i = 0; i < saveObj.map.length; i++) {
             var row = [];
@@ -470,7 +473,9 @@ export class Region {
 
         this.map[townPoint[1]][townPoint[0]].init("town", minDiff, minDiff, this);
         this.map[townPoint[1]][townPoint[0]].building = BuildingRegistry.getBuildingByName("town");
-        this.placeBuilding(townPoint[0], townPoint[1], BuildingRegistry.getBuildingByName("town"));
+        // avoid place building as that can lead to infinite loops in the startup path
+        this._addBuilding(this.map[townPoint[1]][townPoint[0]]);
+        this._calculateTileBonuses();
         this.map[spawnPoint[1]][spawnPoint[0]].revealed = true;
 
         // calculate dungeon spawns
@@ -998,6 +1003,19 @@ export class Region {
                 return yieldSum > 0 && tile.houseBuildable && ProgressionStore.getInstance().persistentUnlocks.dungeons === true;
         }
     }
+    _canUpgrade(tile) {
+        if (tile.building === undefined || tile.building.tier >= 3 || tile.building.name === "Town") {
+            return false;
+        }
+        if ((tile.building.name === "Market" && tile.building.tier >= this.townData.getMarketLevel()) ||
+            (tile.building.name === "Tavern" && tile.building.tier >= this.townData.getTavernLevel())) {
+            return false;
+        }
+        var player = new PlayerData();
+        var tier = Math.floor(Math.min(7, this.regionLevel));
+        return Common.canCraft(tile.building.resourceCosts, player.resources[tier]) === true &&
+            tile.building.goldCost <= player.gold;
+    }
 
     _addBuilding(tile) {
         tile.defense += MoonlightData.getInstance().moonperks.hardenedvillagers.level +
@@ -1139,6 +1157,8 @@ export class Region {
     }
 
     placeBuilding(x, y, building) {
+        PlayerData.getInstance().spendResource(building.resourceCosts, Math.min(7, this.regionLevel));
+        PlayerData.getInstance().addGold(-building.goldCost);
         this.map[y][x].building = building;
         this.map[y][x].building.increaseCosts();
         this._addBuilding(this.map[y][x]);
@@ -1146,6 +1166,8 @@ export class Region {
         this._onTileChanged(this.map[y][x]);
     }
     upgradeBuilding(x, y) {
+        PlayerData.getInstance().spendResource(this.map[y][x].building.resourceCosts, Math.min(7, this.regionLevel));
+        PlayerData.getInstance().addGold(-this.map[y][x].building.goldCost);
         this._removeBuilding(this.map[y][x]);
         this.map[y][x].building.tier += 1;
         this.map[y][x].building.increaseCosts();
@@ -1177,6 +1199,15 @@ export class Region {
         resource[4] *= PlayerData.getInstance().dungeonBonus.stone;
         resource[5] *= PlayerData.getInstance().dungeonBonus.crystal;
         return resource;
+    }
+
+    _tryUpgradeList(list) {
+        for (var i = 0; i < list.length; i++) {
+            if (this._canUpgrade(this.map[list[i][0]][list[i][1]])) {
+                this.upgradeBuilding(list[i][1], list[i][0]);
+                break;
+            }
+        }
     }
 
     updateDay() {
@@ -1219,6 +1250,15 @@ export class Region {
 
         if (this.invasionCounter > Statics.INVASION_THRESHOLD) {
             this._invade();
+        }
+
+        if (this.autoUpgrade === true) {
+            this._tryUpgradeList(this.productionBuildings);
+            this._tryUpgradeList(this.houses);
+            this._tryUpgradeList(this.markets);
+            this._tryUpgradeList(this.taverns);
+            this._tryUpgradeList(this.roads);
+            this._tryUpgradeList(this.warehouses);
         }
     }
 

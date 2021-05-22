@@ -41,7 +41,7 @@ export class BuildingRegistry {
                     [15, 10, 0, 0, 10, 0], 50, 5);
             case "town":
                 return new Building("Town", "town", 3, BuildingTypes.ROAD, { sprite: "roadicons", tile: 38, w: 50, h: 50 },
-                    [15, 10, 0, 0, 10, 0], 50, 5);
+                    [0, 0, 0, 0, 0, 0], 0, 0);
             case "alchemy":
                 return new Building("Alchemy Lab", "alchemy", 1, BuildingTypes.ECON, { sprite: "bldicons", tile: 35, w: 32, h: 32 },
                     [10, 0, 20, 0, 10, 15], 150, 5);
@@ -49,7 +49,7 @@ export class BuildingRegistry {
                 return new Building("Warehouse", "warehouse", 1, BuildingTypes.OTHER, { sprite: "bldicons", tile: 36, w: 32, h: 32 },
                     [50, 10, 0, 10, 50, 0], 75, 5);
             case "dojo":
-                return new Building("Dojo", "dojo", 1, BuildingTypes.OTHER, { sprite: "bldicons", tile: 38, w: 32, h: 32 },
+                return new Building("Dojo", "dojo", 1, BuildingTypes.ECON, { sprite: "bldicons", tile: 38, w: 32, h: 32 },
                     [30, 0, 20, 20, 0, 10], 125, 5);
         }
     }
