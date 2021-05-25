@@ -34,12 +34,43 @@ export class GearRuneWindow {
         this.gearRuneImages = [];
         this.runeBonuses = [];
         this.runeInventory = [];
+
+        this.page = 0;
+        this.pageBtns = [];
+
         this._setupViews();
     }
 
     _sortRunes(sortType) {
         PlayerData.getInstance().sortRunes(sortType);
         this._setupViews();
+    }
+
+    _setupPageBtn(x, y, idx) {
+        var pageBtn = new TextButton(this.scene, x, y, 30, 20, idx + "", 999);
+        pageBtn.onClickHandler(() => { this._switchPage(idx); });
+        return pageBtn;
+    }
+
+    _switchPage(page) {
+        if (this.page !== page) {
+            this.selectedRune = -1;
+        }
+        this.page = page;
+        var player = PlayerData.getInstance();
+
+        for (var i = 0; i < this.runeInventory.length; i++) {
+            this.runeInventory[i].destroy();
+        }
+        this.runeInventory = [];
+
+        var idx = 0;
+        for (var i = page * 64; i < Math.min(player.runes.length, page * 64 + 64); i++) {
+            var posX = this.x + 258 + (idx % 8) * 55;
+            var posY = this.y + 30 + Math.floor(idx / 8) * 55;
+            this.runeInventory.push(this._setupRuneInventory(this.scene, player.runes[i], posX, posY, i));
+            idx += 1;
+        }
     }
 
     _setupViews() {
@@ -49,16 +80,20 @@ export class GearRuneWindow {
         for (var i = 0; i < this.runeBonuses.length; i++) {
             this.runeBonuses[i].destroy();
         }
-        for (var i = 0; i < this.runeInventory.length; i++) {
-            this.runeInventory[i].destroy();
+        for (var i = 0; i < this.pageBtns.length; i++) {
+            this.pageBtns[i].destroy();
         }
         if (this.floatingText !== undefined) {
             this.floatingText.destroy();
         }
+        this.pageBtns = [];
         this.gearRuneImages = [];
         this.runeBonuses = [];
-        this.runeInventory = [];
 
+        var maxPage = 1 + Math.floor(PlayerData.getInstance().runes.length / 64);
+        for (var i = 0; i < maxPage; i++) {
+            this.pageBtns.push(this._setupPageBtn(this.x + 440 + i * 35, this.y + 5, i));
+        }
         for (var i = 0; i < this.gear.runes.length; i++) {
             var posX = this.x + 7 + 36 * i;
             var posY = this.y + 27 + (i % 2) * 36;
@@ -82,12 +117,7 @@ export class GearRuneWindow {
             t += 20 + text.getTextBounds(true).local.height + 10;
         }
 
-        var player = PlayerData.getInstance();
-        for (var i = 0; i < player.runes.length; i++) {
-            var posX = this.x + 258 + (i % 8) * 55;
-            var posY = this.y + 30 + Math.floor(i / 8) * 55;
-            this.runeInventory.push(this._setupRuneInventory(this.scene, player.runes[i], posX, posY, i));
-        }
+        this._switchPage(Math.min(maxPage, this.page));
     }
 
     _slotRune(idx) {
@@ -107,10 +137,10 @@ export class GearRuneWindow {
 
     _selectRune(idx) {
         if (this.selectedRune !== -1) {
-            this.runeInventory[this.selectedRune].setBorderTint(Phaser.Display.Color.GetColor(255, 255, 255));
+            this.runeInventory[this.selectedRune % 64].setBorderTint(Phaser.Display.Color.GetColor(255, 255, 255));
         }
         this.selectedRune = idx;
-        this.runeInventory[this.selectedRune].setBorderTint(Phaser.Display.Color.GetColor(0, 255, 0));
+        this.runeInventory[this.selectedRune % 64].setBorderTint(Phaser.Display.Color.GetColor(0, 255, 0));
     }
 
     _setupRuneSocket(sceneContext, rune, x, y, idx) {

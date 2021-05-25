@@ -218,7 +218,7 @@ export class TownScene extends SceneUIBase {
             player.spendResource(resource, tier);
             region.townData.increaseTechLevel(tech);
             this._updateStatus();
-            this._updateTech();
+            this._refreshTechs();
         }
     }
 

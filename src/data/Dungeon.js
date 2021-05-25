@@ -26,7 +26,7 @@ export class Dungeon {
 
     _rewardAlreadyPicked(rewardType) {
         for (var i = 0; i < this.rewards.length; i++) {
-            if (rewardType === this.rewards.type) {
+            if (rewardType === this.rewards[i].type) {
                 return true;
             }
         }

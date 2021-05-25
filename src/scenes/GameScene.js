@@ -275,6 +275,7 @@ export class GameScene extends SceneUIBase {
         this.player.statBlock.registerEvent("onHealthChanged", () => { this._updateDetails(); });
         this.player.registerEvent("onStatChanged", () => {
             this._layoutStats();
+            this.updateStatIcons();
         });
         this.player.registerEvent("onResourcesChanged", (res, gold, tier) => {
             this._updateResources();
@@ -462,7 +463,8 @@ export class GameScene extends SceneUIBase {
         this.detailsLabels.push(this.add.bitmapText(40, this.detailsStart + 60, "courier16", Common.numberString(this.player.statBlock.Armor())));
         this.detailsLabels.push(this.add.bitmapText(40, this.detailsStart + 80, "courier16", Common.numberString(this.player.statBlock.Hit())));
         this.detailsLabels.push(this.add.bitmapText(40, this.detailsStart + 100, "courier16", Common.numberString(this.player.statBlock.Evasion())));
-        this.detailsLabels.push(this.add.bitmapText(40, this.detailsStart + 120, "courier16", this.player.statBlock.HealthRegen() + "/s"));
+        var txt = this.player.statBlock.HealthRegen() > 100 ? Common.numberString(Math.floor(this.player.statBlock.HealthRegen())) : this.player.statBlock.HealthRegen() + "";
+        this.detailsLabels.push(this.add.bitmapText(40, this.detailsStart + 120, "courier16", txt + "/s"));
         this.detailsLabels.push(this.add.bitmapText(40, this.detailsStart + 140, "courier16",
             Math.floor(this.player.statBlock.CritChance() * 100) + "%"));
         this.detailsLabels.push(this.add.bitmapText(40, this.detailsStart + 160, "courier16",
@@ -801,12 +803,12 @@ export class GameScene extends SceneUIBase {
             var dynamicSettings = new DynamicSettings();
             dynamicSettings.load(saveObj.settings);
         }
+        this.progression.load(saveObj.progression, saveObj.version);
         this.moonlight.load(saveObj.moon, saveObj.version);
         gearData.load(saveObj.gear, saveObj.version);
         //player needs to load after gear
         this.player.load(saveObj.player, saveObj.version);
         this.worldData.load(saveObj.world, saveObj.version);
-        this.progression.load(saveObj.progression, saveObj.version);
         lore.load(saveObj.lore, saveObj.version);
         var timeOffline = Date.now() - saveObj.saveTime;
         if (timeOffline > 60000) {

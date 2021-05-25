@@ -77,43 +77,43 @@ export class CreatureBlock {
 
     MaxHealth() {
         var ret = this.statBonuses.health + this.Endurance() * Statics.HP_PER_ENDURANCE;
-        return Math.floor(ret);
+        return Math.floor(Math.max(1, ret));
     }
     Strength() {
         var ret = this.stats.strength + this.statBonuses.strength;
-        return Math.floor(ret);
+        return Math.floor(Math.max(1, ret));
     }
     Dexterity() {
         var ret = this.stats.dexterity + this.statBonuses.dexterity;
-        return Math.floor(ret);
+        return Math.floor(Math.max(1, ret));
     }
     Agility() {
         var ret = this.stats.agility + this.statBonuses.agility;
-        return Math.floor(ret);
+        return Math.floor(Math.max(1, ret));
     }
     Endurance() {
         var ret = this.stats.endurance + this.statBonuses.endurance;
-        return Math.floor(ret);
+        return Math.floor(Math.max(1, ret));
     }
     Recovery() {
         var ret = this.stats.recovery + this.statBonuses.recovery;
-        return Math.floor(ret);
+        return Math.floor(Math.max(1, ret));
     }
     Defense() {
         var ret = this.stats.defense + this.statBonuses.defense;
-        return Math.floor(ret);
+        return Math.floor(Math.max(1, ret));
     }
     Accuracy() {
         var ret = this.stats.accuracy + this.statBonuses.accuracy;
-        return Math.floor(ret);
+        return Math.floor(Math.max(1, ret));
     }
     Hit() {
         var ret = this.stats.hit + this.statBonuses.hit + this.Dexterity() * Statics.HIT_PER_DEXTERITY;
-        return Math.floor(ret);
+        return Math.floor(Math.max(1, ret));
     }
     Evasion() {
         var ret = this.stats.evasion + this.statBonuses.evasion + this.Agility() * Statics.EVA_PER_AGILITY;
-        return Math.floor(ret);
+        return Math.floor(Math.max(1, ret));
     }
     CritChance() {
         var ret = this.statBonuses.critChance;
@@ -121,12 +121,12 @@ export class CreatureBlock {
     }
     CritPower() {
         var ret = this.stats.critPower + this.statBonuses.critPower + this.Accuracy() * Statics.CRITPOWER_PER_ACCURACY;
-        return Math.floor(ret);
+        return Math.floor(Math.max(1, ret));
     }
     CritResistance() {
         var ret = this.stats.critResistance + this.statBonuses.critResistance + this.Endurance() * Statics.CRITRESISTANCE_PER_ENDURANCE;
         ret = ret * (this.shieldValue > 0 ? 10 : 1);
-        return Math.floor(ret);
+        return Math.floor(Math.max(1, ret));
     }
     DamageMin() {
         var ret = this.statBonuses.damageMin + this.Strength() * Statics.STRENGTH_DMG_MIN;
@@ -138,11 +138,11 @@ export class CreatureBlock {
     }
     HealthRegen() {
         var ret = this.statBonuses.healthRegen + this.Recovery() * Statics.REGEN_PER_RECOVERY;
-        return Math.floor(ret * 10) / 10;
+        return Math.floor(Math.max(0, ret) * 10) / 10;
     }
     Armor() {
         var ret = this.Defense() * Statics.ARMOR_PER_DEFENSE + this.statBonuses.armor;
-        return Math.floor(ret);
+        return Math.floor(Math.max(0, ret));
     }
     AttackSpeed() {
         return this.attackSpeed;

@@ -18,7 +18,7 @@ export class TownData {
     }
     static getTechResourceCost(tech, tier) {
         var vlvl = tech.level;
-        var ret = []
+        var ret = [];
         for (var i = 0; i < tech.resources.length; i++) {
             var aGold = tech.resources[i][0];
             var bGold = vlvl * tech.resources[i][1];
@@ -82,11 +82,11 @@ export class TownData {
         };
 
         if (ProgressionStore.getInstance().persistentUnlocks.dungeons === true) {
-            this.buildings.barracks = {
+            this.buildings["barracks"] = {
                 name: "Barracks", level: 0, maxLevel: -1, requires: [],
                 goldCosts: [75, 40, 20], resources: [[25, 15, 10], [0, 0, 0], [0, 0, 0], [20, 10, 8], [0, 0, 0], [0, 0, 0]]
             }
-            this.buildings.armory = {
+            this.buildings['armory'] = {
                 name: "Armory", level: 0, maxLevel: -1, requires: [],
                 goldCosts: [75, 40, 20], resources: [[0, 0, 0], [20, 10, 8], [25, 15, 10], [0, 0, 0], [0, 0, 0], [0, 0, 0]]
             }
@@ -160,7 +160,7 @@ export class TownData {
     }
     getGoldCap() {
         var player = new PlayerData();
-        var exploreBonus = MoonlightData.getInstance().moonperks.crownlands.level * 2;
+        var exploreBonus = MoonlightData.getInstance().moonperks.crownlands.level * 2 * this.tilesExplored;
         return (this.currentPopulation * Statics.GOLDCAP_PER_POP + this.goldCapBonus + exploreBonus) *
             this.economyMulti * (1 + player.getTalentLevel("governance") * 0.04);
     }
@@ -277,19 +277,22 @@ export class TownData {
             case Statics.DUNGEON.GEAR_LEVELS:
                 var player = PlayerData.getInstance();
                 if (player.weapon !== undefined) {
-                    player.unequip(player.weapon.slotType);
-                    player.weapon.bringToLevel(player.weapon.level + reward.amount);
-                    player.equip(player.weapon);
+                    var wep = player.weapon;
+                    player.unequip(wep.slotType);
+                    wep.bringToLevel(wep.level + reward.amount);
+                    player.equip(wep);
                 }
                 if (player.armor !== undefined) {
-                    player.unequip(player.armor.slotType);
-                    player.armor.bringToLevel(player.armor.level + reward.amount);
-                    player.equip(player.armor);
+                    var arm = player.armor;
+                    player.unequip(arm.slotType);
+                    arm.bringToLevel(arm.level + reward.amount);
+                    player.equip(arm);
                 }
                 if (player.trinket !== undefined) {
-                    player.unequip(player.trinket.slotType);
-                    player.trinket.bringToLevel(player.trinket.level + reward.amount);
-                    player.equip(player.trinket);
+                    var trink = player.trinket;
+                    player.unequip(trink.slotType);
+                    trink.bringToLevel(trink.level + reward.amount);
+                    player.equip(trink);
                 }
                 break;
             case Statics.DUNGEON.RUNES:
