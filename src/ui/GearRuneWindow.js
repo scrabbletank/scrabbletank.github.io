@@ -208,6 +208,9 @@ export class GearRuneWindow {
         for (var i = 0; i < this.runeInventory.length; i++) {
             this.runeInventory[i].destroy();
         }
+        for (var i = 0; i < this.pageBtns.length; i++) {
+            this.pageBtns[i].destroy();
+        }
         if (this.floatingText !== undefined) {
             this.floatingText.destroy();
         }
