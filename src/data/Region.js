@@ -1074,6 +1074,7 @@ export class Region {
             case "Crystal Loom":
             case "Docks":
             case "Alchemy Lab":
+            case "Dojo":
                 this.productionBuildings = this.productionBuildings.filter(p => p[1] !== tile.x || p[0] !== tile.y);
                 break;
             case "Watch Tower":

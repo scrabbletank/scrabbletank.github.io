@@ -675,7 +675,7 @@ export class RegionScene extends SceneUIBase {
                 tile: this.region.map[this.hoveredTile[1]][this.hoveredTile[0]],
                 building: BuildingRegistry.getBuildingByName('house')
             });
-        } else if (this.houseKey.isDown && this.hoveredTile[0] !== -1) {
+        } else if (this.roadKey.isDown && this.hoveredTile[0] !== -1) {
             this._tileActionHandler("build", {
                 tile: this.region.map[this.hoveredTile[1]][this.hoveredTile[0]],
                 building: BuildingRegistry.getBuildingByName('road')

@@ -103,8 +103,8 @@ export class DynamicSettings {
                 this.productionMulti = 0.5 - (challenge.completions * 0.1);
                 this.spendFriendship = true;
                 this.friendshipToProduction = true;
-                this.regionDifficultyIncrease = 40 + (5 * challenge.completions);
-                this.minGateRegion = 4 + challenge.completions;
+                this.regionDifficultyIncrease = 30 + (5 * challenge.completions);
+                this.minGateRegion = 3 + challenge.completions;
                 break;
         }
     }
