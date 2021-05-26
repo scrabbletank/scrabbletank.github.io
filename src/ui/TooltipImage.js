@@ -27,6 +27,7 @@ export class TooltipImage {
 
     onClickHandler(callback) {
         this.clickCallback = callback;
+        return this;
     }
 
     setImage(img) {
@@ -56,8 +57,8 @@ export class TooltipImage {
         if (this.floatingText !== undefined) {
             this.floatingText.destroy();
         }
-        var x = this.x + 20 + (this.x + 350 > 1100 ? -350 : 0);
-        var y = this.y + (this.y - 100 < 0 ? 0 : -100);
+        var x = this.x + 20 + (this.x + 350 > 1090 ? -350 : 0);
+        var y = this.y + (this.y - 100 < 100 ? 0 : -100);
         this.floatingText = new FloatingTooltip(this.scene, this.tooltip, x, y, 350, 100, "courier16", 16, 999);
     }
 

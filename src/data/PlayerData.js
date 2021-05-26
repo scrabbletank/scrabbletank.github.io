@@ -18,6 +18,9 @@ export class PlayerData {
             this.talentChangedHandlers = [];
             this.classSelectedHandlers = [];
 
+            this.baseVillagerPower = 1;
+            this.baseVillagerHealth = 10;
+
             this._init();
             this.statBlock = new AdventurerBlock(this);
 
@@ -240,6 +243,23 @@ export class PlayerData {
             agilityScaling: 0
         }
 
+        this.dungeonBonus = {
+            strength: 1,
+            dexterity: 1,
+            agility: 1,
+            endurance: 1,
+            recovery: 1,
+            defense: 1,
+            accuracy: 1,
+            wood: 1,
+            leather: 1,
+            metal: 1,
+            fiber: 1,
+            stone: 1,
+            crystal: 1,
+            moonlight: 1
+        }
+
         this.runes = [];
     }
 
@@ -282,7 +302,7 @@ export class PlayerData {
     }
 
     reduceCraftingCosts(tier, amount) {
-        for (var i = 0; i < Math.min(tier, 7); i++) {
+        for (var i = 0; i < Math.min(tier, 8); i++) {
             this.craftingCosts[i] = Math.max(0.1, this.craftingCosts[i] * amount);
         }
     }
@@ -506,7 +526,8 @@ export class PlayerData {
     }
 
     earnableMoonlight(gateReached) {
-        return MoonlightData.getMoonlightEarned((this.statLevel - 1) + (this.talentLevel - 1) * 3, gateReached);
+        return MoonlightData.getMoonlightEarned((this.statLevel - 1) + (this.talentLevel - 1) * 3, gateReached) *
+            (1 + 0.15 * MoonlightData.getInstance().challenges.time.completions) * this.dungeonBonus.moonlight;
     }
 
     getExploreMulti() {
@@ -628,6 +649,10 @@ export class PlayerData {
         }
         this._onTalentChanged();
     }
+    addTalentPoints(amount) {
+        this.talentPoints += amount;
+        this._onTalentChanged();
+    }
 
     levelTalent(talent) {
         if (talent.level < talent.maxLevel || talent.maxLevel === -1) {
@@ -661,6 +686,7 @@ export class PlayerData {
     }
     addShade(amount) {
         this.shade += amount;
+        this._onResourcesChanged([0, 0, 0, 0, 0, 0], 0, 0);
     }
 
     addRune(rune) {
@@ -681,6 +707,17 @@ export class PlayerData {
                 this.runes.sort((a, b) => { return b.level - a.level; });
                 break;
         }
+    }
+    addBaseVillagerStats(power, health) {
+        this.baseVillagerPower += power;
+        this.baseVillagerHealth += health;
+    }
+
+    multiplyDungeonBonus(prop, value) {
+        if (this.dungeonBonus[prop] !== undefined) {
+            this.dungeonBonus[prop] = this.dungeonBonus[prop] * value;
+        }
+        this._onStatChanged();
     }
 
     isEquipedItem(gear) {
@@ -774,6 +811,9 @@ export class PlayerData {
             mote: this.motes,
             talents: this.talents,
             runes: this.runes,
+            vp: this.baseVillagerPower,
+            vh: this.baseVillagerHealth,
+            db: this.dungeonBonus,
             w: this.weapon === undefined ? "" : this.weapon.name,
             a: this.armor === undefined ? "" : this.armor.name,
             t: this.trinket === undefined ? "" : this.trinket.name
@@ -798,6 +838,9 @@ export class PlayerData {
         this.gold = saveObj.gold;
         this.motes = saveObj.mote;
         this.runes = saveObj.runes === undefined ? [] : saveObj.runes;
+        this.baseVillagerPower = saveObj.vp === undefined ? 1 : saveObj.vp;
+        this.baseVillagerHealth = saveObj.vh === undefined ? 10 : saveObj.vh;
+        this.dungeonBonus = saveObj.db === undefined ? this.dungeonBonus : saveObj.db;
 
         this.selectClass(this.playerClass);
         var keys = Object.keys(saveObj.talents);

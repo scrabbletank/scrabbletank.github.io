@@ -1,3 +1,4 @@
+import { MoonlightData } from "../data/MoonlightData";
 import { ProgressionStore } from "../data/ProgressionStore";
 import { Common } from "../utils/Common";
 import { TextButton } from "./TextButton";
@@ -64,12 +65,21 @@ export class GuideWindow {
             new TextButton(scene, x + 5, by, 120, 20, "Runes").onClickHandler(() => { this._setGuide(11); }) :
             new TextButton(scene, x + 5, by, 120, 20, "???");
         by += 22;
+        this.automationBtn = ProgressionStore.getInstance().persistentUnlocks.autoExplore === true ?
+            new TextButton(scene, x + 5, by, 120, 20, "Automation").onClickHandler(() => { this._setGuide(13); }) :
+            new TextButton(scene, x + 5, by, 120, 20, "???");
+        by += 22;
         this.challengeBtn = ProgressionStore.getInstance().persistentUnlocks.challenges === true ?
             new TextButton(scene, x + 5, by, 120, 20, "Challenges").onClickHandler(() => { this._setGuide(12); }) :
             new TextButton(scene, x + 5, by, 120, 20, "???");
         by += 22;
+        this.dungeonBtn = ProgressionStore.getInstance().persistentUnlocks.dungeons === true ?
+            new TextButton(scene, x + 5, by, 120, 20, "Dungeons").onClickHandler(() => { this._setGuide(14); }) :
+            new TextButton(scene, x + 5, by, 120, 20, "???");
+        by += 22;
         this.btns = [this.hotkeyBtn, this.gearBtn, this.exploreBtn, this.combatBtn, this.townBtn, this.talentsBtn, this.worldBtn, this.infuseBtn,
-        this.resourceBtn, this.craftingBtn, this.buildingsBtn, this.moteBtn, this.runeBtn, this.challengeBtn];
+        this.resourceBtn, this.craftingBtn, this.buildingsBtn, this.moteBtn, this.runeBtn, this.challengeBtn, this.automationBtn,
+        this.dungeonBtn];
         this.guideTexts = [];
         this.closeButton = new TextButton(scene, x + 630, y + 620, 110, 20, "Back");
     }
@@ -239,6 +249,51 @@ export class GuideWindow {
                     "Mystic Gate. Challenges change the game, removing features and generally making things a pain. If you complete " +
                     "a challenge you can get some powerful rewards along with a handful of Challenge Points. Challenge Points are " +
                     "pretty much just another stat multiplier to encourage you to do the annoying/boring ones.";
+                this.guideTexts.push(this.scene.add.bitmapText(this.x + 150, this.y + 70, "courier16", Common.processText(helptxt, 72)));
+                break;
+            case 13:
+                var py = 45;
+                this.guideTexts.push(this.scene.add.bitmapText(this.x + 150, this.y + py, "courier20", "Automation"));
+                var helptxt = "Why play the game when it can do all the work and play it for you? You'll unlock more automation as " +
+                    "you play the game.";
+                this.guideTexts.push(this.scene.add.bitmapText(this.x + 150, this.y + py + 25, "courier16", Common.processText(helptxt, 72)));
+                py += 60;
+                this.guideTexts.push(this.scene.add.bitmapText(this.x + 150, this.y + py, "courier20", "Auto Explore"));
+                helptxt = "With auto explore on, every time you fully explore a tile it will jump to the next available tile. It doesn't " +
+                    "continue when you die, and doesn't cross regions.";
+                this.guideTexts.push(this.scene.add.bitmapText(this.x + 150, this.y + py + 25, "courier16", Common.processText(helptxt, 72)));
+                py += 80;
+                if (MoonlightData.getInstance().challenges.invasion.completions > 0) {
+                    this.guideTexts.push(this.scene.add.bitmapText(this.x + 150, this.y + py, "courier20", "Auto Invade"));
+                    helptxt = "With this on Auto Explore will clear up any invasions first before exploring new tiles. Fighting Invasions " +
+                        "with this on gives 25% motes until you finish all Invasion challenges.";
+                    this.guideTexts.push(this.scene.add.bitmapText(this.x + 150, this.y + py + 25, "courier16", Common.processText(helptxt, 72)));
+                    py += 80;
+                }
+                if (MoonlightData.getInstance().challenges.outcast.completions > 0) {
+                    this.guideTexts.push(this.scene.add.bitmapText(this.x + 150, this.y + py, "courier20", "Auto Upgrade"));
+                    helptxt = "Finally, some building automation. This is toggled on each region and will attempt to upgrade a handful of " +
+                        "buildings each day, assuming you can afford it. Each day, it will upgrade one production building, house, road, market, " +
+                        "tavern, and warehouse. Why those? Because I already have lists for those and I'm too lazy to code something else.";
+                    this.guideTexts.push(this.scene.add.bitmapText(this.x + 150, this.y + py + 25, "courier16", Common.processText(helptxt, 72)));
+                    py += 100;
+                }
+                break;
+            case 14:
+                this.guideTexts.push(this.scene.add.bitmapText(this.x + 150, this.y + 45, "courier20", "Dungeons"));
+                var helptxt = "Don't know what to do with your villagers when your pop capped? Throw them into these meat grinders " +
+                    "full of loot! You can find 3 dungeons in each region by exploring tiles, each giving different loot and rewards. " +
+                    "Dungeons are completed by sending Villager Hordes in to fight the swarms of monsters inside. Towns have Villager " +
+                    "Power and Health, which is how much damage they deal and how much damage they can take before dying, and Army Size, " +
+                    "which is 10% of your current population. When fighting in dungeons your Horde's power and health is multiplied " +
+                    "by your army size. When your horde or the monsters take damage their army size decreases and they get weaker. Villagers " +
+                    "that die in the dungeons reduce your towns population, so be careful! or not, up to you.\n\n" +
+                    "Each dungeon room, except for the elites and bosses, take 5 fights to clear and give rewards once complete. The small " +
+                    "rooms give a bunch of a random resource, mini bosses give shade and motes, and bosses give you 3 options to choose from. " +
+                    "Each boss has a different pool of rewards:\n\n" +
+                    "Tier 1: Resources, Shade, Motes, Runes, Gear Levels, Gold.\n" +
+                    "Tier 2: Resource production boost to all regions for a given type, Econ/Production boost to this region.\n" +
+                    "Tier 3: % Stat increases, % Moonlight earned this run, Free Talents, Permanent Villager Power/Health (persists through rebirths).";
                 this.guideTexts.push(this.scene.add.bitmapText(this.x + 150, this.y + 70, "courier16", Common.processText(helptxt, 72)));
                 break;
         }

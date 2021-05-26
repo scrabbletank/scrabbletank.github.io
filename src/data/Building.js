@@ -3,6 +3,7 @@ import { WorldData } from "./WorldData";
 import { MoonlightData } from "./MoonlightData";
 import { Common } from "../utils/Common";
 import { Statics } from "./Statics";
+import { PlayerData } from "./PlayerData";
 
 export const BuildingTypes = {
     PRODUCTION: 0,
@@ -56,32 +57,33 @@ export class Building {
         var prodBonus = prodBonus * region.townData.getProductionMulti() * eff;
         switch (name) {
             case "Lumberyard":
-                var prod = tier * tile.yields[0] * prodBonus;
+                var prod = tier * tile.yields[0] * prodBonus * PlayerData.getInstance().dungeonBonus.wood;
                 return "Produces " + Math.floor(prod * 100) / 100 + " Wood at the end of each day. Production at " +
                     Math.floor(eff * 100) + "% based on distance to roads and other buildings.";
             case "Hunter's Lodge":
-                var prod = tier * tile.yields[1] * prodBonus;
+                var prod = tier * tile.yields[1] * prodBonus * PlayerData.getInstance().dungeonBonus.leather;
                 return "Produces " + Math.floor(prod * 100) / 100 + " Leather at the end of each day. Production at " +
                     Math.floor(eff * 100) + "% based on distance to roads and other buildings.";
             case "Mine":
-                var prod = tier * tile.yields[2] * prodBonus;
+                var prod = tier * tile.yields[2] * prodBonus * PlayerData.getInstance().dungeonBonus.metal;
                 return "Produces " + Math.floor(prod * 100) / 100 + " Metal at the end of each day. Production at " +
                     Math.floor(eff * 100) + "% based on distance to roads and other buildings.";
             case "Herbalist's Hut":
-                var prod = tier * tile.yields[3] * prodBonus;
+                var prod = tier * tile.yields[3] * prodBonus * PlayerData.getInstance().dungeonBonus.fiber;
                 return "Produces " + Math.floor(prod * 100) / 100 + " Fiber at the end of each day. Production at " +
                     Math.floor(eff * 100) + "% based on distance to roads and other buildings.";
             case "Quarry":
-                var prod = tier * tile.yields[4] * prodBonus;
+                var prod = tier * tile.yields[4] * prodBonus * PlayerData.getInstance().dungeonBonus.stone;
                 return "Produces " + Math.floor(prod * 100) / 100 + " Stone at the end of each day. Production at " +
                     Math.floor(eff * 100) + "% based on distance to roads and other buildings.";
             case "Crystal Loom":
-                var prod = tier * tile.yields[5] * prodBonus;
+                var prod = tier * tile.yields[5] * prodBonus * PlayerData.getInstance().dungeonBonus.crystal;
                 return "Produces " + Math.floor(prod * 100) / 100 + " Crystal at the end of each day. Production at " +
                     Math.floor(eff * 100) + "% based on distance to roads and other buildings.";
             case "Town House":
                 if (tile.houseBuildable === true) {
-                    return "Increases the Town's max population by " + (tier * 5) + ".";
+                    return "Increases the Town's max population by " +
+                        (tier * (5 + MoonlightData.getInstance().moonperks.urbanization.level)) + ".";
                 } else {
                     return "This house is too far away from a road and has been abandoned.";
                 }
@@ -133,6 +135,16 @@ export class Building {
             case "Warehouse":
                 var bonus = tier * 20;
                 return "Stores goods for transport, increasing production of nearby buildings by " + bonus + "%.";
+            case "Dojo":
+                if (tile.houseBuildable === false) {
+                    return "Villagers once trained here, but now it is abandoned, waiting for a road to reach it."
+                }
+                var moonBonus = (1 + MoonlightData.getInstance().moonperks.devotion.level * 0.1) *
+                    (1 + MoonlightData.getInstance().moonperks.ninja.level * 0.25);
+                var pow = tier * 0.05 * region.townData.villagerPowerMulti * moonBonus;
+                var def = tier * 0.5 * region.townData.villagerPowerMulti * moonBonus;
+                return "A place for your villagers to train. Each week it permanently increases Villager Power by " + Math.floor(pow * 100) / 100 + " and " +
+                    "Villager Health by " + Math.floor(def * 100) / 100 + ".";
         }
     }
 }

@@ -174,6 +174,35 @@ var Statics = {
         "1101": 12,
         "1110": 13,
         "1111": 14,
+    },
+    
+    //DUNGEON REWARDS
+    DUNGEON: {
+        RESOURCES: 0,
+        SHADE: 1,
+        MOTES: 2,
+        GOLD: 3,
+        GEAR_LEVELS: 4,
+        RUNES: 5,
+        WOOD: 10,
+        LEATHER: 11,
+        METAL: 12,
+        FIBER: 13,
+        STONE: 14,
+        CRYSTAL: 15,
+        PRODUCTION: 16,
+        ECONOMY: 17,
+        STRENGTH: 20,
+        DEXTERITY: 21,
+        AGILITY: 22,
+        ENDURANCE: 23,
+        RECOVERY: 24,
+        DEFENSE: 25,
+        ACCURACY: 26,
+        MOONLIGHT: 27,
+        TALENTS: 28,
+        PERM_VPOWER: 29,
+        PERM_VHEALTH: 30
     }
 };
 

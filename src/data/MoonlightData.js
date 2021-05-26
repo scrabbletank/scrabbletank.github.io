@@ -174,6 +174,18 @@ export class MoonlightData {
                 nightlabour: {
                     name: "Night Labour", level: 0, maxLevel: -1, requires: ["heropouch"], cost: [150, 100, 1.5],
                     texture: { sprite: "moonicons", tile: 9 }
+                },
+                devotion: {
+                    name: "Devotion", level: 0, maxLevel: -1, requires: [], cost: [150, 75, 1.25],
+                    texture: { sprite: "moonicons", tile: 34 }
+                },
+                ninja: {
+                    name: "Ninjas", level: 0, maxLevel: -1, requires: ["devotion"], cost: [750, 500, 1.3],
+                    texture: { sprite: "moonicons", tile: 35 }
+                },
+                urbanization: {
+                    name: "Urbanization", level: 0, maxLevel: -1, requires: ["ninja"], cost: [10000, 7500, 4],
+                    texture: { sprite: "moonicons", tile: 33 }
                 }
             };
 

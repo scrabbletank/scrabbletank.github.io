@@ -60,6 +60,7 @@ export class GameScene extends SceneUIBase {
         this.load.bitmapFont("courier16", "./../../assets/font/anonpro16.png", "./../../assets/font/anonpro16.xml");
         this.load.bitmapFont("courier20", "./../../assets/font/anonpro20.png", "./../../assets/font/anonpro20.xml");
         this.load.spritesheet("icons", "./../../assets/icons/icons.png", { frameWidth: 16, frameHeight: 16 });
+        this.load.spritesheet("icons2", "./../../assets/icons/icons2.png", { frameWidth: 16, frameHeight: 16 });
         this.load.spritesheet("talenticons", "./../../assets/icons/talenticons.png", { frameWidth: 16, frameHeight: 16 });
         this.load.spritesheet("bldicons", "./../../assets/icons/buildingicons.png", { frameWidth: 16, frameHeight: 16 });
         this.load.spritesheet("roadicons", "./../../assets/icons/roadicons.png", { frameWidth: 50, frameHeight: 50 });
@@ -216,7 +217,7 @@ export class GameScene extends SceneUIBase {
             .onClickHandler(() => { this.scene.bringToTop("TownScene"); this.scene.bringToTop("DarkWorld"); });
         this.worldButton = new TextButton(this, 962, 60, 122, 20, "World")
             .onClickHandler(() => { this.scene.bringToTop("WorldScene"); this.scene.bringToTop("DarkWorld"); });
-        this.worldTimeBacking = this.add.rectangle(500, 80, 300, 20, Phaser.Display.Color.GetColor(0, 0, 0))
+        this.worldTimeBacking = this.add.rectangle(500, 81, 300, 19, Phaser.Display.Color.GetColor(0, 0, 0))
             .setOrigin(0, 0).setInteractive()
             .on("pointerover", () => { this.showTimeThisRun = true; })
             .on("pointerout", () => { this.showTimeThisRun = false; });
@@ -274,6 +275,7 @@ export class GameScene extends SceneUIBase {
         this.player.statBlock.registerEvent("onHealthChanged", () => { this._updateDetails(); });
         this.player.registerEvent("onStatChanged", () => {
             this._layoutStats();
+            this.updateStatIcons();
         });
         this.player.registerEvent("onResourcesChanged", (res, gold, tier) => {
             this._updateResources();
@@ -461,7 +463,8 @@ export class GameScene extends SceneUIBase {
         this.detailsLabels.push(this.add.bitmapText(40, this.detailsStart + 60, "courier16", Common.numberString(this.player.statBlock.Armor())));
         this.detailsLabels.push(this.add.bitmapText(40, this.detailsStart + 80, "courier16", Common.numberString(this.player.statBlock.Hit())));
         this.detailsLabels.push(this.add.bitmapText(40, this.detailsStart + 100, "courier16", Common.numberString(this.player.statBlock.Evasion())));
-        this.detailsLabels.push(this.add.bitmapText(40, this.detailsStart + 120, "courier16", this.player.statBlock.HealthRegen() + "/s"));
+        var txt = this.player.statBlock.HealthRegen() > 100 ? Common.numberString(Math.floor(this.player.statBlock.HealthRegen())) : this.player.statBlock.HealthRegen() + "";
+        this.detailsLabels.push(this.add.bitmapText(40, this.detailsStart + 120, "courier16", txt + "/s"));
         this.detailsLabels.push(this.add.bitmapText(40, this.detailsStart + 140, "courier16",
             Math.floor(this.player.statBlock.CritChance() * 100) + "%"));
         this.detailsLabels.push(this.add.bitmapText(40, this.detailsStart + 160, "courier16",
@@ -506,8 +509,7 @@ export class GameScene extends SceneUIBase {
             this.resourceTierButtons[i].setPosition(20 + (i * 20), this.resourceStart + 20);
             this.resourceTierButtons[i].setVisible(this.player.resourceTierReached >= 1 && i <= this.player.resourceTierReached);
         }
-        this.resourceIcons[6].setVisible(this.progression.unlocks.townTab);
-        this.resourceIcons[7].setVisible(this.progression.unlocks.motes);
+        this.resourceIcons[7].setVisible(this.progression.unlocks.motes || this.player.motes > 0);
         if (this.progression.unlocks.resourceUI === true) {
             var res = this.player.resources[this.resourceTierSelected];
             this.resourceLabels.push(this.add.bitmapText(40, this.resourceStart + 40, "courier16", Common.numberString(Math.floor(res[0]))));
@@ -801,12 +803,12 @@ export class GameScene extends SceneUIBase {
             var dynamicSettings = new DynamicSettings();
             dynamicSettings.load(saveObj.settings);
         }
+        this.progression.load(saveObj.progression, saveObj.version);
         this.moonlight.load(saveObj.moon, saveObj.version);
         gearData.load(saveObj.gear, saveObj.version);
         //player needs to load after gear
         this.player.load(saveObj.player, saveObj.version);
         this.worldData.load(saveObj.world, saveObj.version);
-        this.progression.load(saveObj.progression, saveObj.version);
         lore.load(saveObj.lore, saveObj.version);
         var timeOffline = Date.now() - saveObj.saveTime;
         if (timeOffline > 60000) {

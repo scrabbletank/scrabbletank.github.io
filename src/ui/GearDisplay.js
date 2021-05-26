@@ -9,7 +9,12 @@ export class GearDisplay {
             this.statLabel = sceneContext.add.bitmapText(x + 5, y + 45, "courier16", "");
         }
         else {
-            this.nameLabel = sceneContext.add.bitmapText(x + 5, y + 5, "courier20", gear.name + " Lv" + gear.level);
+            var txt = gear.name + " Lv" + gear.level;
+            if (txt.length > 25) {
+                this.nameLabel = sceneContext.add.bitmapText(x + 5, y + 5, "courier16", txt);
+            } else {
+                this.nameLabel = sceneContext.add.bitmapText(x + 5, y + 5, "courier20", txt);
+            }
 
             var types = ["Weapon", "Armor", "Trinket"]
             this.typeLabel = sceneContext.add.bitmapText(x + 5, y + 25, "courier16", "Tier " + gear.tier + " " + types[gear.slotType]);

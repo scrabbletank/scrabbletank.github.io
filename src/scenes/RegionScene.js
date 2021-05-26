@@ -54,6 +54,9 @@ export class RegionScene extends SceneUIBase {
         this.warehouseKey = undefined;
         this.alchemyKey = undefined;
         this.destroyKey = undefined;
+        this.docksKey = undefined;
+        this.dojoKey = undefined;
+        this.watchtowerKey = undefined;
         this.hoveredTile = [-1, -1];
         this.regionTiles = [];
         this.regionStats = undefined;
@@ -112,9 +115,13 @@ export class RegionScene extends SceneUIBase {
             var txt = "Daily Production:\n"
             var resources = this.region._getResourcesPerDay();
             for (var i = 0; i < resources.length; i++) {
-                txt += " " + Statics.RESOURCE_NAMES[i] + ": " + (Math.floor(resources[i] * 100) / 100) + "\n";
+                if (resources[i] > 100) {
+                    txt += " " + Statics.RESOURCE_NAMES[i] + ": " + Common.numberString(Math.floor(resources[i])) + "\n";
+                } else {
+                    txt += " " + Statics.RESOURCE_NAMES[i] + ": " + (Math.floor(resources[i] * 100) / 100) + "\n";
+                }
             }
-            this.regionStats = this.add.bitmapText(this.relativeX(660), this.relativeY(280), "courier20", txt);
+            this.regionStats = this.add.bitmapText(this.relativeX(660), this.relativeY(400), "courier20", txt);
         }
     }
 
@@ -252,16 +259,6 @@ export class RegionScene extends SceneUIBase {
         this.tileSelectWindow.addOnActionHandler((action, blob) => { this._tileActionHandler(action, blob); });
     }
 
-    _canUpgrade(tile) {
-        if (tile.building.name === "Market") {
-            return tile.building.tier < this.region.townData.getMarketLevel();
-        }
-        if (tile.building.name === "Tavern") {
-            return tile.building.tier < this.region.townData.getTavernLevel();
-        }
-        return tile.building.tier < 3;
-    }
-
     _tileActionHandler(action, blob) {
         switch (action) {
             case "explore":
@@ -272,8 +269,6 @@ export class RegionScene extends SceneUIBase {
                 var tier = Math.floor(Math.min(7, this.region.regionLevel));
                 if (Common.canCraft(blob.building.resourceCosts, player.resources[tier]) === true &&
                     blob.building.goldCost <= player.gold && this.region._canBuild(blob.tile, blob.building)) {
-                    player.spendResource(blob.building.resourceCosts, tier);
-                    player.addGold(-blob.building.goldCost);
                     this.region.placeBuilding(blob.tile.x, blob.tile.y, blob.building);
                     blob.tile.building = blob.building;
                     this.scene.get("TownScene")._updateStatus();
@@ -284,12 +279,7 @@ export class RegionScene extends SceneUIBase {
                 if (blob.tile.building === undefined) {
                     break;
                 }
-                var player = new PlayerData();
-                var tier = Math.floor(Math.min(7, this.region.regionLevel));
-                if (Common.canCraft(blob.tile.building.resourceCosts, player.resources[tier]) === true &&
-                    blob.tile.building.goldCost <= player.gold && this._canUpgrade(blob.tile)) {
-                    player.spendResource(blob.tile.building.resourceCosts, tier);
-                    player.addGold(-blob.tile.building.goldCost);
+                if (this.region._canUpgrade(blob.tile) === true) {
                     this.region.upgradeBuilding(blob.tile.x, blob.tile.y);
                     this.tileElements[blob.tile.y][blob.tile.x].building.setTexture(blob.tile.building.texture.sprite,
                         blob.tile.building.texture.tile + 8 * (blob.tile.building.tier - 1));
@@ -504,6 +494,8 @@ export class RegionScene extends SceneUIBase {
         this.autoExploreButton.setVisible(this.progression.persistentUnlocks.autoExplore);
         this.autoInvadeLabel.setVisible(MoonlightData.getInstance().challenges.invasion.completions > 0);
         this.autoInvadeButton.setVisible(MoonlightData.getInstance().challenges.invasion.completions > 0);
+        this.autoUpgradeLabel.setVisible(MoonlightData.getInstance().challenges.outcast.completions > 0);
+        this.autoUpgradeButton.setVisible(MoonlightData.getInstance().challenges.outcast.completions > 0);
         this._updateRegionStats();
     }
 
@@ -525,6 +517,16 @@ export class RegionScene extends SceneUIBase {
         } else {
             this.autoInvadeButton.setText("OFF");
             this.autoInvadeButton.setTextColor(Phaser.Display.Color.GetColor(175, 0, 140));
+        }
+    }
+    _toggleAutoUpgrade() {
+        this.region.autoUpgrade = !this.region.autoUpgrade;
+        if (this.region.autoUpgrade === true) {
+            this.autoUpgradeButton.setText("ON");
+            this.autoUpgradeButton.setTextColor(Phaser.Display.Color.GetColor(255, 255, 255));
+        } else {
+            this.autoUpgradeButton.setText("OFF");
+            this.autoUpgradeButton.setTextColor(Phaser.Display.Color.GetColor(175, 0, 140));
         }
     }
 
@@ -559,14 +561,22 @@ export class RegionScene extends SceneUIBase {
         this.autoInvadeButton = new TextButton(this, this.relativeX(795), this.relativeY(220), 40, 20, "OFF")
             .onClickHandler(() => { this._toggleAutoInvade() });
         this.autoInvadeButton.setTextColor(Phaser.Display.Color.GetColor(175, 0, 140));
+        this.autoUpgradeLabel = this.add.bitmapText(this.relativeX(660), this.relativeY(250), "courier20", "Auto Upgrade:");
+        this.autoUpgradeButton = new TextButton(this, this.relativeX(795), this.relativeY(250), 40, 20,
+            this.region.autoUpgrade === true ? "ON" : "OFF")
+            .onClickHandler(() => { this._toggleAutoUpgrade() });
+        this.autoUpgradeButton.setTextColor(this.region.autoUpgrade === true ? Phaser.Display.Color.GetColor(255, 255, 255) :
+            Phaser.Display.Color.GetColor(175, 0, 140));
 
         this.autoExploreLabel.setVisible(this.progression.persistentUnlocks.autoExplore);
         this.autoExploreButton.setVisible(this.progression.persistentUnlocks.autoExplore);
         this.autoInvadeLabel.setVisible(MoonlightData.getInstance().challenges.invasion.completions > 0);
         this.autoInvadeButton.setVisible(MoonlightData.getInstance().challenges.invasion.completions > 0);
+        this.autoUpgradeLabel.setVisible(MoonlightData.getInstance().challenges.outcast.completions > 0);
+        this.autoUpgradeButton.setVisible(MoonlightData.getInstance().challenges.outcast.completions > 0);
 
-        this.exploreLabel = this.add.bitmapText(this.relativeX(660), this.relativeY(250), "courier20", "Exploring:");
-        this.exploreProgressBar = new ProgressBar(this, this.relativeX(765), this.relativeY(250), 130, 20,
+        this.exploreLabel = this.add.bitmapText(this.relativeX(660), this.relativeY(370), "courier20", "Exploring:");
+        this.exploreProgressBar = new ProgressBar(this, this.relativeX(765), this.relativeY(370), 130, 20,
             Phaser.Display.Color.GetColor(0, 0, 255), Phaser.Display.Color.GetColor(32, 32, 64));
         this.exploreProgressBar.setFillPercent(0);
 
@@ -605,6 +615,9 @@ export class RegionScene extends SceneUIBase {
         this.warehouseKey = this.input.keyboard.addKey(Phaser.Input.Keyboard.KeyCodes.W);
         this.alchemyKey = this.input.keyboard.addKey(Phaser.Input.Keyboard.KeyCodes.A);
         this.destroyKey = this.input.keyboard.addKey(Phaser.Input.Keyboard.KeyCodes.D);
+        this.docksKey = this.input.keyboard.addKey(Phaser.Input.Keyboard.KeyCodes.O);
+        this.dojoKey = this.input.keyboard.addKey(Phaser.Input.Keyboard.KeyCodes.J);
+        this.watchtowerKey = this.input.keyboard.addKey(Phaser.Input.Keyboard.KeyCodes.C);
         this.woodKey = this.input.keyboard.addKey(Phaser.Input.Keyboard.KeyCodes.ONE);
         this.leatherKey = this.input.keyboard.addKey(Phaser.Input.Keyboard.KeyCodes.TWO);
         this.metalKey = this.input.keyboard.addKey(Phaser.Input.Keyboard.KeyCodes.THREE);
@@ -655,74 +668,89 @@ export class RegionScene extends SceneUIBase {
 
         if (Phaser.Input.Keyboard.JustUp(this.upgradeKey) && this.hoveredTile[0] !== -1) {
             this._tileActionHandler("upgrade", { tile: this.region.map[this.hoveredTile[1]][this.hoveredTile[0]] });
-        } else if (Phaser.Input.Keyboard.JustUp(this.houseKey) && this.hoveredTile[0] !== -1) {
+        } else if (Phaser.Input.Keyboard.JustUp(this.exploreKey) && this.hoveredTile[0] !== -1) {
+            this._tileActionHandler("explore", { tile: this.region.map[this.hoveredTile[1]][this.hoveredTile[0]] });
+        } else if (this.houseKey.isDown && this.hoveredTile[0] !== -1) {
             this._tileActionHandler("build", {
                 tile: this.region.map[this.hoveredTile[1]][this.hoveredTile[0]],
                 building: BuildingRegistry.getBuildingByName('house')
             });
-        } else if (Phaser.Input.Keyboard.JustUp(this.roadKey) && this.hoveredTile[0] !== -1) {
+        } else if (this.roadKey.isDown && this.hoveredTile[0] !== -1) {
             this._tileActionHandler("build", {
                 tile: this.region.map[this.hoveredTile[1]][this.hoveredTile[0]],
                 building: BuildingRegistry.getBuildingByName('road')
             });
-        } else if (Phaser.Input.Keyboard.JustUp(this.exploreKey) && this.hoveredTile[0] !== -1) {
-            this._tileActionHandler("explore", { tile: this.region.map[this.hoveredTile[1]][this.hoveredTile[0]] });
-        } else if (Phaser.Input.Keyboard.JustUp(this.productionKey) && this.hoveredTile[0] !== -1) {
+        } else if (this.productionKey.isDown && this.hoveredTile[0] !== -1) {
             this._tileActionHandler("build", {
                 tile: this.region.map[this.hoveredTile[1]][this.hoveredTile[0]],
                 building: BuildingRegistry.getBuildingByName(RegionRegistry.TILE_TYPES[this.region.map[this.hoveredTile[1]][this.hoveredTile[0]].regName].preferredBuilding)
             });
-        } else if (Phaser.Input.Keyboard.JustUp(this.woodKey) && this.hoveredTile[0] !== -1) {
+        } else if (this.woodKey.isDown && this.hoveredTile[0] !== -1) {
             this._tileActionHandler("build", {
                 tile: this.region.map[this.hoveredTile[1]][this.hoveredTile[0]],
                 building: BuildingRegistry.getBuildingByName('wood')
             });
-        } else if (Phaser.Input.Keyboard.JustUp(this.leatherKey) && this.hoveredTile[0] !== -1) {
+        } else if (this.leatherKey.isDown && this.hoveredTile[0] !== -1) {
             this._tileActionHandler("build", {
                 tile: this.region.map[this.hoveredTile[1]][this.hoveredTile[0]],
                 building: BuildingRegistry.getBuildingByName('leather')
             });
-        } else if (Phaser.Input.Keyboard.JustUp(this.metalKey) && this.hoveredTile[0] !== -1) {
+        } else if (this.metalKey.isDown && this.hoveredTile[0] !== -1) {
             this._tileActionHandler("build", {
                 tile: this.region.map[this.hoveredTile[1]][this.hoveredTile[0]],
                 building: BuildingRegistry.getBuildingByName('metal')
             });
-        } else if (Phaser.Input.Keyboard.JustUp(this.fiberKey) && this.hoveredTile[0] !== -1) {
+        } else if (this.fiberKey.isDown && this.hoveredTile[0] !== -1) {
             this._tileActionHandler("build", {
                 tile: this.region.map[this.hoveredTile[1]][this.hoveredTile[0]],
                 building: BuildingRegistry.getBuildingByName('fiber')
             });
-        } else if (Phaser.Input.Keyboard.JustUp(this.stoneKey) && this.hoveredTile[0] !== -1) {
+        } else if (this.stoneKey.isDown && this.hoveredTile[0] !== -1) {
             this._tileActionHandler("build", {
                 tile: this.region.map[this.hoveredTile[1]][this.hoveredTile[0]],
                 building: BuildingRegistry.getBuildingByName('stone')
             });
-        } else if (Phaser.Input.Keyboard.JustUp(this.crystalKey) && this.hoveredTile[0] !== -1) {
+        } else if (this.crystalKey.isDown && this.hoveredTile[0] !== -1) {
             this._tileActionHandler("build", {
                 tile: this.region.map[this.hoveredTile[1]][this.hoveredTile[0]],
                 building: BuildingRegistry.getBuildingByName('crystal')
             });
-        } else if (Phaser.Input.Keyboard.JustUp(this.marketKey) && this.hoveredTile[0] !== -1) {
+        } else if (this.marketKey.isDown && this.hoveredTile[0] !== -1) {
             this._tileActionHandler("build", {
                 tile: this.region.map[this.hoveredTile[1]][this.hoveredTile[0]],
                 building: BuildingRegistry.getBuildingByName('market')
             });
-        } else if (Phaser.Input.Keyboard.JustUp(this.tavernKey) && this.hoveredTile[0] !== -1) {
+        } else if (this.tavernKey.isDown && this.hoveredTile[0] !== -1) {
             this._tileActionHandler("build", {
                 tile: this.region.map[this.hoveredTile[1]][this.hoveredTile[0]],
                 building: BuildingRegistry.getBuildingByName('tavern')
             });
-        } else if (Phaser.Input.Keyboard.JustUp(this.warehouseKey) && this.hoveredTile[0] !== -1) {
+        } else if (this.warehouseKey.isDown && this.hoveredTile[0] !== -1) {
             this._tileActionHandler("build", {
                 tile: this.region.map[this.hoveredTile[1]][this.hoveredTile[0]],
                 building: BuildingRegistry.getBuildingByName('warehouse')
             });
-        } else if (Phaser.Input.Keyboard.JustUp(this.alchemyKey) && this.hoveredTile[0] !== -1) {
+        } else if (this.alchemyKey.isDown && this.hoveredTile[0] !== -1) {
             this._tileActionHandler("build", {
                 tile: this.region.map[this.hoveredTile[1]][this.hoveredTile[0]],
                 building: BuildingRegistry.getBuildingByName('alchemy')
             });
-        } else if (Phaser.Input.Keyboard.JustUp(this.destroyKey) && this.hoveredTile[0] !== -1) {
+        } else if (this.docksKey.isDown && this.hoveredTile[0] !== -1) {
+            this._tileActionHandler("build", {
+                tile: this.region.map[this.hoveredTile[1]][this.hoveredTile[0]],
+                building: BuildingRegistry.getBuildingByName('docks')
+            });
+        } else if (this.dojoKey.isDown && this.hoveredTile[0] !== -1) {
+            this._tileActionHandler("build", {
+                tile: this.region.map[this.hoveredTile[1]][this.hoveredTile[0]],
+                building: BuildingRegistry.getBuildingByName('dojo')
+            });
+        } else if (this.watchtowerKey.isDown && this.hoveredTile[0] !== -1) {
+            this._tileActionHandler("build", {
+                tile: this.region.map[this.hoveredTile[1]][this.hoveredTile[0]],
+                building: BuildingRegistry.getBuildingByName('watchtower')
+            });
+        } else if (this.destroyKey.isDown && this.hoveredTile[0] !== -1) {
             this._tileActionHandler("destroy", {
                 tile: this.region.map[this.hoveredTile[1]][this.hoveredTile[0]]
             });

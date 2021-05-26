@@ -218,6 +218,9 @@ export class Region {
         this.houses = [];
         this.alchemyDrain = 0;
         this.alchemyGain = 0;
+        this.villagerStatGain = [0, 0];
+        this.dungeonLocations = [];
+        this.autoUpgrade = false;
 
         if (ignoreGen === true) {
             return true;
@@ -279,7 +282,9 @@ export class Region {
             ic: this.invasionCounter,
             wh: this.worldHeight,
             type: this.type,
-            tr: this.traits
+            tr: this.traits,
+            dl: this.dungeonLocations,
+            au: this.autoUpgrade
         }
 
         return saveObj;
@@ -300,6 +305,8 @@ export class Region {
         region.worldHeight = saveObj.wh;
         region.type = saveObj.type;
         region.traits = saveObj.tr;
+        region.dungeonLocations = saveObj.dl === undefined ? [] : saveObj.dl;
+        region.autoUpgrade = saveObj.au === undefined ? false : saveObj.au;
         region.map = []
         for (var i = 0; i < saveObj.map.length; i++) {
             var row = [];
@@ -421,6 +428,14 @@ export class Region {
             this.map[gatePos[0]][gatePos[1]].init("mysticgate", maxDiff, minDiff, this);
         }
 
+        // for unlocking dungeons, we need to place a single crypt tile in region 5
+        if (DynamicSettings.getInstance().challengeName === "" &&
+            ProgressionStore.getInstance().persistentUnlocks.dungeons === false && this.regionLevel === 4) {
+            // place the crypt on a random tile 5 rows from the top
+            var x = Common.randint(0, this.width);
+            this.map[this.height - 5][x].init("crypt", maxDiff, minDiff, this);
+        }
+
         //if runes appear on the map, add spawn locations here
         var runeCount = MoonlightData.getInstance().moonperks.runes.level > 0 ? 5 : 0;
         runeCount += MoonlightData.getInstance().moonperks.runelands.level;
@@ -458,8 +473,29 @@ export class Region {
 
         this.map[townPoint[1]][townPoint[0]].init("town", minDiff, minDiff, this);
         this.map[townPoint[1]][townPoint[0]].building = BuildingRegistry.getBuildingByName("town");
-        this.placeBuilding(townPoint[0], townPoint[1], BuildingRegistry.getBuildingByName("town"));
+        // avoid place building as that can lead to infinite loops in the startup path
+        this._addBuilding(this.map[townPoint[1]][townPoint[0]]);
+        this._calculateTileBonuses();
         this.map[spawnPoint[1]][spawnPoint[0]].revealed = true;
+
+        // calculate dungeon spawns
+        if (ProgressionStore.getInstance().persistentUnlocks.dungeons === true) {
+            var p = [Common.randint(0, Math.floor(this.height / 3)), Common.randint(0, this.width)]
+            while (this.map[p[0]][p[1]].regName === "town" || this.map[p[0]][p[1]].regName === 'mysticgate') {
+                p = [Common.randint(0, Math.floor(this.height / 3)), Common.randint(0, this.width)]
+            }
+            this.dungeonLocations.push(p);
+            var p = [Common.randint(Math.floor(this.height / 3), Math.floor(this.height / 3) * 2), Common.randint(0, this.width)]
+            while (this.map[p[0]][p[1]].regName === "town" || this.map[p[0]][p[1]].regName === 'mysticgate') {
+                p = [Common.randint(Math.floor(this.height / 3), Math.floor(this.height / 3) * 2), Common.randint(0, this.width)]
+            }
+            this.dungeonLocations.push(p);
+            var p = [Common.randint(Math.floor(this.height / 3) * 2, Math.floor(this.height / 3) * 3), Common.randint(0, this.width)]
+            while (this.map[p[0]][p[1]].regName === "town" || this.map[p[0]][p[1]].regName === 'mysticgate') {
+                p = [Common.randint(Math.floor(this.height / 3) * 2, Math.floor(this.height / 3) * 3), Common.randint(0, this.width)]
+            }
+            this.dungeonLocations.push(p);
+        }
     }
 
     getRegionImage() {
@@ -494,6 +530,15 @@ export class Region {
         return this.map[y][x].revealed;
     }
 
+    _tileIsDungeon(x, y) {
+        for (var i = 0; i < this.dungeonLocations.length; i++) {
+            if (this.dungeonLocations[i][0] === y && this.dungeonLocations[i][1] === x) {
+                return true;
+            }
+        }
+        return false;
+    }
+
     exploreTile(x, y) {
         if (this.map[y][x].revealed === true && this.map[y][x].explored !== true) {
             this.tilesExplored += 1;
@@ -502,7 +547,7 @@ export class Region {
             this.townData.addFriendship(10 * MoonlightData.getInstance().moonperks.discovery.level);
             if (this.map[y][x].hasRune === true) {
                 this.map[y][x].hasRune = false;
-                var rune = RuneRegistry.getRandomRuneAtLevel((this.regionLevel / 2) + 1);
+                var rune = RuneRegistry.getRandomRuneAtLevel(Math.floor(this.regionLevel / 2) + 1);
                 PlayerData.getInstance().addRune(rune);
             }
             if (this.map[y][x].name === "Town") {
@@ -526,6 +571,25 @@ export class Region {
             if (x < this.width - 1) {
                 this.map[y][x + 1].revealed = true;
                 this._onTileChanged(this.map[y][x + 1]);
+            }
+            if (this._tileIsDungeon(x, y)) {
+                this.dungeonLocations = this.dungeonLocations.filter(p => p[1] !== x || p[0] !== y);
+                this.townData.uncoverDungeon(this);
+            }
+            if (this.map[y][x].name === "Ancient Crypt" && ProgressionStore.getInstance().persistentUnlocks.dungeons === false) {
+                ProgressionStore.getInstance().persistentUnlocks.dungeons = true;
+                ProgressionStore.getInstance().registerFeatureUnlocked(Statics.UNLOCK_GENERIC,
+                    "As you clear the final floor of this ancient crypt you find an ornate key! Surely this key must lead to " +
+                    "some ancient treasure. As you leave the crypt thinking about how your going to get PAID you see a " +
+                    "villager carrying the same key as you.\n\n" +
+                    "\"What, this old thing? We find them all the time, it's so bad we end up just throwing them away. Apparently it " +
+                    "unlocks some old dungeon filled with treasure and unspeakable horrors. Anyway, I gotta go chuck this key " +
+                    "down into the crypt here.\"\n\n" +
+                    "This whole time there's been dungeons full of loot and the villagers are just telling you now? Well, you don't " +
+                    "have time to do the dungeons yourself, and it's not because your afraid of whatever unspeakable horrors are inside. " +
+                    "You're pretty sure the villagers can handle it, and if not it only takes a week for them to breed a fully adult " +
+                    "villager. What's with that anyway?\n" +
+                    "VILLAGER DUNEGONS UNLOCKED! On your next rebirth you'll find dungeons to throw your villagers in.");
             }
         }
         if (this.regionLevel > 0 && this.regionLevel <= 8 && WorldData.getInstance().getRegion(this.regionLevel - 1).townData.alchemyEnabled === false) {
@@ -724,6 +788,7 @@ export class Region {
         this.resourcesPerDay = [0, 0, 0, 0, 0, 0];
         this.alchemyDrain = 0;
         this.alchemyGain = 0;
+        this.villagerStatGain = [0, 0];
         for (var i = 0; i < this.height; i++) {
             for (var t = 0; t < this.width; t++) {
                 this.map[i][t].roadDist = -1;
@@ -775,7 +840,8 @@ export class Region {
         //get house population
         for (var i = 0; i < this.houses.length; i++) {
             if (this.map[this.houses[i][0]][this.houses[i][1]].houseBuildable === true) {
-                maxPop += 5 * this.map[this.houses[i][0]][this.houses[i][1]].building.tier;
+                maxPop += (5 + MoonlightData.getInstance().moonperks.urbanization.level) *
+                    this.map[this.houses[i][0]][this.houses[i][1]].building.tier;
             }
         }
 
@@ -885,6 +951,13 @@ export class Region {
                     this.alchemyDrain += drain[tile.building.tier - 1];
                     this.alchemyGain += gain[tile.building.tier - 1];
                     break;
+                case "Dojo":
+                    if (tile.houseBuildable === true) {
+                        var moonBonus = (1 + MoonlightData.getInstance().moonperks.ninja.level * 0.25);
+                        this.villagerStatGain[0] += tile.building.tier * 0.05 * moonBonus;
+                        this.villagerStatGain[1] += tile.building.tier * 0.5 * moonBonus;
+                    }
+                    break;
             }
         }
         this.townData.setMaxPopulation(maxPop);
@@ -926,7 +999,22 @@ export class Region {
                 return yieldSum > 0 && this.townData.alchemyEnabled === true;
             case "Tavern":
                 return yieldSum > 0 && this.townData.getTavernLevel() > 0;
+            case "Dojo":
+                return yieldSum > 0 && tile.houseBuildable && ProgressionStore.getInstance().persistentUnlocks.dungeons === true;
         }
+    }
+    _canUpgrade(tile) {
+        if (tile.building === undefined || tile.building.tier >= 3 || tile.building.name === "Town") {
+            return false;
+        }
+        if ((tile.building.name === "Market" && tile.building.tier >= this.townData.getMarketLevel()) ||
+            (tile.building.name === "Tavern" && tile.building.tier >= this.townData.getTavernLevel())) {
+            return false;
+        }
+        var player = new PlayerData();
+        var tier = Math.floor(Math.min(7, this.regionLevel));
+        return Common.canCraft(tile.building.resourceCosts, player.resources[tier]) === true &&
+            tile.building.goldCost <= player.gold;
     }
 
     _addBuilding(tile) {
@@ -941,6 +1029,7 @@ export class Region {
             case "Crystal Loom":
             case "Docks":
             case "Alchemy Lab":
+            case "Dojo":
                 this.productionBuildings.push([tile.y, tile.x]);
                 break;
             case "Town House":
@@ -985,6 +1074,7 @@ export class Region {
             case "Crystal Loom":
             case "Docks":
             case "Alchemy Lab":
+            case "Dojo":
                 this.productionBuildings = this.productionBuildings.filter(p => p[1] !== tile.x || p[0] !== tile.y);
                 break;
             case "Watch Tower":
@@ -1068,6 +1158,8 @@ export class Region {
     }
 
     placeBuilding(x, y, building) {
+        PlayerData.getInstance().spendResource(building.resourceCosts, Math.min(7, this.regionLevel));
+        PlayerData.getInstance().addGold(-building.goldCost);
         this.map[y][x].building = building;
         this.map[y][x].building.increaseCosts();
         this._addBuilding(this.map[y][x]);
@@ -1075,6 +1167,8 @@ export class Region {
         this._onTileChanged(this.map[y][x]);
     }
     upgradeBuilding(x, y) {
+        PlayerData.getInstance().spendResource(this.map[y][x].building.resourceCosts, Math.min(7, this.regionLevel));
+        PlayerData.getInstance().addGold(-this.map[y][x].building.goldCost);
         this._removeBuilding(this.map[y][x]);
         this.map[y][x].building.tier += 1;
         this.map[y][x].building.increaseCosts();
@@ -1099,7 +1193,22 @@ export class Region {
         for (var i = 0; i < this.resourcesPerDay.length; i++) {
             resource.push(Math.max(0, this.resourcesPerDay[i] * prodBonus));
         }
+        resource[0] *= PlayerData.getInstance().dungeonBonus.wood;
+        resource[1] *= PlayerData.getInstance().dungeonBonus.leather;
+        resource[2] *= PlayerData.getInstance().dungeonBonus.metal;
+        resource[3] *= PlayerData.getInstance().dungeonBonus.fiber;
+        resource[4] *= PlayerData.getInstance().dungeonBonus.stone;
+        resource[5] *= PlayerData.getInstance().dungeonBonus.crystal;
         return resource;
+    }
+
+    _tryUpgradeList(list) {
+        for (var i = 0; i < list.length; i++) {
+            if (this._canUpgrade(this.map[list[i][0]][list[i][1]])) {
+                this.upgradeBuilding(list[i][1], list[i][0]);
+                break;
+            }
+        }
     }
 
     updateDay() {
@@ -1143,9 +1252,31 @@ export class Region {
         if (this.invasionCounter > Statics.INVASION_THRESHOLD) {
             this._invade();
         }
+
+        if (this.autoUpgrade === true) {
+            this._tryUpgradeList(this.productionBuildings);
+            this._tryUpgradeList(this.houses);
+            this._tryUpgradeList(this.markets);
+            this._tryUpgradeList(this.taverns);
+            this._tryUpgradeList(this.roads);
+            this._tryUpgradeList(this.warehouses);
+        }
     }
 
     updateWeek() {
+        if (this.townData.areDungeonsComplete() === true) {
+            var regionList = WorldData.getInstance().regionList;
+            for (var i = this.regionLevel + 1; i < regionList.length; i++) {
+                if (regionList[i].townData.areDungeonsComplete() === false) {
+                    regionList[i].townData.villagerPower += this.villagerStatGain[0] * 0.2;
+                    regionList[i].townData.villagerHealth += this.villagerStatGain[1] * 0.2;
+                    break;
+                }
+            }
+        } else {
+            this.townData.villagerPower += this.villagerStatGain[0];
+            this.townData.villagerHealth += this.villagerStatGain[1];
+        }
         this.townData.endOfWeek();
     }
 }

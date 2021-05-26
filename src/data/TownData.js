@@ -3,6 +3,9 @@ import { Statics } from "./Statics";
 import { WorldData } from "./WorldData";
 import { MoonlightData } from "./MoonlightData";
 import { DynamicSettings } from "./DynamicSettings";
+import { ProgressionStore } from "./ProgressionStore";
+import { Dungeon } from "./Dungeon";
+import { RuneRegistry } from "./RuneRegistry";
 
 export class TownData {
     static getTechGoldCost(tech, tier) {
@@ -15,7 +18,7 @@ export class TownData {
     }
     static getTechResourceCost(tech, tier) {
         var vlvl = tech.level;
-        var ret = []
+        var ret = [];
         for (var i = 0; i < tech.resources.length; i++) {
             var aGold = tech.resources[i][0];
             var bGold = vlvl * tech.resources[i][1];
@@ -41,6 +44,8 @@ export class TownData {
         this.bountyMulti = 1;
         this.productionMulti = 1;
         this.exploreMulti = 1;
+        this.dungeonEconMulti = 1;
+        this.dungeonProdMulti = 1;
         this.townDefenseBonus = 0;
         this.goldCapBonus = moonData.moonperks.heropouch.level * 100;
         this.baseIncome = Statics.BASE_TAX_INCOME + moonData.moonperks.vault.level * 0.1;
@@ -53,6 +58,13 @@ export class TownData {
         this.friendshipToNext = 25;
         this.tilesExplored = 0;
         this.nightLabourActive = false;
+
+        // dungeon variables
+        this.villagerPower = PlayerData.getInstance().baseVillagerPower;
+        this.villagerHealth = PlayerData.getInstance().baseVillagerHealth;
+        this.villagerPowerMulti = 1;
+        this.villagerHealthMulti = 1;
+        this.dungeons = [];
 
         this.buildings = {
             forge: {
@@ -68,6 +80,17 @@ export class TownData {
                 goldCosts: [50, 30, 15], resources: [[15, 10, 8], [0, 0, 0], [0, 0, 0], [0, 0, 0], [10, 10, 5], [0, 0, 0]]
             }
         };
+
+        if (ProgressionStore.getInstance().persistentUnlocks.dungeons === true) {
+            this.buildings["barracks"] = {
+                name: "Barracks", level: 0, maxLevel: -1, requires: [],
+                goldCosts: [75, 40, 20], resources: [[25, 15, 10], [0, 0, 0], [0, 0, 0], [20, 10, 8], [0, 0, 0], [0, 0, 0]]
+            }
+            this.buildings['armory'] = {
+                name: "Armory", level: 0, maxLevel: -1, requires: [],
+                goldCosts: [75, 40, 20], resources: [[0, 0, 0], [20, 10, 8], [25, 15, 10], [0, 0, 0], [0, 0, 0], [0, 0, 0]]
+            }
+        }
 
         this.upgrades = {
             reinforcedhouses: {
@@ -118,11 +141,17 @@ export class TownData {
             case "Map Making":
                 this.exploreMulti += 0.1;
                 break;
+            case "Barracks":
+                this.villagerPowerMulti += 0.2;
+                break;
+            case "Armory":
+                this.villagerHealthMulti += 0.2;
+                break;
         }
     }
 
     calculateEconMulti(bonus) {
-        this.economyMulti = 1 + bonus + (this.upgrades.banking.level * 0.05);
+        this.economyMulti = (1 + bonus + (this.upgrades.banking.level * 0.05)) * this.dungeonEconMulti;
     }
     getTownIncome() {
         var player = new PlayerData();
@@ -131,35 +160,39 @@ export class TownData {
     }
     getGoldCap() {
         var player = new PlayerData();
-        var exploreBonus = MoonlightData.getInstance().moonperks.crownlands.level * 2;
+        var exploreBonus = MoonlightData.getInstance().moonperks.crownlands.level * 2 * this.tilesExplored;
         return (this.currentPopulation * Statics.GOLDCAP_PER_POP + this.goldCapBonus + exploreBonus) *
             this.economyMulti * (1 + player.getTalentLevel("governance") * 0.04);
-    }
-    getMaxPopulation() {
-        return this.maxPopulation;
-    }
-    getMarketLevel() {
-        return this.upgrades.market.level;
-    }
-    getTavernLevel() {
-        return this.upgrades.tavern.level;
-    }
-    setMaxPopulation(pop) {
-        this.maxPopulation = pop;
-    }
-    setTilesExplored(explored) {
-        this.tilesExplored = explored;
     }
     getProductionMulti() {
         var nightLabourBonus = this.nightLabourActive === true ? (1 + 0.1 * MoonlightData.getInstance().moonperks.nightlabour.level) : 1;
         var multi = this.productionMulti *
             (1 + this.friendshipLevel * 0.01 * MoonlightData.getInstance().moonperks.motivatedlabor.level) *
-            nightLabourBonus * DynamicSettings.getInstance().productionMulti;
+            nightLabourBonus * DynamicSettings.getInstance().productionMulti * this.dungeonProdMulti;
         if (DynamicSettings.getInstance().friendshipToProduction === true) {
             return multi + this.friendshipLevel * 0.05;
         } else {
             return multi;
         }
+    }
+    getMaxPopulation() { return this.maxPopulation; }
+    getMarketLevel() { return this.upgrades.market.level; }
+    getTavernLevel() { return this.upgrades.tavern.level; }
+    getVillagerPower() {
+        return Math.round(this.villagerPower * this.villagerPowerMulti *
+            (1 + MoonlightData.getInstance().moonperks.devotion.level * 0.25));
+    }
+    getVillagerHealth() {
+        return Math.round(this.villagerHealth * this.villagerHealthMulti *
+            (1 + MoonlightData.getInstance().moonperks.devotion.level * 0.25));
+    }
+    getArmySize() { return Math.ceil(this.currentPopulation * 0.1); }
+
+    setMaxPopulation(pop) {
+        this.maxPopulation = pop;
+    }
+    setTilesExplored(explored) {
+        this.tilesExplored = explored;
     }
 
     addFriendship(value) {
@@ -193,6 +226,141 @@ export class TownData {
         }
     }
 
+    killPopulation(value) {
+        this.currentPopulation = Math.max(0, this.currentPopulation - value);
+    }
+
+    uncoverDungeon(region) {
+        if (this.dungeons.length >= 3) {
+            return;
+        }
+        var tier = this.dungeons.length;
+        var lvl = region.regionLevel * DynamicSettings.getInstance().regionDifficultyIncrease + 5 + tier * 5;
+        var difficulty = Math.floor((1 + lvl) * Math.pow(Statics.MONSTER_STATSCALE_PER_LEVEL, lvl) *
+            Math.pow(Statics.MONSTER_STATSCALE_PER_REGION, region.regionLevel));
+        this.dungeons.push(new Dungeon(lvl, difficulty, tier, region.regionLevel, 5 + tier * 5));
+    }
+
+    areDungeonsComplete() {
+        if (this.dungeons.length != 3) {
+            return false;
+        }
+        for (var i = 0; i < this.dungeons.length; i++) {
+            if (this.dungeons[i].completedRooms < this.dungeons[i].maxRooms) {
+                return false;
+            }
+        }
+        return true;
+    }
+
+    chooseReward(reward) {
+        switch (reward.type) {
+            case Statics.DUNGEON.RESOURCES:
+                var region = WorldData.getInstance().getCurrentRegion();
+                var res = region.resourcesPerDay;
+                var avg = 0;
+                for (var i = 0; i < res.length; i++) {
+                    avg += res[i];
+                }
+                avg = Math.ceil(avg / res.length) * reward.amount;
+                PlayerData.getInstance().addResource([avg, avg, avg, avg, avg, avg], Math.min(7, region.regionLevel));
+                break;
+            case Statics.DUNGEON.SHADE:
+                PlayerData.getInstance().addShade(reward.amount);
+                break;
+            case Statics.DUNGEON.MOTES:
+                PlayerData.getInstance().addMote(reward.amount);
+                break;
+            case Statics.DUNGEON.GOLD:
+                PlayerData.getInstance().addGold(reward.amount);
+                break;
+            case Statics.DUNGEON.GEAR_LEVELS:
+                var player = PlayerData.getInstance();
+                if (player.weapon !== undefined) {
+                    var wep = player.weapon;
+                    player.unequip(wep.slotType);
+                    wep.bringToLevel(wep.level + reward.amount);
+                    player.equip(wep);
+                }
+                if (player.armor !== undefined) {
+                    var arm = player.armor;
+                    player.unequip(arm.slotType);
+                    arm.bringToLevel(arm.level + reward.amount);
+                    player.equip(arm);
+                }
+                if (player.trinket !== undefined) {
+                    var trink = player.trinket;
+                    player.unequip(trink.slotType);
+                    trink.bringToLevel(trink.level + reward.amount);
+                    player.equip(trink);
+                }
+                break;
+            case Statics.DUNGEON.RUNES:
+                var runeLevel = 1 + Math.floor(WorldData.getInstance().getCurrentRegion().regionLevel / 2);
+                for (var i = 0; i < reward.amount; i++) {
+                    PlayerData.getInstance().addRune(RuneRegistry.getRandomRuneAtLevel(runeLevel));
+                }
+                break;
+            case Statics.DUNGEON.WOOD:
+                PlayerData.getInstance().multiplyDungeonBonus('wood', 1 + reward.amount);
+                break;
+            case Statics.DUNGEON.LEATHER:
+                PlayerData.getInstance().multiplyDungeonBonus('leather', 1 + reward.amount);
+                break;
+            case Statics.DUNGEON.METAL:
+                PlayerData.getInstance().multiplyDungeonBonus('metal', 1 + reward.amount);
+                break;
+            case Statics.DUNGEON.FIBER:
+                PlayerData.getInstance().multiplyDungeonBonus('fiber', 1 + reward.amount);
+                break;
+            case Statics.DUNGEON.STONE:
+                PlayerData.getInstance().multiplyDungeonBonus('stone', 1 + reward.amount);
+                break;
+            case Statics.DUNGEON.CRYSTAL:
+                PlayerData.getInstance().multiplyDungeonBonus('crystal', 1 + reward.amount);
+                break;
+            case Statics.DUNGEON.PRODUCTION:
+                this.dungeonProdMulti += reward.amount;
+                break;
+            case Statics.DUNGEON.ECONOMY:
+                this.dungeonEconMulti += reward.amount;
+                break;
+            case Statics.DUNGEON.STRENGTH:
+                PlayerData.getInstance().multiplyDungeonBonus('strength', 1 + reward.amount);
+                break;
+            case Statics.DUNGEON.DEXTERITY:
+                PlayerData.getInstance().multiplyDungeonBonus('dexterity', 1 + reward.amount);
+                break;
+            case Statics.DUNGEON.AGILITY:
+                PlayerData.getInstance().multiplyDungeonBonus('agility', 1 + reward.amount);
+                break;
+            case Statics.DUNGEON.ENDURANCE:
+                PlayerData.getInstance().multiplyDungeonBonus('endurance', 1 + reward.amount);
+                break;
+            case Statics.DUNGEON.RECOVERY:
+                PlayerData.getInstance().multiplyDungeonBonus('recovery', 1 + reward.amount);
+                break;
+            case Statics.DUNGEON.DEFENSE:
+                PlayerData.getInstance().multiplyDungeonBonus('defense', 1 + reward.amount);
+                break;
+            case Statics.DUNGEON.ACCURACY:
+                PlayerData.getInstance().multiplyDungeonBonus('accuracy', 1 + reward.amount);
+                break;
+            case Statics.DUNGEON.MOONLIGHT:
+                PlayerData.getInstance().multiplyDungeonBonus('moonlight', 1 + reward.amount);
+                break;
+            case Statics.DUNGEON.TALENTS:
+                PlayerData.getInstance().addTalentPoints(reward.amount);
+                break;
+            case Statics.DUNGEON.PERM_VPOWER:
+                PlayerData.getInstance().addBaseVillagerStats(reward.amount, 0);
+                break;
+            case Statics.DUNGEON.PERM_VHEALTH:
+                PlayerData.getInstance().addBaseVillagerStats(0, reward.amount);
+                break;
+        }
+    }
+
 
     endOfDay() {
 
@@ -207,7 +375,7 @@ export class TownData {
             }
             PlayerData.getInstance().addGold(this.getTownIncome());
             PlayerData.getInstance().addShade(this.currentPopulation * 0.1 *
-                MoonlightData.getInstance().moonperks.shadow3.level);
+                MoonlightData.getInstance().moonperks.shadow3.level * MoonlightData.getInstance().getShadowBonus());
         }
     }
 
@@ -220,6 +388,10 @@ export class TownData {
         for (const prop in this.upgrades) {
             upgrades.push([prop, this.upgrades[prop].level]);
         }
+        var dungeons = [];
+        for (var i = 0; i < this.dungeons.length; i++) {
+            dungeons.push(this.dungeons[i].save());
+        }
         var saveObj = {
             cp: this.currentPopulation,
             mp: this.maxPopulation,
@@ -231,13 +403,18 @@ export class TownData {
             bi: this.baseIncome,
             bld: buildings,
             up: upgrades,
+            dng: dungeons,
             gc: this.goldCapBonus,
             te: this.townExplored,
             re: this.researchEnabled,
             fr: this.friendship,
             frl: this.friendshipLevel,
             alc: this.alchemyEnabled,
-            tl: this.tilesExplored
+            tl: this.tilesExplored,
+            vp: this.villagerPower,
+            vpm: this.villagerPowerMulti,
+            vh: this.villagerHealth,
+            vhm: this.villagerHealthMulti
         }
 
         return saveObj;
@@ -258,12 +435,23 @@ export class TownData {
         this.friendshipLevel = saveObj.frl;
         this.alchemyEnabled = saveObj.alc;
         this.tilesExplored = saveObj.tl ? saveObj.tl : 0;
+        this.villagerPower = saveObj.vp ? saveObj.vp : 1;
+        this.villagerPowerMulti = saveObj.vpm ? saveObj.vpm : 1;
+        this.villagerHealth = saveObj.vh ? saveObj.vh : 10;
+        this.villagerHealthMulti = saveObj.vhm ? saveObj.vhm : 1;
         this.friendshipToNext = TownData.calcFriendshipToLevel(this.friendshipLevel);
         for (var i = 0; i < saveObj.bld.length; i++) {
-            this.buildings[saveObj.bld[i][0]].level = saveObj.bld[i][1];
+            if (this.buildings[saveObj.bld[i][0]] !== undefined) {
+                this.buildings[saveObj.bld[i][0]].level = saveObj.bld[i][1];
+            }
         }
         for (var i = 0; i < saveObj.up.length; i++) {
             this.upgrades[saveObj.up[i][0]].level = saveObj.up[i][1];
+        }
+        if (saveObj.dng !== undefined) {
+            for (var i = 0; i < saveObj.dng.length; i++) {
+                this.dungeons.push(Dungeon.loadFromFile(saveObj.dng[i], ver));
+            }
         }
     }
 }

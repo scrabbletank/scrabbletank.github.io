@@ -100,6 +100,9 @@ export class TileSelectWindow {
                         if (MoonlightData.getInstance().challenges.buildings.completions > 0) {
                             bld.push("warehouse");
                         }
+                        if (ProgressionStore.getInstance().persistentUnlocks.dungeons === true) {
+                            bld.push('dojo');
+                        }
                     }
                     if (region.townData.getTavernLevel() > 0) {
                         bld.push("tavern");

@@ -1,8 +1,9 @@
-import { Statics } from './Statics';
 import { CreatureBlock } from './CreatureBlock';
+import { DungeonBlock } from './DungeonBlock';
 
 
-var creatureDefs = {}
+var creatureDefs = {};
+var dungeonDefs = {};
 
 creatureDefs['wolf'] = {
     name: "Wolf",
@@ -505,11 +506,72 @@ creatureDefs['lootgoblin'] = {
     icon: { sprite: "enemyicons", tile: 14 }
 };
 
+dungeonDefs['goblin'] = {
+    name: "Goblin Horde",
+    powerScale: 0.9,
+    healthScale: 1,
+    icon: { sprite: "enemyicons", tile: 12 }
+};
+dungeonDefs['wolf'] = {
+    name: "Wolf Pack",
+    powerScale: 1.2,
+    healthScale: 0.8,
+    icon: { sprite: "enemyicons", tile: 2 }
+};
+dungeonDefs['lizard'] = {
+    name: "Lizard Hunting Party",
+    powerScale: 1.2,
+    healthScale: 1.1,
+    icon: { sprite: "enemyicons", tile: 13 }
+};
+dungeonDefs['guardian'] = {
+    name: "Crypt Guardians",
+    powerScale: 1.1,
+    healthScale: 1.4,
+    icon: { sprite: "enemyicons", tile: 9 }
+};
+dungeonDefs['slime'] = {
+    name: "Gelatinous Cube",
+    powerScale: 0.925,
+    healthScale: 1.5,
+    icon: { sprite: "enemyicons", tile: 0 }
+};
+dungeonDefs['drake'] = {
+    name: "Ancient Dragon",
+    powerScale: 1.1,
+    healthScale: 1.2,
+    icon: { sprite: "enemyicons", tile: 9 }
+};
+dungeonDefs['shadow'] = {
+    name: "Nameless Shadow",
+    powerScale: 1.3,
+    healthScale: 0.9,
+    icon: { sprite: "enemyicons", tile: 9 }
+};
+dungeonDefs['void'] = {
+    name: "Crystaline Void",
+    powerScale: 0.95,
+    healthScale: 1.5,
+    icon: { sprite: "enemyicons", tile: 9 }
+};
+// used only for player
+dungeonDefs['villager'] = {
+    name: "Villager Horde",
+    powerScale: 1,
+    healthScale: 1,
+    icon: { sprite: "enemyicons", tile: 8 }
+};
+
 export class CreatureRegistry {
     static GetCreatureByName(name, level, tier) {
         var creature = new CreatureBlock();
         creature.setMonsterStats(creatureDefs[name].name, creatureDefs[name].scaleBlock, creatureDefs[name].attackSpeed,
             creatureDefs[name].critChance, level, tier, creatureDefs[name].shadeBase, creatureDefs[name].rewardBase, creatureDefs[name].icon);
+        return creature;
+    }
+    static GetDungeonCreatureByName(name, power, health, count) {
+        var creature = new DungeonBlock();
+        creature.setArmyStats(power, health, count, dungeonDefs[name]);
         return creature;
     }
 }

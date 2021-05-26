@@ -19,6 +19,7 @@ export class WorldData {
             this.time.registerEvent("onDayEnd", () => { this.updateDay(); });
             this.time.registerEvent("onWeekEnd", () => { this.updateWeek(); });
             this.onRegionChangedHandlers = [];
+
             WorldData.instance = this;
         }
 
@@ -121,8 +122,7 @@ export class WorldData {
     }
 
     handleRunCompletion() {
-        var moonlightEarned = PlayerData.getInstance().earnableMoonlight(this.getCurrentRegion().regionLevel + 1) *
-            (1 + 0.15 * MoonlightData.getInstance().challenges.time.completions);
+        var moonlightEarned = PlayerData.getInstance().earnableMoonlight(this.getCurrentRegion().regionLevel + 1);
         MoonlightData.getInstance().moonlight += moonlightEarned;
 
         if (this.getCurrentRegion().regionLevel >= 1) {
