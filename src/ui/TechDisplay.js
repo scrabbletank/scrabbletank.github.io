@@ -21,7 +21,7 @@ export class TechDisplay {
         var descText = Common.processText(TooltipRegistry.getTechTooltip(tech, townTier), 77);
         this.descLabel = sceneContext.add.bitmapText(x + 5, y + 25, "courier16", descText);
 
-        var costText = "Cost: " + TownData.getTechGoldCost(tech, townTier) + " Gold";
+        var costText = "Cost: " + Common.numberString(TownData.getTechGoldCost(tech, townTier)) + " Gold";
         var resourceCosts = TownData.getTechResourceCost(tech, townTier);
         for (var i = 0; i < resourceCosts.length; i++) {
             if (resourceCosts[i] > 0) {

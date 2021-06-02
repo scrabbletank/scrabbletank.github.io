@@ -173,6 +173,9 @@ export class TileData {
                 this.difficulty - 1 + bonusDif, this.parent.regionLevel));
             enemyList.push(CreatureRegistry.GetCreatureByName(this.enemies[Common.randint(0, this.enemies.length)],
                 this.difficulty - 1 + bonusDif, this.parent.regionLevel));
+            for (var i = 0; i < enemyList.length; i++) {
+                enemyList[i].addTrait(Statics.TRAIT_INVADER, 1);
+            }
         } else {
             var min = this.difficulty < 30 ? 1 : 2;
             var max = (this.difficulty < 5 ? 2 : 3) + (this.difficulty > 15 ? 1 : 0)
@@ -221,6 +224,7 @@ export class Region {
         this.villagerStatGain = [0, 0];
         this.dungeonLocations = [];
         this.autoUpgrade = false;
+        this.blueprint = -1;
 
         if (ignoreGen === true) {
             return true;
@@ -284,7 +288,8 @@ export class Region {
             type: this.type,
             tr: this.traits,
             dl: this.dungeonLocations,
-            au: this.autoUpgrade
+            au: this.autoUpgrade,
+            bp: this.blueprint
         }
 
         return saveObj;
@@ -307,6 +312,7 @@ export class Region {
         region.traits = saveObj.tr;
         region.dungeonLocations = saveObj.dl === undefined ? [] : saveObj.dl;
         region.autoUpgrade = saveObj.au === undefined ? false : saveObj.au;
+        region.blueprint = saveObj.bp === undefined ? -1 : saveObj.bp;
         region.map = []
         for (var i = 0; i < saveObj.map.length; i++) {
             var row = [];
@@ -552,6 +558,9 @@ export class Region {
             }
             if (this.map[y][x].name === "Town") {
                 this.townData.townExplored = true;
+            }
+            if (this.tilesExplored >= 5 && WorldData.getInstance().invasionRegion < this.regionLevel) {
+                WorldData.getInstance().increaseInvasionPower();
             }
             if (this.tilesExplored >= 10) {
                 this.townData.researchEnabled = true;
@@ -969,6 +978,11 @@ export class Region {
             tile.explored === false || ProgressionStore.getInstance().unlocks.buildings === false) {
             return false;
         }
+        var tier = Math.floor(Math.min(7, this.regionLevel));
+        if (Common.canCraft(building.resourceCosts, PlayerData.getInstance().resources[tier]) === false ||
+            building.goldCost > PlayerData.getInstance().gold) {
+            return false;
+        }
         var yieldSum = tile.yields.reduce((a, b) => { return a + b; });
         switch (building.name) {
             case "Lumberyard":
@@ -1235,7 +1249,7 @@ export class Region {
             player.addResource(resource, Math.min(tier + 1, 7));
         }
 
-        if (this.tilesExplored >= 11) {
+        if (this.tilesExplored >= 11 && this.regionLevel === WorldData.getInstance().invasionRegion) {
             this.sightingsDelay -= Statics.TIME_PER_DAY;
             if (this.sightingsDelay <= 0) {
                 this._addSighting();
@@ -1245,7 +1259,7 @@ export class Region {
             var s = this.sightings[i];
             //TODO Add ramping strength from land/building
             this.map[s[0]][s[1]].incInvasionPower(this.regionLevel * DynamicSettings.getInstance().regionDifficultyIncrease);
-            this.invasionCounter += this.map[s[0]][s[1]].getInvasionMulti() * (1 / (1 + player.getTalentLevel("guardian") * 0.25)) *
+            this.invasionCounter += this.map[s[0]][s[1]].getInvasionMulti() *
                 (1 / (1 + MoonlightData.getInstance().challenges.invasion.completions * 0.25));
         }
 
@@ -1276,6 +1290,24 @@ export class Region {
         } else {
             this.townData.villagerPower += this.villagerStatGain[0];
             this.townData.villagerHealth += this.villagerStatGain[1];
+        }
+        if (this.blueprint !== -1 && this.width === 11 && this.height === 13) {
+            var bp = PlayerData.getInstance().blueprints[this.blueprint];
+            for (var y = 0; y < bp.map.length; y++) {
+                for (var x = 0; x < bp.map[y].length; x++) {
+                    if (bp.map[y][x] !== 0) {
+                        var bld;
+                        if (bp.map[y][x] === 'prod') {
+                            bld = BuildingRegistry.getBuildingByName(RegionRegistry.TILE_TYPES[this.map[y][x].regName].preferredBuilding);
+                        } else {
+                            bld = BuildingRegistry.getBuildingByName(bp.map[y][x]);
+                        }
+                        if (this._canBuild(this.map[y][x], bld)) {
+                            this.placeBuilding(x, y, bld);
+                        }
+                    }
+                }
+            }
         }
         this.townData.endOfWeek();
     }

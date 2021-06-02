@@ -237,7 +237,7 @@ export class AdventurerBlock extends CreatureBlock {
         var ret = def * this.player.classStatics.ARMOR_PER_DEFENSE + this.statBonuses.armor * (1 + this.player.runeBonuses.armorPercent) *
             this._getScale(def);
         ret += def * this.player.getTalentLevel("def") * 0.13 * this.player.classStatics.ARMOR_PER_DEFENSE;
-        return Math.floor(Math.max(0, ret));
+        return Math.floor(Math.max(0, ret) - this.corrosion);
     }
     AttackSpeed() {
         var ret = this.attackSpeed / (1 + this.player.runeBonuses.baseAttackSpeed);
@@ -245,12 +245,13 @@ export class AdventurerBlock extends CreatureBlock {
     }
 
     initCombat() {
+        this.corrosion = 0;
         this.attackCooldown = 0;
         this._onHealthChanged();
     }
 
     takeDamage(damage, isCrit, dmgType) {
-        if (this.player.getTalentLevel("dodge") > 0) {
+        if (this.player.getTalentLevel("dodge") > 0 && dmgType !== Statics.DMG_TRUE) {
             this.hitCounter -= 1;
             if (this.hitCounter <= 0) {
                 this.hitCounter = Math.max(3, Statics.DODGE_COUNTER - this.player.getTalentLevel("dodge"));
@@ -302,6 +303,10 @@ export class AdventurerBlock extends CreatureBlock {
     }
 
     attack(creature, isCrit = false) {
+        var thorns = creature.findTrait(Statics.TRAIT_THORNS);
+        if (thorns !== undefined) {
+            this.takeDamage(creature.Armor() * 0.2, false, Statics.DMG_MAGIC);
+        }
         if (Math.random() < this.player.getTalentLevel("stun") * 0.05) {
             creature.stunTimer = 500;
         }

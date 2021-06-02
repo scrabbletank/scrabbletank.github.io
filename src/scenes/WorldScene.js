@@ -2,6 +2,7 @@ import { SceneUIBase } from "./SceneUIBase";
 import { WorldData } from "../data/WorldData";
 import { NewRegionWindow } from "../ui/NewRegionWindow";
 import { RegionButton } from "../ui/RegionButton";
+import { Common } from "../utils/Common";
 
 export class WorldScene extends SceneUIBase {
     constructor(position, name) {
@@ -10,6 +11,8 @@ export class WorldScene extends SceneUIBase {
         this.regionIcons = [];
         this.regionPaths = [];
         this.worldData = new WorldData();
+
+        this.worldData.registerEvent('invasionPowerChanged', () => { this._onInvasionPowerChanged(); });
     }
 
     refresh() {
@@ -17,6 +20,8 @@ export class WorldScene extends SceneUIBase {
     }
 
     rebirth() {
+        this._refreshRegions();
+        this._onInvasionPowerChanged();
     }
 
     create() {
@@ -25,8 +30,20 @@ export class WorldScene extends SceneUIBase {
             .setOrigin(0)
             .setInteractive();
         this.regionSelectWindow = undefined;
+
+        this.invasionPowerLabel = this.add.bitmapText(this.relativeX(300), this.relativeY(30), "courier20",
+            "Invasion Power\n" + Common.numberString(Math.floor(this.worldData.invasionPower * 100)) + "%", 20, 1);
+        this.invasionPowerLabel.setTint(Phaser.Display.Color.GetColor(255, 128, 255));
+        this.invasionRewardLabel = this.add.bitmapText(this.relativeX(600), this.relativeY(30), "courier20",
+            "Invasion Reward\n" + Common.numberString(Math.floor(this.worldData.invasionReward * 100)) + "%", 20, 1);
+        this.invasionRewardLabel.setTint(Phaser.Display.Color.GetColor(255, 0, 255));
         this._refreshRegions();
 
+    }
+
+    _onInvasionPowerChanged() {
+        this.invasionPowerLabel.setText("Invasion Power\n" + Common.numberString(Math.floor(this.worldData.getInvasionPower() * 100)) + "%");
+        this.invasionRewardLabel.setText("Invasion Reward\n" + Common.numberString(Math.floor(this.worldData.invasionReward * 100)) + "%");
     }
 
     _selectNewRegion(idx) {
@@ -60,7 +77,6 @@ export class WorldScene extends SceneUIBase {
     }
 
     _refreshRegions() {
-        // super fuckign cursed function
         for (var i = 0; i < this.regionIcons.length; i++) {
             this.regionIcons[i].destroy();
         }

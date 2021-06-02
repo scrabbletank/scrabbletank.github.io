@@ -5,6 +5,7 @@ import { DynamicSettings } from "./DynamicSettings";
 import { PlayerData } from "./PlayerData";
 import { MoonlightData } from "./MoonlightData";
 import { ProgressionStore } from "./ProgressionStore";
+import { Statics } from "./Statics";
 
 export class WorldData {
     constructor() {
@@ -19,6 +20,10 @@ export class WorldData {
             this.time.registerEvent("onDayEnd", () => { this.updateDay(); });
             this.time.registerEvent("onWeekEnd", () => { this.updateWeek(); });
             this.onRegionChangedHandlers = [];
+            this.invasionPower = 1;
+            this.invasionReward = 1;
+            this.invasionRegion = 0;
+            this.invasionPowerHandlers = [];
 
             WorldData.instance = this;
         }
@@ -33,6 +38,12 @@ export class WorldData {
         return WorldData.instance;
     }
 
+    registerEvent(event, callback) {
+        if (event === 'invasionPowerChanged') {
+            this.invasionPowerHandlers.push(callback);
+        }
+    }
+
     rebirth() {
         var regSize = DynamicSettings.getInstance().regionSize;
         this.regionList = [];
@@ -40,6 +51,9 @@ export class WorldData {
         this.currentRegion = 0;
         this.nextRegions = [];
         this.timeAtRunStart = this.time.time;
+        this.invasionPower = 1;
+        this.invasionReward = 1;
+        this.invasionRegion = 0;
         this._onRegionChangedHandler();
     }
 
@@ -73,6 +87,9 @@ export class WorldData {
         }
         return cap;
     }
+    getInvasionPower() {
+        return 1 + (this.invasionPower - 1) / (1 + PlayerData.getInstance().getTalentLevel('guardian') * 0.2);
+    }
 
     _randomizeTraits(count) {
         var settings = DynamicSettings.getInstance();
@@ -81,12 +98,12 @@ export class WorldData {
             traits.push({ type: settings.fixedTraits[i].type, level: settings.fixedTraits[i].level });
         }
         for (var i = 0; i < count + settings.startingTraits; i++) {
-            // only allow a max of 3 traits
-            if (traits.length >= 3) {
+            // only allow a max of 5 traits
+            if (traits.length >= 5) {
                 var inc = Common.randint(0, traits.length);
                 traits[inc].level += 1;
             } else {
-                var traitType = Common.randint(1, 8);
+                var traitType = Common.randint(1, 11);
                 var temp = traits.find(t => t.type === traitType);
                 if (temp !== undefined) {
                     temp.level += 1;
@@ -111,6 +128,19 @@ export class WorldData {
             });
             choices.splice(choice, 1);
         }
+    }
+
+    _onInvasionPowerChanged() {
+        for (var i = 0; i < this.invasionPowerHandlers.length; i++) {
+            this.invasionPowerHandlers[i]();
+        }
+    }
+
+    increaseInvasionPower() {
+        this.invasionPower = this.invasionPower * Statics.INVASION_POWER_MULTI;
+        this.invasionReward = this.invasionReward * Statics.INVASION_REWARD_MULTI;
+        this.invasionRegion = this.regionList.length - 1;
+        this._onInvasionPowerChanged();
     }
 
     addRegion(index) {
@@ -215,7 +245,10 @@ export class WorldData {
             cr: this.currentRegion,
             nr: this.nextRegions,
             st: this.timeAtRunStart,
-            time: this.time.save()
+            time: this.time.save(),
+            ip: this.invasionPower,
+            ir: this.invasionReward,
+            ire: this.invasionRegion
         }
 
         return saveObj;
@@ -232,6 +265,9 @@ export class WorldData {
         this.nextRegions = saveObj.nr;
         this.timeAtRunStart = saveObj.st;
         this.time.load(saveObj.time, ver);
+        this.invasionPower = saveObj.ip === undefined ? Math.pow(Statics.INVASION_POWER_MULTI, this.regionList.length - 1) : saveObj.ip;
+        this.invasionReward = saveObj.ir === undefined ? Math.pow(Statics.INVASION_REWARD_MULTI, this.regionList.length - 1) : saveObj.ir;
+        this.invasionRegion = saveObj.ire === undefined ? this.regionList.length - 1 : saveObj.ire;
         if (this.nextRegions.length > 0 && this.nextRegions.length !== 3) {
             this.generateRegionChoices();
         }

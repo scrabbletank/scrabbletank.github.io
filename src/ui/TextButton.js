@@ -20,6 +20,10 @@ export class TextButton {
         return this;
     }
 
+    setBorderTint(clr) {
+        this.backgroundRect.strokeColor = clr;
+    }
+
     setPosition(x, y) {
         this.backgroundRect.setPosition(x, y);
         this.text.setPosition(x + this.width / 2, y + this.height / 2);

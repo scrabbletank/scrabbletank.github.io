@@ -130,6 +130,7 @@ export class TownScene extends SceneUIBase {
     changeRegion() {
         this.selectedTab = 0;
         this._updateStatus();
+        this._refreshTechs();
         this.updateResearchButton();
     }
 
@@ -256,7 +257,11 @@ export class TownScene extends SceneUIBase {
 
         var resources = region._getResourcesPerDay();
         for (var i = 0; i < resources.length; i++) {
-            txt += "  " + Statics.RESOURCE_NAMES[i] + ": " + (Math.floor(resources[i] * prodBonus * govBonus * 100) / 100) + "\n";
+            if (resources[i] > 100) {
+                txt += " " + Statics.RESOURCE_NAMES[i] + ": " + Common.numberString(Math.floor(resources[i])) + "\n";
+            } else {
+                txt += " " + Statics.RESOURCE_NAMES[i] + ": " + (Math.floor(resources[i] * 100) / 100) + "\n";
+            }
         }
         if (region.alchemyDrain > 0) {
             txt += "  Alchemy Drain: " + region.alchemyDrain + "\n" +
@@ -297,6 +302,7 @@ export class TownScene extends SceneUIBase {
     _refreshTechs() {
         var region = WorldData.instance.getCurrentRegion();
         this.dungeonsBtn.setVisible(region.townData.dungeons.length > 0);
+        this.dungeonsCompleteLabel.setVisible(false);
 
         for (var i = 0; i < this.buildingDisplays.length; i++) {
             this.buildingDisplays[i].destroy();
