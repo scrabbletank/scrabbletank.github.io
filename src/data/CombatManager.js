@@ -6,6 +6,7 @@ import { Statics } from "./Statics";
 import { ProgressionStore } from "./ProgressionStore";
 import { DynamicSettings } from "./DynamicSettings";
 import { RegionRegistry } from "./RegionRegistry";
+import { WorldData } from "./WorldData";
 
 export class CombatManager {
     constructor() {
@@ -124,6 +125,13 @@ export class CombatManager {
             this._creatureWorkaround(i);
         }
         PlayerData.getInstance().statBlock.initCombat();
+        for (var i = 0; i < this.monsters.length; i++) {
+            var trait = this.monsters[i].findTrait(Statics.TRAIT_CORROSIVE);
+            if (trait !== undefined) {
+                PlayerData.getInstance().statBlock.corrosion += this.monsters[i].DamageMin() * 0.01 * trait.level;
+            }
+        }
+        PlayerData.getIn
         this.target = this._getTarget();
         if (this.combatCallback !== undefined) {
             this.combatCallback(this.activeTile.isInvaded);
@@ -207,9 +215,11 @@ export class CombatManager {
             }
             if (MoonlightData.getInstance().challenges.invasion.completions > 0 &&
                 MoonlightData.getInstance().challenges.invasion.completions < 5 && this.fromAutoExplore === true) {
-                rewards.motes += (1 + MoonlightData.getInstance().moonperks.heartofdarkness.level) * 0.25;
+                rewards.motes += (1 + MoonlightData.getInstance().moonperks.heartofdarkness.level) *
+                    WorldData.getInstance().invasionReward * 0.25;
             } else {
-                rewards.motes += 1 + MoonlightData.getInstance().moonperks.heartofdarkness.level;
+                rewards.motes += (1 + MoonlightData.getInstance().moonperks.heartofdarkness.level) *
+                    WorldData.getInstance().invasionReward;
             }
             this.activeTile.invasionFights -= 1;
             if (this.activeTile.invasionFights <= 0) {
@@ -246,7 +256,8 @@ export class CombatManager {
 
                 var poison = this.monsters[i].findTrait(Statics.TRAIT_POISONED);
                 if (poison !== undefined) {
-                    player.statBlock.takeDamage(this.monsters[i].DamageMax() * 0.05 * poison.level * (delta / 1000), false, Statics.DMG_TRUE);
+                    var poisonDmg = player.statBlock.currentHealth / player.statBlock.MaxHealth() > 0.5 ? 0.02 : 0.04;
+                    player.statBlock.takeDamage(this.monsters[i].DamageMax() * poisonDmg * poison.level * (delta / 1000), false, Statics.DMG_TRUE);
                 }
 
                 if (this.monsters[i].canAttack() === true) {

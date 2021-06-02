@@ -1,5 +1,7 @@
 import { Common } from "../utils/Common";
+import { PlayerData } from "./PlayerData";
 import { Statics } from "./Statics";
+import { WorldData } from "./WorldData";
 import { WorldTime } from "./WorldTime";
 
 export class TooltipRegistry {
@@ -79,8 +81,8 @@ export class TooltipRegistry {
                 return "Crit so hard your crits have crits. Gain a chance to crit twice, doubling your crit damage for the attack. Double crit " +
                     "chance is " + (lvl * 1) + "% + (1%) of your normal crit chance.";
             case "Guardian":
-                return "Getting invaded while you weren't paying attention sucks. Isn't this supposed to be an idle game? Invasions build up " +
-                    (lvl * 25) + "% + (25%) slower.";
+                return "Invasions are too strong! If you spend some time patrolling you can probably divide Invasion Power by " +
+                    (1 + lvl / 5) + " + (0.2).";
             case "Governance":
                 return "Spend less time fighting things and more time learning how they can fight for you! Increases economy and production by " +
                     (lvl * 4) + "% + (4%). This effect is multiplicative, not additive.";
@@ -389,6 +391,7 @@ export class TooltipRegistry {
                     "Restrictions: Production buildings are unavailable.\n" +
                     "              Reach Gate " + (3 + completions) + ".\n\n" +
                     "On First Completion: Unlock the Warehouse building.\n" +
+                    "                     Unlocks Blueprints\n\n" +
                     "On Every Completion: Increases building production by 10%\n" +
                     "                     +4 Challenge Points\n\n" +
                     "Completions: " + challenge.completions + "/" + challenge.maxCompletions + "\n" +
@@ -439,7 +442,8 @@ export class TooltipRegistry {
                 return "Dire " + trait.level + ": Core stats are increased by " + trait.level * 20 + "%, drops motes, and gives " +
                     trait.level * 75 + "% more experience.";
             case Statics.TRAIT_POISONED:
-                return "Poisoned " + trait.level + ": Deals " + trait.level * 5 + "% of its max damage per second as true damage.";
+                return "Poisoned " + trait.level + ": Deals " + trait.level * 2 + "% of its max damage per second as true damage. Damage " +
+                    "doubles when below half health.";
             case Statics.TRAIT_MONSTROUS:
                 return "Monstrous " + trait.level + ": Attack speed is reduced by 15%. Has " + trait.level * 25 + "% increased health and " +
                     trait.level * 10 + "% increased damage.";
@@ -452,10 +456,23 @@ export class TooltipRegistry {
                     "absorbs incoming damage. Crit Resistance is increased 1000% while shielded.";
             case Statics.TRAIT_BESERK:
                 return "Beserk " + trait.level + ": Hit chance is increased by " + trait.level * 20 + "%, health regen by " +
-                    trait.level * 10 + "% and has a " + Math.floor(((1 - Math.pow(0.92, trait.level)) * 100)) + "% chance to trigger Follow Through.";
+                    trait.level * 10 + "% and has a " + Math.floor(((1 - Math.pow(0.92, trait.level)) * 100)) +
+                    "% chance to trigger Follow Through.";
             case Statics.TRAIT_FIRSTSTRIKE:
                 return "First Strike " + trait.level + ": Starts combat with their attack bar filled to 95% and gain " +
                     trait.level * 25 + "% more Accuracy.";
+            case Statics.TRAIT_INVADER:
+                var inc = Math.floor((WorldData.getInstance().getInvasionPower() - 1) * 100);
+                var reward = Math.floor((WorldData.getInstance().invasionReward - 1) * 100);
+                return "Invader: These monsters are infused with a dark power, increasing their stats by " + Common.numberString(inc) +
+                    "% and giving " + Common.numberString(reward) + "% more shade, and motes.";
+            case Statics.TRAIT_CORROSIVE:
+                return "Corrosive " + trait.level + ": Reduces your armor by " + trait.level + "% of its min damage.";
+            case Statics.TRAIT_REGENERATING:
+                return "Regenerating " + trait.level + ": Has " + (trait.level * 30) + "% more health regen.";
+            case Statics.TRAIT_THORNS:
+                return "Thorns " + trait.level + ": Has " + (trait.level * 10) + "% more armor. When attacked, it deals 20% " +
+                    "of its armor in magic damage.";
         }
         return trait.type + ": Missing Tooltip. Better report this to the dev.";
     }
@@ -478,6 +495,14 @@ export class TooltipRegistry {
                 return { sprite: "icons", tile: 45 };
             case Statics.TRAIT_FIRSTSTRIKE:
                 return { sprite: "icons", tile: 56 };
+            case Statics.TRAIT_CORROSIVE:
+                return { sprite: "icons2", tile: 2 };
+            case Statics.TRAIT_REGENERATING:
+                return { sprite: "icons", tile: 12 };
+            case Statics.TRAIT_THORNS:
+                return { sprite: "icons2", tile: 3 };
+            case Statics.TRAIT_INVADER:
+                return { sprite: "icons", tile: 39 };
         }
         return { sprite: "icons", tile: 0 };
     }

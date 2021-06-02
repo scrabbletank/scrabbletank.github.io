@@ -3,6 +3,7 @@
 import { Statics } from "./Statics";
 import { Common } from "../utils/Common";
 import { MoonlightData } from "./MoonlightData";
+import { WorldData } from "./WorldData";
 
 // stat calculations:
 // attacks always hit, but attack speed is adjusted by hit chance/evasion. Higher hit chance means
@@ -69,6 +70,7 @@ export class CreatureBlock {
         this.slowDamage = 0;
         this.igniteTimer = 0;
         this.igniteDamage = 0;
+        this.corrosion = 0;
 
         this.healthChangedHandlers = [];
         this.attackCooldownChangedHandlers = [];
@@ -178,6 +180,7 @@ export class CreatureBlock {
     }
 
     initCombat() {
+        this.corrosion = 0;
         this.currentHealth = this.MaxHealth();
         if (this.findTrait({ type: Statics.TRAIT_FIRSTSTRIKE }) !== undefined) {
             this.attackCooldown = this.AttackSpeed() * 0.95;
@@ -397,6 +400,24 @@ export class CreatureBlock {
                 case Statics.TRAIT_FIRSTSTRIKE:
                     firstStrike = true;
                     extraStats.accuracy += this.Accuracy() * (0.25 * trait.level);
+                    break;
+                case Statics.TRAIT_REGENERATING:
+                    extraStats.healthRegen = this.HealthRegen() * 0.3 * trait.level;
+                    break;
+                case Statics.TRAIT_THORNS:
+                    extraStats.armor += this.Armor() * (0.1 * trait.level);
+                    break;
+                case Statics.TRAIT_INVADER:
+                    var pow = WorldData.getInstance().getInvasionPower();
+                    var reward = WorldData.getInstance().invasionReward - 1;
+                    extraStats.strength += this.Strength() * pow;
+                    extraStats.dexterity += this.Dexterity() * pow;
+                    extraStats.agility += this.Agility() * pow;
+                    extraStats.endurance += this.Endurance() * pow;
+                    extraStats.recovery += this.Recovery() * pow;
+                    extraStats.defense += this.Defense() * pow;
+                    extraStats.accuracy += this.Accuracy() * pow;
+                    extraStats.xpReward += this.xpReward * reward;
                     break;
             }
             extraStats.xpReward += this.xpReward * (1 + MoonlightData.getInstance().challenges.megamonsters.completions * 0.01 * trait.level);

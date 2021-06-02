@@ -37,4 +37,11 @@ export class ProgressBar {
         percent = Math.max(0, Math.min(1, percent));
         this.fillRect2.displayWidth = Math.floor(percent * (this.width - 2));
     }
+
+    destroy() {
+        this.backgroundRect.destroy();
+        this.fillRect.destroy();
+        this.fillRect2.destroy();
+        this.progressText.destroy();
+    }
 }

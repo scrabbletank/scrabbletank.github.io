@@ -281,7 +281,10 @@ export class GameScene extends SceneUIBase {
             this._updateResources();
             this._updateFadingResourceLabels(res, gold, tier);
         });
-        this.player.registerEvent("onTalentChanged", () => { this.updateStatIcons(); });
+        this.player.registerEvent("onTalentChanged", () => {
+            this.updateStatIcons();
+            this.worldScene._onInvasionPowerChanged();
+        });
         this.player.registerEvent("onClassSelected", () => { this._handleClassSelected(); });
 
         if (this.progression.unlocks.gearTab === false) {
@@ -677,6 +680,7 @@ export class GameScene extends SceneUIBase {
         this.regionScene.rebirth();
         this.combatScene.rebirth();
         this.townScene.rebirth();
+        this.worldScene.rebirth();
 
         //reset images back to adventurer
         this.statIcons[5].setImage({ sprite: "icons", tile: 5 });

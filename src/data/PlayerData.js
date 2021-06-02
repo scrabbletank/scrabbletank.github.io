@@ -7,6 +7,7 @@ import { MoonlightData } from "./MoonlightData";
 import { DynamicSettings } from "./DynamicSettings";
 import { ProgressionStore } from "./ProgressionStore";
 import { TooltipRegistry } from "./TooltipRegistry";
+import { Blueprint } from "./Blueprint";
 
 
 
@@ -20,6 +21,10 @@ export class PlayerData {
 
             this.baseVillagerPower = 1;
             this.baseVillagerHealth = 10;
+            this.blueprints = [];
+            for (var i = 0; i < 5; i++) {
+                this.blueprints.push(new Blueprint());
+            }
 
             this._init();
             this.statBlock = new AdventurerBlock(this);
@@ -554,7 +559,7 @@ export class PlayerData {
         return ret;
     }
     getTalentLevel(name) {
-        if (this.talents[name] === undefined) {
+        if (this.talents[name] === undefined || DynamicSettings.getInstance().talentsEnabled === false) {
             return 0;
         }
         switch (name) {
@@ -793,6 +798,10 @@ export class PlayerData {
     }
 
     save() {
+        var bpArray = [];
+        for (var i = 0; i < this.blueprints.length; i++) {
+            bpArray.push(this.blueprints[i].save());
+        }
         var saveObj = {
             stats: this.statBlock.save(),
             shade: this.shade,
@@ -814,6 +823,7 @@ export class PlayerData {
             vp: this.baseVillagerPower,
             vh: this.baseVillagerHealth,
             db: this.dungeonBonus,
+            bp: bpArray,
             w: this.weapon === undefined ? "" : this.weapon.name,
             a: this.armor === undefined ? "" : this.armor.name,
             t: this.trinket === undefined ? "" : this.trinket.name
@@ -850,6 +860,13 @@ export class PlayerData {
             }
         }
         this.classChosen = saveObj.cc === undefined ? true : saveObj.cc;
+
+        if (saveObj.bp !== undefined) {
+            this.blueprints = [];
+            for (var i = 0; i < saveObj.bp.length; i++) {
+                this.blueprints.push(Blueprint.loadFromFile(saveObj.bp[i]));
+            }
+        }
 
         var gearData = GearData.getInstance();
         if (saveObj.w !== "") {

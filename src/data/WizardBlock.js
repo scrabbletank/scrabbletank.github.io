@@ -80,7 +80,7 @@ export class WizardBlock extends AdventurerBlock {
         var ret = this.stats.hit + (this.statBonuses.hit * this._getScale(dex)) + dex * this.player.classStatics.HIT_PER_DEXTERITY;
         ret += dex * this.player.getTalentLevel("wizdex");
         ret += ret * this.player.runeBonuses.hitPercent;
-        return Math.floor(ret);
+        return Math.floor(Math.max(1, ret));
     }
     Evasion() {
         var agi = this.Agility();
@@ -90,7 +90,7 @@ export class WizardBlock extends AdventurerBlock {
         if (this.hasteAttacks > 0) {
             ret += ret * this.player.getTalentLevel('quicken') * 0.05;
         }
-        return Math.floor(ret);
+        return Math.floor(Math.max(1, ret));
     }
     CritResistance() {
         var end = this.Endurance();
@@ -139,7 +139,7 @@ export class WizardBlock extends AdventurerBlock {
         var def = this.Defense();
         var ret = def * this.player.classStatics.ARMOR_PER_WARD + this.statBonuses.armor * (1 + this.player.runeBonuses.armorPercent) *
             this._getScale(def);
-        return Math.floor(ret);
+        return Math.floor(ret - this.corrosion);
     }
     Shield() {
         var ret = this.Defense() * this.player.classStatics.SHIELD_PER_WARD +
@@ -180,6 +180,7 @@ export class WizardBlock extends AdventurerBlock {
     }
 
     initCombat() {
+        this.corrosion = 0;
         this.attackCooldown = 0;
         this.shieldValue = this.Shield();
         this._onHealthChanged();
@@ -282,6 +283,12 @@ export class WizardBlock extends AdventurerBlock {
     attack(creature, isCrit = false) {
         var dmg = 0;
         var didCast = false;
+
+        var thorns = creature.findTrait(Statics.TRAIT_THORNS);
+        if (thorns !== undefined) {
+            this.takeDamage(creature.Armor() * 0.2, false, Statics.DMG_MAGIC);
+        }
+
         if (this.player.getTalentLevel("fifth") >= 5 && this.player.getTalentLevel('powerwordkill') > 0 &&
             this.fifthCounter <= 0) {
             dmg = this._castPowerWordKill(creature);
