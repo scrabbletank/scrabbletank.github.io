@@ -1,6 +1,8 @@
+import { BuildingRegistry } from "../data/BuildingRegistry";
 import { MoonlightData } from "../data/MoonlightData";
 import { PlayerData } from "../data/PlayerData";
 import { ProgressionStore } from "../data/ProgressionStore";
+import { RegionRegistry } from "../data/RegionRegistry";
 import { Statics } from "../data/Statics";
 import { WorldData } from "../data/WorldData";
 import { FloatingTooltip } from "../ui/FloatingTooltip";
