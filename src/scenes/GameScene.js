@@ -757,17 +757,29 @@ export class GameScene extends SceneUIBase {
     }
 
     copyToClipboard() {
-        navigator.clipboard.writeText(LZString.compressToEncodedURIComponent(localStorage.getItem("save")));
+        navigator.clipboard.writeText(LZString.compressToEncodedURIComponent(localStorage.getItem("save"))).then(() => { },
+            () => {
+                prompt("This is your save string, make sure you copy it!",
+                    LZString.compressToEncodedURIComponent(localStorage.getItem("save")));
+            });
     }
 
     copyFromClipboard() {
         var that = this;
-        navigator.clipboard.readText().then((text) => {
+        if (navigator.clipboard.readText === undefined) {
+            var text = prompt("Paste your save string", "");
             if (text !== "") {
                 that.loadGame(text);
                 that.refreshAll();
             }
-        });
+        } else {
+            navigator.clipboard.readText().then((text) => {
+                if (text !== "") {
+                    that.loadGame(text);
+                    that.refreshAll();
+                }
+            });
+        }
     }
 
     _getSaveObj() {

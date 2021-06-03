@@ -787,6 +787,13 @@ export class RegionView {
         for (var i = 0; i < this.detailsContainer.length; i++) {
             this.detailsContainer[i].setVisible(visible);
         }
+        this.autoExploreLabel.setVisible(ProgressionStore.getInstance().persistentUnlocks.autoExplore);
+        this.autoExploreButton.setVisible(ProgressionStore.getInstance().persistentUnlocks.autoExplore);
+        this.autoInvadeLabel.setVisible(MoonlightData.getInstance().challenges.invasion.completions > 0);
+        this.autoInvadeButton.setVisible(MoonlightData.getInstance().challenges.invasion.completions > 0);
+        this.autoUpgradeLabel.setVisible(MoonlightData.getInstance().challenges.outcast.completions > 0);
+        this.autoUpgradeButton.setVisible(MoonlightData.getInstance().challenges.outcast.completions > 0);
+        
         for (var i = 0; i < this.tileElements.length; i++) {
             for (var t = 0; t < this.tileElements[0].length; t++) {
                 this.tileElements[i][t].rect.setVisible(visible);
