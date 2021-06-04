@@ -86,7 +86,7 @@ export class CombatScene extends SceneUIBase {
         this.restButton.setVisible(true);
 
         if (DynamicSettings.getInstance().autoExploreOptions === Statics.AUTOEXPLORE_HOLD &&
-            this.scene.get("RegionScene").autoInvadeActive === true && this.combatManager.activeTile.isInvaded === false) {
+            this.scene.get("RegionScene").getAutoInvadeActive() === true && this.combatManager.activeTile.isInvaded === false) {
             this.scene.get("RegionScene").triggerAutoExplore(this.combatManager.activeTile,
                 this.combatManager.activeTile.parent.regionLevel);
         }
@@ -274,7 +274,7 @@ export class CombatScene extends SceneUIBase {
     }
 
     _onInvasionEndCallback() {
-        if (this.scene.get("RegionScene").autoInvadeActive === true) {
+        if (this.scene.get("RegionScene").getAutoInvadeActive() === true) {
             this.scene.get("RegionScene").triggerAutoExplore(this.combatManager.activeTile,
                 this.combatManager.activeTile.parent.regionLevel);
         }
