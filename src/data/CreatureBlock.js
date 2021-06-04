@@ -408,7 +408,7 @@ export class CreatureBlock {
                     extraStats.armor += this.Armor() * (0.1 * trait.level);
                     break;
                 case Statics.TRAIT_INVADER:
-                    var pow = WorldData.getInstance().getInvasionPower();
+                    var pow = WorldData.getInstance().getInvasionPower() - 1;
                     var reward = WorldData.getInstance().getInvasionReward() - 1;
                     extraStats.strength += this.Strength() * pow;
                     extraStats.dexterity += this.Dexterity() * pow;
