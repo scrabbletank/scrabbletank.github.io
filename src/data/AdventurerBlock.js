@@ -1,6 +1,7 @@
 import { CreatureBlock } from "./CreatureBlock";
 import { Statics } from "./Statics";
 import { MoonlightData } from "./MoonlightData";
+import { StarData } from "./StarData";
 
 export class AdventurerBlock extends CreatureBlock {
     constructor(player) {
@@ -16,7 +17,7 @@ export class AdventurerBlock extends CreatureBlock {
 
     _getScale(attr) {
         return (1 + Math.pow(attr, this.player.classStatics.SCALING_DIMINISHING_POWER) *
-            this.player.classStatics.SCALING_DIMINISHING_MULTIPLIER);
+            this.player.classStatics.SCALING_DIMINISHING_MULTIPLIER) * (1 + StarData.getInstance().perks.proficiency.level * 0.1);
     }
 
     rebirth() {
@@ -124,7 +125,8 @@ export class AdventurerBlock extends CreatureBlock {
         return Math.floor(Math.max(1, ret));
     }
     Strength() {
-        var ret = this.stats.strength + this.statBonuses.strength + this.player.runeBonuses.strFlat;
+        var ret = this.stats.strength * (1 + StarData.getInstance().perks.str.level * 10);
+        ret += this.statBonuses.strength + this.player.runeBonuses.strFlat;
         ret = ret * (1 + (this.moonData.moonperks.str.level + MoonlightData.getInstance().challengePoints * 2) * 0.005);
         ret += ret * (this.player.runeBonuses.strPercent + this.player.runeBonuses.allPercent);
         ret = ret * this.player.dungeonBonus.strength;
@@ -132,28 +134,32 @@ export class AdventurerBlock extends CreatureBlock {
         return Math.floor(Math.max(1, ret));
     }
     Dexterity() {
-        var ret = this.stats.dexterity + this.statBonuses.dexterity + this.player.runeBonuses.dexFlat;
+        var ret = this.stats.dexterity * (1 + StarData.getInstance().perks.dex.level * 10);
+        ret += this.statBonuses.dexterity + this.player.runeBonuses.dexFlat;
         ret = ret * (1 + (this.moonData.moonperks.dex.level + MoonlightData.getInstance().challengePoints * 2) * 0.005);
         ret += ret * (this.player.runeBonuses.dexPercent + this.player.runeBonuses.allPercent);
         ret = ret * this.player.dungeonBonus.dexterity;
         return Math.floor(Math.max(1, ret));
     }
     Agility() {
-        var ret = this.stats.agility + this.statBonuses.agility + this.player.runeBonuses.agiFlat;
+        var ret = this.stats.agility * (1 + StarData.getInstance().perks.agi.level * 10);
+        ret += this.statBonuses.agility + this.player.runeBonuses.agiFlat;
         ret = ret * (1 + (this.moonData.moonperks.agi.level + MoonlightData.getInstance().challengePoints * 2) * 0.005);
         ret += ret * (this.player.runeBonuses.agiPercent + this.player.runeBonuses.allPercent);
         ret = ret * this.player.dungeonBonus.agility;
         return Math.floor(Math.max(1, ret));
     }
     Endurance() {
-        var ret = this.stats.endurance + this.statBonuses.endurance + this.player.runeBonuses.endFlat;
+        var ret = this.stats.endurance * (1 + StarData.getInstance().perks.end.level * 10);
+        ret += this.statBonuses.endurance + this.player.runeBonuses.endFlat;
         ret = ret * (1 + (this.moonData.moonperks.end.level + MoonlightData.getInstance().challengePoints * 2) * 0.005);
         ret += ret * (this.player.runeBonuses.endPercent + this.player.runeBonuses.allPercent);
         ret = ret * this.player.dungeonBonus.endurance;
         return Math.floor(Math.max(1, ret));
     }
     Recovery() {
-        var ret = this.stats.recovery + this.statBonuses.recovery + this.player.runeBonuses.recFlat;
+        var ret = this.stats.recovery * (1 + StarData.getInstance().perks.rec.level * 10);
+        ret += this.statBonuses.recovery + this.player.runeBonuses.recFlat;
         ret = ret * (1 + (this.moonData.moonperks.rec.level + MoonlightData.getInstance().challengePoints * 2) * 0.005);
         ret += ret * (this.player.runeBonuses.recPercent + this.player.runeBonuses.allPercent);
         ret = ret * this.player.dungeonBonus.recovery;
@@ -161,7 +167,8 @@ export class AdventurerBlock extends CreatureBlock {
         return Math.floor(Math.max(1, ret));
     }
     Defense() {
-        var ret = this.stats.defense + this.statBonuses.defense + this.player.runeBonuses.defFlat;
+        var ret = this.stats.defense * (1 + StarData.getInstance().perks.def.level * 10);
+        ret += this.statBonuses.defense + this.player.runeBonuses.defFlat;
         ret = ret * (1 + (this.moonData.moonperks.def.level + MoonlightData.getInstance().challengePoints * 2) * 0.005);
         ret += ret * (this.player.runeBonuses.defPercent + this.player.runeBonuses.allPercent);
         ret = ret * this.player.dungeonBonus.defense;
@@ -169,7 +176,8 @@ export class AdventurerBlock extends CreatureBlock {
         return Math.floor(Math.max(1, ret));
     }
     Accuracy() {
-        var ret = this.stats.accuracy + this.statBonuses.accuracy + this.player.runeBonuses.accFlat;
+        var ret = this.stats.accuracy * (1 + StarData.getInstance().perks.acc.level * 10);
+        ret += this.statBonuses.accuracy + this.player.runeBonuses.accFlat;
         ret = ret * (1 + (this.moonData.moonperks.acc.level + MoonlightData.getInstance().challengePoints * 2) * 0.005);
         ret += ret * (this.player.runeBonuses.accPercent + this.player.runeBonuses.allPercent);
         ret = ret * this.player.dungeonBonus.accuracy;

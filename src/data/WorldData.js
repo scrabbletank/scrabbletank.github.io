@@ -6,6 +6,7 @@ import { PlayerData } from "./PlayerData";
 import { MoonlightData } from "./MoonlightData";
 import { ProgressionStore } from "./ProgressionStore";
 import { Statics } from "./Statics";
+import { StarData } from "./StarData";
 
 export class WorldData {
     constructor() {
@@ -88,7 +89,11 @@ export class WorldData {
         return cap;
     }
     getInvasionPower() {
-        return 1 + (this.invasionPower - 1) / (1 + PlayerData.getInstance().getTalentLevel('guardian') * 0.2);
+        return 1 + (this.invasionPower - 1) / (1 + PlayerData.getInstance().getTalentLevel('guardian') * 0.2) /
+            (1 + StarData.getInstance().perks.invasionpower.level);
+    }
+    getInvasionReward() {
+        return 1 + (this.invasionReward - 1) * (1 + StarData.getInstance().perks.invasionrewards.level * 0.5);
     }
 
     _randomizeTraits(count) {

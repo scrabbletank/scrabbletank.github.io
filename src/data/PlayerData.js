@@ -8,6 +8,7 @@ import { DynamicSettings } from "./DynamicSettings";
 import { ProgressionStore } from "./ProgressionStore";
 import { TooltipRegistry } from "./TooltipRegistry";
 import { Blueprint } from "./Blueprint";
+import { StarData } from "./StarData";
 
 
 
@@ -174,7 +175,7 @@ export class PlayerData {
         this.talentPoints = MoonlightData.getInstance().challenges.talent.completions;
         this.statLevel = 1;
         this.talentLevel = 1;
-        this.nextStatCost = Statics.STAT_COST_BASE;
+        this.nextStatCost = Statics.STAT_COST_BASE - StarData.getInstance().perks.statcost.level * 2;
         this.nextTalentCost = Statics.TALENT_COST_BASE;
         this.resources = [[0, 0, 0, 0, 0, 0], [0, 0, 0, 0, 0, 0], [0, 0, 0, 0, 0, 0], [0, 0, 0, 0, 0, 0],
         [0, 0, 0, 0, 0, 0], [0, 0, 0, 0, 0, 0], [0, 0, 0, 0, 0, 0], [0, 0, 0, 0, 0, 0]];
@@ -184,6 +185,7 @@ export class PlayerData {
             this.craftingCosts[i] = this.craftingCosts[i] * Math.pow(0.925,
                 MoonlightData.getInstance().challenges.forge.completions);
         }
+        this.starperkCostReduction = Math.pow(0.95, StarData.getInstance().perks.forge.level);
         this.resourceTierReached = 0;
         this.gold = 0;
         this.motes = 0;
@@ -310,6 +312,12 @@ export class PlayerData {
         for (var i = 0; i < Math.min(tier, 8); i++) {
             this.craftingCosts[i] = Math.max(0.1, this.craftingCosts[i] * amount);
         }
+    }
+    getCraftingCosts(tier) {
+        if (tier < 0 || tier >= 8) {
+            return 1;
+        }
+        return this.craftingCosts[tier] * this.starperkCostReduction;
     }
 
     rebirth() {
@@ -627,9 +635,10 @@ export class PlayerData {
 
     buyStat(buyAmount) {
         for (var i = 0; i < buyAmount; i++) {
-            this.statPoints += Statics.STAT_POINTS_PER_BUY;
+            this.statPoints += Statics.STAT_POINTS_PER_BUY + StarData.getInstance().perks.statpoints.level;
             this.shade -= this.nextStatCost;
-            this.nextStatCost = Statics.STAT_COST_BASE + (Statics.STAT_COST_PER_LEVEL * this.statLevel);
+            this.nextStatCost = (Statics.STAT_COST_BASE - StarData.getInstance().perks.statcost.level * 2) +
+                ((Statics.STAT_COST_PER_LEVEL - StarData.getInstance().perks.statcost.level * 2) * this.statLevel);
             this.statLevel += 1;
         }
     }
@@ -791,12 +800,6 @@ export class PlayerData {
         this._onStatChanged();
     }
 
-    applyForgeUpgrade(tier) {
-        for (var i = 0; i < tier; i++) {
-            this.craftingCosts[i] = this.craftingCosts[i] * Statics.FORGE_REDUCTION;
-        }
-    }
-
     save() {
         var bpArray = [];
         for (var i = 0; i < this.blueprints.length; i++) {
@@ -814,6 +817,7 @@ export class PlayerData {
             res: this.resources,
             rtr: this.resourceTierReached,
             crf: this.craftingCosts,
+            csp: this.starperkCostReduction,
             pc: this.playerClass,
             cc: this.classChosen,
             gold: this.gold,
@@ -851,6 +855,7 @@ export class PlayerData {
         this.baseVillagerPower = saveObj.vp === undefined ? 1 : saveObj.vp;
         this.baseVillagerHealth = saveObj.vh === undefined ? 10 : saveObj.vh;
         this.dungeonBonus = saveObj.db === undefined ? this.dungeonBonus : saveObj.db;
+        this.starperkCostReduction = saveObj.csp === undefined ? 1 : saveObj.csp;
 
         this.selectClass(this.playerClass);
         var keys = Object.keys(saveObj.talents);

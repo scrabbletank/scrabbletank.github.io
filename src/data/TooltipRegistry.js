@@ -785,6 +785,61 @@ export class TooltipRegistry {
         }
         return { sprite: "icons", tile: 0 };
     }
+
+    static getStarPerkTooltip(perk) {
+        switch (perk.name) {
+            case "Astra's Marble: Strength":
+                return "Your base Strength (ignoring gear) is increased by " + (perk.level * 1000) + "% + (1000%).";
+            case "Astra's Marble: Dexterity":
+                return "Your base Dexterity (ignoring gear) is increased by " + (perk.level * 1000) + "% + (1000%).";
+            case "Astra's Marble: Agility":
+                return "Your base Agility (ignoring gear) is increased by " + (perk.level * 1000) + "% + (1000%).";
+            case "Astra's Marble: Endurance":
+                return "Your base Endurance (ignoring gear) is increased by " + (perk.level * 1000) + "% + (1000%).";
+            case "Astra's Marble: Recovery":
+                return "Your base Recovery (ignoring gear) is increased by " + (perk.level * 1000) + "% + (1000%).";
+            case "Astra's Marble: Defense":
+                return "Your base Defense (ignoring gear) is increased by " + (perk.level * 1000) + "% + (1000%).";
+            case "Astra's Marble: Accuracy":
+                return "Your base Accuracy (ignoring gear) is increased by " + (perk.level * 1000) + "% + (1000%).";
+            case "Ingram's Bell: Infusion":
+                return "Base Stat Point cost reduced by " + (perk.level * 2) + " + (2).";
+            case "Ingram's Bell: Stat Points":
+                return "Gain " + (perk.level) + " + (1) more Stat Points when infusing.";
+            case "Ingram's Bell: Bounty":
+                return "Monsters drop " + (perk.level * 50) + "% + (50%) more resources.";
+            case "Myrah's Spear: Forge":
+                return "Reduces gear costs by " + Math.floor((1 - Math.pow(0.95, moonlight.level)) * 100) + "% + (~5%). This ignores the gear cost softcap.";
+            case "Myrah's Spear: Stellar Enchantments":
+                return "Gear gives " + (perk.level * 10) + "% + (10%) more stats.";
+            case "Myrah's Spear: Proficiency":
+                return "Increases gear scaling from stats by " + (perk.level * 10) + "% + (10%).";
+            case "Myrah's Spear: Starmetal":
+                return "Newly crafted gear starts at level " + (perk.level * 5) + " + (5).";
+            case "Mask of Zymesh: Invasion Power":
+                return "Divides Invasion Power by " + (perk.level + 1) + " + (1).";
+            case "Mask of Zymesh: Invasion Rewards":
+                return "Increases Invasion Rewards by " + (perk.level * 50) + "% + (50%).";
+            case "Mask of Zymesh: Solidification":
+                return "Monsters have a " + (perk.level * 10) + "% + (10%) chance per trait level to drop a Mote of Darkness. Having over 100% gives a chance " +
+                    "of dropping multiple Motes.";
+            case "Kella's Horn: Construction":
+                return "Buildings can be upgraded to tier 4.";
+            case "Kella's Horn: Worldsmith":
+                return "Resources start at Tier " + (perk.level + 1) + " + (1). Upgrades, Gear, and Buildings that used resources below this tier now use T" +
+                    (perk.level + 1) + " resources.";
+            case "Kella's Horn: Enchanted Tools":
+                return "Increases building production by " + (perk.level * 25) + "% + (25%).";
+            case "Kella's Horn: Estate":
+                return "Houses hold " + (perk.level * 50) + "% + (50%) more people.";
+            case "Betrayer Star: Mists":
+                return "Increases Shade earned by " + (perk.level * 25) + "% + (25%).";
+            case "Betrayer Star: Forbidden Knowledge":
+                return "Talents give " + (perk.level * 2) + " + (2) more moonlight, before multipliers.";
+            case "Betrayer Star: Mysticism":
+                return "Cost multiplier for sacrificing resources becomes x" + (10 - perk.level / 2) + " - (0.5).";
+        }
+    }
 }
 
 // static fuckery

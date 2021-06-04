@@ -17,16 +17,25 @@ export class Common {
     }
 
     static numberString(x) {
-        var ret = new Intl.NumberFormat('en-US').format(x);
-        if (ret.length >= 18) {
-            ret = ret.substr(0, ret.length - 16) + "T";
-        } else if (ret.length >= 14) {
-            ret = ret.substr(0, ret.length - 12) + "B";
-        } else if (ret.length >= 10) {
-            ret = ret.substr(0, ret.length - 8) + "M";
-        } else if (ret.length >= 6) {
-            ret = ret.substr(0, ret.length - 4) + "K";
+        var val = x;
+        var suffix = "";
+        if (val > 10000000000000000n) {
+            val = Math.floor(x / 1000000000000000n);
+            suffix = "Q";
+        } else if (val > 10000000000000) {
+            val = Math.floor(x / 1000000000000);
+            suffix = "T";
+        } else if (val > 10000000000) {
+            val = Math.floor(x / 1000000000);
+            suffix = "B";
+        } else if (val > 10000000) {
+            val = Math.floor(x / 1000000);
+            suffix = "M";
+        } else if (val > 10000) {
+            val = Math.floor(x / 1000);
+            suffix = "K";
         }
+        var ret = new Intl.NumberFormat('en-US').format(val) + suffix;
         return ret;
     }
 

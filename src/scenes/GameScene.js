@@ -27,6 +27,7 @@ import { OptionsDialog } from "../ui/OptionsDialog";
 import { GuideWindow } from "../ui/GuideWindow";
 import { WorldTime } from "../data/WorldTime";
 import { FadingNumberLabel } from "../ui/FadingNumberLabel";
+import { StarData } from "../data/StarData";
 
 export class GameScene extends SceneUIBase {
     constructor(position, name) {
@@ -36,6 +37,7 @@ export class GameScene extends SceneUIBase {
         // DYNAMIC SETTINGS SHOULD BE FIRST ALWAYS
         this.settings = new DynamicSettings();
         this.moonlight = new MoonlightData();
+        this.starData = new StarData();
         this.worldData = new WorldData();
         this.player = new PlayerData();
         this.progression = new ProgressionStore();
@@ -792,6 +794,7 @@ export class GameScene extends SceneUIBase {
             world: this.worldData.save(),
             progression: this.progression.save(),
             moon: this.moonlight.save(),
+            star: this.starData.save(),
             lore: LoreStore.getInstance().save()
         }
     }
@@ -821,6 +824,9 @@ export class GameScene extends SceneUIBase {
         }
         this.progression.load(saveObj.progression, saveObj.version);
         this.moonlight.load(saveObj.moon, saveObj.version);
+        if (saveObj.star !== undefined) {
+            this.starData.load(saveObj.star, saveObj.version);
+        }
         gearData.load(saveObj.gear, saveObj.version);
         //player needs to load after gear
         this.player.load(saveObj.player, saveObj.version);

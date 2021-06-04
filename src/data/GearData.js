@@ -3,6 +3,7 @@ import { Statics } from "./Statics";
 import { MoonlightData } from "./MoonlightData";
 import { PlayerData } from "./PlayerData";
 import { Common } from "../utils/Common";
+import { StarData } from "./StarData";
 
 export class GearData {
     constructor() {
@@ -71,7 +72,11 @@ export class GearData {
             gear.bringToLevel(gear.level + 1);
             player.equip(gear);
         } else {
-            gear.bringToLevel(gear.level + 1);
+            if (gear.level === 0 && StarData.getInstance().perks.starmetal.level > 0) {
+                gear.bringToLevel(StarData.getInstance().perks.starmetal.level * 5);
+            } else {
+                gear.bringToLevel(gear.level + 1);
+            }
         }
     }
 

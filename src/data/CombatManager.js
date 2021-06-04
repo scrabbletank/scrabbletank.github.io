@@ -7,6 +7,7 @@ import { ProgressionStore } from "./ProgressionStore";
 import { DynamicSettings } from "./DynamicSettings";
 import { RegionRegistry } from "./RegionRegistry";
 import { WorldData } from "./WorldData";
+import { StarData } from "./StarData";
 
 export class CombatManager {
     constructor() {
@@ -186,6 +187,7 @@ export class CombatManager {
             for (var t = 0; t < numRewards; t++) {
                 var idx = this._getDropIndex();
                 var dropMulti = (1 + (this.monsters[i].level - baseLvl) * 0.20) + (this.activeTile.parent.regionLevel * 0.1);
+                dropMulti = dropMulti * (1 + StarData.getInstance().perks.bounty * 0.5);
                 rewards.resource[idx] += Math.max(0, this.monsters[i].dropBase * dropMulti) + player.runeBonuses.lootFlat;
             }
             rewards.friendship += this.activeTile.getFriendshipReward();
