@@ -187,7 +187,7 @@ export class TileData {
             for (var i = 0; i < numCreatures; i++) {
                 if (Math.random() <= PlayerData.getInstance().getTalentLevel("lootgoblin") * 0.005) {
                     enemyList.push(CreatureRegistry.GetCreatureByName("lootgoblin", this.difficulty, this.parent.regionLevel));
-                } if (this.hasShard === true) {
+                } else if (this.hasShard === true) {
                     var num = Common.randint(0, Statics.STARSHARD_ENEMIES.length);
                     enemyList.push(CreatureRegistry.GetCreatureByName(Statics.STARSHARD_ENEMIES[num], this.difficulty, this.parent.regionLevel));
                 } else {
@@ -327,7 +327,7 @@ export class Region {
         region.dungeonLocations = saveObj.dl === undefined ? [] : saveObj.dl;
         region.autoUpgrade = saveObj.au === undefined ? false : saveObj.au;
         region.blueprint = saveObj.bp === undefined ? -1 : saveObj.bp;
-        region.resourceTier = saveObj.rt === undefined ? region.regionLevel : saveObj.rt;
+        region.resourceTier = saveObj.rt === undefined ? Math.min(7, region.regionLevel) : saveObj.rt;
         region.map = []
         for (var i = 0; i < saveObj.map.length; i++) {
             var row = [];

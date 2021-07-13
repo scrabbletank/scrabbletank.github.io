@@ -395,7 +395,7 @@ export class CreatureBlock {
                     this.attackSpeed = this.attackSpeed * 0.85;
                     break;
                 case Statics.TRAIT_DEADLY:
-                    this.critChance = this.critChance * 2;
+                    extraStats.critChance = this.statBonuses.critChance;
                     extraStats.critPower += this.CritPower() * (0.3 * trait.level);
                     break;
                 case Statics.TRAIT_BESERK:

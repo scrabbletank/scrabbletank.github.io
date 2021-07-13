@@ -266,7 +266,7 @@ export class CombatScene extends SceneUIBase {
     _onCombatCallback(isInvasion) {
         this._hideEnemyDisplays();
         var monsters = this.combatManager.monsters;
-        for (var i = 0; i < monsters.length; i++) {
+        for (var i = 0; i < Math.min(monsters.length, this.monsterDisplays.length); i++) {
             this.monsterDisplays[i].setVisible(true);
             this.monsterDisplays[i].initWithCreature(monsters[i]);
             if (isInvasion === true) {
