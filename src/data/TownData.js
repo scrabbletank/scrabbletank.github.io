@@ -6,6 +6,7 @@ import { DynamicSettings } from "./DynamicSettings";
 import { ProgressionStore } from "./ProgressionStore";
 import { Dungeon } from "./Dungeon";
 import { RuneRegistry } from "./RuneRegistry";
+import { StarData } from "./StarData";
 
 export class TownData {
     static getTechGoldCost(tech, tier) {
@@ -168,7 +169,8 @@ export class TownData {
         var nightLabourBonus = this.nightLabourActive === true ? (1 + 0.1 * MoonlightData.getInstance().moonperks.nightlabour.level) : 1;
         var multi = this.productionMulti *
             (1 + this.friendshipLevel * 0.01 * MoonlightData.getInstance().moonperks.motivatedlabor.level) *
-            nightLabourBonus * DynamicSettings.getInstance().productionMulti * this.dungeonProdMulti;
+            nightLabourBonus * DynamicSettings.getInstance().productionMulti * this.dungeonProdMulti *
+            (1 + StarData.getInstance().perks.tools.level * 0.25);
         if (DynamicSettings.getInstance().friendshipToProduction === true) {
             return multi + this.friendshipLevel * 0.05;
         } else {
@@ -371,7 +373,8 @@ export class TownData {
             if (this.currentPopulation > this.maxPopulation) {
                 this.currentPopulation = Math.max(this.getMaxPopulation(), this.currentPopulation * 0.9);
             } else {
-                this.currentPopulation = Math.min(this.getMaxPopulation(), this.currentPopulation * Statics.POPULATION_GROWTH);
+                this.currentPopulation = Math.min(this.getMaxPopulation(), this.currentPopulation * (Statics.POPULATION_GROWTH +
+                    StarData.getInstance().perks.fertility.level * 0.01));
             }
             PlayerData.getInstance().addGold(this.getTownIncome());
             PlayerData.getInstance().addShade(this.currentPopulation * 0.1 *

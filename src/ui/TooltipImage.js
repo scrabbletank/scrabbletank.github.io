@@ -2,7 +2,7 @@ import { FloatingTooltip } from "./FloatingTooltip";
 import { Common } from "../utils/Common";
 
 export class TooltipImage {
-    constructor(scene, x, y, width, height, texture, tooltip) {
+    constructor(scene, x, y, width, height, texture, tooltip, tooltipSize = [350, 100], textWidth = 40) {
         this.backRect = scene.add.rectangle(x, y, width, height, 0x000000).setOrigin(0, 0);
         this.backRect.isStroked = true;
         this.backRect.strokeColor = Phaser.Display.Color.GetColor(255, 255, 255);
@@ -16,7 +16,9 @@ export class TooltipImage {
         this.y = y;
         this.width = width;
         this.height = height;
-        this.tooltip = Common.processText(tooltip, 40);
+        this.tooltipSize = tooltipSize;
+        this.textWidth = textWidth;
+        this.tooltip = Common.processText(tooltip, this.textWidth);
         this.clickCallback = undefined;
 
         this.backRect.setInteractive({ useHandCursor: true })
@@ -34,6 +36,13 @@ export class TooltipImage {
         this.img.setTexture(img.sprite, img.tile);
     }
 
+    setTint(clr) {
+        this.img.setTint(clr);
+    }
+    clearTint() {
+        this.img.clearTint();
+    }
+
     setPosition(x, y) {
         this.x = x;
         this.y = y;
@@ -41,13 +50,8 @@ export class TooltipImage {
         this.img.setPosition(x + this.width / 2, y + this.height / 2);
     }
 
-    setVisible(visible) {
-        this.backRect.setVisible(visible);
-        this.img.setVisible(visible);
-    }
-
     setTooltip(tooltip) {
-        this.tooltip = Common.processText(tooltip, 40);
+        this.tooltip = Common.processText(tooltip, this.textWidth);
     }
 
     _showTooltip() {
@@ -57,9 +61,10 @@ export class TooltipImage {
         if (this.floatingText !== undefined) {
             this.floatingText.destroy();
         }
-        var x = this.x + 20 + (this.x + 350 > 1090 ? -350 : 0);
-        var y = this.y + (this.y - 100 < 100 ? 0 : -100);
-        this.floatingText = new FloatingTooltip(this.scene, this.tooltip, x, y, 350, 100, "courier16", 16, 999);
+        var x = this.x + 20 + (this.x + this.tooltipSize[0] > 1090 ? -this.tooltipSize[0] : 0);
+        var y = this.y + (this.y - this.tooltipSize[1] < 100 ? 0 : -this.tooltipSize[1]);
+        this.floatingText = new FloatingTooltip(this.scene, this.tooltip, x, y, this.tooltipSize[0],
+            this.tooltipSize[1], "courier16", 16, 999);
     }
 
     _removeTooltip() {
@@ -67,6 +72,14 @@ export class TooltipImage {
             this.floatingText.destroy();
             this.floatingText = undefined;
         }
+    }
+
+    setVisible(visible) {
+        if (this.floatingText !== undefined) {
+            this.floatingText.destroy();
+        }
+        this.backRect.setVisible(visible);
+        this.img.setVisible(visible);
     }
 
     destroy() {

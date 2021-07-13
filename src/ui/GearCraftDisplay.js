@@ -54,7 +54,7 @@ export class GearCraftDisplay {
         this.statLabels.push(sceneContext.add.bitmapText(x + 5, y + 45, "courier16", txt));
         if (progression.unlocks.resourceUI === true) {
             var player = new PlayerData();
-            var craftCostMulti = gear.tier <= 0 ? 1 : player.craftingCosts[gear.tier - 1];
+            var craftCostMulti = gear.tier <= 0 ? 1 : player.getCraftingCosts(gear.tier - 1);
             var idx = 0;
             for (var i = 0; i < gear.costs.length; i++) {
                 if (gear.costs[i] !== 0) {

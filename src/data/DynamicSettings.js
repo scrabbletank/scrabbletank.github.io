@@ -1,3 +1,4 @@
+import { StarData } from "./StarData";
 import { Statics } from "./Statics";
 
 // this class exists purely to save the lore page for reloading
@@ -22,6 +23,10 @@ export class DynamicSettings {
             this.productionMulti = 1;
             this.spendFriendship = false;
             this.friendshipToProduction = false;
+            this.invasionTimer = Statics.MIN_SIGHTING_SECONDS;
+            this.invasionLevelBonus = 0;
+            this.invasionsIncreaseDifficulty = false;
+            this.minResourceTier = 0 + StarData.getInstance().perks.worldsmith.level;
 
             // game settings
             this.openCombatOnExplore = true;
@@ -61,6 +66,7 @@ export class DynamicSettings {
         this.invasionTimer = Statics.MIN_SIGHTING_SECONDS;
         this.invasionLevelBonus = 0;
         this.invasionsIncreaseDifficulty = false;
+        this.minResourceTier = 0 + StarData.getInstance().perks.worldsmith.level;
     }
 
     setupChallenge(challenge) {
@@ -132,7 +138,8 @@ export class DynamicSettings {
             ilb: this.invasionLevelBonus,
             iid: this.invasionsIncreaseDifficulty,
             sce: this.openCombatOnExplore,
-            saeo: this.autoExploreOptions
+            saeo: this.autoExploreOptions,
+            mnrt: this.minResourceTier
         }
 
         return saveObj;
@@ -160,5 +167,6 @@ export class DynamicSettings {
         this.invasionsIncreaseDifficulty = saveObj.iid !== undefined ? saveObj.iid : false;
         this.openCombatOnExplore = saveObj.sce !== undefined ? saveObj.sce : true;
         this.autoExploreOptions = saveObj.saeo !== undefined ? saveObj.saeo : Statics.AUTOEXPLORE_WEAKEST;
+        this.minResourceTier = saveObj.mnrt !== undefined ? saveObj.mnrt : 0;
     }
 }

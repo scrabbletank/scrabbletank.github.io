@@ -132,7 +132,7 @@ export class GearScene extends SceneUIBase {
         } else if (filter === 0) {
             this.craftingCostLabel.setText("Crafting Cost: 100%");
         } else {
-            this.craftingCostLabel.setText("Crafting Cost: " + (Math.round(this.player.craftingCosts[filter - 1] * 10000) / 100) + "%");
+            this.craftingCostLabel.setText("Crafting Cost: " + (Math.round(this.player.getCraftingCosts(filter - 1) * 10000) / 100) + "%");
         }
         var gearData = new GearData();
         this.gearList = [];

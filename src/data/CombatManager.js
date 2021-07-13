@@ -7,6 +7,7 @@ import { ProgressionStore } from "./ProgressionStore";
 import { DynamicSettings } from "./DynamicSettings";
 import { RegionRegistry } from "./RegionRegistry";
 import { WorldData } from "./WorldData";
+import { StarData } from "./StarData";
 
 export class CombatManager {
     constructor() {
@@ -115,6 +116,28 @@ export class CombatManager {
         }
     }
 
+    initFightWithCreatures(fromAutoExplore, monsterList) {
+        this.fromAutoExplore = fromAutoExplore;
+        this.combatActive = true;
+        this.monsters = monsterList;
+        for (var i = 0; i < this.monsters.length; i++) {
+            // to save context on i when calling functions, because scope fuckery.
+            this.monsters[i].initCombat();
+            this._creatureWorkaround(i);
+        }
+        PlayerData.getInstance().statBlock.initCombat();
+        for (var i = 0; i < this.monsters.length; i++) {
+            var trait = this.monsters[i].findTrait(Statics.TRAIT_CORROSIVE);
+            if (trait !== undefined) {
+                PlayerData.getInstance().statBlock.corrosion += this.monsters[i].DamageMin() * 0.01 * trait.level;
+            }
+        }
+        this.target = this._getTarget();
+        if (this.combatCallback !== undefined) {
+            this.combatCallback(this.activeTile.isInvaded);
+        }
+    }
+
     initFight(fromAutoExplore) {
         this.fromAutoExplore = fromAutoExplore;
         this.combatActive = true;
@@ -131,7 +154,6 @@ export class CombatManager {
                 PlayerData.getInstance().statBlock.corrosion += this.monsters[i].DamageMin() * 0.01 * trait.level;
             }
         }
-        PlayerData.getIn
         this.target = this._getTarget();
         if (this.combatCallback !== undefined) {
             this.combatCallback(this.activeTile.isInvaded);
@@ -156,7 +178,7 @@ export class CombatManager {
     _handleRewards() {
         this.fightCooldown = Statics.COMBAT_COOLDOWN;
         var rewards = {
-            tier: Math.min(7, this.activeTile.parent.regionLevel),
+            tier: this.activeTile.parent.resourceTier,
             resource: [0, 0, 0, 0, 0, 0],
             shade: 0,
             gold: 0,
@@ -186,6 +208,7 @@ export class CombatManager {
             for (var t = 0; t < numRewards; t++) {
                 var idx = this._getDropIndex();
                 var dropMulti = (1 + (this.monsters[i].level - baseLvl) * 0.20) + (this.activeTile.parent.regionLevel * 0.1);
+                dropMulti = dropMulti * (1 + StarData.getInstance().perks.bounty.level * 0.5);
                 rewards.resource[idx] += Math.max(0, this.monsters[i].dropBase * dropMulti) + player.runeBonuses.lootFlat;
             }
             rewards.friendship += this.activeTile.getFriendshipReward();
@@ -197,7 +220,7 @@ export class CombatManager {
                 rewards.resource[i] += townProd[i] * totalBundle;
             }
         }
-        rewards.gold = (rewards.gold + (this.activeTile.explored ? 1 : 5)) * this.activeTile.parent.townData.bountyMulti;
+        rewards.gold = (rewards.gold * (this.activeTile.explored ? 1 : 3.5)) * this.activeTile.parent.townData.bountyMulti;
         rewards.shade *= MoonlightData.getInstance().getShadowBonus() * this.activeTile.parent.townData.getFriendshipBonus();
         rewards.friendship *= (1 + player.runeBonuses.friendshipMulti) *
             (1 + MoonlightData.getInstance().challenges.outcast.completions * 0.1) *

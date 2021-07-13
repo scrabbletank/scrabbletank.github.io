@@ -4,6 +4,7 @@ import { MoonlightData } from "./MoonlightData";
 import { Common } from "../utils/Common";
 import { Statics } from "./Statics";
 import { PlayerData } from "./PlayerData";
+import { StarData } from "./StarData";
 
 export const BuildingTypes = {
     PRODUCTION: 0,
@@ -82,8 +83,9 @@ export class Building {
                     Math.floor(eff * 100) + "% based on distance to roads and other buildings.";
             case "Town House":
                 if (tile.houseBuildable === true) {
-                    return "Increases the Town's max population by " +
-                        (tier * (5 + MoonlightData.getInstance().moonperks.urbanization.level)) + ".";
+                    var pop = Math.floor((tier * (5 + MoonlightData.getInstance().moonperks.urbanization.level)) *
+                        (1 + StarData.getInstance().perks.estate.level * 0.5));
+                    return "Increases the Town's max population by " + pop + ".";
                 } else {
                     return "This house is too far away from a road and has been abandoned.";
                 }

@@ -247,7 +247,7 @@ export class TownScene extends SceneUIBase {
 
         var txt = "Population: " + Math.round(region.townData.currentPopulation) + "/" + Math.floor(region.townData.getMaxPopulation()) + "\n" +
             "Tax Income: " + Math.round(region.townData.getTownIncome()) + "g/week\n" +
-            "T" + region.townData.tier + " Crafting Cost: " + (Math.round(player.craftingCosts[region.townData.tier - 1] * 10000) / 100) + "%\n" +
+            "T" + region.townData.tier + " Crafting Cost: " + (Math.round(player.getCraftingCosts(region.townData.tier - 1) * 10000) / 100) + "%\n" +
             "Economy: " + Math.round(region.townData.economyMulti * 100 * govBonus) + "%\n" +
             "Production: " + Math.round(prodBonus * 100) + "%\n" +
             "Bounty Gold: " + Math.round(region.townData.bountyMulti * 100) + "%\n" +

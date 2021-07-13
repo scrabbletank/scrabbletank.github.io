@@ -19,6 +19,5 @@
     "build": "webpack",
     "start": "npm run build && webpack-dev-server --port=8000"
   },
-  "author": "Scrabbletank",
-  "license": "MIT"
+  "author": "Scrabbletank"
 }

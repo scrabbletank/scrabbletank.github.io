@@ -27,6 +27,8 @@ import { OptionsDialog } from "../ui/OptionsDialog";
 import { GuideWindow } from "../ui/GuideWindow";
 import { WorldTime } from "../data/WorldTime";
 import { FadingNumberLabel } from "../ui/FadingNumberLabel";
+import { StarData } from "../data/StarData";
+import { MyrahScene } from "./MyrahScene";
 
 export class GameScene extends SceneUIBase {
     constructor(position, name) {
@@ -36,6 +38,7 @@ export class GameScene extends SceneUIBase {
         // DYNAMIC SETTINGS SHOULD BE FIRST ALWAYS
         this.settings = new DynamicSettings();
         this.moonlight = new MoonlightData();
+        this.starData = new StarData();
         this.worldData = new WorldData();
         this.player = new PlayerData();
         this.progression = new ProgressionStore();
@@ -67,6 +70,7 @@ export class GameScene extends SceneUIBase {
         this.load.spritesheet("moonicons", "./../../assets/icons/moonicons.png", { frameWidth: 16, frameHeight: 16 });
         this.load.spritesheet("runeicons", "./../../assets/icons/runeicons.png", { frameWidth: 16, frameHeight: 16 });
         this.load.spritesheet("enemyicons", "./../../assets/enemy/enemyicons.png", { frameWidth: 16, frameHeight: 16 });
+        this.load.spritesheet("staricons", "./../../assets/icons/staricons.png", { frameWidth: 16, frameHeight: 16 });
         this.load.image("title", "./../../assets/title.png");
     }
 
@@ -177,12 +181,12 @@ export class GameScene extends SceneUIBase {
         this.buyButtons.push(new TextButton(this, 10, 780, 30, 18, "x1")
             .onClickHandler(() => { this._setBuyAmount(1, 0); })
             .setTextColor(Phaser.Display.Color.GetColor(255, 255, 0)));
-        this.buyButtons.push(new TextButton(this, 45, 780, 30, 18, "x5")
-            .onClickHandler(() => { this._setBuyAmount(5, 1); }));
-        this.buyButtons.push(new TextButton(this, 80, 780, 40, 18, "x10")
-            .onClickHandler(() => { this._setBuyAmount(10, 2); }));
-        this.buyButtons.push(new TextButton(this, 125, 780, 40, 18, "x100")
-            .onClickHandler(() => { this._setBuyAmount(100, 3); }));
+        this.buyButtons.push(new TextButton(this, 45, 780, 30, 18, "x10")
+            .onClickHandler(() => { this._setBuyAmount(10, 1); }));
+        this.buyButtons.push(new TextButton(this, 80, 780, 40, 18, "x100")
+            .onClickHandler(() => { this._setBuyAmount(100, 2); }));
+        this.buyButtons.push(new TextButton(this, 125, 780, 40, 18, "x1K")
+            .onClickHandler(() => { this._setBuyAmount(1000, 3); }));
 
         this.infuseLabel = this.add.bitmapText(10, 10, "courier20", "Infuse");
         this.shadeLabel = this.add.bitmapText(20, 10, "courier16", "Shade: " + this.player.shade);
@@ -259,6 +263,7 @@ export class GameScene extends SceneUIBase {
         this.talentScene = new TalentScene([200, 100], "TalentScene");
         this.worldScene = new WorldScene([200, 100], "WorldScene");
         this.moonlightScene = new MoonlightScene([0, 0], "MoonlightScene");
+        this.myrahScene = new MyrahScene([0, 0], "MyrahScene");
 
         this.scene.add("CombatScene", this.combatScene, true);
         this.scene.add("RegionScene", this.regionScene, true);
@@ -268,6 +273,7 @@ export class GameScene extends SceneUIBase {
         this.scene.add("TalentScene", this.talentScene, true);
         this.scene.add("WorldScene", this.worldScene, true);
         this.scene.add("MoonlightScene", this.moonlightScene, true);
+        this.scene.add("MyrahScene", this.myrahScene, true);
 
         this.scene.bringToTop("LoreScene");
         this.scene.bringToTop("DarkWorld");
@@ -278,6 +284,7 @@ export class GameScene extends SceneUIBase {
             this.updateStatIcons();
         });
         this.player.registerEvent("onResourcesChanged", (res, gold, tier) => {
+            this._updateShade();
             this._updateResources();
             this._updateFadingResourceLabels(res, gold, tier);
         });
@@ -612,7 +619,7 @@ export class GameScene extends SceneUIBase {
 
     _onRewardCallback(rewards) {
         if (this.progression.unlocks.craftingUI === true) {
-            GearData.getInstance().tiersAvailable = Math.max(GearData.getInstance().tiersAvailable, rewards.tier + 1);
+            GearData.getInstance().tiersAvailable = Math.max(GearData.getInstance().tiersAvailable, rewards.regionLevel + 1);
             this.gearScene._updateTierButtons();
         }
         this.player.addShade(rewards.shade);
@@ -792,6 +799,7 @@ export class GameScene extends SceneUIBase {
             world: this.worldData.save(),
             progression: this.progression.save(),
             moon: this.moonlight.save(),
+            star: this.starData.save(),
             lore: LoreStore.getInstance().save()
         }
     }
@@ -821,6 +829,9 @@ export class GameScene extends SceneUIBase {
         }
         this.progression.load(saveObj.progression, saveObj.version);
         this.moonlight.load(saveObj.moon, saveObj.version);
+        if (saveObj.star !== undefined) {
+            this.starData.load(saveObj.star, saveObj.version);
+        }
         gearData.load(saveObj.gear, saveObj.version);
         //player needs to load after gear
         this.player.load(saveObj.player, saveObj.version);

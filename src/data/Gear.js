@@ -1,5 +1,6 @@
 import { MoonlightData } from './MoonlightData';
 import { RuneRegistry } from './RuneRegistry';
+import { StarData } from './StarData';
 import { Statics } from './Statics';
 
 export class Gear {
@@ -20,6 +21,7 @@ export class Gear {
         this.rampingCostMulti = 1;
 
         for (const prop in this.statBonuses) {
+            this.statBonuses[prop] = this.statBonuses[prop] * (1 + StarData.getInstance().perks.stellar.level * 0.1);
             if (prop !== 'critChance') {
                 this.statsPerLevel[prop] = this.statBonuses[prop] * (0.25 + MoonlightData.getInstance().moonperks.soulbound.level * 0.01);
             }

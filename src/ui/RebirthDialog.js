@@ -1,11 +1,12 @@
 import { Common } from "../utils/Common";
 import { PlayerData } from "../data/PlayerData";
-import { MoonlightData } from "../data/MoonlightData";
 import { TextButton } from "./TextButton";
+import { ProgressionStore } from "../data/ProgressionStore";
+import { WorldData } from "../data/WorldData";
 
 export class RebirthDialog {
     constructor(scene, x, y, regionLevel) {
-        this.backingRect = scene.add.rectangle(x, y, 400, 270, Phaser.Display.Color.GetColor(0, 0, 0))
+        this.backingRect = scene.add.rectangle(x, y, 400, 320, Phaser.Display.Color.GetColor(0, 0, 0))
             .setOrigin(0, 0).setInteractive();
         this.backingRect.isStroked = true;
         this.backingRect.strokeColor = Phaser.Display.Color.GetColor(200, 0, 200);
@@ -49,6 +50,13 @@ export class RebirthDialog {
             case 8:
                 desc = "\"DO NOT LISTEN. THEIR LIES ARE AS NUMEROUS AS THE STARS IN THE SKY. WE SHALL PURGE THEM BOTH.\"";
                 break;
+            case 9:
+                desc = "\"THE VOID, I FEEL IT NEAR. ARE YOU PREPARED, CHILD, FOR THE END?\""
+                break;
+            case 10:
+                desc = "\"DO YOU STILL HUNT US, SLAVE OF MOONLIGHT? THE BETRAYER STAR WATCHES.\"";
+                descColor = Phaser.Display.Color.GetColor(177, 100, 169);
+                break;
             default:
                 desc = "\"...\"";
                 break;
@@ -63,12 +71,18 @@ export class RebirthDialog {
 
 
         var playerData = new PlayerData();
-        var costTxt = "MOONLIGHT\n" + Math.round(playerData.earnableMoonlight(regionLevel + 1));
+        var costTxt = "MOONLIGHT\n" + Common.numberString(Math.round(playerData.earnableMoonlight(regionLevel + 1)));
         this.moonlightLabel = scene.add.bitmapText(x + 200, y + 190, "courier20", costTxt, 20, 1).setOrigin(0.5, 0);
         this.moonlightLabel.setTint(Phaser.Display.Color.GetColor(206, 238, 240));
 
-        this.rebirthButton = new TextButton(scene, x + 30, y + 240, 155, 20, "Enter");
-        this.leaveButton = new TextButton(scene, x + 215, y + 240, 155, 20, "Leave");
+        if (ProgressionStore.getInstance().persistentUnlocks.starshards === true) {
+            var costTxt = "STAR SHARDS\n" + Common.numberString(WorldData.getInstance().starshardsEarned);
+            this.starshardLabel = scene.add.bitmapText(x + 200, y + 240, "courier20", costTxt, 20, 1).setOrigin(0.5, 0);
+            this.starshardLabel.setTint(Phaser.Display.Color.GetColor(177, 100, 169));
+        }
+
+        this.rebirthButton = new TextButton(scene, x + 30, y + 290, 155, 20, "Enter");
+        this.leaveButton = new TextButton(scene, x + 215, y + 290, 155, 20, "Leave");
     }
 
     onRebirthHandler(callback) {
@@ -87,6 +101,9 @@ export class RebirthDialog {
         this.desc2Label.destroy();
         this.desc3Label.destroy();
         this.moonlightLabel.destroy();
+        if (this.starshardLabel !== undefined) {
+            this.starshardLabel.destroy();
+        }
         this.rebirthButton.destroy();
         this.leaveButton.destroy();
     }

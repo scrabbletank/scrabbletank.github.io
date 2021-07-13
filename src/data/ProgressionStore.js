@@ -183,7 +183,8 @@ export class ProgressionStore {
                 challenges: false,
                 autoExplore: false,
                 wizardClass: false,
-                dungeons: false
+                dungeons: false,
+                starshards: false
             }
 
             this.totalCounts = {
