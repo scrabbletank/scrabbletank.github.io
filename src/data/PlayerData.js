@@ -186,7 +186,7 @@ export class PlayerData {
                 MoonlightData.getInstance().challenges.forge.completions);
         }
         this.starperkCostReduction = Math.pow(0.95, StarData.getInstance().perks.forge.level);
-        this.resourceTierReached = 0;
+        this.resourceTierReached = DynamicSettings.getInstance().minResourceTier;
         this.gold = 0;
         this.motes = 0;
         this.challengeExploreMulti = 1 + (MoonlightData.getInstance().challenges.explore.completions * 0.25);
@@ -539,7 +539,8 @@ export class PlayerData {
     }
 
     earnableMoonlight(gateReached) {
-        return MoonlightData.getMoonlightEarned((this.statLevel - 1) + (this.talentLevel - 1) * 3, gateReached) *
+        return MoonlightData.getMoonlightEarned((this.statLevel - 1) + (this.talentLevel - 1) *
+            (3 + StarData.getInstance().perks.knowledge.level * 2), gateReached) *
             (1 + 0.15 * MoonlightData.getInstance().challenges.time.completions) * this.dungeonBonus.moonlight;
     }
 
@@ -553,8 +554,9 @@ export class PlayerData {
 
     getStatCost(buyAmount) {
         var ret = 0;
+        var starMod = StarData.getInstance().perks.statcost.level * 2;
         for (var i = 0; i < buyAmount; i++) {
-            ret += Statics.STAT_COST_BASE + (Statics.STAT_COST_PER_LEVEL * (this.statLevel - 1 + i));
+            ret += (Statics.STAT_COST_BASE - starMod) + ((Statics.STAT_COST_PER_LEVEL - starMod) * (this.statLevel - 1 + i));
         }
         return ret;
     }

@@ -11,12 +11,12 @@ import { FloatingTooltip } from "./FloatingTooltip";
 import { DynamicSettings } from "../data/DynamicSettings";
 import { MoonlightData } from "../data/MoonlightData";
 import { PlayerData } from "../data/PlayerData";
+import { StarData } from "../data/StarData";
 
 export class TileSelectWindow {
     constructor(scene, x, y, tile) {
         var progression = new ProgressionStore();
         var region = new WorldData().getCurrentRegion();
-        var regionTier = Math.min(region.regionLevel, 7);
 
         this.backRect = scene.add.rectangle(x, y, 500, 220, Phaser.Display.Color.GetColor(0, 0, 0))
             .setInteractive()
@@ -124,7 +124,7 @@ export class TileSelectWindow {
                     var costY = y + 42;
                     for (var i = 0; i < tile.building.resourceCosts.length; i++) {
                         if (tile.building.resourceCosts[i] > 0) {
-                            var clr = PlayerData.getInstance().resources[regionTier][i] >= tile.building.resourceCosts[i] ?
+                            var clr = PlayerData.getInstance().resources[region.resourceTier][i] >= tile.building.resourceCosts[i] ?
                                 Phaser.Display.Color.GetColor(255, 255, 255) : Phaser.Display.Color.GetColor(255, 80, 80);
                             var label = scene.add.bitmapText(x + 395, costY, "courier16",
                                 Statics.RESOURCE_NAMES[i] + ": " + Common.numberString(tile.building.resourceCosts[i]));
@@ -169,7 +169,7 @@ export class TileSelectWindow {
         } else if (bld.name === "Tavern") {
             return bld.tier < WorldData.instance.getCurrentRegion().townData.getTavernLevel();
         } else {
-            return bld.tier < 3;
+            return bld.tier < 3 + StarData.getInstance().perks.construction.level;
         }
     }
 
@@ -180,7 +180,7 @@ export class TileSelectWindow {
                 if (this.floatingText !== undefined) {
                     this.floatingText.destroy();
                 }
-                var regionTier = Math.min(WorldData.getInstance().getCurrentRegion().regionLevel, 7);
+                var regionTier = WorldData.getInstance().getCurrentRegion().resourceTier;
                 var descTxt = Common.processText(Building.getTooltip(tile, building.name, building.tier, true), 24);
                 this.floatingText = new ExtendedFloatingTooltip(scene, x + (x + 350 > 1100 ? -350 : 0), y - 150, 350, 150)
                     .addText(5, 5, "courier20", building.name)

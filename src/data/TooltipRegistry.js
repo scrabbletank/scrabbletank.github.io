@@ -318,6 +318,8 @@ export class TooltipRegistry {
                 return "A massive forest full of the oldest trees waiting to be cut down, beasts to be hunted and plants to be gathered.";
             case "hills":
                 return "Rolling hills with few plains between them. Full of wild beasts, plants, and the Gnoll's who hunt them.";
+            case "void":
+                return "An unending void filled with glittering stars. There is nothing here, except for the Starlight Palace.";
         }
         return regionName + ": Missing Tooltip";
     }
@@ -330,6 +332,8 @@ export class TooltipRegistry {
                 return { sprite: "icons", tile: 59 };
             case "desert":
                 return { sprite: "icons", tile: 57 };
+            case "void":
+                return { sprite: "icons2", tile: 5 };
             default:
                 return { sprite: "icons", tile: 40 };
         }
@@ -430,6 +434,37 @@ export class TooltipRegistry {
                     "On Every Completion: Wizard starts with +2 Talent Points.\n" +
                     "                     +5 Challenge Points\n\n" +
                     "On Final Completion: Unlocks the Spire building.\n" +
+                    "Completions: " + challenge.completions + "/" + challenge.maxCompletions + "\n" +
+                    "Fastest Time: " + new WorldTime(challenge.fastestTime).getTimespanText();
+            case "A Matter of Decades":
+                return "Did you finish all the normal challenges yet? I'm feeling kind, so consider this a warmup.\n\n" +
+                    "Restrictions: Reach the 10th Gate within " + (10 - completions * 2) + " Years.\n\n" +
+                    "              Regions span 25 levels.\n\n" +
+                    "On First Completion: Auto Explore will continue to a random region if the current region is complete.\n" +
+                    "On Every Completion: Increases Starshard drop chance as if you were 1 region further.\n" +
+                    "                     +10 Challenge Points\n\n" +
+                    "It is possible to fail this challenge!\n\n" +
+                    "Completions: " + challenge.completions + "/" + challenge.maxCompletions + "\n" +
+                    "Fastest Time: " + new WorldTime(challenge.fastestTime).getTimespanText();
+            case "Forged Ahead 2: Reforged":
+                return "You didn't actually want to equip gear, did you? In this world Gear costs 1000 times as much.\n\n" +
+                    "Restrictions: Gear costs increased x1000.\n" +
+                    "              Can only use up to Tier " + (8 - challenge.completions) + " Gear\n\n" +
+                    "              Reach the 10th Gate.\n\n" +
+                    "On First Completion: Forge Upgrades can pass the 10% softcap at a greatly reduced rate.\n" +
+                    "On Every Completion: Gear costs are multiplied by x0.95\n" +
+                    "                     +12 Challenge Points\n\n" +
+                    "Completions: " + challenge.completions + "/" + challenge.maxCompletions + "\n" +
+                    "Fastest Time: " + new WorldTime(challenge.fastestTime).getTimespanText();
+            case "Capitalism":
+                return "The people of this world actually want to be paid for their work, can you imagine that? They won't work " +
+                    "without gold, good thing you got those taxes!\n\n" +
+                    "Restrictions: production buildings cost " + (250 + challenge.completions * 250) + "g per day.\n" +
+                    "              Tax loopholes mean you earn 50% less tax.\n\n" +
+                    "              Reach the 10th Gate.\n\n" +
+                    "On Every Completion: Gold cost of Town upgrades reduced by 10%\n" +
+                    "                     +250 base gold cap per Town\n\n" +
+                    "                     +15 Challenge Points\n\n" +
                     "Completions: " + challenge.completions + "/" + challenge.maxCompletions + "\n" +
                     "Fastest Time: " + new WorldTime(challenge.fastestTime).getTimespanText();
         }
@@ -809,7 +844,7 @@ export class TooltipRegistry {
             case "Ingram's Bell: Bounty":
                 return "Monsters drop " + (perk.level * 50) + "% + (50%) more resources.";
             case "Myrah's Spear: Forge":
-                return "Reduces gear costs by " + Math.floor((1 - Math.pow(0.95, moonlight.level)) * 100) + "% + (~5%). This ignores the gear cost softcap.";
+                return "Reduces gear costs by " + Math.floor((1 - Math.pow(0.95, perk.level)) * 100) + "% + (~5%). This ignores the gear cost softcap.";
             case "Myrah's Spear: Stellar Enchantments":
                 return "Gear gives " + (perk.level * 10) + "% + (10%) more stats.";
             case "Myrah's Spear: Proficiency":
@@ -830,6 +865,8 @@ export class TooltipRegistry {
                     (perk.level + 1) + " resources.";
             case "Kella's Horn: Enchanted Tools":
                 return "Increases building production by " + (perk.level * 25) + "% + (25%).";
+            case "Kella's Horn: Fertility":
+                return "Town Population increases by " + (perk.level + 3) + "% + (1%) each week.";
             case "Kella's Horn: Estate":
                 return "Houses hold " + (perk.level * 50) + "% + (50%) more people.";
             case "Betrayer Star: Mists":

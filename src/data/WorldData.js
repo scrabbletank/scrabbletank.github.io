@@ -25,6 +25,7 @@ export class WorldData {
             this.invasionReward = 1;
             this.invasionRegion = 0;
             this.invasionPowerHandlers = [];
+            this.starshardsEarned = 0;
 
             WorldData.instance = this;
         }
@@ -55,6 +56,7 @@ export class WorldData {
         this.invasionPower = 1;
         this.invasionReward = 1;
         this.invasionRegion = 0;
+        this.starshardsEarned = 0;
         this._onRegionChangedHandler();
     }
 
@@ -122,6 +124,11 @@ export class WorldData {
     }
 
     generateRegionChoices() {
+        if (this.regionList.length === 9 && ProgressionStore.getInstance().persistentUnlocks.starshards === false) {
+            this.nextRegions = [{ type: "void", traits: this._randomizeTraits(this.regionList.length - 1) }];
+            this.addRegion(0);
+            return;
+        }
         var choices = ["temperate", "mountains", "desert", "forest", "hills"];
         this.nextRegions = [];
         for (var i = 0; i < 3; i++) {
@@ -159,6 +166,7 @@ export class WorldData {
     handleRunCompletion() {
         var moonlightEarned = PlayerData.getInstance().earnableMoonlight(this.getCurrentRegion().regionLevel + 1);
         MoonlightData.getInstance().moonlight += moonlightEarned;
+        StarData.getInstance().starShards += this.starshardsEarned;
 
         if (this.getCurrentRegion().regionLevel >= 1) {
             ProgressionStore.getInstance().persistentUnlocks.challenges = true;
@@ -253,7 +261,8 @@ export class WorldData {
             time: this.time.save(),
             ip: this.invasionPower,
             ir: this.invasionReward,
-            ire: this.invasionRegion
+            ire: this.invasionRegion,
+            sse: this.starshardsEarned
         }
 
         return saveObj;
@@ -273,6 +282,7 @@ export class WorldData {
         this.invasionPower = saveObj.ip === undefined ? Math.pow(Statics.INVASION_POWER_MULTI, this.regionList.length - 1) : saveObj.ip;
         this.invasionReward = saveObj.ir === undefined ? Math.pow(Statics.INVASION_REWARD_MULTI, this.regionList.length - 1) : saveObj.ir;
         this.invasionRegion = saveObj.ire === undefined ? this.regionList.length - 1 : saveObj.ire;
+        this.starshardsEarned = saveObj.sse === undefined ? 0 : saveObj.sse;
         if (this.nextRegions.length > 0 && this.nextRegions.length !== 3) {
             this.generateRegionChoices();
         }

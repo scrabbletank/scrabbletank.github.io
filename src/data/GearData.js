@@ -4,6 +4,7 @@ import { MoonlightData } from "./MoonlightData";
 import { PlayerData } from "./PlayerData";
 import { Common } from "../utils/Common";
 import { StarData } from "./StarData";
+import { DynamicSettings } from "./DynamicSettings";
 
 export class GearData {
     constructor() {
@@ -60,13 +61,14 @@ export class GearData {
         var player = PlayerData.getInstance();
         var craftCostMulti = gear.tier <= 0 ? 1 : player.craftingCosts[gear.tier - 1];
         var res = [];
+        var resTier = Math.max(DynamicSettings.getInstance().minResourceTier, gear.tier - 1);
         for (var i = 0; i < gear.costs.length; i++) {
             res.push(gear.costs[i] * craftCostMulti);
         }
-        if (Common.canCraft(res, player.resources[Math.max(0, gear.tier - 1)]) === false) {
+        if (Common.canCraft(res, player.resources[resTier]) === false) {
             return;
         }
-        player.spendResource(res, Math.max(0, gear.tier - 1));
+        player.spendResource(res, resTier);
         if (player.isEquipedItem(gear)) {
             player.unequip(gear.slotType);
             gear.bringToLevel(gear.level + 1);

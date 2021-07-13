@@ -19,8 +19,19 @@ export class Common {
     static numberString(x) {
         var val = x;
         var suffix = "";
-        if (val > 10000000000000000n) {
-            val = Math.floor(x / 1000000000000000n);
+        if (val > 10000000000000000000000000000n) {
+            return "TOO BIG";
+        } else if (val > 10000000000000000000000000n) {
+            val = BigInt(x) / 10000000000000000000000000n;
+            suffix = "Sp";
+        } else if (val > 10000000000000000000000n) {
+            val = BigInt(x) / 10000000000000000000000n;
+            suffix = "Sx";
+        } else if (val > 10000000000000000000n) {
+            val = BigInt(x) / 1000000000000000000n;
+            suffix = "Qi";
+        } else if (val > 10000000000000000n) {
+            val = BigInt(x) / 1000000000000000n;
             suffix = "Q";
         } else if (val > 10000000000000) {
             val = Math.floor(x / 1000000000000);

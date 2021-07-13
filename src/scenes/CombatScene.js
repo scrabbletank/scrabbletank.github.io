@@ -73,17 +73,18 @@ export class CombatScene extends SceneUIBase {
         } else {
             fillTxt = Common.numberString(Math.ceil(health)) + "/" + Common.numberString(this.combatManager.monsters[idx].MaxHealth());
         }
-        this.monsterDiplays[idx].setHealthBar(health / this.combatManager.monsters[idx].MaxHealth(), fillTxt);
-        this.monsterDiplays[idx].setShieldBar(shieldPercent);
+        this.monsterDisplays[idx].setHealthBar(health / this.combatManager.monsters[idx].MaxHealth(), fillTxt);
+        this.monsterDisplays[idx].setShieldBar(shieldPercent);
     }
     _monsterAttackCooldownCallback(attackCooldown, idx) {
-        this.monsterDiplays[idx].setAttackBar(attackCooldown / this.combatManager.monsters[idx].attackSpeed,
+        this.monsterDisplays[idx].setAttackBar(attackCooldown / this.combatManager.monsters[idx].attackSpeed,
             Math.floor(attackCooldown / this.combatManager.monsters[idx].attackSpeed * 100) + "%");
     }
 
-    _rewardCallback(tile, rewards) {
+    _rewardCallback(rewards) {
         this._hideEnemyDisplays();
         this.restButton.setVisible(true);
+        this.restButton.setText("Rest");
 
         if (DynamicSettings.getInstance().autoExploreOptions === Statics.AUTOEXPLORE_HOLD &&
             this.scene.get("RegionScene").getAutoInvadeActive() === true && this.combatManager.activeTile.isInvaded === false) {
@@ -92,7 +93,7 @@ export class CombatScene extends SceneUIBase {
         }
 
         for (var i = 0; i < this.onRewardHandlers.length; i++) {
-            this.onRewardHandlers[i](tile, rewards);
+            this.onRewardHandlers[i](rewards);
         }
     }
 
@@ -100,6 +101,7 @@ export class CombatScene extends SceneUIBase {
         this._hideEnemyDisplays();
         this.progression.registerDeath(1);
         this.restButton.setVisible(true);
+        this.restButton.setText("Explore");
     }
 
     _updatePlayerBlock() {
@@ -112,8 +114,8 @@ export class CombatScene extends SceneUIBase {
         }
     }
     _hideEnemyDisplays() {
-        for (var i = 0; i < this.monsterDiplays.length; i++) {
-            this.monsterDiplays[i].setVisible(false);
+        for (var i = 0; i < this.monsterDisplays.length; i++) {
+            this.monsterDisplays[i].setVisible(false);
         }
     }
     _setupAnim(idx, animKey) {
@@ -140,8 +142,8 @@ export class CombatScene extends SceneUIBase {
         if (this.monsterHitAnim[idx] !== undefined) {
             this._removeMonsterAnim(idx);
         }
-        var x = this.monsterDiplays[idx].getCenterX();
-        var y = this.monsterDiplays[idx].getCenterY();
+        var x = this.monsterDisplays[idx].getCenterX();
+        var y = this.monsterDisplays[idx].getCenterY();
         this.monsterHitAnim[idx] = new SpriteAnimation(this, x, y, animKey, Combat.getAnimInfoFromKey(animKey), () => { this._removeMonsterAnim(idx); });
     }
     _removeMonsterAnim(i) {
@@ -189,6 +191,10 @@ export class CombatScene extends SceneUIBase {
         this._hideEnemyDisplays();
     }
 
+    stopCombat() {
+        this.combatManager.stopCombat();
+    }
+
     preload() {
         this.load.spritesheet("claws", "./../../assets/anims/clawanim.png", { frameWidth: 128, frameHeight: 128 });
         this.load.spritesheet("clawscrit", "./../../assets/anims/clawanimcrit.png", { frameWidth: 128, frameHeight: 128 });
@@ -212,10 +218,10 @@ export class CombatScene extends SceneUIBase {
         this.invasionCounter = this.add.bitmapText(this.relativeX(400), this.relativeY(35), "courier20", "Invaders: 0")
             .setTint(Phaser.Display.Color.GetColor(220, 0, 220));
         this.invasionCounter.setVisible(false);
-        this.monsterDiplays = [];
-        this.monsterDiplays.push(new CreatureDisplay(this, this.relativeX(325), this.relativeY(70)));
-        this.monsterDiplays.push(new CreatureDisplay(this, this.relativeX(100), this.relativeY(170)));
-        this.monsterDiplays.push(new CreatureDisplay(this, this.relativeX(550), this.relativeY(170)));
+        this.monsterDisplays = [];
+        this.monsterDisplays.push(new CreatureDisplay(this, this.relativeX(325), this.relativeY(70)));
+        this.monsterDisplays.push(new CreatureDisplay(this, this.relativeX(100), this.relativeY(170)));
+        this.monsterDisplays.push(new CreatureDisplay(this, this.relativeX(550), this.relativeY(170)));
 
         this.playerDisplay = new CreatureDisplay(this, this.relativeX(325), this.relativeY(460));
         this.playerDisplay.initWithCreature(this.player.statBlock);
@@ -261,10 +267,10 @@ export class CombatScene extends SceneUIBase {
         this._hideEnemyDisplays();
         var monsters = this.combatManager.monsters;
         for (var i = 0; i < monsters.length; i++) {
-            this.monsterDiplays[i].setVisible(true);
-            this.monsterDiplays[i].initWithCreature(monsters[i]);
+            this.monsterDisplays[i].setVisible(true);
+            this.monsterDisplays[i].initWithCreature(monsters[i]);
             if (isInvasion === true) {
-                this.monsterDiplays[i].setInvader();
+                this.monsterDisplays[i].setInvader();
             }
         }
         this.invasionCounter.setVisible(this.combatManager.activeTile.isInvaded);

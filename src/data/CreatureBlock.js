@@ -4,6 +4,7 @@ import { Statics } from "./Statics";
 import { Common } from "../utils/Common";
 import { MoonlightData } from "./MoonlightData";
 import { WorldData } from "./WorldData";
+import { StarData } from "./StarData";
 
 // stat calculations:
 // attacks always hit, but attack speed is adjusted by hit chance/evasion. Higher hit chance means
@@ -301,8 +302,9 @@ export class CreatureBlock {
         var sLvl = Math.max(0, rLvl);
         // monster stat bonuses
         var flatStat = rLvl * Statics.MONSTER_STAT_PER_LEVEL;
-        var scaleStat = Math.pow(Statics.MONSTER_STATSCALE_PER_LEVEL, sLvl) * Math.pow(Statics.MONSTER_STATSCALE_PER_REGION, tier);
-        var scaleXp = Math.pow(Statics.MONSTER_XPSCALE_PER_REGION, tier)
+        var scaleStat = Math.pow(Statics.MONSTER_STATSCALE_PER_LEVEL, sLvl) * Math.pow(Statics.MONSTER_STATSCALE_PER_REGION, tier) *
+            Math.pow(Statics.MONSTER_STATSCALE_POST_MYRAH, Math.max(0, tier - 10));
+        var scaleXp = Math.pow(Statics.MONSTER_XPSCALE_PER_REGION, tier);
 
         this.stats.strength = (this.stats.strength + flatStat) * scaleBlock.strength * scaleStat;
         this.stats.dexterity = (this.stats.dexterity + flatStat) * scaleBlock.dexterity * scaleStat;
@@ -327,7 +329,8 @@ export class CreatureBlock {
         this.name = level < 1 ? "Weak " + name : name;
         var shade = shadeBase + (MoonlightData.getInstance().moonperks.shadow2.level * 2);
         this.xpReward = shade + (shade / 4) * rLvl;
-        this.xpReward = this.xpReward * (1 + MoonlightData.getInstance().challenges.megamonsters.completions * 0.05) * scaleXp;
+        this.xpReward = this.xpReward * (1 + MoonlightData.getInstance().challenges.megamonsters.completions * 0.05) * scaleXp *
+            (1 + StarData.getInstance().perks.mists.level * 0.25);
         this.dropBase = rewardBase;
         this.icon = icon;
     }
@@ -364,9 +367,11 @@ export class CreatureBlock {
             motes: 0
         };
         var firstStrike = false;
+        var traitLevels = 0;
 
         for (var i = 0; i < this.traits.length; i++) {
             var trait = this.traits[i];
+            traitLevels += trait.level;
             switch (trait.type) {
                 case Statics.TRAIT_DIRE:
                     extraStats.strength += this.Strength() * (0.2 * trait.level);
@@ -422,6 +427,9 @@ export class CreatureBlock {
             }
             extraStats.xpReward += this.xpReward * (1 + MoonlightData.getInstance().challenges.megamonsters.completions * 0.01 * trait.level);
         }
+        var moteChance = StarData.getInstance().perks.solidification.level * traitLevels;
+        extraStats.motes += Math.floor(moteChance / 10);
+        extraStats.motes += Math.random() < (moteChance % 10) / 10 ? 1 : 0;
 
         for (const prop in this.statBonuses) {
             this.statBonuses[prop] += extraStats[prop];
