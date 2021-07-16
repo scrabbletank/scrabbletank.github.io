@@ -131,7 +131,7 @@ export class StarData {
 
     _havePerkRequirements(perk) {
         for (var i = 0; i < perk.requires.length; i++) {
-            if (this.starperks[perk.requires[i]].level === 0) {
+            if (this.perks[perk.requires[i]].level === 0) {
                 return false;
             }
         }
