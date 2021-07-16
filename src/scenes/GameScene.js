@@ -29,6 +29,8 @@ import { WorldTime } from "../data/WorldTime";
 import { FadingNumberLabel } from "../ui/FadingNumberLabel";
 import { StarData } from "../data/StarData";
 import { MyrahScene } from "./MyrahScene";
+import { RitualView } from "./RitualView";
+import { RitualData } from "../data/RitualData";
 
 export class GameScene extends SceneUIBase {
     constructor(position, name) {
@@ -660,6 +662,8 @@ export class GameScene extends SceneUIBase {
     }
 
     rebirth() {
+        this.player.applyRitualBonuses();
+        RitualData.getInstance().rebirth();
         this.player.rebirth();
         var gear = new GearData();
         gear.rebirth();

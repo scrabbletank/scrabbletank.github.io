@@ -5,6 +5,7 @@ import { Common } from "../utils/Common";
 import { MoonlightData } from "./MoonlightData";
 import { WorldData } from "./WorldData";
 import { StarData } from "./StarData";
+import { RitualData } from "./RitualData";
 
 // stat calculations:
 // attacks always hit, but attack speed is adjusted by hit chance/evasion. Higher hit chance means
@@ -305,6 +306,7 @@ export class CreatureBlock {
         var scaleStat = Math.pow(Statics.MONSTER_STATSCALE_PER_LEVEL, sLvl) * Math.pow(Statics.MONSTER_STATSCALE_PER_REGION, tier) *
             Math.pow(Statics.MONSTER_STATSCALE_POST_MYRAH, Math.max(0, tier - 10));
         var scaleXp = Math.pow(Statics.MONSTER_XPSCALE_PER_REGION, tier);
+        scaleStat *= (1 + RitualData.getInstance().activePerks.ruinouspower * 0.25);
 
         this.stats.strength = (this.stats.strength + flatStat) * scaleBlock.strength * scaleStat;
         this.stats.dexterity = (this.stats.dexterity + flatStat) * scaleBlock.dexterity * scaleStat;

@@ -438,33 +438,60 @@ export class TooltipRegistry {
                     "Fastest Time: " + new WorldTime(challenge.fastestTime).getTimespanText();
             case "A Matter of Decades":
                 return "Did you finish all the normal challenges yet? I'm feeling kind, so consider this a warmup.\n\n" +
-                    "Restrictions: Reach the 10th Gate within " + (10 - completions * 2) + " Years.\n\n" +
+                    "Restrictions: Reach the 10th Gate within " + (10 - completions * 2) + " Years.\n" +
                     "              Regions span 25 levels.\n\n" +
                     "On First Completion: Auto Explore will continue to a random region if the current region is complete.\n" +
                     "On Every Completion: Increases Starshard drop chance as if you were 1 region further.\n" +
-                    "                     +10 Challenge Points\n\n" +
+                    "                     +7 Challenge Points\n\n" +
+                    "On Final Completion: 5% of your Challenge Points apply to Moonlight gain.\n" +
                     "It is possible to fail this challenge!\n\n" +
                     "Completions: " + challenge.completions + "/" + challenge.maxCompletions + "\n" +
                     "Fastest Time: " + new WorldTime(challenge.fastestTime).getTimespanText();
             case "Forged Ahead 2: Reforged":
                 return "You didn't actually want to equip gear, did you? In this world Gear costs 1000 times as much.\n\n" +
                     "Restrictions: Gear costs increased x1000.\n" +
-                    "              Can only use up to Tier " + (8 - challenge.completions) + " Gear\n\n" +
+                    "              Can only use up to Tier " + (8 - challenge.completions) + " Gear\n" +
                     "              Reach the 10th Gate.\n\n" +
                     "On First Completion: Forge Upgrades can pass the 10% softcap at a greatly reduced rate.\n" +
                     "On Every Completion: Gear costs are multiplied by x0.95\n" +
-                    "                     +12 Challenge Points\n\n" +
+                    "                     +8 Challenge Points\n\n" +
                     "Completions: " + challenge.completions + "/" + challenge.maxCompletions + "\n" +
                     "Fastest Time: " + new WorldTime(challenge.fastestTime).getTimespanText();
             case "Capitalism":
                 return "The people of this world actually want to be paid for their work, can you imagine that? They won't work " +
                     "without gold, good thing you got those taxes!\n\n" +
                     "Restrictions: production buildings cost " + (250 + challenge.completions * 250) + "g per day.\n" +
-                    "              Tax loopholes mean you earn 50% less tax.\n\n" +
+                    "              Tax loopholes mean you earn 50% less tax.\n" +
                     "              Reach the 10th Gate.\n\n" +
                     "On Every Completion: Gold cost of Town upgrades reduced by 10%\n" +
-                    "                     +250 base gold cap per Town\n\n" +
-                    "                     +15 Challenge Points\n\n" +
+                    "                     +250 base gold cap per Town\n" +
+                    "                     +10 Challenge Points\n\n" +
+                    "Completions: " + challenge.completions + "/" + challenge.maxCompletions + "\n" +
+                    "Fastest Time: " + new WorldTime(challenge.fastestTime).getTimespanText();
+            case "Cult Dimension":
+                var powerNeeded = [1000000000, 5000000000, 25000000000, 100000000000, 250000000000];
+                return "Welcome to the Cult Dimension! The Heretics in this world think they can improve upon traditional " +
+                    "rituals, they just need a small investment of " + Common.numberString(powerNeeded[challenge.completions]) +
+                    " Ritual Power, which they say they can make from your resources!\n\n" +
+                    "Restrictions: 99% of production is converted to Ritual Power. Higher tiers convert at a better rate.\n" +
+                    "              Invasions can happen anywhere. Instead of destroying tiles they consume " +
+                    (challenge.completions + 1) + "% of your Max Ritual Power.\n" +
+                    "              Mystic Gates are replaced with Cult Fortresses. Each Fortress conquered increases " +
+                    "Ritual Power gain by 10%.\n\n" +
+                    "On Every Completion: Sacrifices are 5% cheaper\n" +
+                    "                     +12 Challenge Points\n" +
+                    "On Final Completion: Rituals of Destruction have +3% Moonlight/Star Shard Chance per level.\n\n" +
+                    "Completions: " + challenge.completions + "/" + challenge.maxCompletions + "\n" +
+                    "Fastest Time: " + new WorldTime(challenge.fastestTime).getTimespanText();
+            case "Star Invaders":
+                return "Invasions, everyones favourite feature! I made the invasion timer reaaal small so you can enjoy it to the fullest. " +
+                    "Oh, also invasion monsters have +" + (5 + 5 * completions) + " levels, and if you lose a tile to an invasion it's " +
+                    "difficulty increases by the same amount.\n\n" +
+                    "Restrictions: Reach Gate " + (1 + completions) + ".\n\n" +
+                    "On First Completion: Auto explore auto fights invasions, giving 25% motes.\n" +
+                    "On Every Completion: Invasions take 25% longer to destroy a tile.\n" +
+                    "                     +12 Challenge Points\n\n" +
+                    "On Final Completion: Defending an Invasion increases your Moonlight earned by 1% (heavily diminished returns).\n" +
                     "Completions: " + challenge.completions + "/" + challenge.maxCompletions + "\n" +
                     "Fastest Time: " + new WorldTime(challenge.fastestTime).getTimespanText();
         }
@@ -844,7 +871,7 @@ export class TooltipRegistry {
             case "Ingram's Bell: Bounty":
                 return "Monsters drop " + (perk.level * 50) + "% + (50%) more resources.";
             case "Myrah's Spear: Forge":
-                return "Reduces gear costs by " + Math.floor((1 - Math.pow(0.95, perk.level)) * 100) + "% + (~5%). This ignores the gear cost softcap.";
+                return "Reduces gear costs by " + Math.floor((1 - Math.pow(0.95, perk.level)) * 100) + "% - (~5%). This ignores the gear cost softcap.";
             case "Myrah's Spear: Stellar Enchantments":
                 return "Gear gives " + (perk.level * 10) + "% + (10%) more stats.";
             case "Myrah's Spear: Proficiency":
@@ -875,6 +902,93 @@ export class TooltipRegistry {
                 return "Talents give " + (perk.level * 2) + " + (2) more moonlight, before multipliers.";
             case "Betrayer Star: Mysticism":
                 return "Cost multiplier for sacrificing resources becomes x" + (10 - perk.level / 2) + " - (0.5).";
+        }
+    }
+
+    static getRitualTooltip(ritual) {
+        var statGrowth = (ritual.level * (10 + 10 + (ritual.level - 1) * 5)) / 2;
+        var ml = ritual.level === 0 ? 0 :
+            (ritual.moonlight < 0 ? Math.pow(1 + ritual.moonlight, ritual.level) * 100 : ritual.moonlight * ritual.level * 100);
+        ml = Common.numberString(Math.floor(ml));
+        var ss = ritual.level === 0 ? 0 :
+            (ritual.starshards < 0 ? Math.pow(1 + ritual.starshards, ritual.level) * 100 : ritual.starshards * ritual.level * 100);
+        ss = Common.numberString(Math.floor(ss));
+        switch (ritual.name) {
+            case "Empower Strength":
+                return "Permanently increases your Strength by " + statGrowth + " + (" + (10 + ritual.level * 5) + ").";
+            case "Empower Dexterity":
+                return "Permanently increases your Dexterity by " + statGrowth + " + (" + (10 + ritual.level * 5) + ").";
+            case "Empower Agility":
+                return "Permanently increases your Agility by " + statGrowth + " + (" + (10 + ritual.level * 5) + ").";
+            case "Empower Endurance":
+                return "Permanently increases your Endurance by " + statGrowth + " + (" + (10 + ritual.level * 5) + ").";
+            case "Empower Recovery":
+                return "Permanently increases your Recovery by " + statGrowth + " + (" + (10 + ritual.level * 5) + ").";
+            case "Empower Defense":
+                return "Permanently increases your Defense by " + statGrowth + " + (" + (10 + ritual.level * 5) + ").";
+            case "Empower Accuracy":
+                return "Permanently increases your Accuracy by " + statGrowth + " + (" + (10 + ritual.level * 5) + ").";
+            case "Cult Infiltrators":
+                return "Permanently increases Villager Power by " + (statGrowth / 2) + " + (" + (5 + ritual.level * 2.5) + ").";
+            case "Cult Warders":
+                return "Permanently increases Villager Health by " + (statGrowth * 5) + " + (" + (50 + ritual.level * 25) + ").";
+            case "Corrupted Strength":
+                return "Increases your Strength, Dexterity, and Agility by " + (ritual.level * 20) + "% + (20%), but reduces " +
+                    "Moonlight by " + ml + "% - (~" + (-ritual.moonlight * 100) + "%) and " +
+                    "Star Shard Chance by " + ss + "% - (~" + (-ritual.starshards * 100) + "%).";
+            case "Corrupted Endurance":
+                return "Increases your Endurance, Recovery, and Defense by " + (ritual.level * 20) + "% + (20%), but reduces " +
+                    "Moonlight by " + ml + "% - (~" + (-ritual.moonlight * 100) + "%) and " +
+                    "Star Shard Chance by " + ss + "% - (~" + (-ritual.starshards * 100) + "%).";
+            case "Corrupted Accuracy":
+                return "Increases your Crit Chance by " + (ritual.level * 10) + "% + (10%) and " +
+                    "Accuracy by " + (ritual.level * 25) + "% + (25%), but reduces " +
+                    "Moonlight by " + ml + "% - (~" + (-ritual.moonlight * 100) + "%) and " +
+                    "Star Shard Chance by " + ss + "% - (~" + (-ritual.starshards * 100) + "%).";
+            case "Wild Growth":
+                return "Increases tile yields by " + (ritual.level * 25) + "% + (25%), but reduces " +
+                    "Moonlight by " + ml + "% - (~" + (-ritual.moonlight * 100) + "%) and " +
+                    "Star Shard Chance by " + ss + "% - (~" + (-ritual.starshards * 100) + "%).";
+            case "Hatchlings":
+                return "Town population grows " + (ritual.level * 25) + "% + (25%) faster and " +
+                    "Max Population is increased by " + (ritual.level * 5) + "% + (5%), but reduces " +
+                    "Moonlight by " + ml + "% - (~" + (-ritual.moonlight * 100) + "%) and " +
+                    "Star Shard Chance by " + ss + "% - (~" + (-ritual.starshards * 100) + "%).";
+            case "Vile Offering":
+                return "Increases Resource and Mote of Darkness drops by " + (ritual.level * 20) + "% + (20%), but reduces " +
+                    "Moonlight by " + ml + "% - (~" + (-ritual.moonlight * 100) + "%).";
+            case "Cult Towns":
+                return "Increases Villager Power and Health by " + (ritual.level * 25) + "% + (25%), but reduces " +
+                    "Moonlight by " + ml + "% - (~" + (-ritual.moonlight * 100) + "%).";
+            case "Ruinous Powers":
+                return "Enemy stats are increased by " + (ritual.level * 25) + "% + (25%). Increases " +
+                    "Moonlight by " + ml + "% + (" + (ritual.moonlight * 100) + "%).";
+            case "Betrayer's Gift":
+                return "All enemy trait levels are increased by " + (ritual.level) + " + (1). Increases " +
+                    "Star Shard Chance by " + ss + "% + (" + (ritual.starshards * 100) + "%).";
+            case "Call of The Void":
+                return "Base time between Invasions is reduced by " + (ritual.level) + "s + (1s), " +
+                    "Invaders are " + (ritual.level) + " + (1) level higher. Increases " +
+                    "Moonlight by " + ml + "% + (" + (ritual.moonlight * 100) + "%) and " +
+                    "Star Shard Chance by " + ss + "% + (" + (ritual.starshards * 100) + "%).";
+            case "Desolation":
+                return "Tile Yields and Explore Speed are divided by " + (1 + ritual.level * 0.25) + " + (0.25). Increases " +
+                    "Moonlight by " + ml + "% + (" + (ritual.moonlight * 100) + "%) and " +
+                    "Star Shard Chance by " + ss + "% + (" + (ritual.starshards * 100) + "%).";
+            case "Apathy":
+                return "Town Growth, Taxes, Villager Power, and Villager Health are divided by " + (1 + ritual.level * 0.5) + " + (0.5). Increases " +
+                    "Moonlight by " + ml + "% + (" + (ritual.moonlight * 100) + "%).";
+            case "Vengeance":
+                return "Regions span " + (ritual.level) + " + (1) more level. Increases " +
+                    "Star Shard Chance by " + ss + "% + (" + (ritual.starshards * 100) + "%).";
+            case "Ritual of the Star Queen":
+                return "Give an offering of moonlight to the Star Queen. Reduces " +
+                    "Moonlight by " + ml + "% - (~" + (-ritual.moonlight * 100) + "%) and increases " +
+                    "Star Shard Chance by " + ss + "% + (" + (ritual.starshards * 100) + "%).";
+            case "Ritual of the Betrayer Star":
+                return "Give an offering of star shards to the Betrayer Star. Increases " +
+                    "Moonlight by " + ml + "% + (" + (-ritual.moonlight * 100) + "%) and reduces " +
+                    "Star Shard Chance by " + ss + "% - (~" + (ritual.starshards * 100) + "%).";
         }
     }
 }

@@ -24,6 +24,7 @@ import { WorldData } from './WorldData';
 import { ProgressionStore } from './ProgressionStore';
 import { RuneRegistry } from './RuneRegistry';
 import { StarData } from './StarData';
+import { RitualData } from './RitualData';
 
 export class TileData {
 
@@ -169,7 +170,8 @@ export class TileData {
     generateMonsters() {
         var enemyList = [];
         if (this.isInvaded === true) {
-            var bonusDif = DynamicSettings.getInstance().invasionLevelBonus;
+            var bonusDif = DynamicSettings.getInstance().invasionLevelBonus +
+                RitualData.getInstance().activePerks.callofthevoid;
             var bossDif = this.difficulty + this.getInvasionMulti();
             enemyList.push(CreatureRegistry.GetCreatureByName(this.enemies[Common.randint(0, this.enemies.length)],
                 bossDif + bonusDif, this.parent.regionLevel));
@@ -232,6 +234,7 @@ export class Region {
         this.dungeonLocations = [];
         this.autoUpgrade = false;
         this.blueprint = -1;
+        this.starshardsPerTile = 1;
 
         if (ignoreGen === true) {
             return true;
@@ -303,7 +306,8 @@ export class Region {
             dl: this.dungeonLocations,
             au: this.autoUpgrade,
             bp: this.blueprint,
-            rt: this.resourceTier
+            rt: this.resourceTier,
+            sst: this.starshardsPerTile
         }
 
         return saveObj;
@@ -328,6 +332,7 @@ export class Region {
         region.autoUpgrade = saveObj.au === undefined ? false : saveObj.au;
         region.blueprint = saveObj.bp === undefined ? -1 : saveObj.bp;
         region.resourceTier = saveObj.rt === undefined ? Math.min(7, region.regionLevel) : saveObj.rt;
+        region.starshardsPerTile = saveObj.sst === undefined ? 1 : saveObj.sst;
         region.map = []
         for (var i = 0; i < saveObj.map.length; i++) {
             var row = [];
@@ -354,6 +359,8 @@ export class Region {
         // we use the tile yields as a mask to determine which yields we should add for a given tile
         var yieldMask = RegionRegistry.TILE_TYPES[this.map[py][px].regName].yields;
         var yields = [0, 0, 0, 0, 0, 0];
+        var ritMulti = (1 + RitualData.getInstance().activePerks.wildgrowth * 0.25) /
+            (1 + RitualData.getInstance().activePerks.desolation * 0.25);
         for (var y = Math.max(0, py - 1); y < Math.min(this.height, py + 2); y++) {
             for (var x = Math.max(0, px - 1); x < Math.min(this.width, px + 2); x++) {
                 for (var i = 0; i < yields.length; i++) {
@@ -364,12 +371,12 @@ export class Region {
                 }
             }
         }
-        yields[0] = yields[0] * (1 + MoonlightData.getInstance().moonperks.wood.level * 0.05);
-        yields[1] = yields[1] * (1 + MoonlightData.getInstance().moonperks.leather.level * 0.05);
-        yields[2] = yields[2] * (1 + MoonlightData.getInstance().moonperks.metal.level * 0.05);
-        yields[3] = yields[3] * (1 + MoonlightData.getInstance().moonperks.fiber.level * 0.05);
-        yields[4] = yields[4] * (1 + MoonlightData.getInstance().moonperks.stone.level * 0.05);
-        yields[5] = yields[5] * (1 + MoonlightData.getInstance().moonperks.crystal.level * 0.05);
+        yields[0] = yields[0] * (1 + MoonlightData.getInstance().moonperks.wood.level * 0.05) * ritMulti;
+        yields[1] = yields[1] * (1 + MoonlightData.getInstance().moonperks.leather.level * 0.05) * ritMulti;
+        yields[2] = yields[2] * (1 + MoonlightData.getInstance().moonperks.metal.level * 0.05) * ritMulti;
+        yields[3] = yields[3] * (1 + MoonlightData.getInstance().moonperks.fiber.level * 0.05) * ritMulti;
+        yields[4] = yields[4] * (1 + MoonlightData.getInstance().moonperks.stone.level * 0.05) * ritMulti;
+        yields[5] = yields[5] * (1 + MoonlightData.getInstance().moonperks.crystal.level * 0.05) * ritMulti;
         return yields;
     }
 
@@ -415,8 +422,10 @@ export class Region {
     }
 
     generateTerrain(pointList) {
-        var minDiff = this.regionLevel * DynamicSettings.getInstance().regionDifficultyIncrease;
-        var maxDiff = minDiff + DynamicSettings.getInstance().regionDifficultyIncrease;
+        var minDiff = this.regionLevel * (DynamicSettings.getInstance().regionDifficultyIncrease +
+            RitualData.getInstance().activePerks.vengeance);
+        var maxDiff = minDiff + (DynamicSettings.getInstance().regionDifficultyIncrease +
+            RitualData.getInstance().activePerks.vengeance);
         // spawn point is always within 2 tiles of town (ignoring north points)
         var townPoint = [Math.floor(this.width / 2), this.height - 3]
         var spawnPoint = [townPoint[0] + Math.floor(Math.random() * 2)]
@@ -562,6 +571,11 @@ export class Region {
         // add shard locations
         if (ProgressionStore.getInstance().persistentUnlocks.starshards === true) {
             var chance = Statics.BASE_STARSHARD_CHANCE * (1 + this.regionLevel * Statics.STARSHARD_REGION_MULTI);
+            this.starshardsPerTile = 1;
+            while (chance > 0.1) {
+                chance = chance / 2;
+                this.starshardsPerTile = this.starshardsPerTile * 2;
+            }
             for (var y = 0; y < this.height; y++) {
                 for (var x = 0; x < this.width; x++) {
                     if (Math.random() < chance) {
@@ -646,7 +660,7 @@ export class Region {
             }
             if (this.map[y][x].hasShard === true) {
                 this.map[y][x].hasShard = false;
-                WorldData.getInstance().starshardsEarned += 1;
+                WorldData.getInstance().starshardsEarned += this.starshardsPerTile;
             }
             if (this.map[y][x].name === "Ancient Crypt" && ProgressionStore.getInstance().persistentUnlocks.dungeons === false) {
                 ProgressionStore.getInstance().persistentUnlocks.dungeons = true;
@@ -695,7 +709,9 @@ export class Region {
     }
 
     _addSighting() {
-        var a = Math.min(DynamicSettings.getInstance().invasionTimer * (1 + this.sightings.length * Statics.SIGHTING_MULTI_PER_SIGHTING),
+        var baseTimer = Math.max(DynamicSettings.getInstance().invasionTimer -
+            RitualData.getInstance().activePerks.callofthevoid, 5);
+        var a = Math.min(baseTimer * (1 + this.sightings.length * Statics.SIGHTING_MULTI_PER_SIGHTING),
             Statics.MAX_SIGHTING_SECONDS);
         var b = Math.min(a * 2, Statics.MAX_SIGHTING_SECONDS);
         this.sightingsDelay = Common.randint(a, b) * 1000;

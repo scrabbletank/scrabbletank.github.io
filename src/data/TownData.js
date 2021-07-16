@@ -7,6 +7,7 @@ import { ProgressionStore } from "./ProgressionStore";
 import { Dungeon } from "./Dungeon";
 import { RuneRegistry } from "./RuneRegistry";
 import { StarData } from "./StarData";
+import { RitualData } from "./RitualData";
 
 export class TownData {
     static getTechGoldCost(tech, tier) {
@@ -157,7 +158,8 @@ export class TownData {
     getTownIncome() {
         var player = new PlayerData();
         return (Math.floor(this.currentPopulation) * this.baseIncome + this.buildingIncome) *
-            this.economyMulti * (1 + player.getTalentLevel("governance") * 0.04);
+            this.economyMulti * (1 + player.getTalentLevel("governance") * 0.04) /
+            (1 + RitualData.getInstance().activePerks.apathy * 0.5);
     }
     getGoldCap() {
         var player = new PlayerData();
@@ -177,16 +179,20 @@ export class TownData {
             return multi;
         }
     }
-    getMaxPopulation() { return this.maxPopulation; }
+    getMaxPopulation() { return this.maxPopulation * (1 + RitualData.getInstance().activePerks.hatchlings * 0.05); }
     getMarketLevel() { return this.upgrades.market.level; }
     getTavernLevel() { return this.upgrades.tavern.level; }
     getVillagerPower() {
         return Math.round(this.villagerPower * this.villagerPowerMulti *
-            (1 + MoonlightData.getInstance().moonperks.devotion.level * 0.25));
+            (1 + MoonlightData.getInstance().moonperks.devotion.level * 0.25) *
+            (1 + RitualData.getInstance().activePerks.culttowns * 0.25) /
+            (1 + RitualData.getInstance().activePerks.apathy * 0.5));
     }
     getVillagerHealth() {
         return Math.round(this.villagerHealth * this.villagerHealthMulti *
-            (1 + MoonlightData.getInstance().moonperks.devotion.level * 0.25));
+            (1 + MoonlightData.getInstance().moonperks.devotion.level * 0.25) *
+            (1 + RitualData.getInstance().activePerks.culttowns * 0.25) /
+            (1 + RitualData.getInstance().activePerks.apathy * 0.5));
     }
     getArmySize() { return Math.ceil(this.currentPopulation * 0.1); }
 
@@ -370,11 +376,13 @@ export class TownData {
 
     endOfWeek() {
         if (this.townExplored === true) {
-            if (this.currentPopulation > this.maxPopulation) {
+            if (this.currentPopulation > this.getMaxPopulation()) {
                 this.currentPopulation = Math.max(this.getMaxPopulation(), this.currentPopulation * 0.9);
             } else {
-                this.currentPopulation = Math.min(this.getMaxPopulation(), this.currentPopulation * (Statics.POPULATION_GROWTH +
-                    StarData.getInstance().perks.fertility.level * 0.01));
+                var growthRate = (Statics.POPULATION_GROWTH + StarData.getInstance().perks.fertility.level * 0.01) *
+                    (1 + RitualData.getInstance().activePerks.hatchlings * 0.25) /
+                    (1 + RitualData.getInstance().activePerks.apathy * 0.5);
+                this.currentPopulation = Math.min(this.getMaxPopulation(), this.currentPopulation * growthRate);
             }
             PlayerData.getInstance().addGold(this.getTownIncome());
             PlayerData.getInstance().addShade(this.currentPopulation * 0.1 *

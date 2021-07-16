@@ -9,6 +9,7 @@ import { ProgressionStore } from "./ProgressionStore";
 import { TooltipRegistry } from "./TooltipRegistry";
 import { Blueprint } from "./Blueprint";
 import { StarData } from "./StarData";
+import { RitualData } from "./RitualData";
 
 
 
@@ -185,6 +186,15 @@ export class PlayerData {
             this.craftingCosts[i] = this.craftingCosts[i] * Math.pow(0.925,
                 MoonlightData.getInstance().challenges.forge.completions);
         }
+        this.baseStats = {
+            strength: 5,
+            dexterity: 5,
+            agility: 5,
+            endurance: 5,
+            recovery: 5,
+            defense: 5,
+            accuracy: 5
+        }
         this.starperkCostReduction = Math.pow(0.95, StarData.getInstance().perks.forge.level);
         this.resourceTierReached = DynamicSettings.getInstance().minResourceTier;
         this.gold = 0;
@@ -326,6 +336,22 @@ export class PlayerData {
         block.rebirth();
         block.copyHandlers(this.statBlock);
         this.statBlock = block;
+    }
+
+    applyRitualBonuses() {
+        var statHelper = (ritual) => { return (ritual.level * (10 + 10 + (ritual.level - 1) * 5)) / 2; };
+        // permanent stats
+        const rituals = RitualData.getInstance().rituals;
+        this.baseStats.strength += statHelper(rituals.permstr);
+        this.baseStats.dexterity += statHelper(rituals.permdex);
+        this.baseStats.agility += statHelper(rituals.permagi);
+        this.baseStats.endurance += statHelper(rituals.permend);
+        this.baseStats.recovery += statHelper(rituals.permrec);
+        this.baseStats.defense += statHelper(rituals.permdef);
+        this.baseStats.accuracy += statHelper(rituals.permacc);
+
+        this.baseVillagerPower += statHelper(rituals.permvp) / 2;
+        this.baseVillagerHealth += statHelper(rituals.permvh) * 5;
     }
 
     increaseStat(stat, val) {
@@ -549,7 +575,8 @@ export class PlayerData {
             (1 + this.runeBonuses.exploreSpeed) *
             (1 + Statics.AGI_EXPLORE_MULTI * Math.pow(this.statBlock.Agility(), Statics.AGI_EXPLORE_POWER + this.runeBonuses.agilityScaling)) *
             (1 + MoonlightData.getInstance().moonperks.farstrider.level * 0.1) *
-            this.challengeExploreMulti;
+            this.challengeExploreMulti /
+            (1 + RitualData.getInstance().activePerks.desolation * 0.25);
     }
 
     getStatCost(buyAmount) {

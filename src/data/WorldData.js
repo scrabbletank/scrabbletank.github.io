@@ -7,6 +7,7 @@ import { MoonlightData } from "./MoonlightData";
 import { ProgressionStore } from "./ProgressionStore";
 import { Statics } from "./Statics";
 import { StarData } from "./StarData";
+import { RitualData } from "./RitualData";
 
 export class WorldData {
     constructor() {
@@ -120,6 +121,9 @@ export class WorldData {
             }
         }
         traits = traits.sort((a, b) => { return b.level - a.level });
+        for (var i = 0; i < traits.length; i++) {
+            traits[i].level += RitualData.getInstance().activePerks.betrayersgift;
+        }
         return traits;
     }
 

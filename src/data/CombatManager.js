@@ -253,6 +253,11 @@ export class CombatManager {
             }
         }
 
+        rewards.motes *= (1 + RitualData.getInstance().activePerks.offerings * 0.2);
+        for (var i = 0; i < rewards.resource.length; i++) {
+            rewards.resource[i] *= (1 + RitualData.getInstance().activePerks.offerings * 0.2);
+        }
+
         if (this.rewardCallback !== undefined) {
             this.rewardCallback(rewards);
         }
