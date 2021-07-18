@@ -3,6 +3,7 @@ import { ProgressionStore } from "../data/ProgressionStore";
 import { PlayerData } from "../data/PlayerData";
 import { ImageButton } from "./ImageButton";
 import { TooltipRegistry } from "../data/TooltipRegistry";
+import { DynamicSettings } from "../data/DynamicSettings";
 
 export class GearCraftDisplay {
     constructor(sceneContext, x, y, gear) {
@@ -45,7 +46,7 @@ export class GearCraftDisplay {
         this.statLabels = []
         var txt = "";
         var bonus = gear.getStatBonuses();
-        const resourceTier = Math.max(0, gear.tier - 1);
+        const resourceTier = Math.max(DynamicSettings.getInstance().minResourceTier, gear.tier - 1);
         for (const prop in bonus) {
             if (bonus[prop] !== 0) {
                 txt += TooltipRegistry.getBonusText(prop, bonus[prop]) + "\n";

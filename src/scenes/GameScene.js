@@ -660,6 +660,7 @@ export class GameScene extends SceneUIBase {
     }
 
     rebirth() {
+        DynamicSettings.getInstance().reset();
         this.player.rebirth();
         var gear = new GearData();
         gear.rebirth();
