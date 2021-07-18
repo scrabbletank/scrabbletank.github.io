@@ -37,12 +37,13 @@ export class TownData {
             Statics.FRIENDSHIP_FLAT) * Statics.FRIENDSHIP_FLAT;
     }
 
-    constructor(tier) {
+    constructor(tier, resourceTier) {
         var moonData = new MoonlightData();
 
         this.currentPopulation = 50;
         this.maxPopulation = 100;
         this.tier = tier;
+        this.resourceTier = resourceTier;
         this.economyMulti = 1;
         this.bountyMulti = 1;
         this.productionMulti = 1;
@@ -128,7 +129,7 @@ export class TownData {
 
         switch (tech.name) {
             case "Forge":
-                PlayerData.getInstance().reduceCraftingCosts(this.tier, Statics.FORGE_REDUCTION);
+                PlayerData.getInstance().reduceCraftingCosts(this.resourceTier, Statics.FORGE_REDUCTION);
                 break;
             case "Guilds":
                 this.productionMulti += 0.1;
@@ -420,6 +421,7 @@ export class TownData {
             cp: this.currentPopulation,
             mp: this.maxPopulation,
             t: this.tier,
+            rt: this.resourceTier,
             em: this.economyMulti,
             bm: this.bountyMulti,
             pm: this.productionMulti,
@@ -469,6 +471,7 @@ export class TownData {
         this.dungeonProdMulti = saveObj.dpm ? saveObj.dpm : 1;
         this.dungeonEconMulti = saveObj.dem ? saveObj.dem : 1;
         this.paidProdMulti = saveObj.ppm ? saveObj.ppm : 1;
+        this.resourceTier = saveObj.rt ? saveObj.rt : this.tier - 1;
         this.friendshipToNext = TownData.calcFriendshipToLevel(this.friendshipLevel);
         for (var i = 0; i < saveObj.bld.length; i++) {
             if (this.buildings[saveObj.bld[i][0]] !== undefined) {

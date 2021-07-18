@@ -668,6 +668,7 @@ export class GameScene extends SceneUIBase {
     }
 
     rebirth() {
+        DynamicSettings.getInstance().reset();
         this.player.applyRitualBonuses();
         RitualData.getInstance().rebirth();
         this.player.rebirth();

@@ -244,7 +244,7 @@ export class Region {
         this.height = height;
         this.regionLevel = regionLevel;
         this.resourceTier = Math.min(7, this.regionLevel + DynamicSettings.getInstance().minResourceTier);
-        this.townData = new TownData(regionLevel + 1);
+        this.townData = new TownData(regionLevel + 1, this.resourceTier);
         this.tilesExplored = 0;
         this.sightings = [];
         this.sightingsDelay = 0;
@@ -319,7 +319,7 @@ export class Region {
         region.width = saveObj.w;
         region.height = saveObj.h;
         region.regionLevel = saveObj.rl;
-        region.townData = new TownData(1);
+        region.townData = new TownData(1, 0);
         region.townData.load(saveObj.td);
         region.tilesExplored = saveObj.te;
         region.sightings = saveObj.sight;
