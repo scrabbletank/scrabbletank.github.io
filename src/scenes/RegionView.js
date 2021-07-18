@@ -1,4 +1,5 @@
 import { BuildingRegistry } from "../data/BuildingRegistry";
+import { DynamicSettings } from "../data/DynamicSettings";
 import { MoonlightData } from "../data/MoonlightData";
 import { PlayerData } from "../data/PlayerData";
 import { ProgressionStore } from "../data/ProgressionStore";
@@ -419,6 +420,15 @@ export class RegionView {
                     }
                 }
                 this._exploreTile(activeRegion.map[pos[1]][pos[0]], true);
+            } else if (ProgressionStore.getInstance().persistentUnlocks.autoExplore2 === true &&
+                DynamicSettings.getInstance().autoExploreRegions === true &&
+                WorldData.getInstance().nextRegions.length > 0) {
+                WorldData.getInstance().addRegion(0);
+                WorldData.getInstance().setCurrentRegion(WorldData.getInstance().regionList.length - 1);
+                this.scene.scene.get("DarkWorld").changeRegion();
+                this.scene.scene.get("RegionScene").changeRegion();
+                this.scene.scene.get("TownScene").changeRegion();
+                this.triggerAutoExplore(tile, WorldData.getInstance().regionList.length - 1);
             }
         }
     }

@@ -1482,8 +1482,8 @@ export class GearData {
 
         var stat = {
             health: 0, damageMin: 166, damageMax: 333, strength: 40,
-            dexterity: 0, agility: -10, endurance: 15, recovery: 0,
-            defense: 0, accuracy: 0, hit: -470, evasion: 0,
+            dexterity: 0, agility: -9, endurance: 15, recovery: 0,
+            defense: 0, accuracy: 0, hit: -430, evasion: 0,
             critPower: 0, critResistance: 0, critChance: 0.24, healthRegen: 0, armor: 0
         };
         var cost = [90, 0, 100, 25, 0, 0];
@@ -1501,9 +1501,9 @@ export class GearData {
         this.gear.push(new Gear("9 Lives Stealer", 8, Statics.GEAR_WEAPON, stat, cost, costlvl));
 
         var stat = {
-            health: 0, damageMin: 157, damageMax: 205, strength: 17,
+            health: 0, damageMin: 152, damageMax: 201, strength: 16,
             dexterity: 0, agility: 0, endurance: 0, recovery: 0,
-            defense: 0, accuracy: 0, hit: 620, evasion: 0,
+            defense: 0, accuracy: 0, hit: 590, evasion: 0,
             critPower: 210, critResistance: 0, critChance: 0.3, healthRegen: 0, armor: 0
         };
         var cost = [55, 0, 70, 90, 0, 0];
@@ -1571,9 +1571,9 @@ export class GearData {
         this.gear.push(new Gear("Winds of Battle", 8, Statics.GEAR_TRINKET, stat, cost, costlvl));
 
         var stat = {
-            health: 0, damageMin: 0, damageMax: 0, strength: 17,
-            dexterity: 17, agility: 17, endurance: 17, recovery: 17,
-            defense: 17, accuracy: 17, hit: 0, evasion: 0,
+            health: 0, damageMin: 0, damageMax: 0, strength: 13,
+            dexterity: 13, agility: 13, endurance: 13, recovery: 13,
+            defense: 13, accuracy: 13, hit: 0, evasion: 0,
             critPower: 0, critResistance: 0, critChance: 0, healthRegen: 0, armor: 0
         };
         var cost = [60, 60, 60, 0, 0, 35];

@@ -152,9 +152,10 @@ var Statics = {
 
     //UPGRADES
     FORGE_REDUCTION: 0.95,
+    FORGE_DIMINISHING_POWER: 0.2,
 
     //REBIRTH
-    MOONLIGHT_REGION_POWER: 1.5,
+    MOONLIGHT_REGION_POWER: 1.6,
 
     //TIME
     MONTH_NAMES: ["Primas", "Twin", "Threed", "Tera", "Pentas", "Hexat", "Septus", "Octor", "Novum", "Deccan", "Hendeka", "Dodecan", "Zenith"],

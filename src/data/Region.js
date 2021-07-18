@@ -32,7 +32,7 @@ export class TileData {
         //variables to save
         this.regName = "plains";
         this.explored = false;
-        this.revealed = false;
+        this.revealed = true;
         this.difficulty = 0;
         this.amountExplored = 0;
         this.isInvaded = false;
@@ -504,7 +504,19 @@ export class Region {
             ProgressionStore.getInstance().persistentUnlocks.dungeons === false && this.regionLevel === 4) {
             // place the crypt on a random tile 5 rows from the top
             var x = Common.randint(0, this.width);
-            this.map[this.height - 5][x].init("crypt", maxDiff, minDiff, this);
+            this.map[6][x].init("crypt", maxDiff, minDiff, this);
+        }
+
+        // For unlocking Rituals, place a cultist fortress in region 12
+        if (DynamicSettings.getInstance().challengeName === "" &&
+            ProgressionStore.getInstance().persistentUnlocks.rituals === false && this.regionLevel === 0) {
+            // the cultist lair is ontop of mount doom, a 5 tile area shaped like a '+'
+            var x = Common.randint(1, this.width - 1);
+            this.map[3][x].init("doomhill", maxDiff - 2, minDiff, this);
+            this.map[5][x].init("doomhill", maxDiff - 2, minDiff, this);
+            this.map[4][x - 1].init("doomhill", maxDiff - 2, minDiff, this);
+            this.map[4][x + 1].init("doomhill", maxDiff - 2, minDiff, this);
+            this.map[4][x].init("mtdoom", maxDiff, minDiff, this);
         }
 
         //if runes appear on the map, add spawn locations here
@@ -570,7 +582,9 @@ export class Region {
 
         // add shard locations
         if (ProgressionStore.getInstance().persistentUnlocks.starshards === true) {
-            var chance = Statics.BASE_STARSHARD_CHANCE * (1 + this.regionLevel * Statics.STARSHARD_REGION_MULTI);
+            var starLevel = this.regionLevel + MoonlightData.getInstance().challenges.time2.completions;
+            var chance = Statics.BASE_STARSHARD_CHANCE * (1 + starLevel * Statics.STARSHARD_REGION_MULTI) *
+                RitualData.getInstance().starshardBonus;
             this.starshardsPerTile = 1;
             while (chance > 0.1) {
                 chance = chance / 2;
@@ -676,6 +690,13 @@ export class Region {
                     "You're pretty sure the villagers can handle it, and if not it only takes a week for them to breed a fully adult " +
                     "villager. What's with that anyway?\n" +
                     "VILLAGER DUNEGONS UNLOCKED! On your next rebirth you'll find dungeons to throw your villagers in.");
+            }
+            if (this.map[y][x].name === "Cultist Foothills") {
+                ProgressionStore.getInstance().registerLore("cultists1");
+            }
+            if (this.map[y][x].name === "Doom Mountain" && ProgressionStore.getInstance().persistentUnlocks.rituals === false) {
+                ProgressionStore.getInstance().persistentUnlocks.rituals = true;
+                ProgressionStore.getInstance().registerLore("cultists2");
             }
         }
         if (this.regionLevel > 0 && this.regionLevel <= 8 && WorldData.getInstance().getRegion(this.regionLevel - 1).townData.alchemyEnabled === false) {
@@ -1224,6 +1245,10 @@ export class Region {
             }
         }
         return pos;
+    }
+
+    getProdBuildingCount() {
+        return this.productionBuildings.length;
     }
 
     nextWeakestTile(autoInvasion) {

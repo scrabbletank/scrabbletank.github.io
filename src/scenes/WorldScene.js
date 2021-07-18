@@ -1,3 +1,4 @@
+import { ProgressionStore } from "../data/ProgressionStore";
 import { TextButton } from "../ui/TextButton";
 import { RitualView } from "./RitualView";
 import { SceneUIBase } from "./SceneUIBase";
@@ -9,15 +10,28 @@ export class WorldScene extends SceneUIBase {
 
         this.worldView = new WorldView(this, this.relativeX(0), this.relativeY(0));
         this.ritualView = new RitualView(this, this.relativeX(0), this.relativeY(0));
+        this.activeView = 0;
+    }
+
+    refreshButtons() {
+        var vis = ProgressionStore.getInstance().persistentUnlocks.rituals;
+        this.worldBtn.setVisible(vis);
+        this.ritualBtn.setVisible(vis);
     }
 
     refresh() {
-        this._refreshRegions();
+        if (activeView === 0) {
+            this.worldView._refreshRegions();
+        }
     }
 
     rebirth() {
-        this._refreshRegions();
-        this._onInvasionPowerChanged();
+        this.ritualView._refreshRituals();
+        this.ritualView._refreshSacrificeLabels();
+        this.ritualView._refreshBonuses();
+        this.refreshButtons();
+        this._changeView(0);
+        this.worldView._onInvasionPowerChanged();
     }
 
     create() {
@@ -29,10 +43,13 @@ export class WorldScene extends SceneUIBase {
             .onClickHandler(() => { this._changeView(0); });
         this.ritualBtn = new TextButton(this, this.relativeX(130), this.relativeY(10), 100, 20, "Rituals")
             .onClickHandler(() => { this._changeView(1); });
+
+        this.refreshButtons();
     }
 
     _changeView(id) {
         if (id === 0) {
+            this.worldView._refreshRegions();
             this.worldView.setVisible(true);
             this.ritualView.setVisible(false);
         } else {

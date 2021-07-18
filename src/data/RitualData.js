@@ -150,7 +150,7 @@ export class RitualData {
 
     increaseSacCost(idx) {
         this.ritualPoints += 1;
-        var multi = 9 - 0.5 * StarData.getInstance().perks.mysticism.level;
+        var multi = 10 - 0.5 * StarData.getInstance().perks.mysticism.level;
         this.ritualCosts[idx] = this.ritualCosts[idx] * multi;
     }
 

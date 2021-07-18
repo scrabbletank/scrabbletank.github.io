@@ -238,6 +238,12 @@ export class MoonlightData {
                 return this.challenges.megamonsters;
             case "Outcast":
                 return this.challenges.outcast;
+            case "A Matter of Decades":
+                return this.challenges.time2;
+            case "Forged Ahead 2: Reforged":
+                return this.challenges.forge2;
+            case "Capitalism":
+                return this.challenges.capitalism;
         }
     }
 

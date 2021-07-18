@@ -375,8 +375,10 @@ export class TooltipRegistry {
                     "Oh, also invasion monsters have +" + (5 + 5 * completions) + " levels, and if you lose a tile to an invasion it's " +
                     "difficulty increases by the same amount.\n\n" +
                     "Restrictions: Reach Gate " + (1 + completions) + ".\n\n" +
-                    "On First Completion: Auto explore auto fights invasions, giving 25% motes.\n" +
-                    "On Every Completion: Invasions take 25% longer to destroy a tile.\n" +
+                    "On First Completion: Auto explore auto fights invasions,\n" +
+                    "                     giving 25% motes.\n" +
+                    "On Every Completion: Invasions take 25% longer to destroy\n" +
+                    "                     a tile.\n" +
                     "                     +3 Challenge Points\n\n" +
                     "On Final Completion: Auto explore gives 100% motes.\n" +
                     "Completions: " + challenge.completions + "/" + challenge.maxCompletions + "\n" +
@@ -405,7 +407,8 @@ export class TooltipRegistry {
                     " traits. That's how many.\n\n" +
                     "Restrictions: Monsters start with " + (4 + completions * 2) + " traits.\n" +
                     "              Reach Gate " + (5 + completions) + ".\n\n" +
-                    "On Every Completion: Monsters give 5% more shade, plus 1% per trait.\n" +
+                    "On Every Completion: Monsters give 5% more shade, plus 1%\n" +
+                    "                     per trait.\n" +
                     "                     +5 Challenge Points\n\n" +
                     "Completions: " + challenge.completions + "/" + challenge.maxCompletions + "\n" +
                     "Fastest Time: " + new WorldTime(challenge.fastestTime).getTimespanText();
@@ -417,7 +420,8 @@ export class TooltipRegistry {
                     "              Reach Gate " + (4 + completions) + ".\n\n" +
                     "On First Completion: Unlocks Auto Upgrade.\n" +
                     "On Every Completion: Gain 10% more friendship.\n" +
-                    "                     Friendship tiers scale slightly slower.\n" +
+                    "                     Friendship tiers scale slightly\n" +
+                    "                     slower.\n" +
                     "                     +5 Challenge Points\n\n" +
                     "Completions: " + challenge.completions + "/" + challenge.maxCompletions + "\n" +
                     "Fastest Time: " + new WorldTime(challenge.fastestTime).getTimespanText();
@@ -440,8 +444,11 @@ export class TooltipRegistry {
                 return "Did you finish all the normal challenges yet? I'm feeling kind, so consider this a warmup.\n\n" +
                     "Restrictions: Reach the 10th Gate within " + (10 - completions * 2) + " Years.\n" +
                     "              Regions span 25 levels.\n\n" +
-                    "On First Completion: Auto Explore will continue to a random region if the current region is complete.\n" +
-                    "On Every Completion: Increases Starshard drop chance as if you were 1 region further.\n" +
+                    "On First Completion: Auto Explore will continue to a\n" +
+                    "                     random region if the current region\n" +
+                    "                     is complete.\n" +
+                    "On Every Completion: Increases Star Shard Chance as if\n" +
+                    "                     you were 1 region further.\n" +
                     "                     +7 Challenge Points\n\n" +
                     "On Final Completion: 5% of your Challenge Points apply to Moonlight gain.\n" +
                     "It is possible to fail this challenge!\n\n" +
@@ -451,8 +458,10 @@ export class TooltipRegistry {
                 return "You didn't actually want to equip gear, did you? In this world Gear costs 1000 times as much.\n\n" +
                     "Restrictions: Gear costs increased x1000.\n" +
                     "              Can only use up to Tier " + (8 - challenge.completions) + " Gear\n" +
+                    "              Regions span 25 levels.\n" +
                     "              Reach the 10th Gate.\n\n" +
-                    "On First Completion: Forge Upgrades can pass the 10% softcap at a greatly reduced rate.\n" +
+                    "On First Completion: Forge Upgrades can pass the 10%\n" +
+                    "                     softcap at a greatly reduced rate.\n" +
                     "On Every Completion: Gear costs are multiplied by x0.95\n" +
                     "                     +8 Challenge Points\n\n" +
                     "Completions: " + challenge.completions + "/" + challenge.maxCompletions + "\n" +
@@ -462,8 +471,10 @@ export class TooltipRegistry {
                     "without gold, good thing you got those taxes!\n\n" +
                     "Restrictions: production buildings cost " + (250 + challenge.completions * 250) + "g per day.\n" +
                     "              Tax loopholes mean you earn 50% less tax.\n" +
+                    "              Regions span 25 levels.\n" +
                     "              Reach the 10th Gate.\n\n" +
-                    "On Every Completion: Gold cost of Town upgrades reduced by 10%\n" +
+                    "On Every Completion: Gold cost of Town upgrades reduced\n" +
+                    "                     by 10%.\n" +
                     "                     +250 base gold cap per Town\n" +
                     "                     +10 Challenge Points\n\n" +
                     "Completions: " + challenge.completions + "/" + challenge.maxCompletions + "\n" +

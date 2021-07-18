@@ -106,8 +106,7 @@ export class WorldView {
             }
         }
 
-        this.elements = [];
-        this.elements.concat(this.regionIcons, this.regionPaths);
+        this.elements = this.elements.concat(this.regionIcons, this.regionPaths);
         this.elements.push(this.backRect, this.invasionPowerLabel, this.invasionRewardLabel);
     }
 

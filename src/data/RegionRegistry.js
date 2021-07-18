@@ -191,6 +191,24 @@ var RegionRegistry = {
             yields: [0, 0, 0, 0, 0, 0],
             preferredBuilding: "metal",
             buildable: false
+        },
+        mtdoom: {
+            name: "Doom Mountain",
+            enemies: ["cultist"],
+            clr: [133, 105, 255],
+            explorationNeeded: 50000,
+            yields: [0, 0, 2, 0, 0, 2],
+            preferredBuilding: "metal",
+            buildable: true
+        },
+        doomhill: {
+            name: "Cultist Foothills",
+            enemies: ["cultist", "slime", "goblin", "formation"],
+            clr: [80, 60, 150],
+            explorationNeeded: 40000,
+            yields: [0, 0, 2, 0, 2, 0],
+            preferredBuilding: "metal",
+            buildable: true
         }
     },
     REGION_TYPES: {

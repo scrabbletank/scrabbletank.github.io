@@ -160,6 +160,9 @@ export class WorldData {
     }
 
     addRegion(index) {
+        if (this.nextRegions.length === 0) {
+            return;
+        }
         var regSize = DynamicSettings.getInstance().regionSize;
         this.regionList.push(new Region(regSize[0], regSize[1], this.regionList.length, this.nextRegions[index].type, this.nextRegions[index].traits));
         this.regionList[this.regionList.length - 1].worldHeight = Math.floor((index + 1) * (700 / (this.nextRegions.length + 1)));
@@ -184,6 +187,9 @@ export class WorldData {
         }
         if (this.getCurrentRegion().regionLevel >= 6) {
             MoonlightData.getInstance().challenges.outcast.unlocked = true;
+        }
+        if (this.getCurrentRegion().regionLevel >= 9) {
+            MoonlightData.getInstance().challenges.time2.unlocked = true;
         }
 
         //handle challenge completion here
@@ -218,6 +224,18 @@ export class WorldData {
                             break;
                         case "Outcast":
                             MoonlightData.getInstance().challengePoints += 5;
+                            break;
+                        case "A Matter of Decades":
+                            MoonlightData.getInstance().challengePoints += 7;
+                            MoonlightData.getInstance().challenges.forge2.unlocked = true;
+                            MoonlightData.getInstance().challenges.capitalism.unlocked = true;
+                            ProgressionStore.getInstance().persistentUnlocks.autoExplore2 = true;
+                            break;
+                        case "Forged Ahead 2: Reforged":
+                            MoonlightData.getInstance().challengePoints += 8;
+                            break;
+                        case "Capitalism":
+                            MoonlightData.getInstance().challengePoints += 10;
                             break;
                     }
                     challenge.completions += 1;

@@ -42,4 +42,13 @@ export class RegionButton {
             this.traitIcons[i].destroy();
         }
     }
+
+    setVisible(visible) {
+        this.backingRect.setVisible(visible);
+        this.title.setVisible(visible);
+        this.regionImg.setVisible(visible);
+        for (var i = 0; i < this.traitIcons.length; i++) {
+            this.traitIcons[i].setVisible(visible);
+        }
+    }
 }

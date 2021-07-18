@@ -202,9 +202,7 @@ export class RitualView {
         RitualData.getInstance().ritualPoints -= 1;
         RitualData.getInstance().calculateModifiers();
         this.ritualPointsLabel.setText(Common.numberString(RitualData.getInstance().ritualPoints));
-
-        this.nextMoonLabel.setText("Moonlight: " + Common.numberString(Math.floor(RitualData.getInstance().nextMoonlightBonus * 100)) + "%");
-        this.nextStarLabel.setText("Star Shards: " + Common.numberString(Math.floor(RitualData.getInstance().nextStarshardBonus * 100)) + "%");
+        this._refreshBonuses();
     }
 
     _setupRitualElement(ritual) {
@@ -226,6 +224,13 @@ export class RitualView {
         for (const prop in RitualData.getInstance().rituals) {
             this.ritualElements.push(this._setupRitualElement(RitualData.getInstance().rituals[prop]));
         }
+    }
+
+    _refreshBonuses() {
+        this.currentMoonLabel.setText("Moonlight: " + Common.numberString(Math.floor(RitualData.getInstance().moonlightBonus * 100)) + "%");
+        this.currentStarLabel.setText("Star Shards: " + Common.numberString(Math.floor(RitualData.getInstance().starshardBonus * 100)) + "%");
+        this.nextMoonLabel.setText("Moonlight: " + Common.numberString(Math.floor(RitualData.getInstance().nextMoonlightBonus * 100)) + "%");
+        this.nextStarLabel.setText("Star Shards: " + Common.numberString(Math.floor(RitualData.getInstance().nextStarshardBonus * 100)) + "%");
     }
 
     _refreshSacrificeLabels() {

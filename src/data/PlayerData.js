@@ -181,6 +181,7 @@ export class PlayerData {
         this.resources = [[0, 0, 0, 0, 0, 0], [0, 0, 0, 0, 0, 0], [0, 0, 0, 0, 0, 0], [0, 0, 0, 0, 0, 0],
         [0, 0, 0, 0, 0, 0], [0, 0, 0, 0, 0, 0], [0, 0, 0, 0, 0, 0], [0, 0, 0, 0, 0, 0]];
         this.craftingCosts = [1, 1, 1, 1, 1, 1, 1, 1];
+        this.dimCraftingCosts = [1, 1, 1, 1, 1, 1, 1, 1];
         for (var i = 0; i < this.craftingCosts.length; i++) {
             this.craftingCosts[i] = this.craftingCosts[i] * DynamicSettings.getInstance().gearCostMulti;
             this.craftingCosts[i] = this.craftingCosts[i] * Math.pow(0.925,
@@ -196,6 +197,7 @@ export class PlayerData {
             accuracy: 5
         }
         this.starperkCostReduction = Math.pow(0.95, StarData.getInstance().perks.forge.level);
+        this.starperkCostReduction *= Math.pow(0.95, MoonlightData.getInstance().challenges.forge2.completions);
         this.resourceTierReached = DynamicSettings.getInstance().minResourceTier;
         this.gold = 0;
         this.motes = 0;
@@ -320,14 +322,19 @@ export class PlayerData {
 
     reduceCraftingCosts(tier, amount) {
         for (var i = 0; i < Math.min(tier, 8); i++) {
-            this.craftingCosts[i] = Math.max(0.1, this.craftingCosts[i] * amount);
+            if (this.craftingCosts[i] <= 0.1 && MoonlightData.getInstance().challenges.forge2.completions > 0) {
+                this.dimCraftingCosts[i] = this.dimCraftingCosts[i] * amount;
+            } else {
+                this.craftingCosts[i] = Math.max(0.1, this.craftingCosts[i] * amount);
+            }
         }
     }
     getCraftingCosts(tier) {
         if (tier < 0 || tier >= 8) {
             return 1;
         }
-        return this.craftingCosts[tier] * this.starperkCostReduction;
+        return this.craftingCosts[tier] * this.starperkCostReduction *
+            Math.pow(this.dimCraftingCosts[tier], Statics.FORGE_DIMINISHING_POWER);
     }
 
     rebirth() {
@@ -565,9 +572,12 @@ export class PlayerData {
     }
 
     earnableMoonlight(gateReached) {
+        var challengeBonus = MoonlightData.getInstance().challenges.time2.completions <= 4 ? 1 :
+            1 + MoonlightData.getInstance().challengePoints * 0.05 * 0.01;
         return MoonlightData.getMoonlightEarned((this.statLevel - 1) + (this.talentLevel - 1) *
             (3 + StarData.getInstance().perks.knowledge.level * 2), gateReached) *
-            (1 + 0.15 * MoonlightData.getInstance().challenges.time.completions) * this.dungeonBonus.moonlight;
+            (1 + 0.15 * MoonlightData.getInstance().challenges.time.completions) * this.dungeonBonus.moonlight *
+            RitualData.getInstance().moonlightBonus * challengeBonus;
     }
 
     getExploreMulti() {
@@ -720,7 +730,7 @@ export class PlayerData {
     }
     addGold(amount) {
         var worldData = new WorldData();
-        this.gold = Math.min(worldData.getGoldCap(), this.gold + amount);
+        this.gold = Math.max(0, Math.min(worldData.getGoldCap(), this.gold + amount));
         this._onResourcesChanged([0, 0, 0, 0, 0, 0], amount, 0);
     }
     addMote(amount) {
@@ -846,6 +856,7 @@ export class PlayerData {
             res: this.resources,
             rtr: this.resourceTierReached,
             crf: this.craftingCosts,
+            dcf: this.dimCraftingCosts,
             csp: this.starperkCostReduction,
             pc: this.playerClass,
             cc: this.classChosen,
@@ -885,6 +896,7 @@ export class PlayerData {
         this.baseVillagerHealth = saveObj.vh === undefined ? 10 : saveObj.vh;
         this.dungeonBonus = saveObj.db === undefined ? this.dungeonBonus : saveObj.db;
         this.starperkCostReduction = saveObj.csp === undefined ? 1 : saveObj.csp;
+        this.dimCraftingCosts = saveObj.dcf === undefined ? [1, 1, 1, 1, 1, 1, 1, 1] : saveObj.dcf;
 
         this.selectClass(this.playerClass);
         var keys = Object.keys(saveObj.talents);

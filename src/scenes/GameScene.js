@@ -410,6 +410,11 @@ export class GameScene extends SceneUIBase {
             case Statics.UNLOCK_MOTES_UI:
                 this._updateResources();
                 break;
+            default:
+                this.worldButton.setVisible(ProgressionStore.getInstance().unlocks.worldTab === true ||
+                    ProgressionStore.getInstance().persistentUnlocks.rituals === true);
+                this.worldScene.refreshButtons();
+                break;
         }
     }
 
@@ -621,7 +626,8 @@ export class GameScene extends SceneUIBase {
 
     _onRewardCallback(rewards) {
         if (this.progression.unlocks.craftingUI === true) {
-            GearData.getInstance().tiersAvailable = Math.max(GearData.getInstance().tiersAvailable, rewards.regionLevel + 1);
+            GearData.getInstance().tiersAvailable = Math.max(DynamicSettings.getInstance().maxGearTier,
+                Math.max(GearData.getInstance().tiersAvailable, rewards.regionLevel + 1));
             this.gearScene._updateTierButtons();
         }
         this.player.addShade(rewards.shade);

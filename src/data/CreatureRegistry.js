@@ -1,5 +1,6 @@
 import { CreatureBlock } from './CreatureBlock';
 import { DungeonBlock } from './DungeonBlock';
+import { Statics } from './Statics';
 
 
 var creatureDefs = {};
@@ -28,6 +29,7 @@ creatureDefs['wolf'] = {
     critChance: 0.3,
     shadeBase: 19,
     rewardBase: 1.9,
+    dmgType: Statics.DMG_NORMAL,
     icon: { sprite: "enemyicons", tile: 2 }
 };
 creatureDefs['bear'] = {
@@ -53,6 +55,7 @@ creatureDefs['bear'] = {
     critChance: 0.14,
     shadeBase: 28,
     rewardBase: 2.4,
+    dmgType: Statics.DMG_NORMAL,
     icon: { sprite: "enemyicons", tile: 5 }
 };
 creatureDefs['plant'] = {
@@ -78,6 +81,7 @@ creatureDefs['plant'] = {
     critChance: 0.1,
     shadeBase: 19,
     rewardBase: 2.2,
+    dmgType: Statics.DMG_NORMAL,
     icon: { sprite: "enemyicons", tile: 3 }
 };
 creatureDefs['slime'] = {
@@ -103,6 +107,7 @@ creatureDefs['slime'] = {
     critChance: 0.1,
     shadeBase: 16,
     rewardBase: 1.8,
+    dmgType: Statics.DMG_NORMAL,
     icon: { sprite: "enemyicons", tile: 0 }
 };
 creatureDefs['bloom'] = {
@@ -128,6 +133,7 @@ creatureDefs['bloom'] = {
     critChance: 0.17,
     shadeBase: 17,
     rewardBase: 2.2,
+    dmgType: Statics.DMG_NORMAL,
     icon: { sprite: "enemyicons", tile: 4 }
 };
 creatureDefs['goblin'] = {
@@ -153,6 +159,7 @@ creatureDefs['goblin'] = {
     critChance: 0.4,
     shadeBase: 15,
     rewardBase: 1.7,
+    dmgType: Statics.DMG_NORMAL,
     icon: { sprite: "enemyicons", tile: 12 }
 };
 creatureDefs['formation'] = {
@@ -178,6 +185,7 @@ creatureDefs['formation'] = {
     critChance: 0.11,
     shadeBase: 27,
     rewardBase: 2.7,
+    dmgType: Statics.DMG_NORMAL,
     icon: { sprite: "enemyicons", tile: 10 }
 };
 creatureDefs['whale'] = {
@@ -203,6 +211,7 @@ creatureDefs['whale'] = {
     critChance: 0.1,
     shadeBase: 35,
     rewardBase: 3.5,
+    dmgType: Statics.DMG_NORMAL,
     icon: { sprite: "enemyicons", tile: 6 }
 };
 creatureDefs['fish'] = {
@@ -228,6 +237,7 @@ creatureDefs['fish'] = {
     critChance: 0.17,
     shadeBase: 19,
     rewardBase: 2,
+    dmgType: Statics.DMG_NORMAL,
     icon: { sprite: "enemyicons", tile: 7 }
 };
 creatureDefs['lizard'] = {
@@ -253,6 +263,7 @@ creatureDefs['lizard'] = {
     critChance: 0.14,
     shadeBase: 33,
     rewardBase: 2.6,
+    dmgType: Statics.DMG_NORMAL,
     icon: { sprite: "enemyicons", tile: 13 }
 };
 creatureDefs['gateguardian'] = {
@@ -278,6 +289,7 @@ creatureDefs['gateguardian'] = {
     critChance: 0.19,
     shadeBase: 44,
     rewardBase: 3.7,
+    dmgType: Statics.DMG_NORMAL,
     icon: { sprite: "enemyicons", tile: 9 }
 };
 creatureDefs['elk'] = {
@@ -303,6 +315,7 @@ creatureDefs['elk'] = {
     critChance: 0.15,
     shadeBase: 22,
     rewardBase: 2,
+    dmgType: Statics.DMG_NORMAL,
     icon: { sprite: "enemyicons", tile: 1 }
 };
 creatureDefs['drake'] = {
@@ -328,6 +341,7 @@ creatureDefs['drake'] = {
     critChance: 0.17,
     shadeBase: 39,
     rewardBase: 3.2,
+    dmgType: Statics.DMG_NORMAL,
     icon: { sprite: "enemyicons", tile: 9 }
 };
 creatureDefs['cactus'] = {
@@ -353,6 +367,7 @@ creatureDefs['cactus'] = {
     critChance: 0.31,
     shadeBase: 26,
     rewardBase: 2.1,
+    dmgType: Statics.DMG_NORMAL,
     icon: { sprite: "enemyicons", tile: 11 }
 };
 creatureDefs['moss'] = {
@@ -378,6 +393,7 @@ creatureDefs['moss'] = {
     critChance: 0.21,
     shadeBase: 37,
     rewardBase: 3.5,
+    dmgType: Statics.DMG_NORMAL,
     icon: { sprite: "enemyicons", tile: 9 }
 };
 creatureDefs['lion'] = {
@@ -403,6 +419,7 @@ creatureDefs['lion'] = {
     critChance: 0.21,
     shadeBase: 37,
     rewardBase: 2.5,
+    dmgType: Statics.DMG_NORMAL,
     icon: { sprite: "enemyicons", tile: 9 }
 };
 creatureDefs['gnoll'] = {
@@ -428,6 +445,7 @@ creatureDefs['gnoll'] = {
     critChance: 0.1,
     shadeBase: 28,
     rewardBase: 2.7,
+    dmgType: Statics.DMG_NORMAL,
     icon: { sprite: "enemyicons", tile: 9 }
 };
 creatureDefs['coyote'] = {
@@ -453,6 +471,7 @@ creatureDefs['coyote'] = {
     critChance: 0.25,
     shadeBase: 28,
     rewardBase: 2.1,
+    dmgType: Statics.DMG_NORMAL,
     icon: { sprite: "enemyicons", tile: 9 }
 };
 creatureDefs['catfish'] = {
@@ -478,6 +497,7 @@ creatureDefs['catfish'] = {
     critChance: 0.27,
     shadeBase: 26,
     rewardBase: 2.2,
+    dmgType: Statics.DMG_NORMAL,
     icon: { sprite: "enemyicons", tile: 9 }
 };
 creatureDefs['lootgoblin'] = {
@@ -503,6 +523,7 @@ creatureDefs['lootgoblin'] = {
     critChance: 0.4,
     shadeBase: 190,
     rewardBase: 15,
+    dmgType: Statics.DMG_NORMAL,
     icon: { sprite: "enemyicons", tile: 14 }
 };
 creatureDefs['star1'] = {
@@ -528,6 +549,7 @@ creatureDefs['star1'] = {
     critChance: 0.17,
     shadeBase: 28,
     rewardBase: 2.4,
+    dmgType: Statics.DMG_NORMAL,
     icon: { sprite: "enemyicons", tile: 16 }
 };
 creatureDefs['star2'] = {
@@ -553,6 +575,7 @@ creatureDefs['star2'] = {
     critChance: 0.35,
     shadeBase: 30,
     rewardBase: 2.6,
+    dmgType: Statics.DMG_NORMAL,
     icon: { sprite: "enemyicons", tile: 18 }
 };
 creatureDefs['star3'] = {
@@ -578,6 +601,7 @@ creatureDefs['star3'] = {
     critChance: 0.1,
     shadeBase: 32,
     rewardBase: 2.8,
+    dmgType: Statics.DMG_NORMAL,
     icon: { sprite: "enemyicons", tile: 17 }
 };
 creatureDefs['void'] = {
@@ -603,6 +627,7 @@ creatureDefs['void'] = {
     critChance: 0.25,
     shadeBase: 30,
     rewardBase: 2.6,
+    dmgType: Statics.DMG_NORMAL,
     icon: { sprite: "enemyicons", tile: 19 }
 };
 creatureDefs['myrah1'] = {
@@ -628,6 +653,7 @@ creatureDefs['myrah1'] = {
     critChance: 0.22,
     shadeBase: 30,
     rewardBase: 2.6,
+    dmgType: Statics.DMG_NORMAL,
     icon: { sprite: "enemyicons", tile: 20 }
 };
 creatureDefs['myrah2'] = {
@@ -653,7 +679,34 @@ creatureDefs['myrah2'] = {
     critChance: 0.33,
     shadeBase: 30,
     rewardBase: 2.6,
+    dmgType: Statics.DMG_NORMAL,
     icon: { sprite: "enemyicons", tile: 21 }
+};
+creatureDefs['cultist'] = {
+    name: "Cultist",
+    scaleBlock:
+    {
+        strength: 1.4,
+        dexterity: 1.2,
+        agility: 1.3,
+        endurance: 1.0,
+        recovery: 0.8,
+        defense: 1.3,
+        accuracy: 1.3,
+        armor: 1.1,
+        health: 1.4,
+        healthRegen: 1.0,
+        damageMin: 1.2,
+        damageMax: 1.5,
+        hit: 1.0,
+        evasion: 1.3
+    },
+    attackSpeed: 1700,
+    critChance: 0.1,
+    shadeBase: 40,
+    rewardBase: 3,
+    dmgType: Statics.DMG_MAGIC,
+    icon: { sprite: "enemyicons", tile: 15 }
 };
 
 dungeonDefs['goblin'] = {
@@ -716,7 +769,8 @@ export class CreatureRegistry {
     static GetCreatureByName(name, level, tier) {
         var creature = new CreatureBlock();
         creature.setMonsterStats(creatureDefs[name].name, creatureDefs[name].scaleBlock, creatureDefs[name].attackSpeed,
-            creatureDefs[name].critChance, level, tier, creatureDefs[name].shadeBase, creatureDefs[name].rewardBase, creatureDefs[name].icon);
+            creatureDefs[name].critChance, creatureDefs[name].dmgType, level, tier, creatureDefs[name].shadeBase,
+            creatureDefs[name].rewardBase, creatureDefs[name].icon);
         return creature;
     }
     static GetDungeonCreatureByName(name, power, health, count) {

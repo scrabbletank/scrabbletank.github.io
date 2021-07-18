@@ -160,6 +160,25 @@ export class ProgressionStore {
             ];
             // any one off lore that doesnt fit into the above should go here to be tracked better
             this.loreUnlocks = {
+                cultists1: {
+                    unlocked: false,
+                    text: "This is the largest mountain you've ever seen, taking up not one, but 5 whole tiles! It looks like " +
+                        "this mountain already has people living here, wearing robes and chanting strange words. You thought " +
+                        "they might be friendly, but when you tried to talk to them they cast spells at you, dealing Magic Damage " +
+                        "and bypassing your armor.\n\nThat sounds like cheating and you can't stand cheaters. You can see " +
+                        "a spooky looking fortress at the top of this mountain. Time to give those magic nerds a piece of your mind."
+                },
+                cultists2: {
+                    unlocked: false,
+                    text: "Finally fighting your way through the cultist fortress you've arrived at the peak of Doom Mountain. " +
+                        "Standing on the edge of the cliff is the cultist leader.\n\n" +
+                        "\"I see you've bested my cult, and I am no match for you. You must be here to destroy my Tome of " +
+                        "Forbidden Knowledge which holds the secrets to money, fame, and power?\"\n\n" +
+                        "Money, Fame, Power? I like all of those things. You talk to the cultist some more, and while he " +
+                        "keeps talking about a bunch of nerd stuff like eldritch horrors, terrible curses, and corrupting " +
+                        "your eternal soul he can summon the best sandwich I've ever had. All it requires is 'sufficient " +
+                        "resources' to prepare the ritual. That doesn't sound too bad!\n\nRITUALS UNLOCKED"
+                }
             };
             this.loreTexts = {
             };
@@ -184,7 +203,9 @@ export class ProgressionStore {
                 autoExplore: false,
                 wizardClass: false,
                 dungeons: false,
-                starshards: false
+                starshards: false,
+                rituals: false,
+                autoExplore2: false
             }
 
             this.totalCounts = {
@@ -319,9 +340,9 @@ export class ProgressionStore {
         }
     }
     registerLore(name) {
-        if (this.loreUnlocks[name] !== undefined && this.loreUnlocks[name] === false) {
-            this._onUnlock(Statics.UNLOCK_GENERIC, 0, this.loreTexts[name]);
-            this.loreUnlocks[name] = true;
+        if (this.loreUnlocks[name] !== undefined && this.loreUnlocks[name].unlocked === false) {
+            this._onUnlock(Statics.UNLOCK_GENERIC, 0, this.loreUnlocks[name].text);
+            this.loreUnlocks[name].unlocked = true;
         }
     }
 
@@ -371,6 +392,10 @@ export class ProgressionStore {
     }
 
     save() {
+        var loreUnlocks = [];
+        for (const prop in this.loreUnlocks) {
+            loreUnlocks.push([prop, this.loreUnlocks[prop].unlocked]);
+        }
         var saveObj = {
             un: this.unlocks,
             eun: this.exploresUnlocked,
@@ -381,7 +406,8 @@ export class ProgressionStore {
             dun: this.deathUnlocked,
             count: this.counts,
             tcount: this.totalCounts,
-            pun: this.persistentUnlocks
+            pun: this.persistentUnlocks,
+            lore: this.loreUnlocks
         }
 
         return saveObj;
@@ -399,6 +425,13 @@ export class ProgressionStore {
         this.totalCounts = saveObj.tcount;
         for (const prop in saveObj.pun) {
             this.persistentUnlocks[prop] = saveObj.pun[prop];
+        }
+        if (saveObj.lore !== undefined) {
+            for (var i = 0; i < saveObj.lore.length; i++) {
+                if (this.loreUnlocks[saveObj.lore[i][0]] !== undefined) {
+                    this.loreUnlocks[saveObj.lore[i][0]].unlocked = saveObj.lore[i][1];
+                }
+            }
         }
     }
 }

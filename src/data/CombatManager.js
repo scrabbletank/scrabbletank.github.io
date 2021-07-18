@@ -8,6 +8,7 @@ import { DynamicSettings } from "./DynamicSettings";
 import { RegionRegistry } from "./RegionRegistry";
 import { WorldData } from "./WorldData";
 import { StarData } from "./StarData";
+import { RitualData } from "./RitualData";
 
 export class CombatManager {
     constructor() {

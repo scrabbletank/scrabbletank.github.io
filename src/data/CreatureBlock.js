@@ -73,6 +73,7 @@ export class CreatureBlock {
         this.igniteTimer = 0;
         this.igniteDamage = 0;
         this.corrosion = 0;
+        this.dmgType = Statics.DMG_NORMAL;
 
         this.healthChangedHandlers = [];
         this.attackCooldownChangedHandlers = [];
@@ -262,7 +263,7 @@ export class CreatureBlock {
         if (isCrit === true) {
             rawDmg = rawDmg * this.CritDamage(creature.CritResistance());
         }
-        var dmg = creature.takeDamage(rawDmg, isCrit, Statics.DMG_NORMAL);
+        var dmg = creature.takeDamage(rawDmg, isCrit, this.dmgType);
         creature.playAnimation(isCrit === true ? this.critAnim : this.hitAnim);
         this.attackCooldown = 0;
         //handle beserk trait, giving attack speed refresh
@@ -295,7 +296,7 @@ export class CreatureBlock {
 
 
     // used for monsters to add scaling based on level
-    setMonsterStats(name, scaleBlock, attackSpeed, critChance, level, tier, shadeBase, rewardBase, icon) {
+    setMonsterStats(name, scaleBlock, attackSpeed, critChance, dmgType, level, tier, shadeBase, rewardBase, icon) {
         this.level = level;
         // offset by 1, level 0 should have no bonuses
         var rLvl = level - 1;
@@ -326,6 +327,7 @@ export class CreatureBlock {
 
         this.attackSpeed = attackSpeed;
         this.attackCooldown = 0;
+        this.dmgType = dmgType;
 
         this.currentHealth = this.MaxHealth();
         this.name = level < 1 ? "Weak " + name : name;

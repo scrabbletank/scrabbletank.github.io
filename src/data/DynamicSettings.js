@@ -21,6 +21,8 @@ export class DynamicSettings {
             this.startingTraits = 0;
             this.fixedTraits = [];
             this.productionMulti = 1;
+            this.econMulti = 1;
+            this.productionBuildingCost = 0;
             this.spendFriendship = false;
             this.friendshipToProduction = false;
             this.invasionTimer = Statics.MIN_SIGHTING_SECONDS;
@@ -31,6 +33,7 @@ export class DynamicSettings {
             // game settings
             this.openCombatOnExplore = true;
             this.autoExploreWeakestFirst = true;
+            this.autoExploreRegions = true;
 
             DynamicSettings.instance = this;
         }
@@ -61,6 +64,8 @@ export class DynamicSettings {
         this.startingTraits = 0;
         this.fixedTraits = [];
         this.productionMulti = 1;
+        this.econMulti = 1;
+        this.productionBuildingCost = 0;
         this.spendFriendship = false;
         this.friendshipToProduction = false;
         this.invasionTimer = Statics.MIN_SIGHTING_SECONDS;
@@ -112,6 +117,23 @@ export class DynamicSettings {
                 this.regionDifficultyIncrease = 30 + (5 * challenge.completions);
                 this.minGateRegion = 3 + challenge.completions;
                 break;
+            case "A Matter of Decades":
+                this.minGateRegion = 9;
+                this.maxRunTime = Statics.TIME_PER_YEAR * (10 - challenge.completions * 2);
+                this.regionDifficultyIncrease = 25;
+                break;
+            case "Forged Ahead 2: Reforged":
+                this.minGateRegion = 9;
+                this.gearCostMulti = 1000;
+                this.maxGearTier = 8 - challenge.completions;
+                this.regionDifficultyIncrease = 25;
+                break;
+            case "Capitalism":
+                this.minGateRegion = 9;
+                this.productionBuildingCost = 250 + (challenge.completions * 250);
+                this.regionDifficultyIncrease = 25;
+                this.econMulti = 0.5;
+                break;
         }
     }
 
@@ -132,6 +154,8 @@ export class DynamicSettings {
             st: this.startingTraits,
             ft: this.fixedTraits,
             pm: this.productionMulti,
+            em: this.econMulti,
+            pbc: this.productionBuildingCost,
             sf: this.spendFriendship,
             ftp: this.friendshipToProduction,
             it: this.invasionTimer,
@@ -139,7 +163,8 @@ export class DynamicSettings {
             iid: this.invasionsIncreaseDifficulty,
             sce: this.openCombatOnExplore,
             saeo: this.autoExploreOptions,
-            mnrt: this.minResourceTier
+            mnrt: this.minResourceTier,
+            aer: this.autoExploreRegions
         }
 
         return saveObj;
@@ -168,5 +193,8 @@ export class DynamicSettings {
         this.openCombatOnExplore = saveObj.sce !== undefined ? saveObj.sce : true;
         this.autoExploreOptions = saveObj.saeo !== undefined ? saveObj.saeo : Statics.AUTOEXPLORE_WEAKEST;
         this.minResourceTier = saveObj.mnrt !== undefined ? saveObj.mnrt : 0;
+        this.productionBuildingCost = saveObj.pbc !== undefined ? saveObj.pbc : 0;
+        this.autoExploreRegions = saveObj.aer !== undefined ? saveObj.aer : true;
+        this.econMulti = saveObj.em !== undefined ? saveObj.em : 1;
     }
 }

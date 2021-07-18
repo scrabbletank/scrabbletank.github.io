@@ -16,7 +16,8 @@ export class TownData {
         var bGold = vlvl * tech.goldCosts[1];
         var cGold = Math.pow(vlvl * tech.goldCosts[2], Statics.RESEARCH_LEVEL_POWER);
         var tGold = Math.pow(Statics.RESEARCH_TIER_POWER, tier - 1);
-        return Math.floor(((aGold + bGold + cGold) / 5) * tGold) * 5;
+        return Math.floor(((aGold + bGold + cGold) / 5) * tGold) * 5 *
+            (1 - MoonlightData.getInstance().challenges.capitalism.completions * 0.1);
     }
     static getTechResourceCost(tech, tier) {
         var vlvl = tech.level;
@@ -49,7 +50,10 @@ export class TownData {
         this.dungeonEconMulti = 1;
         this.dungeonProdMulti = 1;
         this.townDefenseBonus = 0;
-        this.goldCapBonus = moonData.moonperks.heropouch.level * 100;
+        this.paidProdMulti = 1;
+        this.buildingEconBonus = 0;
+        this.goldCapBonus = moonData.moonperks.heropouch.level * 100 +
+            moonData.challenges.capitalism.completions * 250;
         this.baseIncome = Statics.BASE_TAX_INCOME + moonData.moonperks.vault.level * 0.1;
         this.buildingIncome = 0;
         this.townExplored = false;
@@ -137,7 +141,6 @@ export class TownData {
                 WorldData.getInstance().getCurrentRegion().handleReinforcedHouses();
                 break;
             case "Banking":
-                this.economyMulti += 0.05;
                 this.goldCapBonus += 50;
                 break;
             case "Map Making":
@@ -153,31 +156,32 @@ export class TownData {
     }
 
     calculateEconMulti(bonus) {
-        this.economyMulti = (1 + bonus + (this.upgrades.banking.level * 0.05)) * this.dungeonEconMulti;
+        this.buildingEconBonus = bonus;
     }
     getTownIncome() {
-        var player = new PlayerData();
         return (Math.floor(this.currentPopulation) * this.baseIncome + this.buildingIncome) *
-            this.economyMulti * (1 + player.getTalentLevel("governance") * 0.04) /
-            (1 + RitualData.getInstance().activePerks.apathy * 0.5);
+            this.getEconomyMulti() / (1 + RitualData.getInstance().activePerks.apathy * 0.5);
     }
     getGoldCap() {
-        var player = new PlayerData();
         var exploreBonus = MoonlightData.getInstance().moonperks.crownlands.level * 2 * this.tilesExplored;
         return (this.currentPopulation * Statics.GOLDCAP_PER_POP + this.goldCapBonus + exploreBonus) *
-            this.economyMulti * (1 + player.getTalentLevel("governance") * 0.04);
+            this.getEconomyMulti();
     }
     getProductionMulti() {
         var nightLabourBonus = this.nightLabourActive === true ? (1 + 0.1 * MoonlightData.getInstance().moonperks.nightlabour.level) : 1;
         var multi = this.productionMulti *
             (1 + this.friendshipLevel * 0.01 * MoonlightData.getInstance().moonperks.motivatedlabor.level) *
             nightLabourBonus * DynamicSettings.getInstance().productionMulti * this.dungeonProdMulti *
-            (1 + StarData.getInstance().perks.tools.level * 0.25);
+            (1 + StarData.getInstance().perks.tools.level * 0.25) * this.paidProdMulti;
         if (DynamicSettings.getInstance().friendshipToProduction === true) {
             return multi + this.friendshipLevel * 0.05;
         } else {
             return multi;
         }
+    }
+    getEconomyMulti() {
+        return (1 + this.buildingEconBonus + (this.upgrades.banking.level * 0.05)) * this.dungeonEconMulti *
+            DynamicSettings.getInstance().econMulti * (1 + PlayerData.getInstance().getTalentLevel("governance") * 0.04);
     }
     getMaxPopulation() { return this.maxPopulation * (1 + RitualData.getInstance().activePerks.hatchlings * 0.05); }
     getMarketLevel() { return this.upgrades.market.level; }
@@ -374,7 +378,7 @@ export class TownData {
 
     }
 
-    endOfWeek() {
+    endOfWeek(region) {
         if (this.townExplored === true) {
             if (this.currentPopulation > this.getMaxPopulation()) {
                 this.currentPopulation = Math.max(this.getMaxPopulation(), this.currentPopulation * 0.9);
@@ -385,6 +389,15 @@ export class TownData {
                 this.currentPopulation = Math.min(this.getMaxPopulation(), this.currentPopulation * growthRate);
             }
             PlayerData.getInstance().addGold(this.getTownIncome());
+            if (DynamicSettings.getInstance().productionBuildingCost > 0) {
+                var bldCost = region.getProdBuildingCount() * DynamicSettings.getInstance().productionBuildingCost;
+                if (bldCost > PlayerData.getInstance().gold) {
+                    this.paidProdMulti = PlayerData.getInstance().gold / bldCost;
+                } else {
+                    this.paidProdMulti = 1;
+                }
+                PlayerData.getInstance().addGold(-bldCost);
+            }
             PlayerData.getInstance().addShade(this.currentPopulation * 0.1 *
                 MoonlightData.getInstance().moonperks.shadow3.level * MoonlightData.getInstance().getShadowBonus());
         }
@@ -425,7 +438,10 @@ export class TownData {
             vp: this.villagerPower,
             vpm: this.villagerPowerMulti,
             vh: this.villagerHealth,
-            vhm: this.villagerHealthMulti
+            vhm: this.villagerHealthMulti,
+            dpm: this.dungeonProdMulti,
+            dem: this.dungeonEconMulti,
+            ppm: this.paidProdMulti
         }
 
         return saveObj;
@@ -450,6 +466,9 @@ export class TownData {
         this.villagerPowerMulti = saveObj.vpm ? saveObj.vpm : 1;
         this.villagerHealth = saveObj.vh ? saveObj.vh : 10;
         this.villagerHealthMulti = saveObj.vhm ? saveObj.vhm : 1;
+        this.dungeonProdMulti = saveObj.dpm ? saveObj.dpm : 1;
+        this.dungeonEconMulti = saveObj.dem ? saveObj.dem : 1;
+        this.paidProdMulti = saveObj.ppm ? saveObj.ppm : 1;
         this.friendshipToNext = TownData.calcFriendshipToLevel(this.friendshipLevel);
         for (var i = 0; i < saveObj.bld.length; i++) {
             if (this.buildings[saveObj.bld[i][0]] !== undefined) {
