@@ -100,7 +100,7 @@ export class RegionView {
         } else {
             return {
                 sprite: this.region.map[y][x].building.texture.sprite,
-                tile: this.region.map[y][x].building.texture.tile + 8 * (this.region.map[y][x].building.tier - 1),
+                tile: this.region.map[y][x].building.texture.tile + 10 * (this.region.map[y][x].building.tier - 1),
                 w: this.region.map[y][x].building.texture.w,
                 h: this.region.map[y][x].building.texture.h
             };
@@ -226,7 +226,7 @@ export class RegionView {
             this.tileSelectWindow = undefined;
         }
 
-        this.tileSelectWindow = new TileSelectWindow(this.scene, this.x + 200, this.x + 200, this.region.map[y][x]);
+        this.tileSelectWindow = new TileSelectWindow(this.scene, this.x + 190, this.y + 240, this.region.map[y][x]);
         this.tileSelectWindow.addOnActionHandler((action, blob) => { this._tileActionHandler(action, blob); });
     }
 
@@ -248,8 +248,8 @@ export class RegionView {
                 }
                 if (this.region._canUpgrade(blob.tile) === true) {
                     this.region.upgradeBuilding(blob.tile.x, blob.tile.y);
-                    this.tileElements[blob.tile.y][blob.tile.x].building.setTexture(blob.tile.building.texture.sprite,
-                        blob.tile.building.texture.tile + 8 * (blob.tile.building.tier - 1));
+                    var texture = this._getBuildingImage(blob.tile.x, blob.tile.y)
+                    this.tileElements[blob.tile.y][blob.tile.x].building.setTexture(texture.sprite, texture.tile);
                     this.scene.scene.get("TownScene")._updateStatus();
                 }
                 break;
