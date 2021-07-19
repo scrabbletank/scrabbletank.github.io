@@ -46,7 +46,8 @@ export class GearCraftDisplay {
         this.statLabels = []
         var txt = "";
         var bonus = gear.getStatBonuses();
-        const resourceTier = Math.max(DynamicSettings.getInstance().minResourceTier, gear.tier - 1);
+        const resourceTier = Math.min(7, Math.max(DynamicSettings.getInstance().minResourceTier,
+            DynamicSettings.getInstance().minResourceTier + gear.tier - 1));
         for (const prop in bonus) {
             if (bonus[prop] !== 0) {
                 txt += TooltipRegistry.getBonusText(prop, bonus[prop]) + "\n";
