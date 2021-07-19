@@ -59,9 +59,10 @@ export class GearData {
 
     upgradeGear(gear) {
         var player = PlayerData.getInstance();
-        var craftCostMulti = gear.tier <= 0 ? 1 : player.craftingCosts[gear.tier - 1];
+        var craftCostMulti = gear.tier <= 0 ? 1 : player.getCraftingCosts(gear.tier - 1);
         var res = [];
-        var resTier = Math.max(DynamicSettings.getInstance().minResourceTier, gear.tier - 1);
+        var resTier = Math.min(7, Math.max(DynamicSettings.getInstance().minResourceTier,
+            DynamicSettings.getInstance().minResourceTier + gear.tier - 1));
         for (var i = 0; i < gear.costs.length; i++) {
             res.push(gear.costs[i] * craftCostMulti);
         }

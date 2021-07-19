@@ -40,6 +40,7 @@ export class MoonlightScene extends SceneUIBase {
                     this.canLevelPerks = false;
                     this.moonlightContainer.canLevelPerks = false;
                     this.starshardContainer.canLevelPerks = false;
+                    DynamicSettings.getInstance().reset();
                     game.rebirth();
                 } else {
                     this.scene.sendToBack();
