@@ -919,7 +919,9 @@ export class Region {
         //calculate road bonuses here
         var roadBonus = [[1, 0.5, 0],
         [1.25, 0.75, 0.25],
-        [1.5, 1, 0.5]];
+        [1.5, 1, 0.5],
+        [1.75, 1.25, 0.75],
+        [2, 1.5, 1]];
         for (var i = 0; i < this.roads.length; i++) {
             if (this._getMapProp(this.roads[i][1], this.roads[i][0], 'roadConnected', false) === false) {
                 continue;
