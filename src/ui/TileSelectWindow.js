@@ -18,7 +18,7 @@ export class TileSelectWindow {
         var progression = new ProgressionStore();
         var region = new WorldData().getCurrentRegion();
 
-        this.backRect = scene.add.rectangle(x, y, 500, 220, Phaser.Display.Color.GetColor(0, 0, 0))
+        this.backRect = scene.add.rectangle(x, y, 520, 220, Phaser.Display.Color.GetColor(0, 0, 0))
             .setInteractive()
             .setOrigin(0, 0);
         this.backRect.isStroked = true;
@@ -133,13 +133,13 @@ export class TileSelectWindow {
                             costY += 17;
                         }
                     }
-                    var label = scene.add.bitmapText(x + 395, costY, "courier16", "Gold: " + tile.building.goldCost);
+                    var label = scene.add.bitmapText(x + 395, costY, "courier16", "Gold: " + Common.numberString(tile.building.goldCost));
                     var clr = PlayerData.getInstance().gold >= tile.building.goldCost ?
                         Phaser.Display.Color.GetColor(255, 255, 255) : Phaser.Display.Color.GetColor(255, 80, 80);
                     label.setTint(clr);
                     this.buildingCostLabels.push(label);
 
-                    this.upgradeButton = new TextButton(scene, x + 175, y + 195, 140, 20, "Upgrade")
+                    this.upgradeButton = new TextButton(scene, x + 185, y + 195, 140, 20, "Upgrade")
                         .onClickHandler(() => { this._onAction("upgrade", { tile: tile }); });
                 }
                 this.destroyButton = new ImageButton(scene, x + 130, y + 5, 16, 16, { sprite: "icons", tile: 23 })
@@ -155,9 +155,9 @@ export class TileSelectWindow {
             }
         }
 
-        this.exploreButton = new TextButton(scene, x + 30, y + 195, 140, 20, "Explore")
+        this.exploreButton = new TextButton(scene, x + 40, y + 195, 140, 20, "Explore")
             .onClickHandler(() => { this._onAction("explore", { tile: tile }); });
-        this.cancelButton = new TextButton(scene, x + 320, y + 195, 140, 20, "Cancel")
+        this.cancelButton = new TextButton(scene, x + 330, y + 195, 140, 20, "Cancel")
             .onClickHandler(() => { this._onAction("cancel"); });
 
         this.onActionHandlers = [];

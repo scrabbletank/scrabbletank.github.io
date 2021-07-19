@@ -108,11 +108,11 @@ export class TownData {
                 goldCosts: [25, 25, 15], resources: [[0, 0, 0], [10, 10, 5], [0, 0, 0], [5, 5, 5], [0, 0, 0], [0, 0, 0]]
             },
             tavern: {
-                name: "Tavern", level: 0, maxLevel: 3, requires: [],
+                name: "Tavern", level: 0, maxLevel: 3 + StarData.getInstance().perks.construction.level, requires: [],
                 goldCosts: [250, 150, 50], resources: [[150, 150, 40], [0, 0, 0], [0, 0, 0], [0, 0, 0], [100, 100, 35], [0, 0, 0]]
             },
             market: {
-                name: "Market", level: 0, maxLevel: 3, requires: [],
+                name: "Market", level: 0, maxLevel: 3 + StarData.getInstance().perks.construction.level, requires: [],
                 goldCosts: [400, 250, 60], resources: [[150, 150, 30], [75, 75, 30], [0, 0, 0], [75, 75, 30], [100, 100, 35], [75, 75, 30]]
             }
         };
@@ -124,7 +124,7 @@ export class TownData {
 
         switch (tech.name) {
             case "Forge":
-                PlayerData.getInstance().reduceCraftingCosts(this.resourceTier, Statics.FORGE_REDUCTION);
+                PlayerData.getInstance().reduceCraftingCosts(this.tier, Statics.FORGE_REDUCTION);
                 break;
             case "Guilds":
                 this.productionMulti += 0.1;

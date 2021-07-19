@@ -503,6 +503,7 @@ export class GameScene extends SceneUIBase {
     _updateResources() {
         this.resourceLabel.setPosition(10, this.resourceStart);
         this.resourceLabel.setVisible(this.progression.unlocks.resourceUI);
+        this.resourceTierSelected = Math.max(this.resourceTierSelected, DynamicSettings.getInstance().minResourceTier);
 
         for (var i = 0; i < this.resourceLabels.length; i++) {
             this.resourceLabels[i].destroy();
@@ -515,8 +516,8 @@ export class GameScene extends SceneUIBase {
         for (var i = 0; i < this.resourceIncLabels.length; i++) {
             this.resourceIncLabels[i].setPosition(100, this.resourceStart + 40 + (i * 20));
         }
-        for (var i = 0; i < this.resourceTierButtons.length; i++) {
-            this.resourceTierButtons[i].setPosition(20 + (i * 20), this.resourceStart + 20);
+        for (var i = DynamicSettings.getInstance().minResourceTier; i < this.resourceTierButtons.length; i++) {
+            this.resourceTierButtons[i].setPosition(20 + ((i - DynamicSettings.getInstance().minResourceTier) * 20), this.resourceStart + 20);
             this.resourceTierButtons[i].setVisible(this.player.resourceTierReached >= 1 && i <= this.player.resourceTierReached);
         }
         this.resourceIcons[7].setVisible(this.progression.unlocks.motes || this.player.motes > 0);

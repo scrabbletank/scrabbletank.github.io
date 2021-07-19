@@ -54,7 +54,7 @@ export class StarData {
                     texture: { sprite: "staricons", tile: 10 }
                 },
                 proficiency: { // gear scaling multiplied by x%
-                    name: "Myrah's Spear: Proficiency", level: 0, maxLevel: -1, requires: ["forge"], cost: [5, 5, 1.5],
+                    name: "Myrah's Spear: Proficiency", level: 0, maxLevel: -1, requires: ["forge"], cost: [7, 7, 1.5],
                     texture: { sprite: "staricons", tile: 10 }
                 },
                 stellar: { // % bonus to gear
@@ -85,20 +85,20 @@ export class StarData {
                     name: "Kella's Horn: Construction", level: 0, maxLevel: 2, requires: [], cost: [25, 0, 100],
                     texture: { sprite: "staricons", tile: 8 }
                 },
-                worldsmith: { // increases base resource tier by 1
-                    name: "Kella's Horn: Worldsmith", level: 0, maxLevel: 7, requires: ["construction"], cost: [10, 10, 1],
+                fertility: { // town growth speed
+                    name: "Kella's Horn: Fertility", level: 0, maxLevel: 12, requires: ["construction"], cost: [5, 5, 1],
                     texture: { sprite: "staricons", tile: 8 }
                 },
                 tools: { // prod increased by x%
-                    name: "Kella's Horn: Enchanted Tools", level: 0, maxLevel: -1, requires: ["worldsmith"], cost: [5, 5, 1.15],
+                    name: "Kella's Horn: Enchanted Tools", level: 0, maxLevel: -1, requires: ["fertility"], cost: [5, 5, 1.15],
                     texture: { sprite: "staricons", tile: 8 }
                 },
-                fertility: { // town growth speed
-                    name: "Kella's Horn: Fertility", level: 0, maxLevel: 12, requires: ["tools"], cost: [5, 5, 1],
+                worldsmith: { // increases base resource tier by 1
+                    name: "Kella's Horn: Worldsmith", level: 0, maxLevel: 7, requires: ["tools"], cost: [20, 20, 1],
                     texture: { sprite: "staricons", tile: 8 }
                 },
                 estate: { // house multi
-                    name: "Kella's Horn: Estate", level: 0, maxLevel: -1, requires: ["fertility"], cost: [15, 5, 2],
+                    name: "Kella's Horn: Estate", level: 0, maxLevel: -1, requires: ["worldsmith"], cost: [15, 5, 2],
                     texture: { sprite: "staricons", tile: 8 }
                 },
 
