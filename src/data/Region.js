@@ -421,6 +421,46 @@ export class Region {
     }
 
     generateTerrain(pointList) {
+        var minDiff = this.regionLevel * DynamicSettings.getInstance().regionDifficultyIncrease;
+        var maxDiff = minDiff + DynamicSettings.getInstance().regionDifficultyIncrease;
+
+        var starfields = ['starfield', 'starfield2', 'starfield3'];
+
+        for (var y = 0; y < voidMap.length; y++) {
+            for (var x = 0; x < voidMap[y].length; x++) {
+                var base = minDiff + ((Common.getDistance(x, y, 5, 11) / (this.height * 0.79)) *
+                    DynamicSettings.getInstance().regionDifficultyIncrease);
+                var difficulty = Math.max(minDiff, Math.min(maxDiff, base));
+                var regName;
+                switch (voidMap[y][x]) {
+                    case 0:
+                        regName = 'void';
+                        difficulty = Math.min(maxDiff, difficulty + 5);
+                        break;
+                    case 1:
+                        regName = starfields[Common.randint(0, starfields.length)];
+                        break;
+                    case 2:
+                        regName = 'starpalace';
+                        difficulty = maxDiff + 1;
+                        break;
+                }
+                this.map[y][x].init(regName, Math.floor(difficulty), minDiff, this);
+            }
+        }
+
+        // yields for a tile are based on their surrounding tiles
+        for (var i = 0; i < this.height; i++) {
+            for (var t = 0; t < this.width; t++) {
+                this.map[i][t].yields = this._getTileYields(t, i);
+            }
+        }
+
+        this._calculateTileBonuses();
+        this.map[11][5].revealed = true;
+    }
+
+    generateTerrain(pointList) {
         var minDiff = this.regionLevel * (DynamicSettings.getInstance().regionDifficultyIncrease +
             RitualData.getInstance().activePerks.vengeance);
         var maxDiff = minDiff + (DynamicSettings.getInstance().regionDifficultyIncrease +

@@ -336,6 +336,12 @@ export class PlayerData {
         return this.craftingCosts[tier] * this.starperkCostReduction *
             Math.pow(this.dimCraftingCosts[tier], Statics.FORGE_DIMINISHING_POWER);
     }
+    getCraftingCosts(tier) {
+        if (tier < 0 || tier >= 8) {
+            return 1;
+        }
+        return this.craftingCosts[tier] * this.starperkCostReduction;
+    }
 
     rebirth() {
         this._init();

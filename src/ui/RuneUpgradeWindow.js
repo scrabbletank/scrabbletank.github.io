@@ -12,6 +12,7 @@ export class RuneUpgradeWindow {
         this.scene = sceneContext;
         this.x = x;
         this.y = y;
+        this.hoveredElement = -1;
         this.backRect = sceneContext.add.rectangle(x, y, 700, 500, Phaser.Display.Color.GetColor(0, 0, 0))
             .setInteractive()
             .setOrigin(0, 0).setDepth(999);
@@ -68,6 +69,8 @@ export class RuneUpgradeWindow {
         ];
 
         this.cancelBtn = new TextButton(this.scene, this.x + 575, this.y + 475, 120, 20, "Cancel", 999);
+
+        this.shatterKey = this.scene.input.keyboard.addKey(Phaser.Input.Keyboard.KeyCodes.S);
 
         this.page = 0;
         this.pageBtns = [];
@@ -213,8 +216,8 @@ export class RuneUpgradeWindow {
         }
         var runeBtn = new ImageButton(sceneContext, x, y, 48, 48, RuneRegistry.getRuneTexture(rune.word), 999);
         runeBtn.onClickHandler(() => { this._selectRune(idx); })
-            .onPointerOverHandler(() => { this._showTooltip(sceneContext, txt, x, y); })
-            .onPointerOutHandler(() => { this._removeTooltip() });
+            .onPointerOverHandler(() => { this.hoveredElement = idx; this._showTooltip(sceneContext, txt, x, y); })
+            .onPointerOutHandler(() => { this.hoveredElement = -1; this._removeTooltip() });
         return runeBtn;
     }
 
@@ -235,6 +238,14 @@ export class RuneUpgradeWindow {
     onCancelHandler(callback) {
         this.cancelBtn.onClickHandler(() => { callback(); });
         return this;
+    }
+
+    update() {
+        if (Phaser.Input.Keyboard.JustUp(this.shatterKey) && this.hoveredElement !== -1) {
+            this.selectedRune = this.hoveredElement;
+            this._shatterRune();
+            this.hoveredElement = -1;
+        }
     }
 
     destroy() {

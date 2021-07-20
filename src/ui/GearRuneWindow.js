@@ -191,6 +191,10 @@ export class GearRuneWindow {
         return this;
     }
 
+    update() {
+        //no op because I'm dumb
+    }
+
     destroy() {
         this.backRect.destroy();
         this.separator.destroy();
