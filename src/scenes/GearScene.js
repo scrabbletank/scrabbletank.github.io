@@ -247,5 +247,8 @@ export class GearScene extends SceneUIBase {
                     "staying here is going to do you any good.\n");
             }
         }
+        if (this.runeWindow !== undefined) {
+            this.runeWindow.update();
+        }
     }
 }

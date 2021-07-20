@@ -106,7 +106,8 @@ export class GuideWindow {
                     "* 'P' to build a production building matching the tile (eg: Mountains build mines)\n" +
                     "* '1' - '6' to build a specific production building (Wood -> Leather - > Metal -> Fiber - > Stone -> Crystal)\n" +
                     "* 'U' to upgrade a building\n" +
-                    "* 'E' to explore a tile\n";
+                    "* 'E' to explore a tile\n" +
+                    "* 'S' to shatter a rune (Rune upgrade window only)\n";
                 this.guideTexts.push(this.scene.add.bitmapText(this.x + 150, this.y + 70, "courier16", Common.processText(helptxt, 72)));
                 break;
             case 0:
