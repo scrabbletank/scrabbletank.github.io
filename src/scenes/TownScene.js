@@ -202,9 +202,9 @@ export class TownScene extends SceneUIBase {
         var region = WorldData.instance.getCurrentRegion();
         var gold = TownData.getTechGoldCost(tech, region.townData.tier);
         var resource = TownData.getTechResourceCost(tech, region.townData.tier);
-        var tier = Math.min(7, region.townData.tier - 1);
+        var resourceTier = Math.min(7, region.townData.resourceTier);
         var player = new PlayerData();
-        if (player.gold >= gold && Common.canCraft(resource, player.resources[tier]) === true &&
+        if (player.gold >= gold && Common.canCraft(resource, player.resources[resourceTier]) === true &&
             region.townData.friendshipLevel >= tech.level) {
             // If we are spending friendship, we spend the current level of friendship needed. Level 0 requires no friendship,
             // so don't calculate that here.
@@ -216,7 +216,7 @@ export class TownScene extends SceneUIBase {
                 region.townData.spendFriendship(friendshipCost);
             }
             player.addGold(-gold);
-            player.spendResource(resource, tier);
+            player.spendResource(resource, resourceTier);
             region.townData.increaseTechLevel(tech);
             this._updateStatus();
             this._refreshTechs();
@@ -247,7 +247,7 @@ export class TownScene extends SceneUIBase {
 
         var txt = "Population: " + Math.round(region.townData.currentPopulation) + "/" + Math.floor(region.townData.getMaxPopulation()) + "\n" +
             "Tax Income: " + Math.round(region.townData.getTownIncome()) + "g/week\n" +
-            "T" + region.townData.tier + " Crafting Cost: " + (Math.round(player.craftingCosts[region.townData.tier - 1] * 10000) / 100) + "%\n" +
+            "T" + region.townData.tier + " Crafting Cost: " + (Math.round(player.getCraftingCosts(region.townData.tier - 1) * 10000) / 100) + "%\n" +
             "Economy: " + Math.round(region.townData.economyMulti * 100 * govBonus) + "%\n" +
             "Production: " + Math.round(prodBonus * 100) + "%\n" +
             "Bounty Gold: " + Math.round(region.townData.bountyMulti * 100) + "%\n" +

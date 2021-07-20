@@ -197,7 +197,10 @@ export class MoonlightData {
                 buildings: { name: "Lazy Townsfolk", completions: 0, maxCompletions: 5, unlocked: false, fastestTime: 0 },
                 talent: { name: "Talentless", completions: 0, maxCompletions: 5, unlocked: false, fastestTime: 0 },
                 megamonsters: { name: "Mega Monsters", completions: 0, maxCompletions: 5, unlocked: false, fastestTime: 0 },
-                outcast: { name: "Outcast", completions: 0, maxCompletions: 5, unlocked: false, fastestTime: 0 }
+                outcast: { name: "Outcast", completions: 0, maxCompletions: 5, unlocked: false, fastestTime: 0 },
+                time2: { name: "A Matter of Decades", completions: 0, maxCompletions: 5, unlocked: false, fastestTime: 0 },
+                forge2: { name: "Forged Ahead 2: Reforged", completions: 0, maxCompletions: 5, unlocked: false, fastestTime: 0 },
+                capitalism: { name: "Capitalism", completions: 0, maxCompletions: 5, unlocked: false, fastestTime: 0 },
             };
 
             MoonlightData.instance = this;
@@ -234,6 +237,12 @@ export class MoonlightData {
             case "Mega Monsters":
                 return this.challenges.megamonsters;
             case "Outcast":
+                return this.challenges.outcast;
+            case "A Matter of Decades":
+                return this.challenges.outcast;
+            case "Forged Ahead 2: Reforged":
+                return this.challenges.outcast;
+            case "Capitalism":
                 return this.challenges.outcast;
         }
     }

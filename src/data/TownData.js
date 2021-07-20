@@ -6,6 +6,7 @@ import { DynamicSettings } from "./DynamicSettings";
 import { ProgressionStore } from "./ProgressionStore";
 import { Dungeon } from "./Dungeon";
 import { RuneRegistry } from "./RuneRegistry";
+import { StarData } from "./StarData";
 
 export class TownData {
     static getTechGoldCost(tech, tier) {
@@ -34,12 +35,13 @@ export class TownData {
             Statics.FRIENDSHIP_FLAT) * Statics.FRIENDSHIP_FLAT;
     }
 
-    constructor(tier) {
+    constructor(tier, resourceTier) {
         var moonData = new MoonlightData();
 
         this.currentPopulation = 50;
         this.maxPopulation = 100;
         this.tier = tier;
+        this.resourceTier = resourceTier;
         this.economyMulti = 1;
         this.bountyMulti = 1;
         this.productionMulti = 1;
@@ -106,11 +108,11 @@ export class TownData {
                 goldCosts: [25, 25, 15], resources: [[0, 0, 0], [10, 10, 5], [0, 0, 0], [5, 5, 5], [0, 0, 0], [0, 0, 0]]
             },
             tavern: {
-                name: "Tavern", level: 0, maxLevel: 3, requires: [],
+                name: "Tavern", level: 0, maxLevel: 3 + StarData.getInstance().perks.construction.level, requires: [],
                 goldCosts: [250, 150, 50], resources: [[150, 150, 40], [0, 0, 0], [0, 0, 0], [0, 0, 0], [100, 100, 35], [0, 0, 0]]
             },
             market: {
-                name: "Market", level: 0, maxLevel: 3, requires: [],
+                name: "Market", level: 0, maxLevel: 3 + StarData.getInstance().perks.construction.level, requires: [],
                 goldCosts: [400, 250, 60], resources: [[150, 150, 30], [75, 75, 30], [0, 0, 0], [75, 75, 30], [100, 100, 35], [75, 75, 30]]
             }
         };
@@ -168,7 +170,8 @@ export class TownData {
         var nightLabourBonus = this.nightLabourActive === true ? (1 + 0.1 * MoonlightData.getInstance().moonperks.nightlabour.level) : 1;
         var multi = this.productionMulti *
             (1 + this.friendshipLevel * 0.01 * MoonlightData.getInstance().moonperks.motivatedlabor.level) *
-            nightLabourBonus * DynamicSettings.getInstance().productionMulti * this.dungeonProdMulti;
+            nightLabourBonus * DynamicSettings.getInstance().productionMulti * this.dungeonProdMulti *
+            (1 + StarData.getInstance().perks.tools.level * 0.25);
         if (DynamicSettings.getInstance().friendshipToProduction === true) {
             return multi + this.friendshipLevel * 0.05;
         } else {
@@ -371,7 +374,8 @@ export class TownData {
             if (this.currentPopulation > this.maxPopulation) {
                 this.currentPopulation = Math.max(this.getMaxPopulation(), this.currentPopulation * 0.9);
             } else {
-                this.currentPopulation = Math.min(this.getMaxPopulation(), this.currentPopulation * Statics.POPULATION_GROWTH);
+                this.currentPopulation = Math.min(this.getMaxPopulation(), this.currentPopulation * (Statics.POPULATION_GROWTH +
+                    StarData.getInstance().perks.fertility.level * 0.01));
             }
             PlayerData.getInstance().addGold(this.getTownIncome());
             PlayerData.getInstance().addShade(this.currentPopulation * 0.1 *
@@ -396,6 +400,7 @@ export class TownData {
             cp: this.currentPopulation,
             mp: this.maxPopulation,
             t: this.tier,
+            rt: this.resourceTier,
             em: this.economyMulti,
             bm: this.bountyMulti,
             pm: this.productionMulti,
@@ -439,6 +444,7 @@ export class TownData {
         this.villagerPowerMulti = saveObj.vpm ? saveObj.vpm : 1;
         this.villagerHealth = saveObj.vh ? saveObj.vh : 10;
         this.villagerHealthMulti = saveObj.vhm ? saveObj.vhm : 1;
+        this.resourceTier = saveObj.rt ? saveObj.rt : this.tier - 1;
         this.friendshipToNext = TownData.calcFriendshipToLevel(this.friendshipLevel);
         for (var i = 0; i < saveObj.bld.length; i++) {
             if (this.buildings[saveObj.bld[i][0]] !== undefined) {

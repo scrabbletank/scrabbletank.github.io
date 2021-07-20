@@ -6,6 +6,7 @@ import { RegionRegistry } from "../data/RegionRegistry";
 import { Statics } from "../data/Statics";
 import { WorldData } from "../data/WorldData";
 import { FloatingTooltip } from "../ui/FloatingTooltip";
+import { MyrahTileDialog } from "../ui/MyrahTileDialog";
 import { ProgressBar } from "../ui/ProgressBar";
 import { RebirthDialog } from "../ui/RebirthDialog";
 import { TextButton } from "../ui/TextButton";
@@ -98,7 +99,7 @@ export class RegionView {
         } else {
             return {
                 sprite: this.region.map[y][x].building.texture.sprite,
-                tile: this.region.map[y][x].building.texture.tile + 8 * (this.region.map[y][x].building.tier - 1),
+                tile: this.region.map[y][x].building.texture.tile + 10 * (this.region.map[y][x].building.tier - 1),
                 w: this.region.map[y][x].building.texture.w,
                 h: this.region.map[y][x].building.texture.h
             };
@@ -114,8 +115,12 @@ export class RegionView {
         } else if (this.region.map[y][x].explored === false && this.region.map[y][x].revealed === true) {
             clr = Common.colorLerp(clr, Phaser.Display.Color.GetColor(0, 0, 0), 0.65);
         }
+        if (this.region.map[y][x].hasShard === true && this.region.map[y][x].revealed === true) {
+            border = Phaser.Display.Color.GetColor(177, 100, 169);
+            clr = Common.colorLerp(clr, Phaser.Display.Color.GetColor(177, 100, 169), 0.65);
+        }
         var rect = this.scene.add.rectangle(this.x + (x + 0.5) * WIDTH + this.offsetX,
-            this.y + (y + 0.5) * HEIGHT + this.offsetY, WIDTH - 1, HEIGHT - 1, clr);
+            this.y + (y + 0.5) * HEIGHT + this.offsetY, WIDTH - 2, HEIGHT - 2, clr);
         rect.strokeColor = border;
         rect.isStroked = true;
         rect.lineWidth = 1.5;
@@ -142,6 +147,9 @@ export class RegionView {
         var txt = "Tile " + this.letters[y] + (x + 1) + '\n';
 
         if (this.region.map[y][x].revealed === true) {
+            if (this.region.map[y][x].hasShard === true) {
+                txt += "Starlight ";
+            }
             txt += this.region.map[y][x].name + '\n';
             if (this.region.map[y][x].difficulty < 1) {
                 txt += "Difficulty: Weak\n";
@@ -206,12 +214,18 @@ export class RegionView {
                 .onLeaveHandler(() => { this._leaveClickedHandler(); });
             return;
         }
+        if (this.region.map[y][x].name === "Starlight Palace") {
+            this.rebirthDialog = new MyrahTileDialog(this.scene, this.x + 250, this.y + 215)
+                .onRebirthHandler(() => { this._myrahTileClickedHandler(this.region.map[y][x]); })
+                .onLeaveHandler(() => { this._leaveClickedHandler(); });
+            return;
+        }
         if (this.tileSelectWindow !== undefined) {
             this.tileSelectWindow.destroy();
             this.tileSelectWindow = undefined;
         }
 
-        this.tileSelectWindow = new TileSelectWindow(this.scene, this.x + 200, this.x + 200, this.region.map[y][x]);
+        this.tileSelectWindow = new TileSelectWindow(this.scene, this.x + 190, this.y + 240, this.region.map[y][x]);
         this.tileSelectWindow.addOnActionHandler((action, blob) => { this._tileActionHandler(action, blob); });
     }
 
@@ -233,8 +247,8 @@ export class RegionView {
                 }
                 if (this.region._canUpgrade(blob.tile) === true) {
                     this.region.upgradeBuilding(blob.tile.x, blob.tile.y);
-                    this.tileElements[blob.tile.y][blob.tile.x].building.setTexture(blob.tile.building.texture.sprite,
-                        blob.tile.building.texture.tile + 8 * (blob.tile.building.tier - 1));
+                    var texture = this._getBuildingImage(blob.tile.x, blob.tile.y)
+                    this.tileElements[blob.tile.y][blob.tile.x].building.setTexture(texture.sprite, texture.tile);
                     this.scene.scene.get("TownScene")._updateStatus();
                 }
                 break;
@@ -257,10 +271,8 @@ export class RegionView {
         this.rebirthDialog = undefined;
 
         WorldData.getInstance().handleRunCompletion();
-
-        var moonScene = this.scene.scene.get("MoonlightScene");
-        moonScene.enableLeveling();
-        moonScene._onMoonlightChanged();
+        this.scene.scene.get("MoonlightScene").refresh();
+        this.scene.scene.get("MoonlightScene").enableLeveling();
         this.scene.scene.bringToTop("MoonlightScene");
     }
     _leaveClickedHandler() {
@@ -269,12 +281,21 @@ export class RegionView {
             this.rebirthDialog = undefined;
         }
     }
+    _myrahTileClickedHandler(tile) {
+        this.rebirthDialog.destroy();
+        this.rebirthDialog = undefined;
+        this.scene.scene.bringToTop("MyrahScene");
+        this.scene.scene.get("MyrahScene").initFight(tile);
+    }
     _changeBlueprintHandler(index) {
         this.region.blueprint = index;
         this.refreshDetails();
     }
 
     _exploreTile(tile, fromAutoExplore) {
+        if (tile.parent.isExplorable(tile.x, tile.y) === false) {
+            return;
+        }
         this.activeTile = tile;
         if (ProgressionStore.getInstance().unlocks.combatTab === false) {
             ProgressionStore.getInstance().registerFeatureUnlocked(Statics.UNLOCK_COMBAT_TAB,
@@ -297,7 +318,10 @@ export class RegionView {
                     "a whole world out there. I was wondering what that last tab was going to be.");
             }
 
-            if (WorldData.instance.regionList.length - 1 === tier && WorldData.instance.nextRegions.length === 0) {
+            console.log([WorldData.instance.regionList.length - 1 === tier, WorldData.instance.nextRegions.length === 0,
+            WorldData.instance.regionList.length < 10, ProgressionStore.getInstance().persistentUnlocks.starshards === true])
+            if (WorldData.instance.regionList.length - 1 === tier && WorldData.instance.nextRegions.length === 0 &&
+                (WorldData.instance.regionList.length < 10 || ProgressionStore.getInstance().persistentUnlocks.starshards === true)) {
                 WorldData.instance.generateRegionChoices();
                 this.scene.scene.get("WorldScene")._refreshRegions();
             }
@@ -328,6 +352,10 @@ export class RegionView {
             border = Phaser.Display.Color.GetColor(40, 80, 40);
         } else if (tile.explored === false && tile.revealed === true) {
             clr = Common.colorLerp(clr, Phaser.Display.Color.GetColor(0, 0, 0), 0.65);
+        }
+        if (tile.hasShard === true && tile.revealed === true) {
+            border = Phaser.Display.Color.GetColor(177, 100, 169);
+            clr = Common.colorLerp(clr, Phaser.Display.Color.GetColor(177, 100, 169), 0.65);
         }
         this.tileElements[tile.y][tile.x].rect.fillColor = clr;
         this.tileElements[tile.y][tile.x].rect.strokeColor = border;
@@ -665,9 +693,9 @@ export class RegionView {
         this.invasionLabel.setText("Invasion: " + Math.floor(invasionPercent * 100) + "%");
         this.invasionLabel.setTint(Common.colorLerp(Phaser.Display.Color.GetColor(255, 255, 255),
             Phaser.Display.Color.GetColor(255, 0, 255), invasionPercent));
+        this.sightingVal = (this.sightingVal + delta) % 2000;
+        var lerp = Math.sin((this.sightingVal / 2000) * Math.PI * 2) * 0.5 + 0.5;
         if (this.region.sightings.length > 0) {
-            this.sightingVal = (this.sightingVal + delta) % 2000;
-            var lerp = Math.sin((this.sightingVal / 2000) * Math.PI * 2) * 0.5 + 0.5;
             for (var i = 0; i < this.region.sightings.length; i++) {
                 var s = this.region.sightings[i];
                 var clr = toPhaserColor(this.region.map[s[0]][s[1]].color);
@@ -793,7 +821,7 @@ export class RegionView {
         this.autoInvadeButton.setVisible(MoonlightData.getInstance().challenges.invasion.completions > 0);
         this.autoUpgradeLabel.setVisible(MoonlightData.getInstance().challenges.outcast.completions > 0);
         this.autoUpgradeButton.setVisible(MoonlightData.getInstance().challenges.outcast.completions > 0);
-        
+
         for (var i = 0; i < this.tileElements.length; i++) {
             for (var t = 0; t < this.tileElements[0].length; t++) {
                 this.tileElements[i][t].rect.setVisible(visible);

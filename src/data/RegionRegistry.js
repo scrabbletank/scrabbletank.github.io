@@ -9,7 +9,8 @@ var RegionRegistry = {
             clr: [140, 110, 0],
             explorationNeeded: 25000,
             yields: [1.25, 0, 2.25, 0, 1.5, 1],
-            preferredBuilding: "metal"
+            preferredBuilding: "metal",
+            buildable: true
         },
         drakemountain: {
             name: "Drake Mountains",
@@ -17,7 +18,8 @@ var RegionRegistry = {
             clr: [130, 30, 30],
             explorationNeeded: 27500,
             yields: [0, 0, 2.25, 0, 2.25, 1.5],
-            preferredBuilding: "metal"
+            preferredBuilding: "metal",
+            buildable: true
         },
         forest: {
             name: "Forest",
@@ -25,7 +27,8 @@ var RegionRegistry = {
             clr: [0, 160, 0],
             explorationNeeded: 13000,
             yields: [1.75, 1.25, 0, 1.5, 0, 0],
-            preferredBuilding: "wood"
+            preferredBuilding: "wood",
+            buildable: true
         },
         wode: {
             name: "Wode",
@@ -33,7 +36,8 @@ var RegionRegistry = {
             clr: [0, 130, 30],
             explorationNeeded: 16000,
             yields: [2.25, 1, 0, 1.5, 0, 0.6],
-            preferredBuilding: "wood"
+            preferredBuilding: "wood",
+            buildable: true
         },
         ancientforest: {
             name: "Ancient Forest",
@@ -41,7 +45,8 @@ var RegionRegistry = {
             clr: [0, 90, 0],
             explorationNeeded: 20000,
             yields: [2.5, 0, 0, 1.25, 1, 1],
-            preferredBuilding: "wood"
+            preferredBuilding: "wood",
+            buildable: true
         },
         plains: {
             name: "Plains",
@@ -49,7 +54,8 @@ var RegionRegistry = {
             clr: [20, 220, 20],
             explorationNeeded: 9000,
             yields: [0.9, 2.5, 0, 1.25, 0.75, 0],
-            preferredBuilding: "leather"
+            preferredBuilding: "leather",
+            buildable: true
         },
         savanna: {
             name: "Savanna",
@@ -57,7 +63,8 @@ var RegionRegistry = {
             clr: [190, 190, 60],
             explorationNeeded: 13000,
             yields: [0.75, 1.5, 0, 2, 1.25, 0],
-            preferredBuilding: "fiber"
+            preferredBuilding: "fiber",
+            buildable: true
         },
         desert: {
             name: "Desert",
@@ -65,7 +72,8 @@ var RegionRegistry = {
             clr: [220, 190, 140],
             explorationNeeded: 12000,
             yields: [0.75, 0, 0, 0, 1.75, 2],
-            preferredBuilding: "crystal"
+            preferredBuilding: "crystal",
+            buildable: true
         },
         hills: {
             name: "Hills",
@@ -73,7 +81,8 @@ var RegionRegistry = {
             clr: [130, 190, 50],
             explorationNeeded: 11000,
             yields: [0, 1, 0, 0, 2.75, 0.75],
-            preferredBuilding: "stone"
+            preferredBuilding: "stone",
+            buildable: true
         },
         plateau: {
             name: "Plateau",
@@ -81,7 +90,8 @@ var RegionRegistry = {
             clr: [200, 120, 40],
             explorationNeeded: 15000,
             yields: [0, 3, 0, 0.75, 2, 0],
-            preferredBuilding: "leather"
+            preferredBuilding: "leather",
+            buildable: true
         },
         lake: {
             name: "Lake",
@@ -89,7 +99,8 @@ var RegionRegistry = {
             clr: [20, 40, 170],
             explorationNeeded: 19000,
             yields: [0, 0, 0, 0, 0, 0],
-            preferredBuilding: "metal"
+            preferredBuilding: "metal",
+            buildable: true
         },
         oasis: {
             name: "Oasis",
@@ -97,7 +108,8 @@ var RegionRegistry = {
             clr: [0, 140, 190],
             explorationNeeded: 15000,
             yields: [0, 0, 0, 0, 0, 0],
-            preferredBuilding: "metal"
+            preferredBuilding: "metal",
+            buildable: true
         },
         swamp: {
             name: "Swamp",
@@ -105,7 +117,8 @@ var RegionRegistry = {
             clr: [0, 110, 90],
             explorationNeeded: 19000,
             yields: [1, 1.5, 0, 2.25, 0, 0.7],
-            preferredBuilding: "fiber"
+            preferredBuilding: "fiber",
+            buildable: true
         },
         town: {
             name: "Town",
@@ -113,7 +126,8 @@ var RegionRegistry = {
             clr: [230, 230, 230],
             explorationNeeded: 10,
             yields: [0, 0, 0, 0, 0, 0],
-            preferredBuilding: "metal"
+            preferredBuilding: "metal",
+            buildable: false
         },
         mysticgate: {
             name: "Mystic Gate",
@@ -121,7 +135,8 @@ var RegionRegistry = {
             clr: [153, 50, 204],
             explorationNeeded: 30000,
             yields: [0, 0, 0, 0, 0, 0],
-            preferredBuilding: "metal"
+            preferredBuilding: "metal",
+            buildable: false
         },
         crypt: {
             name: "Ancient Crypt",
@@ -129,7 +144,53 @@ var RegionRegistry = {
             clr: [255, 225, 90],
             explorationNeeded: 30000,
             yields: [0, 0, 0, 0, 0, 0],
-            preferredBuilding: "metal"
+            preferredBuilding: "metal",
+            buildable: false
+        },
+        starfield: {
+            name: "Star Field",
+            enemies: ["star1", "star2", "star3"],
+            clr: [240, 240, 150],
+            explorationNeeded: 25000,
+            yields: [0, 0, 0, 0, 0, 0],
+            preferredBuilding: "metal",
+            buildable: false
+        },
+        starfield2: {
+            name: "Star Field",
+            enemies: ["star1", "star2", "star3"],
+            clr: [160, 200, 250],
+            explorationNeeded: 25000,
+            yields: [0, 0, 0, 0, 0, 0],
+            preferredBuilding: "metal",
+            buildable: false
+        },
+        starfield3: {
+            name: "Star Field",
+            enemies: ["star1", "star2", "star3"],
+            clr: [240, 170, 130],
+            explorationNeeded: 25000,
+            yields: [0, 0, 0, 0, 0, 0],
+            preferredBuilding: "metal",
+            buildable: false
+        },
+        void: {
+            name: "Void",
+            enemies: ["void"],
+            clr: [46, 47, 75],
+            explorationNeeded: 600000,
+            yields: [0, 0, 0, 0, 0, 0],
+            preferredBuilding: "metal",
+            buildable: false
+        },
+        starpalace: {
+            name: "Starlight Palace",
+            enemies: ["myrah"],
+            clr: [235, 134, 181],
+            explorationNeeded: 10,
+            yields: [0, 0, 0, 0, 0, 0],
+            preferredBuilding: "metal",
+            buildable: false
         }
     },
     REGION_TYPES: {
@@ -203,8 +264,59 @@ var RegionRegistry = {
                 { terrain: "savanna", power: [3, 5], amount: 3 },
                 { terrain: "hills", power: [4, 7], amount: 3 }
             ]
+        },
+        void: {
+            name: "Starlight Void",
+            points: []
         }
-    }
+    },
+    VOID_MAPS: [
+        [
+            [0, 0, 0, 0, 1, 2, 1, 0, 0, 0, 0],
+            [0, 0, 0, 0, 0, 1, 0, 0, 0, 0, 0],
+            [0, 1, 1, 1, 1, 1, 1, 1, 1, 1, 0],
+            [0, 1, 0, 0, 0, 0, 0, 0, 0, 1, 0],
+            [0, 1, 0, 0, 0, 0, 0, 0, 0, 1, 0],
+            [0, 1, 0, 1, 1, 1, 1, 1, 0, 1, 0],
+            [0, 1, 0, 1, 0, 1, 0, 1, 0, 1, 0],
+            [0, 1, 0, 1, 0, 1, 0, 1, 0, 1, 0],
+            [0, 1, 1, 1, 0, 1, 0, 1, 1, 1, 0],
+            [0, 0, 0, 0, 0, 1, 0, 0, 0, 0, 0],
+            [0, 1, 1, 1, 0, 1, 1, 1, 0, 1, 0],
+            [0, 1, 0, 1, 1, 1, 0, 1, 1, 1, 0],
+            [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0],
+        ],
+        [
+            [0, 0, 0, 0, 1, 2, 1, 0, 0, 0, 0],
+            [0, 0, 0, 0, 1, 1, 1, 0, 0, 0, 0],
+            [1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 0],
+            [1, 1, 1, 0, 0, 0, 0, 0, 0, 1, 0],
+            [1, 1, 1, 0, 0, 0, 0, 0, 0, 1, 0],
+            [1, 1, 1, 1, 1, 1, 1, 0, 1, 1, 1],
+            [0, 1, 0, 0, 1, 1, 1, 0, 1, 1, 1],
+            [0, 1, 0, 0, 1, 1, 1, 1, 1, 1, 1],
+            [0, 1, 0, 0, 0, 1, 0, 0, 1, 1, 1],
+            [0, 1, 0, 0, 0, 1, 0, 0, 0, 0, 0],
+            [0, 1, 0, 0, 1, 1, 1, 0, 0, 0, 0],
+            [0, 1, 1, 1, 1, 1, 1, 0, 0, 0, 0],
+            [0, 0, 0, 0, 1, 1, 1, 0, 0, 0, 0],
+        ],
+        [
+            [0, 0, 0, 0, 1, 2, 1, 0, 0, 0, 0],
+            [0, 0, 0, 0, 1, 1, 1, 0, 0, 0, 0],
+            [1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 0],
+            [1, 1, 1, 0, 0, 0, 0, 0, 0, 1, 0],
+            [1, 1, 1, 0, 0, 0, 0, 0, 0, 1, 0],
+            [1, 1, 1, 0, 1, 1, 1, 0, 1, 1, 1],
+            [0, 1, 0, 0, 1, 1, 1, 0, 1, 1, 1],
+            [0, 1, 0, 0, 1, 1, 1, 1, 1, 1, 1],
+            [0, 1, 0, 0, 0, 1, 0, 0, 1, 1, 1],
+            [0, 1, 0, 0, 0, 1, 0, 0, 0, 1, 0],
+            [0, 1, 0, 0, 1, 1, 1, 0, 1, 1, 0],
+            [0, 1, 1, 1, 1, 1, 1, 1, 1, 1, 0],
+            [0, 0, 0, 0, 1, 1, 1, 0, 0, 0, 0],
+        ]
+    ]
 };
 
 export { RegionRegistry };

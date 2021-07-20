@@ -1,5 +1,6 @@
 import { Common } from "../utils/Common";
 import { MoonlightData } from "./MoonlightData";
+import { StarData } from "./StarData";
 import { Statics } from "./Statics";
 import { WorldData } from "./WorldData";
 
@@ -47,7 +48,7 @@ export class Dungeon {
                         break;
                     case Statics.DUNGEON.SHADE:
                         var shade = Math.floor((1600 + MoonlightData.getInstance().moonperks.shadow2.level * 75) * (1 + (this.level / 4)) *
-                            MoonlightData.getInstance().getShadowBonus());
+                            MoonlightData.getInstance().getShadowBonus() * (1 + StarData.getInstance().perks.mists.level * 0.25));
                         this.rewards.push({ type: num, amount: shade });
                         break;
                     case Statics.DUNGEON.MOTES:

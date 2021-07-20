@@ -3,6 +3,8 @@ import { Statics } from "./Statics";
 import { MoonlightData } from "./MoonlightData";
 import { PlayerData } from "./PlayerData";
 import { Common } from "../utils/Common";
+import { StarData } from "./StarData";
+import { DynamicSettings } from "./DynamicSettings";
 
 export class GearData {
     constructor() {
@@ -57,21 +59,27 @@ export class GearData {
 
     upgradeGear(gear) {
         var player = PlayerData.getInstance();
-        var craftCostMulti = gear.tier <= 0 ? 1 : player.craftingCosts[gear.tier - 1];
+        var craftCostMulti = gear.tier <= 0 ? 1 : player.getCraftingCosts(gear.tier - 1);
         var res = [];
+        var resTier = Math.min(7, Math.max(DynamicSettings.getInstance().minResourceTier,
+            DynamicSettings.getInstance().minResourceTier + gear.tier - 1));
         for (var i = 0; i < gear.costs.length; i++) {
             res.push(gear.costs[i] * craftCostMulti);
         }
-        if (Common.canCraft(res, player.resources[Math.max(0, gear.tier - 1)]) === false) {
+        if (Common.canCraft(res, player.resources[resTier]) === false) {
             return;
         }
-        player.spendResource(res, Math.max(0, gear.tier - 1));
+        player.spendResource(res, resTier);
         if (player.isEquipedItem(gear)) {
             player.unequip(gear.slotType);
             gear.bringToLevel(gear.level + 1);
             player.equip(gear);
         } else {
-            gear.bringToLevel(gear.level + 1);
+            if (gear.level === 0 && StarData.getInstance().perks.starmetal.level > 0) {
+                gear.bringToLevel(StarData.getInstance().perks.starmetal.level * 5);
+            } else {
+                gear.bringToLevel(gear.level + 1);
+            }
         }
     }
 

@@ -505,6 +505,156 @@ creatureDefs['lootgoblin'] = {
     rewardBase: 15,
     icon: { sprite: "enemyicons", tile: 14 }
 };
+creatureDefs['star1'] = {
+    name: "Raging Star",
+    scaleBlock:
+    {
+        strength: 1.5,
+        dexterity: 1.4,
+        agility: 1,
+        endurance: 1.2,
+        recovery: 1,
+        defense: 1,
+        accuracy: 0.9,
+        armor: 1.9,
+        health: 1,
+        healthRegen: 1,
+        damageMin: 1.1,
+        damageMax: 1.3,
+        hit: 1.2,
+        evasion: 1.2
+    },
+    attackSpeed: 1350,
+    critChance: 0.17,
+    shadeBase: 28,
+    rewardBase: 2.4,
+    icon: { sprite: "enemyicons", tile: 16 }
+};
+creatureDefs['star2'] = {
+    name: "Pulsing Star",
+    scaleBlock:
+    {
+        strength: 1.1,
+        dexterity: 1.4,
+        agility: 1.7,
+        endurance: 0.9,
+        recovery: 1.4,
+        defense: 1.1,
+        accuracy: 1.1,
+        armor: 1.4,
+        health: 1,
+        healthRegen: 1.1,
+        damageMin: 1.1,
+        damageMax: 1.35,
+        hit: 1.1,
+        evasion: 1.1
+    },
+    attackSpeed: 1150,
+    critChance: 0.35,
+    shadeBase: 30,
+    rewardBase: 2.6,
+    icon: { sprite: "enemyicons", tile: 18 }
+};
+creatureDefs['star3'] = {
+    name: "Rising Star",
+    scaleBlock:
+    {
+        strength: 1.5,
+        dexterity: 0.8,
+        agility: 1,
+        endurance: 1.6,
+        recovery: 1.2,
+        defense: 1.3,
+        accuracy: 0.9,
+        armor: 1.5,
+        health: 1.5,
+        healthRegen: 1,
+        damageMin: 1,
+        damageMax: 1.5,
+        hit: 1,
+        evasion: 1
+    },
+    attackSpeed: 1700,
+    critChance: 0.1,
+    shadeBase: 32,
+    rewardBase: 2.8,
+    icon: { sprite: "enemyicons", tile: 17 }
+};
+creatureDefs['void'] = {
+    name: "Voidspawn",
+    scaleBlock:
+    {
+        strength: 1.2,
+        dexterity: 1.2,
+        agility: 1.2,
+        endurance: 1.2,
+        recovery: 1.2,
+        defense: 1.2,
+        accuracy: 1.2,
+        armor: 1.1,
+        health: 1.5,
+        healthRegen: 1.1,
+        damageMin: 1,
+        damageMax: 1.2,
+        hit: 1.1,
+        evasion: 1.1
+    },
+    attackSpeed: 1400,
+    critChance: 0.25,
+    shadeBase: 30,
+    rewardBase: 2.6,
+    icon: { sprite: "enemyicons", tile: 19 }
+};
+creatureDefs['myrah1'] = {
+    name: "Star Queen",
+    scaleBlock:
+    {
+        strength: 1.3,
+        dexterity: 1.3,
+        agility: 1.3,
+        endurance: 1.3,
+        recovery: 1.3,
+        defense: 1.3,
+        accuracy: 1.3,
+        armor: 1.3,
+        health: 1.3,
+        healthRegen: 1.3,
+        damageMin: 1,
+        damageMax: 1.5,
+        hit: 1.3,
+        evasion: 1.3
+    },
+    attackSpeed: 1000,
+    critChance: 0.22,
+    shadeBase: 30,
+    rewardBase: 2.6,
+    icon: { sprite: "enemyicons", tile: 20 }
+};
+creatureDefs['myrah2'] = {
+    name: "MYRAH",
+    scaleBlock:
+    {
+        strength: 1.5,
+        dexterity: 1.5,
+        agility: 1.5,
+        endurance: 1.5,
+        recovery: 1.5,
+        defense: 1.5,
+        accuracy: 1.5,
+        armor: 1.5,
+        health: 1.5,
+        healthRegen: 1.5,
+        damageMin: 1,
+        damageMax: 1.5,
+        hit: 1.5,
+        evasion: 1.5
+    },
+    attackSpeed: 1000,
+    critChance: 0.33,
+    shadeBase: 30,
+    rewardBase: 2.6,
+    icon: { sprite: "enemyicons", tile: 21 }
+};
 
 dungeonDefs['goblin'] = {
     name: "Goblin Horde",
