@@ -14,11 +14,11 @@ const BLD_TO_TEXTURE = {
     prod: { sprite: "bldicons", tile: 2, w: 32, h: 32 },
     house: { sprite: "bldicons", tile: 6, w: 32, h: 32 },
     watchtower: { sprite: "bldicons", tile: 7, w: 32, h: 32 },
-    tavern: { sprite: "bldicons", tile: 33, w: 32, h: 32 },
-    market: { sprite: "bldicons", tile: 32, w: 32, h: 32 },
-    alchemy: { sprite: "bldicons", tile: 35, w: 32, h: 32 },
-    dojo: { sprite: "bldicons", tile: 38, w: 32, h: 32 },
-    warehouse: { sprite: "bldicons", tile: 36, w: 32, h: 32 },
+    tavern: { sprite: "bldicons", tile: 9, w: 32, h: 32 },
+    market: { sprite: "bldicons", tile: 8, w: 32, h: 32 },
+    alchemy: { sprite: "bldicons", tile: 51, w: 32, h: 32 },
+    dojo: { sprite: "bldicons", tile: 54, w: 32, h: 32 },
+    warehouse: { sprite: "bldicons", tile: 52, w: 32, h: 32 },
     none: { sprite: "icons", tile: 23, w: 32, h: 32 }
 }
 
