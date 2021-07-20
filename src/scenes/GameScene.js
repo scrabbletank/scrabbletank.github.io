@@ -292,7 +292,6 @@ export class GameScene extends SceneUIBase {
         });
         this.player.registerEvent("onTalentChanged", () => {
             this.updateStatIcons();
-            this.worldScene._onInvasionPowerChanged();
         });
         this.player.registerEvent("onClassSelected", () => { this._handleClassSelected(); });
 
@@ -627,7 +626,7 @@ export class GameScene extends SceneUIBase {
 
     _onRewardCallback(rewards) {
         if (this.progression.unlocks.craftingUI === true) {
-            GearData.getInstance().tiersAvailable = Math.max(DynamicSettings.getInstance().maxGearTier,
+            GearData.getInstance().tiersAvailable = Math.min(DynamicSettings.getInstance().maxGearTier,
                 Math.max(GearData.getInstance().tiersAvailable, rewards.regionLevel + 1));
             this.gearScene._updateTierButtons();
         }
@@ -811,6 +810,7 @@ export class GameScene extends SceneUIBase {
             progression: this.progression.save(),
             moon: this.moonlight.save(),
             star: this.starData.save(),
+            ritual: RitualData.getInstance().save(),
             lore: LoreStore.getInstance().save()
         }
     }
@@ -842,6 +842,9 @@ export class GameScene extends SceneUIBase {
         this.moonlight.load(saveObj.moon, saveObj.version);
         if (saveObj.star !== undefined) {
             this.starData.load(saveObj.star, saveObj.version);
+        }
+        if (saveObj.ritual !== undefined) {
+            RitualData.getInstance().load(saveObj.ritual, saveObj.version);
         }
         gearData.load(saveObj.gear, saveObj.version);
         //player needs to load after gear

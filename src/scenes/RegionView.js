@@ -122,8 +122,8 @@ export class RegionView {
         }
         var rect = this.scene.add.rectangle(this.x + (x + 0.5) * WIDTH + this.offsetX,
             this.y + (y + 0.5) * HEIGHT + this.offsetY, WIDTH - 2, HEIGHT - 2, clr);
-        rect.strokeColor = border;
         rect.isStroked = true;
+        rect.strokeColor = border;
         rect.lineWidth = 1.5;
         rect.setInteractive({ useHandCursor: true })
             .on("pointerdown", () => { this._handleTileClick(x, y); })
@@ -324,7 +324,7 @@ export class RegionView {
             if (WorldData.instance.regionList.length - 1 === tier && WorldData.instance.nextRegions.length === 0 &&
                 (WorldData.instance.regionList.length < 10 || ProgressionStore.getInstance().persistentUnlocks.starshards === true)) {
                 WorldData.instance.generateRegionChoices();
-                this.scene.scene.get("WorldScene")._refreshRegions();
+                this.scene.scene.get("WorldScene").refresh();
             }
         }
         if (tile.explored === false) {
@@ -428,6 +428,7 @@ export class RegionView {
                 this.scene.scene.get("DarkWorld").changeRegion();
                 this.scene.scene.get("RegionScene").changeRegion();
                 this.scene.scene.get("TownScene").changeRegion();
+                this.scene.scene.get("WorldScene").refresh();
                 this.triggerAutoExplore(tile, WorldData.getInstance().regionList.length - 1);
             }
         }
@@ -666,6 +667,10 @@ export class RegionView {
             } else {
                 txt += " " + Statics.RESOURCE_NAMES[i] + ": " + (Math.floor(resources[i] * 100) / 100) + "\n";
             }
+        }
+        if (ProgressionStore.getInstance().persistentUnlocks.starshards === true) {
+            txt += '\nStar Shard Chance: ' + ((this.region.getStarShardChance() * 100) / 1).toString().substr(0, 4) + "%\n" +
+                "Star Shard Amount: " + Common.numberString(this.region.starshardsPerTile);
         }
         this.regionStats = this.scene.add.bitmapText(this.x + 660, h, "courier20", txt);
         this.regionStats.setVisible(this.region.townData.townExplored === true);

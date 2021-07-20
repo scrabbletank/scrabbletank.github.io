@@ -32,7 +32,7 @@ export class TileData {
         //variables to save
         this.regName = "plains";
         this.explored = false;
-        this.revealed = true;
+        this.revealed = false;
         this.difficulty = 0;
         this.amountExplored = 0;
         this.isInvaded = false;
@@ -98,7 +98,6 @@ export class TileData {
         tile.hasShard = saveObj.hs === undefined ? false : saveObj.hs;
         tile.x = saveObj.x;
         tile.y = saveObj.y;
-
         return tile;
     }
 
@@ -509,7 +508,7 @@ export class Region {
 
         // For unlocking Rituals, place a cultist fortress in region 12
         if (DynamicSettings.getInstance().challengeName === "" &&
-            ProgressionStore.getInstance().persistentUnlocks.rituals === false && this.regionLevel === 0) {
+            ProgressionStore.getInstance().persistentUnlocks.rituals === false && this.regionLevel === 11) {
             // the cultist lair is ontop of mount doom, a 5 tile area shaped like a '+'
             var x = Common.randint(1, this.width - 1);
             this.map[3][x].init("doomhill", maxDiff - 2, minDiff, this);
@@ -616,6 +615,15 @@ export class Region {
         }
     }
 
+    getStarShardChance() {
+        var starLevel = this.regionLevel + MoonlightData.getInstance().challenges.time2.completions;
+        var chance = Statics.BASE_STARSHARD_CHANCE * (1 + starLevel * Statics.STARSHARD_REGION_MULTI) *
+            RitualData.getInstance().starshardBonus;
+        while (chance > 0.1) {
+            chance = chance / 2;
+        }
+        return chance;
+    }
     getExplorePercent() {
         return this.tilesExplored / (this.width * this.height);
     }

@@ -20,7 +20,7 @@ export class WorldScene extends SceneUIBase {
     }
 
     refresh() {
-        if (activeView === 0) {
+        if (this.activeView === 0) {
             this.worldView._refreshRegions();
         }
     }
@@ -56,5 +56,6 @@ export class WorldScene extends SceneUIBase {
             this.worldView.setVisible(false);
             this.ritualView.setVisible(true);
         }
+        this.activeView = id;
     }
 }

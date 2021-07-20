@@ -1,3 +1,4 @@
+import { PlayerData } from "../data/PlayerData";
 import { WorldData } from "../data/WorldData";
 import { NewRegionWindow } from "../ui/NewRegionWindow";
 import { RegionButton } from "../ui/RegionButton";
@@ -14,6 +15,7 @@ export class WorldView {
         this.elements = [];
 
         WorldData.getInstance().registerEvent('invasionPowerChanged', () => { this._onInvasionPowerChanged(); });
+        PlayerData.getInstance().registerEvent("onTalentChanged", () => { this._onInvasionPowerChanged(); });
     }
 
     refresh() {
