@@ -516,7 +516,11 @@ export class GameScene extends SceneUIBase {
         for (var i = 0; i < this.resourceIncLabels.length; i++) {
             this.resourceIncLabels[i].setPosition(100, this.resourceStart + 40 + (i * 20));
         }
-        for (var i = DynamicSettings.getInstance().minResourceTier; i < this.resourceTierButtons.length; i++) {
+        for (var i = 0; i < this.resourceTierButtons.length; i++) {
+            if (i < DynamicSettings.getInstance().minResourceTier) {
+                this.resourceTierButtons[i].setVisible(false);
+                continue;
+            }
             this.resourceTierButtons[i].setPosition(20 + ((i - DynamicSettings.getInstance().minResourceTier) * 20), this.resourceStart + 20);
             this.resourceTierButtons[i].setVisible(this.player.resourceTierReached >= 1 && i <= this.player.resourceTierReached);
         }
