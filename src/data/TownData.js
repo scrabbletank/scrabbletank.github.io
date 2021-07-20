@@ -391,7 +391,7 @@ export class TownData {
             }
             PlayerData.getInstance().addGold(this.getTownIncome());
             if (DynamicSettings.getInstance().productionBuildingCost > 0) {
-                var bldCost = region.getProdBuildingCount() * DynamicSettings.getInstance().productionBuildingCost;
+                var bldCost = region.getProdBuildingCount() * DynamicSettings.getInstance().productionBuildingCost * 7;
                 if (bldCost > PlayerData.getInstance().gold) {
                     this.paidProdMulti = PlayerData.getInstance().gold / bldCost;
                 } else {

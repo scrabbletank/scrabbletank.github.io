@@ -944,20 +944,20 @@ export class TooltipRegistry {
             case "Cult Warders":
                 return "Permanently increases Villager Health by " + (statGrowth * 5) + " + (" + (50 + ritual.level * 25) + ").";
             case "Corrupted Strength":
-                return "Increases your Strength, Dexterity, and Agility by " + (ritual.level * 20) + "% + (20%), but reduces " +
+                return "Increases your Strength, Dexterity, and Agility by " + (ritual.level * 10) + "% + (10%), but reduces " +
                     "Moonlight by " + ml + "% - (~" + (-ritual.moonlight * 100) + "%) and " +
                     "Star Shard Chance by " + ss + "% - (~" + (-ritual.starshards * 100) + "%).";
             case "Corrupted Endurance":
-                return "Increases your Endurance, Recovery, and Defense by " + (ritual.level * 20) + "% + (20%), but reduces " +
+                return "Increases your Endurance, Recovery, and Defense by " + (ritual.level * 10) + "% + (10%), but reduces " +
                     "Moonlight by " + ml + "% - (~" + (-ritual.moonlight * 100) + "%) and " +
                     "Star Shard Chance by " + ss + "% - (~" + (-ritual.starshards * 100) + "%).";
             case "Corrupted Accuracy":
                 return "Increases your Crit Chance by " + (ritual.level * 10) + "% + (10%) and " +
-                    "Accuracy by " + (ritual.level * 25) + "% + (25%), but reduces " +
+                    "Accuracy by " + (ritual.level * 20) + "% + (20%), but reduces " +
                     "Moonlight by " + ml + "% - (~" + (-ritual.moonlight * 100) + "%) and " +
                     "Star Shard Chance by " + ss + "% - (~" + (-ritual.starshards * 100) + "%).";
             case "Wild Growth":
-                return "Increases tile yields by " + (ritual.level * 25) + "% + (25%), but reduces " +
+                return "Increases tile yields by " + (ritual.level * 15) + "% + (15%), but reduces " +
                     "Moonlight by " + ml + "% - (~" + (-ritual.moonlight * 100) + "%) and " +
                     "Star Shard Chance by " + ss + "% - (~" + (-ritual.starshards * 100) + "%).";
             case "Hatchlings":
@@ -972,7 +972,7 @@ export class TooltipRegistry {
                 return "Increases Villager Power and Health by " + (ritual.level * 25) + "% + (25%), but reduces " +
                     "Moonlight by " + ml + "% - (~" + (-ritual.moonlight * 100) + "%).";
             case "Ruinous Powers":
-                return "Enemy stats are increased by " + (ritual.level * 25) + "% + (25%). Increases " +
+                return "Enemy stats are increased by " + (ritual.level * 20) + "% + (20%). Increases " +
                     "Moonlight by " + ml + "% + (" + (ritual.moonlight * 100) + "%).";
             case "Betrayer's Gift":
                 return "All enemy trait levels are increased by " + (ritual.level) + " + (1). Increases " +

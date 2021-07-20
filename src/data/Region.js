@@ -358,7 +358,7 @@ export class Region {
         // we use the tile yields as a mask to determine which yields we should add for a given tile
         var yieldMask = RegionRegistry.TILE_TYPES[this.map[py][px].regName].yields;
         var yields = [0, 0, 0, 0, 0, 0];
-        var ritMulti = (1 + RitualData.getInstance().activePerks.wildgrowth * 0.25) /
+        var ritMulti = (1 + RitualData.getInstance().activePerks.wildgrowth * 0.15) /
             (1 + RitualData.getInstance().activePerks.desolation * 0.25);
         for (var y = Math.max(0, py - 1); y < Math.min(this.height, py + 2); y++) {
             for (var x = Math.max(0, px - 1); x < Math.min(this.width, px + 2); x++) {
@@ -1462,6 +1462,6 @@ export class Region {
                 }
             }
         }
-        this.townData.endOfWeek();
+        this.townData.endOfWeek(this);
     }
 }
