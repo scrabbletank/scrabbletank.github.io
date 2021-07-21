@@ -227,6 +227,7 @@ export class Region {
         this.productionBuildings = [];
         this.warehouses = [];
         this.houses = [];
+        this.towers = [];
         this.alchemyDrain = 0;
         this.alchemyGain = 0;
         this.villagerStatGain = [0, 0];
@@ -838,6 +839,7 @@ export class Region {
         this.taverns = [];
         this.productionBuildings = [];
         this.warehouses = [];
+        this.towers = [];
 
         for (var i = 0; i < this.height; i++) {
             for (var t = 0; t < this.width; t++) {
@@ -852,7 +854,9 @@ export class Region {
                         this.warehouses.push([i, t]);
                     } else if (this.map[i][t].building.name === "Town House") {
                         this.houses.push([i, t]);
-                    } else if (this.map[i][t].building.name !== "Watch Tower") {
+                    } else if (this.map[i][t].building.name === "Watch Tower") {
+                        this.towers.push([i, t]);
+                    } else {
                         this.productionBuildings.push([i, t]);
                     }
                 }
@@ -1200,6 +1204,7 @@ export class Region {
                 this.houses.push([tile.y, tile.x]);
                 break;
             case "Watch Tower":
+                this.towers.push([tile.y, tile.x]);
                 for (var y = Math.max(0, tile.y - 2); y < Math.min(this.height, tile.y + 3); y++) {
                     for (var x = Math.max(0, tile.x - 2); x < Math.min(this.width, tile.x + 3); x++) {
                         if (Math.abs(x - tile.x) + Math.abs(y - tile.y) <= 2) {
@@ -1242,6 +1247,7 @@ export class Region {
                 this.productionBuildings = this.productionBuildings.filter(p => p[1] !== tile.x || p[0] !== tile.y);
                 break;
             case "Watch Tower":
+                this.towers = this.towers.filter(p => p[1] !== tile.x || p[0] !== tile.y);
                 for (var y = Math.max(0, tile.y - 2); y < Math.min(this.height, tile.y + 3); y++) {
                     for (var x = Math.max(0, tile.x - 2); x < Math.min(this.width, tile.x + 3); x++) {
                         if (Math.abs(x - tile.x) + Math.abs(y - tile.y) <= 2) {
@@ -1427,6 +1433,7 @@ export class Region {
             this._tryUpgradeList(this.taverns);
             this._tryUpgradeList(this.roads);
             this._tryUpgradeList(this.warehouses);
+            this._tryUpgradeList(this.towers);
         }
     }
 

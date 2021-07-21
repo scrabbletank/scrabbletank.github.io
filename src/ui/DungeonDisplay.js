@@ -75,7 +75,7 @@ export class DungeonDisplay {
                 TooltipRegistry.getDungeonRewardTooltip(dungeon.rewards[2]))
                 .onClickHandler(() => { this._onClick({ dungeon: dungeon, reward: 2 }); });
 
-            this.elements = [this.backingRect, this.nameLabel, this.reward1Btn, this.reward2Btn, this.reward3Btn];
+            this.elements = [this.backingRect, this.nameLabel, this.descLabel, this.reward1Btn, this.reward2Btn, this.reward3Btn];
         } else {
             this.nameLabel = sceneContext.add.bitmapText(x + 5, y + 5, "courier20", dungeon.name + " Lv" + dungeon.level);
             this.nameLabel.setTint(Phaser.Display.Color.GetColor(212, 175, 55));

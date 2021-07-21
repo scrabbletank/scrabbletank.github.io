@@ -819,6 +819,9 @@ export class GameScene extends SceneUIBase {
         }
     }
     save() {
+        if (DynamicSettings.getInstance().saveEnabled === false) {
+            return;
+        }
         var saveObj = this._getSaveObj();
 
         localStorage.setItem("save", JSON.stringify(saveObj));

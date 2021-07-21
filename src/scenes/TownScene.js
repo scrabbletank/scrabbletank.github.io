@@ -187,6 +187,7 @@ export class TownScene extends SceneUIBase {
         this._updateStatus();
         this._refreshTechs();
         WorldData.getInstance().time.registerEvent("onDayEnd", () => { this._endOfDay(); });
+        WorldData.getInstance().onRegionChanged(() => { this._updateStatus(); this._refreshTechs(); });
     }
 
     _setupTechDisplay(x, y, tech, tier) {
@@ -296,6 +297,11 @@ export class TownScene extends SceneUIBase {
         if (MoonlightData.getInstance().moonperks.nightlabour.level > 0) {
             this.nightLabourBtn.setPosition(this.relativeX(15), this.relativeY(h));
             this.nightLabourBtn.setVisible(true);
+            if (region.townData.nightLabourActive === true) {
+                this.nightLabourBtn.setText("Turn Off Night Labour");
+            } else {
+                this.nightLabourBtn.setText("Turn On Night Labour");
+            }
         }
     }
 

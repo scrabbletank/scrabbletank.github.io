@@ -832,7 +832,7 @@ export class TooltipRegistry {
             case Statics.DUNGEON.PRODUCTION:
                 return { sprite: "icons", tile: 50 };
             case Statics.DUNGEON.ECONOMY:
-                return { sprite: "bldicons", tile: 32 };
+                return { sprite: "bldicons", tile: 8 };
             case Statics.DUNGEON.STRENGTH:
                 return { sprite: "icons", tile: 8 };
             case Statics.DUNGEON.DEXTERITY:

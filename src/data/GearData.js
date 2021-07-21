@@ -57,26 +57,32 @@ export class GearData {
         }
     }
 
-    upgradeGear(gear) {
-        var player = PlayerData.getInstance();
-        var craftCostMulti = gear.tier <= 0 ? 1 : player.getCraftingCosts(gear.tier - 1);
+    getGearCost(gear) {
+        var craftCostMulti = gear.tier <= 0 ? 1 : PlayerData.getInstance().getCraftingCosts(gear.tier - 1);
         var res = [];
         var resTier = Math.min(7, Math.max(DynamicSettings.getInstance().minResourceTier,
             DynamicSettings.getInstance().minResourceTier + gear.tier - 1));
         for (var i = 0; i < gear.costs.length; i++) {
             res.push(gear.costs[i] * craftCostMulti);
         }
-        if (Common.canCraft(res, player.resources[resTier]) === false) {
+        return [res, resTier];
+    }
+
+    upgradeGear(gear) {
+        var player = PlayerData.getInstance();
+        var cost = this.getGearCost(gear);
+        if (Common.canCraft(cost[0], player.resources[cost[1]]) === false) {
             return;
         }
-        player.spendResource(res, resTier);
+        player.spendResource(cost[0], cost[1]);
         if (player.isEquipedItem(gear)) {
             player.unequip(gear.slotType);
             gear.bringToLevel(gear.level + 1);
             player.equip(gear);
         } else {
             if (gear.level === 0 && StarData.getInstance().perks.starmetal.level > 0) {
-                gear.bringToLevel(StarData.getInstance().perks.starmetal.level * 5);
+                gear.bringToLevel(gear.level + 1);
+                // gear.bringToLevel(StarData.getInstance().perks.starmetal.level * 5);
             } else {
                 gear.bringToLevel(gear.level + 1);
             }

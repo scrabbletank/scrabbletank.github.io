@@ -10,6 +10,7 @@ import { GearRuneWindow } from "../ui/GearRuneWindow";
 import { ImageButton } from "../ui/ImageButton";
 import { RuneUpgradeWindow } from "../ui/RuneUpgradeWindow";
 import { WorldData } from "../data/WorldData";
+import { Common } from "../utils/Common";
 
 export class GearScene extends SceneUIBase {
     constructor(position, name) {
@@ -74,14 +75,20 @@ export class GearScene extends SceneUIBase {
         this.nextPageBtn = new TextButton(this, this.relativeX(870), this.relativeY(10), 20, 20, ">")
             .onClickHandler(() => { this._nextPage(); });
 
-        this.craftingCostLabel = this.add.bitmapText(this.relativeX(10), this.relativeY(10), "courier16", "Crafting Cost: 100%");
+        this.buyMaxLabel = this.add.bitmapText(this.relativeX(10), this.relativeY(10), "courier20", "Upgrade Amount:");
+        this.buyMaxButton = new TextButton(this, this.relativeX(170), this.relativeY(10), 40, 20, "1x")
+            .onClickHandler(() => { this._toggleBuyMax(); });
+        this.craftingCostLabel = this.add.bitmapText(this.relativeX(10), this.relativeY(60), "courier16", "Crafting Cost: 100%");
         this.weaponLabel = this.add.bitmapText(this.relativeX(0), this.relativeY(0), "courier20", "Weapon");
         this.armorLabel = this.add.bitmapText(this.relativeX(0), this.relativeY(0), "courier20", "Armor");
         this.trinketLabel = this.add.bitmapText(this.relativeX(0), this.relativeY(0), "courier20", "Trinket");
 
+
         this._updateTierButtons();
         this._setupGearDisplays();
         this._changeFilter(-1);
+
+        this.buyMax = false;
 
         var progression = new ProgressionStore();
         progression.addOnUnlockHandler((type, count, text) => { this._handleProgressionEvents(type, count, text); });
@@ -109,6 +116,11 @@ export class GearScene extends SceneUIBase {
         this.tier6Btn.setVisible(gearData.tiersAvailable >= 6);
         this.tier7Btn.setVisible(gearData.tiersAvailable >= 7);
         this.tier8Btn.setVisible(gearData.tiersAvailable >= 8);
+    }
+
+    _toggleBuyMax() {
+        this.buyMax = this.buyMax === true ? false : true;
+        this.buyMaxButton.setText(this.buyMax === true ? "Max" : "1x");
     }
 
     _nextPage() {
@@ -154,8 +166,8 @@ export class GearScene extends SceneUIBase {
         }
         this.gearDisplays = [];
 
-        this.weaponLabel.setPosition(this.relativeX(10), this.relativeY(30));
-        var h = 35 + this.weaponLabel.getTextBounds(true).local.height;
+        this.weaponLabel.setPosition(this.relativeX(10), this.relativeY(80));
+        var h = 80 + this.weaponLabel.getTextBounds(true).local.height;
 
         this.gearDisplays.push(new GearDisplay(this, this.relativeX(20), this.relativeY(h), this.player.weapon));
         h += 20 + this.gearDisplays[0].getTextBounds();
@@ -178,7 +190,15 @@ export class GearScene extends SceneUIBase {
         this._setupGearDisplays();
     }
     _onUpgradeHandler(gear) {
-        GearData.getInstance().upgradeGear(gear);
+        if (this.buyMax === true) {
+            var cost = GearData.getInstance().getGearCost(gear);
+            while (Common.canCraft(cost[0], PlayerData.getInstance().resources[cost[1]])) {
+                GearData.getInstance().upgradeGear(gear);
+                cost = GearData.getInstance().getGearCost(gear);
+            }
+        } else {
+            GearData.getInstance().upgradeGear(gear);
+        }
         this._setupGearDisplays();
         this._setupView();
     }

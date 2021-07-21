@@ -78,8 +78,8 @@ export class RegionView {
         return new TextButton(this.scene, x, y, 24, 20, (idx + 1) + "").onClickHandler(() => {
             WorldData.getInstance().setCurrentRegion(idx);
             this.scene.scene.get("DarkWorld").changeRegion();
-            this.scene.scene.get("RegionScene").changeRegion();
-            this.scene.scene.get("TownScene").changeRegion();
+            // this.scene.scene.get("RegionScene").changeRegion();
+            // this.scene.scene.get("TownScene").changeRegion();
         });
     }
 
@@ -271,6 +271,7 @@ export class RegionView {
         this.rebirthDialog.destroy();
         this.rebirthDialog = undefined;
 
+        DynamicSettings.getInstance().saveEnabled = false;
         WorldData.getInstance().handleRunCompletion();
         this.scene.scene.get("MoonlightScene").refresh();
         this.scene.scene.get("MoonlightScene").enableLeveling();
@@ -319,8 +320,6 @@ export class RegionView {
                     "a whole world out there. I was wondering what that last tab was going to be.");
             }
 
-            console.log([WorldData.instance.regionList.length - 1 === tier, WorldData.instance.nextRegions.length === 0,
-            WorldData.instance.regionList.length < 10, ProgressionStore.getInstance().persistentUnlocks.starshards === true])
             if (WorldData.instance.regionList.length - 1 === tier && WorldData.instance.nextRegions.length === 0 &&
                 (WorldData.instance.regionList.length < 10 || ProgressionStore.getInstance().persistentUnlocks.starshards === true)) {
                 WorldData.instance.generateRegionChoices();
@@ -426,8 +425,8 @@ export class RegionView {
                 WorldData.getInstance().addRegion(0);
                 WorldData.getInstance().setCurrentRegion(WorldData.getInstance().regionList.length - 1);
                 this.scene.scene.get("DarkWorld").changeRegion();
-                this.scene.scene.get("RegionScene").changeRegion();
-                this.scene.scene.get("TownScene").changeRegion();
+                // this.scene.scene.get("RegionScene").changeRegion();
+                // this.scene.scene.get("TownScene").changeRegion();
                 this.scene.scene.get("WorldScene").refresh();
                 this.triggerAutoExplore(tile, WorldData.getInstance().regionList.length - 1);
             }
@@ -447,7 +446,7 @@ export class RegionView {
         this.scene.scene.get("CombatScene").registerEvent("onExplore", (a, t) => { this._onExploredCallback(a, t); });
         this.region.onTileChanged((x) => { this._updateTile(x); });
         this.region.onSighting((x) => { this.scene.scene.get("DarkWorld").notifyRegion(); });
-        WorldData.getInstance().onRegionChanged(() => { this.refreshDetails(); });
+        WorldData.getInstance().onRegionChanged(() => { this.changeRegion(); });
 
         //hotkeys
         this.upgradeKey = this.scene.input.keyboard.addKey(Phaser.Input.Keyboard.KeyCodes.U);

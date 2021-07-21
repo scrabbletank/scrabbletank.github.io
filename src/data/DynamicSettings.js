@@ -35,6 +35,9 @@ export class DynamicSettings {
             this.autoExploreWeakestFirst = true;
             this.autoExploreRegions = true;
 
+            //programmatic settings
+            this.saveEnabled = true;
+
             DynamicSettings.instance = this;
         }
 
@@ -72,6 +75,8 @@ export class DynamicSettings {
         this.invasionLevelBonus = 0;
         this.invasionsIncreaseDifficulty = false;
         this.minResourceTier = 0 + StarData.getInstance().perks.worldsmith.level;
+
+        this.saveEnabled = true;
     }
 
     setupChallenge(challenge) {
