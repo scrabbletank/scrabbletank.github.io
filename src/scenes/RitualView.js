@@ -111,7 +111,6 @@ export class RitualView {
             { sprite: "icons", tile: 39 }, "Motes of Darkness. Fuse these onto weapons to improve their power.");
         var sacMotesBtn = new TextButton(this.scene, this.x + 390, this.y + h, 40, 20, "Sac")
             .onClickHandler(() => { this._sacResource(7); });
-        this._refreshSacrificeLabels();
 
         var ritPointIcon = new TooltipImage(this.scene, this.x + 475, this.y + 510, 32, 32,
             { sprite: "icons2", tile: 6 }, "Ritual Points. Each Ritual costs a single point to activate, regardless of level.");
@@ -122,6 +121,7 @@ export class RitualView {
         var sacDescLabel = this.scene.add.bitmapText(this.x + 510, this.y + 550, "courier16",
             Common.processText(desc, 18), 16, 1).setOrigin(0.5, 0);
         sacDescLabel.setTint(Phaser.Display.Color.GetColor(220, 100, 60));
+        this._refreshSacrificeLabels();
 
         this.elements = [backRect, titleLabel, descLabel, currentLabel, this.currentMoonLabel, this.currentStarLabel,
             nextLabel, this.nextMoonLabel, this.nextStarLabel, empowerLabel, corruptionLabel, destructionLabel,
@@ -195,9 +195,9 @@ export class RitualView {
     }
 
     _levelUpRitual(ritual) {
-        // if (RitualData.getInstance().ritualPoints <= 0) {
-        //     return;
-        // }
+        if (RitualData.getInstance().ritualPoints <= 0) {
+            return;
+        }
         ritual.level += 1;
         RitualData.getInstance().ritualPoints -= 1;
         RitualData.getInstance().calculateModifiers();
@@ -242,6 +242,7 @@ export class RitualView {
             this.sacLabels.push(this.scene.add.bitmapText(this.x + 320, this.y + 502 + i * 25, "courier16",
                 Common.numberString(RitualData.getInstance().ritualCosts[i])));
         }
+        this.ritualPointsLabel.setText(Common.numberString(RitualData.getInstance().ritualPoints));
     }
 
     setVisible(visible) {

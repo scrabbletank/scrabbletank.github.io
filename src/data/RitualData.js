@@ -141,6 +141,7 @@ export class RitualData {
         this.starshardBonus = this.nextStarshardBonus;
         this.nextMoonlightBonus = 1;
         this.nextStarshardBonus = 1;
+        this.ritualPoints = 0;
 
         for (const prop in this.rituals) {
             this.activePerks[prop] = this.rituals[prop].level;
