@@ -142,6 +142,7 @@ export class RitualData {
         this.nextMoonlightBonus = 1;
         this.nextStarshardBonus = 1;
         this.ritualPoints = 0;
+        this.ritualCosts = [100000, 100000, 100000, 100000, 100000, 100000, 50000, 10000];
 
         for (const prop in this.rituals) {
             this.activePerks[prop] = this.rituals[prop].level;

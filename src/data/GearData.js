@@ -82,7 +82,7 @@ export class GearData {
         } else {
             if (gear.level === 0 && StarData.getInstance().perks.starmetal.level > 0) {
                 gear.bringToLevel(gear.level + 1);
-                // gear.bringToLevel(StarData.getInstance().perks.starmetal.level * 5);
+                gear.bringToLevel(StarData.getInstance().perks.starmetal.level * 5);
             } else {
                 gear.bringToLevel(gear.level + 1);
             }
