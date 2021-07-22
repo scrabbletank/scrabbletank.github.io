@@ -24,6 +24,15 @@ export class PlayerData {
             this.baseVillagerPower = 1;
             this.baseVillagerHealth = 10;
             this.blueprints = [];
+            this.baseStats = {
+                strength: 5,
+                dexterity: 5,
+                agility: 5,
+                endurance: 5,
+                recovery: 5,
+                defense: 5,
+                accuracy: 5
+            }
             for (var i = 0; i < 5; i++) {
                 this.blueprints.push(new Blueprint());
             }
@@ -186,15 +195,6 @@ export class PlayerData {
             this.craftingCosts[i] = this.craftingCosts[i] * DynamicSettings.getInstance().gearCostMulti;
             this.craftingCosts[i] = this.craftingCosts[i] * Math.pow(0.925,
                 MoonlightData.getInstance().challenges.forge.completions);
-        }
-        this.baseStats = {
-            strength: 5,
-            dexterity: 5,
-            agility: 5,
-            endurance: 5,
-            recovery: 5,
-            defense: 5,
-            accuracy: 5
         }
         this.starperkCostReduction = Math.pow(0.95, StarData.getInstance().perks.forge.level);
         this.starperkCostReduction *= Math.pow(0.95, MoonlightData.getInstance().challenges.forge2.completions);
@@ -866,6 +866,7 @@ export class PlayerData {
             csp: this.starperkCostReduction,
             pc: this.playerClass,
             cc: this.classChosen,
+            bs: this.baseStats,
             gold: this.gold,
             mote: this.motes,
             talents: this.talents,
@@ -897,6 +898,16 @@ export class PlayerData {
         this.playerClass = saveObj.pc === undefined ? Statics.CLASS_ADVENTURER : saveObj.pc;
         this.gold = saveObj.gold;
         this.motes = saveObj.mote;
+        var tempStats = {
+            strength: 5,
+            dexterity: 5,
+            agility: 5,
+            endurance: 5,
+            recovery: 5,
+            defense: 5,
+            accuracy: 5
+        };
+        this.baseStats = saveObj.bs === undefined ? tempStats : saveObj.bs;
         this.runes = saveObj.runes === undefined ? [] : saveObj.runes;
         this.baseVillagerPower = saveObj.vp === undefined ? 1 : saveObj.vp;
         this.baseVillagerHealth = saveObj.vh === undefined ? 10 : saveObj.vh;
