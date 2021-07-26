@@ -389,7 +389,7 @@ export class TownData {
                 var growthRate = (Statics.POPULATION_GROWTH + StarData.getInstance().perks.fertility.level * 0.01) *
                     (1 + RitualData.getInstance().activePerks.hatchlings * 0.25) /
                     (1 + RitualData.getInstance().activePerks.apathy * 0.5);
-                this.currentPopulation = Math.min(this.getMaxPopulation(), this.currentPopulation * growthRate);
+                this.currentPopulation = Math.min(this.getMaxPopulation(), this.currentPopulation * (1 + growthRate));
             }
             PlayerData.getInstance().addGold(this.getTownIncome());
             if (DynamicSettings.getInstance().productionBuildingCost > 0) {
@@ -412,14 +412,14 @@ export class TownData {
                 var resTier = Math.min(7, this.resourceTier);
                 if (player.gold >= gold && Common.canCraft(resCost, player.resources[resTier]) === true &&
                     this.friendshipLevel >= this.buildings[prop].level) {
-                        player.addGold(-gold);
-                        player.spendResource(resCost, resTier);
-                        this.increaseTechLevel(this.buildings[prop]);
+                    player.addGold(-gold);
+                    player.spendResource(resCost, resTier);
+                    this.increaseTechLevel(this.buildings[prop]);
                 }
             }
         }
     }
-    
+
     save() {
         var buildings = [];
         for (const prop in this.buildings) {
