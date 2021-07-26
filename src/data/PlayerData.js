@@ -352,7 +352,7 @@ export class PlayerData {
     }
 
     applyRitualBonuses() {
-        var statHelper = (ritual) => { return (ritual.level * (10 + 10 + (ritual.level - 1) * 5)) / 2; };
+        var statHelper = (ritual) => { return (ritual.level * (12 + 12 + (ritual.level - 1) * 4)) / 2; };
         // permanent stats
         const rituals = RitualData.getInstance().rituals;
         this.baseStats.strength += statHelper(rituals.permstr);

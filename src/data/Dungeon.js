@@ -1,11 +1,13 @@
 import { Common } from "../utils/Common";
 import { MoonlightData } from "./MoonlightData";
+import { ProgressionStore } from "./ProgressionStore";
 import { StarData } from "./StarData";
 import { Statics } from "./Statics";
 import { WorldData } from "./WorldData";
 
 const dungeonPrefix = ['Starlit', 'Poisoned', 'Malevolent', 'Monstrous', 'Dank', 'Moody', 'Submerged', 'Burning', 'Ancient',
-    'Foggy', 'Winding', 'Whispering', 'Bloody', 'Malignant', 'Baleful', 'Gloomy'];
+    'Foggy', 'Winding', 'Whispering', 'Bloody', 'Malignant', 'Baleful', 'Gloomy', 'Glowing', 'Old', 'Blasted', 'Pestilent',
+    'Forgotten'];
 const dungeonSuffix = ['Tomb', 'Crypt', 'Grove', 'Garden', 'Tower', 'Spire', 'Dungeon', 'Barrow', 'Mausoleum', 'Catacomb', 'Prison'];
 
 export class Dungeon {
@@ -30,6 +32,14 @@ export class Dungeon {
             if (rewardType === this.rewards[i].type) {
                 return true;
             }
+        }
+        if (rewardType === Statics.DUNGEON.STARSHARDS &&
+            ProgressionStore.getInstance().persistentUnlocks.starshards === false) {
+            return true;
+        }
+        if (rewardType === Statics.DUNGEON.RITUAL_POINTS &&
+            ProgressionStore.getInstance().persistentUnlocks.rituals === false) {
+            return true;
         }
         return false;
     }
@@ -98,9 +108,9 @@ export class Dungeon {
                         break;
                 }
             } else {
-                var num = Common.randint(20, 31);
+                var num = Common.randint(20, 33);
                 while (this._rewardAlreadyPicked(num) === true) {
-                    var num = Common.randint(20, 31);
+                    var num = Common.randint(20, 33);
                 }
                 switch (num) {
                     case Statics.DUNGEON.STRENGTH:
@@ -135,6 +145,13 @@ export class Dungeon {
                         break;
                     case Statics.DUNGEON.PERM_VHEALTH:
                         this.rewards.push({ type: num, amount: this.level * 2.5 });
+                        break;
+                    case Statics.DUNGEON.STARSHARDS:
+                        var shards = WorldData.getInstance().getRegion(this.regionLevel).starshardsPerTile * 2;
+                        this.rewards.push({ type: num, amount: shards });
+                        break;
+                    case Statics.DUNGEON.RITUAL_POINTS:
+                        this.rewards.push({ type: num, amount: Math.floor(1 + (this.tier / 2)) });
                         break;
                 }
             }

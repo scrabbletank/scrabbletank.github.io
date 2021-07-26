@@ -255,7 +255,7 @@ var RuneWords = {
         dropRate: 50,
         getBonus: (level) => {
             return {
-                strFlat: 5 * level
+                strFlat: Math.pow(level, 2) * 25
             };
         }
     },
@@ -263,7 +263,7 @@ var RuneWords = {
         dropRate: 50,
         getBonus: (level) => {
             return {
-                dexFlat: 5 * level
+                dexFlat: Math.pow(level, 2) * 25
             };
         }
     },
@@ -271,7 +271,7 @@ var RuneWords = {
         dropRate: 50,
         getBonus: (level) => {
             return {
-                agiFlat: 5 * level
+                agiFlat: Math.pow(level, 2) * 25
             };
         },
         Run: {
@@ -290,7 +290,7 @@ var RuneWords = {
         dropRate: 50,
         getBonus: (level) => {
             return {
-                endFlat: 5 * level
+                endFlat: Math.pow(level, 2) * 25
             };
         }
     },
@@ -298,7 +298,7 @@ var RuneWords = {
         dropRate: 50,
         getBonus: (level) => {
             return {
-                defFlat: 5 * level
+                defFlat: Math.pow(level, 2) * 25
             };
         },
         Eld: {
@@ -317,7 +317,7 @@ var RuneWords = {
         dropRate: 50,
         getBonus: (level) => {
             return {
-                recFlat: 5 * level
+                recFlat: Math.pow(level, 2) * 25
             };
         },
         Ley: {
@@ -334,7 +334,7 @@ var RuneWords = {
         dropRate: 50,
         getBonus: (level) => {
             return {
-                accFlat: 5 * level
+                accFlat: Math.pow(level, 2) * 25
             };
         }
     },

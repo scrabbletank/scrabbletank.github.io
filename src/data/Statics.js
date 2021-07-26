@@ -215,7 +215,9 @@ var Statics = {
         MOONLIGHT: 27,
         TALENTS: 28,
         PERM_VPOWER: 29,
-        PERM_VHEALTH: 30
+        PERM_VHEALTH: 30,
+        STARSHARDS: 31,
+        RITUAL_POINTS: 32
     }
 };
 

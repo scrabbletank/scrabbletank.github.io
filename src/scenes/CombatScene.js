@@ -23,6 +23,7 @@ export class CombatScene extends SceneUIBase {
         this.onRewardHandlers = [];
         this.onExploreHandlers = [];
         this.regionTier = 0;
+        this.restartAfterRegen = false;
 
         this.playerHitAnim = undefined;
         this.monsterHitAnim = [undefined, undefined, undefined];
@@ -98,6 +99,7 @@ export class CombatScene extends SceneUIBase {
     }
 
     _playerDefeatCallback() {
+        this.restartAfterRegen = true;
         this._hideEnemyDisplays();
         this.progression.registerDeath(1);
         this.restButton.setVisible(true);
@@ -294,5 +296,15 @@ export class CombatScene extends SceneUIBase {
         this._updateAnimations(fDelta);
 
         this.combatManager.update(fDelta);
+
+        if (this.restartAfterRegen === true && this.combatManager.combatActive === false &&
+            this.player.statBlock.currentHealth >= this.player.statBlock.MaxHealth() &&
+            DynamicSettings.getInstance().autoExplore === true) {
+            this.combatManager.initFight(true);
+            this.restartAfterRegen = false;
+        }
+        if (this.combatManager.combatActive === true) {
+            this.restartAfterRegen = false;
+        }
     }
 }

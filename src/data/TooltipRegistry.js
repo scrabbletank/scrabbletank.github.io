@@ -276,7 +276,7 @@ export class TooltipRegistry {
             case "Mystic Cauldron":
                 return "Alchemy Labs create " + (moonlight.level * 10) + "% + (10%) more resources from the same inputs.";
             case "Shadow's Harvest":
-                return "Each day you gain " + (moonlight.level) / 10 + " + (0.1) shade per villager. This bonus is increased by Shadow's Blessing.";
+                return "Each day you gain " + (moonlight.level) * 0.75 + " + (0.75) shade per villager. This bonus is increased by Shadow's Blessing and town production.";
             case "Shadow Wolf Charm":
                 return "Unlocks the Shadow Wolf Charm trinket which grants Strength and Damage. Available up to tier " + (moonlight.level) + " + (1)";
             case "Moonlight Circlet":
@@ -801,6 +801,10 @@ export class TooltipRegistry {
                 return "Body oil that makes the villagers muscles glisten, permanently increasing Villager Power by " + Math.floor(reward.amount * 100) / 100 + ".";
             case Statics.DUNGEON.PERM_VHEALTH:
                 return "A pot of dubious looking stew, permanently increasing Villager Health by " + Math.floor(reward.amount * 100) / 100 + ".";
+            case Statics.DUNGEON.STARSHARDS:
+                return "A dead star which you can brutally harvest for " + reward.amount + " star shards.";
+            case Statics.DUNGEON.RITUAL_POINTS:
+                return "You found a cult leader. You can take his lunch money to get " + reward.amount + " ritual points.";
         }
     }
 
@@ -856,6 +860,10 @@ export class TooltipRegistry {
                 return { sprite: "icons", tile: 24 };
             case Statics.DUNGEON.PERM_VHEALTH:
                 return { sprite: "icons", tile: 26 };
+            case Statics.DUNGEON.STARSHARDS:
+                return { sprite: "icons2", tile: 4 };
+            case Statics.DUNGEON.RITUAL_POINTS:
+                return { sprite: "icons2", tile: 6 };
         }
         return { sprite: "icons", tile: 0 };
     }
@@ -918,7 +926,7 @@ export class TooltipRegistry {
     }
 
     static getRitualTooltip(ritual) {
-        var statGrowth = (ritual.level * (10 + 10 + (ritual.level - 1) * 5)) / 2;
+        var statGrowth = (ritual.level * (12 + 12 + (ritual.level - 1) * 4)) / 2;
         var ml = ritual.level === 0 ? 0 :
             (ritual.moonlight < 0 ? Math.pow(1 + ritual.moonlight, ritual.level) * 100 : ritual.moonlight * ritual.level * 100);
         ml = Common.numberString(Math.floor(ml));
@@ -927,23 +935,23 @@ export class TooltipRegistry {
         ss = Common.numberString(Math.floor(ss));
         switch (ritual.name) {
             case "Empower Strength":
-                return "Permanently increases your Strength by " + statGrowth + " + (" + (10 + ritual.level * 5) + ").";
+                return "Permanently increases your Strength by " + statGrowth + " + (" + (12 + ritual.level * 4) + ").";
             case "Empower Dexterity":
-                return "Permanently increases your Dexterity by " + statGrowth + " + (" + (10 + ritual.level * 5) + ").";
+                return "Permanently increases your Dexterity by " + statGrowth + " + (" + (12 + ritual.level * 4) + ").";
             case "Empower Agility":
-                return "Permanently increases your Agility by " + statGrowth + " + (" + (10 + ritual.level * 5) + ").";
+                return "Permanently increases your Agility by " + statGrowth + " + (" + (12 + ritual.level * 4) + ").";
             case "Empower Endurance":
-                return "Permanently increases your Endurance by " + statGrowth + " + (" + (10 + ritual.level * 5) + ").";
+                return "Permanently increases your Endurance by " + statGrowth + " + (" + (12 + ritual.level * 4) + ").";
             case "Empower Recovery":
-                return "Permanently increases your Recovery by " + statGrowth + " + (" + (10 + ritual.level * 5) + ").";
+                return "Permanently increases your Recovery by " + statGrowth + " + (" + (12 + ritual.level * 4) + ").";
             case "Empower Defense":
-                return "Permanently increases your Defense by " + statGrowth + " + (" + (10 + ritual.level * 5) + ").";
+                return "Permanently increases your Defense by " + statGrowth + " + (" + (12 + ritual.level * 4) + ").";
             case "Empower Accuracy":
-                return "Permanently increases your Accuracy by " + statGrowth + " + (" + (10 + ritual.level * 5) + ").";
+                return "Permanently increases your Accuracy by " + statGrowth + " + (" + (12 + ritual.level * 4) + ").";
             case "Cult Infiltrators":
-                return "Permanently increases Villager Power by " + (statGrowth / 2) + " + (" + (5 + ritual.level * 2.5) + ").";
+                return "Permanently increases Villager Power by " + (statGrowth / 2) + " + (" + (6 + ritual.level * 2) + ").";
             case "Cult Warders":
-                return "Permanently increases Villager Health by " + (statGrowth * 5) + " + (" + (50 + ritual.level * 25) + ").";
+                return "Permanently increases Villager Health by " + (statGrowth * 5) + " + (" + (60 + ritual.level * 20) + ").";
             case "Corrupted Strength":
                 return "Increases your Strength, Dexterity, and Agility by " + (ritual.level * 10) + "% + (10%), but reduces " +
                     "Moonlight by " + ml + "% - (~" + (-ritual.moonlight * 100) + "%) and " +

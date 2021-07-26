@@ -373,12 +373,20 @@ export class TownData {
             case Statics.DUNGEON.PERM_VHEALTH:
                 PlayerData.getInstance().addBaseVillagerStats(0, reward.amount);
                 break;
+            case Statics.DUNGEON.STARSHARDS:
+                WorldData.getInstance().starshardsEarned += reward.amount;
+                break;
+            case Statics.DUNGEON.RITUAL_POINTS:
+                RitualData.getInstance().ritualPoints += reward.amount;
+                break;
         }
     }
 
 
     endOfDay() {
-
+        PlayerData.getInstance().addShade(this.currentPopulation * 0.75 *
+            MoonlightData.getInstance().moonperks.shadow3.level * MoonlightData.getInstance().getShadowBonus() *
+            this.getProductionMulti());
     }
 
     endOfWeek(region) {
@@ -401,8 +409,6 @@ export class TownData {
                 }
                 PlayerData.getInstance().addGold(-bldCost);
             }
-            PlayerData.getInstance().addShade(this.currentPopulation * 0.1 *
-                MoonlightData.getInstance().moonperks.shadow3.level * MoonlightData.getInstance().getShadowBonus());
         }
         if (DynamicSettings.getInstance().autoTownUpgrade === true) {
             var player = new PlayerData();

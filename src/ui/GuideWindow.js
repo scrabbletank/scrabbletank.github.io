@@ -268,8 +268,8 @@ export class GuideWindow {
                 this.guideTexts.push(this.scene.add.bitmapText(this.x + 150, this.y + py + 25, "courier16", Common.processText(helptxt, 72)));
                 py += 60;
                 this.guideTexts.push(this.scene.add.bitmapText(this.x + 150, this.y + py, "courier20", "Auto Explore"));
-                helptxt = "With auto explore on, every time you fully explore a tile it will jump to the next available tile. It doesn't " +
-                    "continue when you die, and doesn't cross regions.";
+                helptxt = "With auto explore on, every time you fully explore a tile it will jump to the next available tile. If you die " +
+                    "it continues after healing to full.";
                 this.guideTexts.push(this.scene.add.bitmapText(this.x + 150, this.y + py + 25, "courier16", Common.processText(helptxt, 72)));
                 py += 80;
                 if (ProgressionStore.getInstance().persistentUnlocks.autoGear === true) {

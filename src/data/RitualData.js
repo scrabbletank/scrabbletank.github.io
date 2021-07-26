@@ -3,7 +3,7 @@ import { StarData } from "./StarData";
 export class RitualData {
     constructor() {
         if (!RitualData.instance) {
-            this.ritualCosts = [100000, 100000, 100000, 100000, 100000, 100000, 50000, 10000];
+            this.ritualCosts = [500000, 500000, 500000, 500000, 500000, 500000, 100000, 25000];
 
             this.moonlightBonus = 1;
             this.starshardBonus = 1;
@@ -142,7 +142,7 @@ export class RitualData {
         this.nextMoonlightBonus = 1;
         this.nextStarshardBonus = 1;
         this.ritualPoints = 0;
-        this.ritualCosts = [100000, 100000, 100000, 100000, 100000, 100000, 50000, 10000];
+        this.ritualCosts = [500000, 500000, 500000, 500000, 500000, 500000, 100000, 25000];
 
         for (const prop in this.rituals) {
             this.activePerks[prop] = this.rituals[prop].level;
