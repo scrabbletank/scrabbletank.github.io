@@ -144,13 +144,13 @@ export class TownScene extends SceneUIBase {
             .setOrigin(0)
             .setInteractive();
 
-        this.townNameLabel = this.add.bitmapText(this.relativeX(10), this.relativeY(10), "courier20", "Town");
-        this.regionNameLabel = this.add.bitmapText(this.relativeX(10), this.relativeY(30), "courier16", "Region ");
-        this.statsLabel = this.add.bitmapText(this.relativeX(15), this.relativeY(50), "courier16", "");
-        this.nightLabourBtn = new TextButton(this, this.relativeX(15), this.relativeY(50), 220, 20, "Turn On Night Labour")
+        this.townNameLabel = this.add.bitmapText(this.relativeX(10), this.relativeY(100), "courier20", "Town");
+        this.regionNameLabel = this.add.bitmapText(this.relativeX(10), this.relativeY(120), "courier16", "Region ");
+        this.statsLabel = this.add.bitmapText(this.relativeX(15), this.relativeY(140), "courier16", "");
+        this.nightLabourBtn = new TextButton(this, this.relativeX(15), this.relativeY(140), 220, 20, "Turn On Night Labour")
             .onClickHandler(() => { this._toggleNightLabour(); });
         this.nightLabourBtn.setVisible(false);
-        this.townUpgradeBtn = new TextButton(this, this.relativeX(15), this.relativeY(50), 220, 20, "Auto Upgrade: OFF")
+        this.townUpgradeBtn = new TextButton(this, this.relativeX(15), this.relativeY(140), 220, 20, "Auto Upgrade: OFF")
             .onClickHandler(() => { this._toggleAutoUpgrade(); });
         this.townUpgradeBtn.setVisible(false);
 
@@ -162,6 +162,8 @@ export class TownScene extends SceneUIBase {
         this.dungeonsBtn = new TextButton(this, this.relativeX(500), this.relativeY(10), 120, 20, "Dungeons")
             .onClickHandler(() => { this._selectTab(2); });
         this.dungeonsBtn.setVisible(WorldData.getInstance().getCurrentRegion().townData.dungeons.length > 0);
+
+        this.regionSelectElements = [];
 
         this.buildingDisplays = []
 
@@ -191,6 +193,12 @@ export class TownScene extends SceneUIBase {
         this._refreshTechs();
         WorldData.getInstance().time.registerEvent("onDayEnd", () => { this._endOfDay(); });
         WorldData.getInstance().onRegionChanged(() => { this._updateStatus(); this._refreshTechs(); });
+    }
+    _setupRegionButton(idx, x, y) {
+        return new TextButton(this, x, y, 27, 20, (idx + 1) + "").onClickHandler(() => {
+            WorldData.getInstance().setCurrentRegion(idx);
+            this.scene.get("DarkWorld").changeRegion();
+        });
     }
 
     _setupTechDisplay(x, y, tech, tier) {
@@ -254,10 +262,23 @@ export class TownScene extends SceneUIBase {
     }
 
     _updateStatus() {
-        var region = WorldData.instance.getCurrentRegion();
+        var region = WorldData.getInstance().getCurrentRegion();
         var player = new PlayerData();
         var prodBonus = region.townData.getProductionMulti();
         var govBonus = (1 + player.getTalentLevel("governance") * 0.04);
+
+        for (var i = 0; i < this.regionSelectElements.length; i++) {
+            this.regionSelectElements[i].destroy();
+        }
+        if (WorldData.getInstance().regionList.length > 1) {
+            this.regionSelectElements = [this.add.bitmapText(this.relativeX(10), this.relativeY(10), "courier20", "Town:")];
+            for (var i = 0; i < WorldData.getInstance().regionList.length; i++) {
+                var x = this.relativeX(10 + (i % 8) * 27);
+                var y = this.relativeY(30 + Math.floor(i / 8) * 20);
+                this.regionSelectElements.push(this._setupRegionButton(i, x, y));
+            }
+        }
+
 
         var txt = "Population: " + Math.round(region.townData.currentPopulation) + "/" + Math.floor(region.townData.getMaxPopulation()) + "\n" +
             "Tax Income: " + Math.round(region.townData.getTownIncome()) + "g/week\n" +
@@ -284,7 +305,7 @@ export class TownScene extends SceneUIBase {
 
         this.statsLabel.setText(txt);
         this.regionNameLabel.setText("Region " + (region.regionLevel + 1));
-        var h = this.statsLabel.getTextBounds().local.height + 60;
+        var h = this.statsLabel.getTextBounds().local.height + 160;
         if (ProgressionStore.getInstance().persistentUnlocks.dungeons === true) {
             for (var i = 0; i < this.dungeonLabels.length; i++) {
                 this.dungeonLabels[i].destroy();

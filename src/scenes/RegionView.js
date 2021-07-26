@@ -76,8 +76,6 @@ export class RegionView {
         return new TextButton(this.scene, x, y, 24, 20, (idx + 1) + "").onClickHandler(() => {
             WorldData.getInstance().setCurrentRegion(idx);
             this.scene.scene.get("DarkWorld").changeRegion();
-            // this.scene.scene.get("RegionScene").changeRegion();
-            // this.scene.scene.get("TownScene").changeRegion();
         });
     }
 
@@ -423,8 +421,6 @@ export class RegionView {
                 WorldData.getInstance().addRegion(0);
                 WorldData.getInstance().setCurrentRegion(WorldData.getInstance().regionList.length - 1);
                 this.scene.scene.get("DarkWorld").changeRegion();
-                // this.scene.scene.get("RegionScene").changeRegion();
-                // this.scene.scene.get("TownScene").changeRegion();
                 this.scene.scene.get("WorldScene").refresh();
                 this.triggerAutoExplore(tile, WorldData.getInstance().regionList.length - 1);
             }

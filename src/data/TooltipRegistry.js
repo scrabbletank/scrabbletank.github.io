@@ -236,7 +236,8 @@ export class TooltipRegistry {
             case "Blackiron Gear":
                 return "Motes of Darkness can reach a " + (20 + moonlight.level * 10) + "% + (10%) bonus before diminishing returns.";
             case "Runelands":
-                return "Each region contains " + (5 + moonlight.level) + " + (1) hidden runes.";
+                return "Each region contains " + (5 + (moonlight.level % 5)) + " + (1) hidden runes. Runes have +" +
+                    Math.floor(moonlight.level / 5) + " levels.";
             case "Moonlight Workers":
                 return "Production buildings generate " + (moonlight.level) + "% + (1%) more resources per defense.";
             case "Hero's Pouch":

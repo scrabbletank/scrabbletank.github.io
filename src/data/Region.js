@@ -560,8 +560,10 @@ export class Region {
         }
 
         //if runes appear on the map, add spawn locations here
-        var runeCount = MoonlightData.getInstance().moonperks.runes.level > 0 ? 5 : 0;
-        runeCount += MoonlightData.getInstance().moonperks.runelands.level;
+        var runeCount = 0;
+        if (MoonlightData.getInstance().moonperks.runes.level > 0) {
+            runeCount = 5 + MoonlightData.getInstance().moonperks.runelands.level % 5;
+        }
         // we can't place runes on the town or gate squares, or on places that already have runes.
         var validFunc = (x, y) => {
             return this.map[y][x].hasRune === false && (x !== townPoint[0] || y !== townPoint[1]) && (x !== gatePos[1] || y !== gatePos[0]);
@@ -689,7 +691,9 @@ export class Region {
             this.townData.addFriendship(10 * MoonlightData.getInstance().moonperks.discovery.level);
             if (this.map[y][x].hasRune === true) {
                 this.map[y][x].hasRune = false;
-                var rune = RuneRegistry.getRandomRuneAtLevel(Math.floor(this.regionLevel / 2) + 1);
+                var runeLvl = Math.floor(this.regionLevel / 2) + 1 +
+                    Math.floor(MoonlightData.getInstance().moonperks.runelands.level / 5);
+                var rune = RuneRegistry.getRandomRuneAtLevel(runeLvl);
                 PlayerData.getInstance().addRune(rune);
             }
             if (this.map[y][x].name === "Town") {
