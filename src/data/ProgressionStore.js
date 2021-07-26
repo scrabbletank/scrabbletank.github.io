@@ -205,7 +205,9 @@ export class ProgressionStore {
                 dungeons: false,
                 starshards: false,
                 rituals: false,
-                autoExplore2: false
+                autoExplore2: false,
+                autoGear: false,
+                autoTown: false
             }
 
             this.totalCounts = {

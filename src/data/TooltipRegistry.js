@@ -357,6 +357,7 @@ export class TooltipRegistry {
                     " times as much.\n\n" +
                     "Restrictions: Gear costs increased by " + (10 + completions * 10) + " times.\n" +
                     "              Reach the 2nd Gate.\n\n" +
+                    "On First Completion: Unlocks Auto Gear Upgrade.\n" +
                     "On Every Completion: Gear costs are multiplied by x0.925\n" +
                     "                     +2 Challenge Points\n\n" +
                     "Completions: " + challenge.completions + "/" + challenge.maxCompletions + "\n" +
@@ -379,8 +380,8 @@ export class TooltipRegistry {
                     "                     giving 25% motes.\n" +
                     "On Every Completion: Invasions take 25% longer to destroy\n" +
                     "                     a tile.\n" +
-                    "                     +3 Challenge Points\n\n" +
-                    "On Final Completion: Auto explore gives 100% motes.\n" +
+                    "                     +3 Challenge Points\n" +
+                    "On Final Completion: Auto explore gives 100% motes.\n\n" +
                     "Completions: " + challenge.completions + "/" + challenge.maxCompletions + "\n" +
                     "Fastest Time: " + new WorldTime(challenge.fastestTime).getTimespanText();
             case "Talentless":
@@ -397,7 +398,7 @@ export class TooltipRegistry {
                     "Restrictions: Production buildings are unavailable.\n" +
                     "              Reach Gate " + (3 + completions) + ".\n\n" +
                     "On First Completion: Unlock the Warehouse building.\n" +
-                    "                     Unlocks Blueprints\n\n" +
+                    "                     Unlocks Blueprints and Auto Town Upgrade\n" +
                     "On Every Completion: Increases building production by 10%\n" +
                     "                     +4 Challenge Points\n\n" +
                     "Completions: " + challenge.completions + "/" + challenge.maxCompletions + "\n" +
@@ -418,7 +419,7 @@ export class TooltipRegistry {
                     "              Town Upgrades cost 1 level of friendship.\n" +
                     "              Region spans " + (30 + (completions * 5)) + " levels.\n" +
                     "              Reach Gate " + (4 + completions) + ".\n\n" +
-                    "On First Completion: Unlocks Auto Upgrade.\n" +
+                    "On First Completion: Unlocks Auto Building Upgrade.\n" +
                     "On Every Completion: Gain 10% more friendship.\n" +
                     "                     Friendship tiers scale slightly\n" +
                     "                     slower.\n" +

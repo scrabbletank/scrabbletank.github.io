@@ -150,6 +150,9 @@ export class TownScene extends SceneUIBase {
         this.nightLabourBtn = new TextButton(this, this.relativeX(15), this.relativeY(50), 220, 20, "Turn On Night Labour")
             .onClickHandler(() => { this._toggleNightLabour(); });
         this.nightLabourBtn.setVisible(false);
+        this.townUpgradeBtn = new TextButton(this, this.relativeX(15), this.relativeY(50), 220, 20, "Auto Upgrade: OFF")
+            .onClickHandler(() => { this._toggleAutoUpgrade(); });
+        this.townUpgradeBtn.setVisible(false);
 
         this.buildingBtn = new TextButton(this, this.relativeX(240), this.relativeY(10), 120, 20, "Buildings")
             .onClickHandler(() => { this._selectTab(0); });
@@ -235,6 +238,16 @@ export class TownScene extends SceneUIBase {
         this._updateStatus();
     }
 
+    _toggleAutoUpgrade() {
+        DynamicSettings.getInstance().autoTownUpgrade = DynamicSettings.getInstance().autoTownUpgrade === true ? false : true;
+        if (DynamicSettings.getInstance().autoTownUpgrade === true) {
+            this.townUpgradeBtn.setText("Auto Upgrade: ON");
+        } else {
+            this.townUpgradeBtn.setText("Auto Upgrade: OFF");
+        }
+        this._updateStatus();
+    }
+
     _selectTab(value) {
         this.selectedTab = value;
         this._refreshTechs();
@@ -296,11 +309,23 @@ export class TownScene extends SceneUIBase {
 
         if (MoonlightData.getInstance().moonperks.nightlabour.level > 0) {
             this.nightLabourBtn.setPosition(this.relativeX(15), this.relativeY(h));
+            h += 30;
             this.nightLabourBtn.setVisible(true);
             if (region.townData.nightLabourActive === true) {
                 this.nightLabourBtn.setText("Turn Off Night Labour");
             } else {
                 this.nightLabourBtn.setText("Turn On Night Labour");
+            }
+        }
+
+        if (ProgressionStore.getInstance().persistentUnlocks.autoTown === true) {
+            this.townUpgradeBtn.setPosition(this.relativeX(15), this.relativeY(h));
+            h += 30;
+            this.townUpgradeBtn.setVisible(true);
+            if (DynamicSettings.getInstance().autoTownUpgrade === true) {
+                this.townUpgradeBtn.setText("Auto Upgrade: ON");
+            } else {
+                this.townUpgradeBtn.setText("Auto Upgrade: OFF");
             }
         }
     }
@@ -350,6 +375,7 @@ export class TownScene extends SceneUIBase {
 
     _endOfDay() {
         this._updateStatus();
+        this._refreshTechs();
     }
 
 

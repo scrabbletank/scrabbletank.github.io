@@ -35,8 +35,6 @@ export class RegionView {
         this.tileSelectWindow = undefined;
         this.rebirthDialog = undefined;
 
-        this.autoExploreActive = false;
-        this.autoInvadeActive = false;
         this.updateBuildings = false;
 
         this.upgradeKey = undefined;
@@ -408,12 +406,12 @@ export class RegionView {
 
     triggerAutoExplore(tile, tier) {
         var activeRegion = WorldData.getInstance().regionList[tier];
-        if (this.autoExploreActive === true) {
-            var pos = activeRegion.nextWeakestTile(this.autoInvadeActive);
+        if (DynamicSettings.getInstance().autoExplore === true) {
+            var pos = activeRegion.nextWeakestTile(DynamicSettings.getInstance().autoInvade);
             if (pos[0] !== -1) {
                 if (activeRegion.map[pos[1]][pos[0]].name === "Town") {
                     this._exploreTown(tile.x, tile.y);
-                    var pos = activeRegion.nextWeakestTile(this.autoInvadeActive);
+                    var pos = activeRegion.nextWeakestTile(DynamicSettings.getInstance().autoInvade);
                     if (pos[0] === -1) {
                         return;
                     }
@@ -493,8 +491,8 @@ export class RegionView {
     }
 
     _toggleAutoExplore() {
-        this.autoExploreActive = !this.autoExploreActive;
-        if (this.autoExploreActive === true) {
+        DynamicSettings.getInstance().autoExplore = !DynamicSettings.getInstance().autoExplore;
+        if (DynamicSettings.getInstance().autoExplore === true) {
             this.autoExploreButton.setText("ON");
             this.autoExploreButton.setTextColor(Phaser.Display.Color.GetColor(255, 255, 255));
         } else {
@@ -503,8 +501,8 @@ export class RegionView {
         }
     }
     _toggleAutoInvade() {
-        this.autoInvadeActive = !this.autoInvadeActive;
-        if (this.autoInvadeActive === true) {
+        DynamicSettings.getInstance().autoInvade = !DynamicSettings.getInstance().autoInvade;
+        if (DynamicSettings.getInstance().autoInvade === true) {
             this.autoInvadeButton.setText("ON");
             this.autoInvadeButton.setTextColor(Phaser.Display.Color.GetColor(255, 255, 255));
         } else {
@@ -603,17 +601,17 @@ export class RegionView {
 
         this.autoExploreLabel = this.scene.add.bitmapText(this.x + 660, h, "courier20", "Auto Explore:");
         this.autoExploreButton = new TextButton(this.scene, this.x + 795, h, 40, 20,
-            this.autoExploreActive === true ? "ON" : "OFF")
+            DynamicSettings.getInstance().autoExplore === true ? "ON" : "OFF")
             .onClickHandler(() => { this._toggleAutoExplore() });
-        this.autoExploreButton.setTextColor(this.autoExploreActive === true ? Phaser.Display.Color.GetColor(255, 255, 255) :
-            Phaser.Display.Color.GetColor(175, 0, 140));
+        this.autoExploreButton.setTextColor(DynamicSettings.getInstance().autoExplore === true ?
+            Phaser.Display.Color.GetColor(255, 255, 255) : Phaser.Display.Color.GetColor(175, 0, 140));
         h += 30;
         this.autoInvadeLabel = this.scene.add.bitmapText(this.x + 660, h, "courier20", "Auto Invade:");
         this.autoInvadeButton = new TextButton(this.scene, this.x + 795, h, 40, 20,
-            this.autoInvadeActive === true ? "ON" : "OFF")
+            DynamicSettings.getInstance().autoInvade === true ? "ON" : "OFF")
             .onClickHandler(() => { this._toggleAutoInvade() });
-        this.autoInvadeButton.setTextColor(this.autoInvadeActive === true ? Phaser.Display.Color.GetColor(255, 255, 255) :
-            Phaser.Display.Color.GetColor(175, 0, 140));
+        this.autoInvadeButton.setTextColor(DynamicSettings.getInstance().autoInvade === true ?
+            Phaser.Display.Color.GetColor(255, 255, 255) : Phaser.Display.Color.GetColor(175, 0, 140));
         h += 30;
         this.autoUpgradeLabel = this.scene.add.bitmapText(this.x + 660, h, "courier20", "Auto Upgrade:");
         this.autoUpgradeButton = new TextButton(this.scene, this.x + 795, h, 40, 20,

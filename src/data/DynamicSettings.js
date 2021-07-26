@@ -34,6 +34,10 @@ export class DynamicSettings {
             this.openCombatOnExplore = true;
             this.autoExploreWeakestFirst = true;
             this.autoExploreRegions = true;
+            this.autoTownUpgrade = false;
+            this.autoGearUpgrade = false;
+            this.autoExplore = false;
+            this.autoInvade = false;
 
             //programmatic settings
             this.saveEnabled = true;
@@ -169,7 +173,11 @@ export class DynamicSettings {
             sce: this.openCombatOnExplore,
             saeo: this.autoExploreOptions,
             mnrt: this.minResourceTier,
-            aer: this.autoExploreRegions
+            aer: this.autoExploreRegions,
+            atu: this.autoTownUpgrade,
+            agu: this.autoGearUpgrade,
+            ae: this.autoExplore,
+            ai: this.autoInvade
         }
 
         return saveObj;
@@ -201,5 +209,9 @@ export class DynamicSettings {
         this.productionBuildingCost = saveObj.pbc !== undefined ? saveObj.pbc : 0;
         this.autoExploreRegions = saveObj.aer !== undefined ? saveObj.aer : true;
         this.econMulti = saveObj.em !== undefined ? saveObj.em : 1;
+        this.autoTownUpgrade = saveObj.atu !== undefined ? saveObj.atu : false;
+        this.autoGearUpgrade = saveObj.agu !== undefined ? saveObj.agu : false;
+        this.autoExplore = saveObj.ae !== undefined ? saveObj.ae : false;
+        this.autoInvade = saveObj.ai !== undefined ? saveObj.ai : false;
     }
 }

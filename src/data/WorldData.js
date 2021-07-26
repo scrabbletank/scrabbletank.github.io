@@ -205,6 +205,7 @@ export class WorldData {
                             MoonlightData.getInstance().challengePoints += 2;
                             break;
                         case "Forged Ahead":
+                            ProgressionStore.getInstance().persistentUnlocks.autoGear = true;
                             MoonlightData.getInstance().challengePoints += 2;
                             break;
                         case "Giant Lands":
@@ -214,6 +215,7 @@ export class WorldData {
                             MoonlightData.getInstance().challengePoints += 3;
                             break;
                         case "Lazy Townsfolk":
+                            ProgressionStore.getInstance().persistentUnlocks.autoTown = true;
                             MoonlightData.getInstance().challengePoints += 4;
                             break;
                         case "Talentless":

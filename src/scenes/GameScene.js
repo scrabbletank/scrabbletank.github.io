@@ -294,6 +294,7 @@ export class GameScene extends SceneUIBase {
             this.updateStatIcons();
         });
         this.player.registerEvent("onClassSelected", () => { this._handleClassSelected(); });
+        this.worldData.time.registerEvent("onWeekEnd", () => { this._updateWeek(); });
 
         if (this.progression.unlocks.gearTab === false) {
             this.loreScene.addText("You open your eyes and see a vast wilderness before you. " +
@@ -671,6 +672,21 @@ export class GameScene extends SceneUIBase {
         }
     }
 
+    _updateWeek() {
+        if (DynamicSettings.getInstance().autoGearUpgrade === true) {
+            if (this.player.weapon !== undefined) {
+                GearData.getInstance().upgradeGear(this.player.weapon);
+            }
+            if (this.player.armor !== undefined) {
+                GearData.getInstance().upgradeGear(this.player.armor);
+            }
+            if (this.player.trinket !== undefined) {
+                GearData.getInstance().upgradeGear(this.player.trinket);
+            }
+            this.gearScene.refresh(false);
+        }
+    }
+
     rebirth() {
         this.player.applyRitualBonuses();
         RitualData.getInstance().rebirth();
@@ -862,5 +878,9 @@ export class GameScene extends SceneUIBase {
         if (timeOffline > 60000) {
             this.worldData.time.addOfflineTime(timeOffline);
         }
+
+        //handle new progression milestones here:
+        this.progression.persistentUnlocks.autoGear = this.moonlight.challenges.forge.completions > 0;
+        this.progression.persistentUnlocks.autoTown = this.moonlight.challenges.buildings.completions > 0;
     }
 }

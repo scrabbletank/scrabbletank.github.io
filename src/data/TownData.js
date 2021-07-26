@@ -8,6 +8,7 @@ import { Dungeon } from "./Dungeon";
 import { RuneRegistry } from "./RuneRegistry";
 import { StarData } from "./StarData";
 import { RitualData } from "./RitualData";
+import { Common } from "../utils/Common";
 
 export class TownData {
     static getTechGoldCost(tech, tier) {
@@ -403,8 +404,22 @@ export class TownData {
             PlayerData.getInstance().addShade(this.currentPopulation * 0.1 *
                 MoonlightData.getInstance().moonperks.shadow3.level * MoonlightData.getInstance().getShadowBonus());
         }
+        if (DynamicSettings.getInstance().autoTownUpgrade === true) {
+            var player = new PlayerData();
+            for (const prop in this.buildings) {
+                var gold = TownData.getTechGoldCost(this.buildings[prop], this.tier);
+                var resCost = TownData.getTechResourceCost(this.buildings[prop], this.tier);
+                var resTier = Math.min(7, this.resourceTier);
+                if (player.gold >= gold && Common.canCraft(resCost, player.resources[resTier]) === true &&
+                    this.friendshipLevel >= this.buildings[prop].level) {
+                        player.addGold(-gold);
+                        player.spendResource(resCost, resTier);
+                        this.increaseTechLevel(this.buildings[prop]);
+                }
+            }
+        }
     }
-
+    
     save() {
         var buildings = [];
         for (const prop in this.buildings) {

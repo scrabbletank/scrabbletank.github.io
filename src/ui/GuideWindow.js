@@ -272,6 +272,12 @@ export class GuideWindow {
                     "continue when you die, and doesn't cross regions.";
                 this.guideTexts.push(this.scene.add.bitmapText(this.x + 150, this.y + py + 25, "courier16", Common.processText(helptxt, 72)));
                 py += 80;
+                if (ProgressionStore.getInstance().persistentUnlocks.autoGear === true) {
+                    this.guideTexts.push(this.scene.add.bitmapText(this.x + 150, this.y + py, "courier20", "Auto Upgrade Gear"));
+                    helptxt = "At the end of every week this will try to upgrade your equiped gear one level.";
+                    this.guideTexts.push(this.scene.add.bitmapText(this.x + 150, this.y + py + 25, "courier16", Common.processText(helptxt, 72)));
+                    py += 60;
+                }
                 if (MoonlightData.getInstance().challenges.invasion.completions > 0) {
                     this.guideTexts.push(this.scene.add.bitmapText(this.x + 150, this.y + py, "courier20", "Auto Invade"));
                     helptxt = "With this on Auto Explore will clear up any invasions first before exploring new tiles. Fighting Invasions " +
@@ -279,8 +285,14 @@ export class GuideWindow {
                     this.guideTexts.push(this.scene.add.bitmapText(this.x + 150, this.y + py + 25, "courier16", Common.processText(helptxt, 72)));
                     py += 80;
                 }
+                if (ProgressionStore.getInstance().persistentUnlocks.autoTown === true) {
+                    this.guideTexts.push(this.scene.add.bitmapText(this.x + 150, this.y + py, "courier20", "Auto Upgrade Town"));
+                    helptxt = "At the end of every week this will try to upgrade town buildings (not research) one level.";
+                    this.guideTexts.push(this.scene.add.bitmapText(this.x + 150, this.y + py + 25, "courier16", Common.processText(helptxt, 72)));
+                    py += 60;
+                }
                 if (MoonlightData.getInstance().challenges.outcast.completions > 0) {
-                    this.guideTexts.push(this.scene.add.bitmapText(this.x + 150, this.y + py, "courier20", "Auto Upgrade"));
+                    this.guideTexts.push(this.scene.add.bitmapText(this.x + 150, this.y + py, "courier20", "Auto Upgrade Buildings"));
                     helptxt = "Finally, some building automation. This is toggled on each region and will attempt to upgrade a handful of " +
                         "buildings each day, assuming you can afford it. Each day, it will upgrade one production building, house, road, market, " +
                         "tavern, and warehouse. Why those? Because I already have lists for those and I'm too lazy to code something else.";
