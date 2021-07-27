@@ -978,9 +978,9 @@ export class GearData {
         this.gear.push(new Gear("Enchanted Plate", 5, Statics.GEAR_ARMOR, stat, cost, costlvl));
 
         var stat = {
-            health: 0, damageMin: 0, damageMax: 0, strength: 3,
-            dexterity: 3, agility: 0, endurance: 0, recovery: 0,
-            defense: 3, accuracy: 0, hit: 0, evasion: 0,
+            health: 0, damageMin: 0, damageMax: 0, strength: 5,
+            dexterity: 5, agility: 0, endurance: 0, recovery: 0,
+            defense: 5, accuracy: 0, hit: 0, evasion: 0,
             critPower: 75, critResistance: 0, critChance: 0.1, healthRegen: 0, armor: 0
         };
         var cost = [20, 0, 0, 0, 40, 50];

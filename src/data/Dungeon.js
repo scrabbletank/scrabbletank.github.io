@@ -11,7 +11,7 @@ const dungeonPrefix = ['Starlit', 'Poisoned', 'Malevolent', 'Monstrous', 'Dank',
 const dungeonSuffix = ['Tomb', 'Crypt', 'Grove', 'Garden', 'Tower', 'Spire', 'Dungeon', 'Barrow', 'Mausoleum', 'Catacomb', 'Prison'];
 
 export class Dungeon {
-    constructor(level, difficulty, tier, regionLevel, maxRooms) {
+    constructor(level, difficulty, tier, regionLevel, maxRooms, randomizeRewards = true) {
         this.level = level;
         this.difficulty = difficulty;
         this.tier = tier;
@@ -19,8 +19,10 @@ export class Dungeon {
         this.completedRooms = 0;
         this.rewards = [];
         this.regionLevel = regionLevel;
-        this.name = this._randomizeName();
-        this._randomizeRewards();
+        if (randomizeRewards === true) {
+            this.name = this._randomizeName();
+            this._randomizeRewards();
+        }
     }
 
     _randomizeName() {
@@ -178,7 +180,7 @@ export class Dungeon {
     }
 
     static loadFromFile(saveObj, ver) {
-        var dungeon = new Dungeon(saveObj.l, saveObj.d, saveObj.t, saveObj.rl, saveObj.mr);
+        var dungeon = new Dungeon(saveObj.l, saveObj.d, saveObj.t, saveObj.rl, saveObj.mr, false);
         dungeon.completedRooms = saveObj.cr;
         dungeon.rewards = saveObj.r;
         dungeon.name = saveObj.n;
