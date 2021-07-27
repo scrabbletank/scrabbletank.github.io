@@ -922,7 +922,7 @@ export class TooltipRegistry {
             case "Betrayer Star: Forbidden Knowledge":
                 return "Talents give " + (perk.level * 2) + " + (2) more moonlight, before multipliers.";
             case "Betrayer Star: Mysticism":
-                return "Cost multiplier for sacrificing resources becomes x" + (10 - perk.level / 2) + " - (0.5).";
+                return "Cost multiplier for sacrificing resources becomes x" + (13 - perk.level / 2) + " - (0.5).";
         }
     }
 
@@ -954,46 +954,46 @@ export class TooltipRegistry {
             case "Cult Warders":
                 return "Permanently increases Villager Health by " + (statGrowth * 5) + " + (" + (60 + ritual.level * 20) + ").";
             case "Corrupted Strength":
-                return "Increases your Strength, Dexterity, and Agility by " + (ritual.level * 10) + "% + (10%), but reduces " +
+                return "Increases your Strength, Dexterity, and Agility by " + (ritual.level * 5) + "% + (5%), but reduces " +
                     "Moonlight by " + ml + "% - (~" + (-ritual.moonlight * 100) + "%) and " +
                     "Star Shard Chance by " + ss + "% - (~" + (-ritual.starshards * 100) + "%).";
             case "Corrupted Endurance":
-                return "Increases your Endurance, Recovery, and Defense by " + (ritual.level * 10) + "% + (10%), but reduces " +
+                return "Increases your Endurance, Recovery, and Defense by " + (ritual.level * 5) + "% + (5%), but reduces " +
                     "Moonlight by " + ml + "% - (~" + (-ritual.moonlight * 100) + "%) and " +
                     "Star Shard Chance by " + ss + "% - (~" + (-ritual.starshards * 100) + "%).";
             case "Corrupted Accuracy":
-                return "Increases your Crit Chance by " + (ritual.level * 10) + "% + (10%) and " +
-                    "Accuracy by " + (ritual.level * 20) + "% + (20%), but reduces " +
+                return "Increases your Crit Chance by " + (ritual.level * 8) + "% + (8%) and " +
+                    "Accuracy by " + (ritual.level * 15) + "% + (15%), but reduces " +
                     "Moonlight by " + ml + "% - (~" + (-ritual.moonlight * 100) + "%) and " +
                     "Star Shard Chance by " + ss + "% - (~" + (-ritual.starshards * 100) + "%).";
             case "Wild Growth":
-                return "Increases tile yields by " + (ritual.level * 15) + "% + (15%), but reduces " +
+                return "Increases tile yields by " + (ritual.level * 10) + "% + (10%), but reduces " +
                     "Moonlight by " + ml + "% - (~" + (-ritual.moonlight * 100) + "%) and " +
                     "Star Shard Chance by " + ss + "% - (~" + (-ritual.starshards * 100) + "%).";
             case "Hatchlings":
-                return "Town population grows " + (ritual.level * 25) + "% + (25%) faster and " +
+                return "Town population grows " + (ritual.level * 15) + "% + (15%) faster and " +
                     "Max Population is increased by " + (ritual.level * 5) + "% + (5%), but reduces " +
                     "Moonlight by " + ml + "% - (~" + (-ritual.moonlight * 100) + "%) and " +
                     "Star Shard Chance by " + ss + "% - (~" + (-ritual.starshards * 100) + "%).";
             case "Vile Offering":
-                return "Increases Resource and Mote of Darkness drops by " + (ritual.level * 20) + "% + (20%), but reduces " +
+                return "Increases Resource and Mote of Darkness drops by " + (ritual.level * 15) + "% + (15%), but reduces " +
                     "Moonlight by " + ml + "% - (~" + (-ritual.moonlight * 100) + "%).";
             case "Cult Towns":
-                return "Increases Villager Power and Health by " + (ritual.level * 25) + "% + (25%), but reduces " +
+                return "Increases Villager Power and Health by " + (ritual.level * 20) + "% + (20%), but reduces " +
                     "Moonlight by " + ml + "% - (~" + (-ritual.moonlight * 100) + "%).";
             case "Ruinous Powers":
-                return "Enemy stats are increased by " + (ritual.level * 20) + "% + (20%). Increases " +
+                return "Enemy stats are increased by " + (ritual.level * 25) + "% + (25%). Increases " +
                     "Moonlight by " + ml + "% + (" + (ritual.moonlight * 100) + "%).";
             case "Betrayer's Gift":
                 return "All enemy trait levels are increased by " + (ritual.level) + " + (1). Increases " +
                     "Star Shard Chance by " + ss + "% + (" + (ritual.starshards * 100) + "%).";
             case "Call of The Void":
-                return "Base time between Invasions is reduced by " + (ritual.level) + "s + (1s), " +
+                return "Base time between Invasions is reduced by " + (ritual.level * 2) + "s + (2s), " +
                     "Invaders are " + (ritual.level) + " + (1) level higher. Increases " +
                     "Moonlight by " + ml + "% + (" + (ritual.moonlight * 100) + "%) and " +
                     "Star Shard Chance by " + ss + "% + (" + (ritual.starshards * 100) + "%).";
             case "Desolation":
-                return "Tile Yields and Explore Speed are divided by " + (1 + ritual.level * 0.25) + " + (0.25). Increases " +
+                return "Tile Yields and Explore Speed are divided by " + (1 + ritual.level * 0.5) + " + (0.5). Increases " +
                     "Moonlight by " + ml + "% + (" + (ritual.moonlight * 100) + "%) and " +
                     "Star Shard Chance by " + ss + "% + (" + (ritual.starshards * 100) + "%).";
             case "Apathy":

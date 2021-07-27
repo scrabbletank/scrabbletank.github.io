@@ -131,7 +131,7 @@ export class AdventurerBlock extends CreatureBlock {
         ret = ret * (1 + (this.moonData.moonperks.str.level + MoonlightData.getInstance().challengePoints * 2) * 0.005);
         ret += ret * (this.player.runeBonuses.strPercent + this.player.runeBonuses.allPercent);
         ret = ret * this.player.dungeonBonus.strength;
-        ret = ret * (1 + RitualData.getInstance().activePerks.playeroffense * 0.1);
+        ret = ret * (1 + RitualData.getInstance().activePerks.playeroffense * 0.05);
         ret += this.Dexterity() * this.player.runeBonuses.dexToStr;
         return Math.floor(Math.max(1, ret));
     }
@@ -141,7 +141,7 @@ export class AdventurerBlock extends CreatureBlock {
         ret = ret * (1 + (this.moonData.moonperks.dex.level + MoonlightData.getInstance().challengePoints * 2) * 0.005);
         ret += ret * (this.player.runeBonuses.dexPercent + this.player.runeBonuses.allPercent);
         ret = ret * this.player.dungeonBonus.dexterity;
-        ret = ret * (1 + RitualData.getInstance().activePerks.playeroffense * 0.1);
+        ret = ret * (1 + RitualData.getInstance().activePerks.playeroffense * 0.05);
         return Math.floor(Math.max(1, ret));
     }
     Agility() {
@@ -150,7 +150,7 @@ export class AdventurerBlock extends CreatureBlock {
         ret = ret * (1 + (this.moonData.moonperks.agi.level + MoonlightData.getInstance().challengePoints * 2) * 0.005);
         ret += ret * (this.player.runeBonuses.agiPercent + this.player.runeBonuses.allPercent);
         ret = ret * this.player.dungeonBonus.agility;
-        ret = ret * (1 + RitualData.getInstance().activePerks.playeroffense * 0.1);
+        ret = ret * (1 + RitualData.getInstance().activePerks.playeroffense * 0.05);
         return Math.floor(Math.max(1, ret));
     }
     Endurance() {
@@ -159,7 +159,7 @@ export class AdventurerBlock extends CreatureBlock {
         ret = ret * (1 + (this.moonData.moonperks.end.level + MoonlightData.getInstance().challengePoints * 2) * 0.005);
         ret += ret * (this.player.runeBonuses.endPercent + this.player.runeBonuses.allPercent);
         ret = ret * this.player.dungeonBonus.endurance;
-        ret = ret * (1 + RitualData.getInstance().activePerks.playerdefense * 0.1);
+        ret = ret * (1 + RitualData.getInstance().activePerks.playerdefense * 0.05);
         return Math.floor(Math.max(1, ret));
     }
     Recovery() {
@@ -168,7 +168,7 @@ export class AdventurerBlock extends CreatureBlock {
         ret = ret * (1 + (this.moonData.moonperks.rec.level + MoonlightData.getInstance().challengePoints * 2) * 0.005);
         ret += ret * (this.player.runeBonuses.recPercent + this.player.runeBonuses.allPercent);
         ret = ret * this.player.dungeonBonus.recovery;
-        ret = ret * (1 + RitualData.getInstance().activePerks.playerdefense * 0.1);
+        ret = ret * (1 + RitualData.getInstance().activePerks.playerdefense * 0.05);
         ret += this.Endurance() * this.player.runeBonuses.endToRec;
         return Math.floor(Math.max(1, ret));
     }
@@ -178,7 +178,7 @@ export class AdventurerBlock extends CreatureBlock {
         ret = ret * (1 + (this.moonData.moonperks.def.level + MoonlightData.getInstance().challengePoints * 2) * 0.005);
         ret += ret * (this.player.runeBonuses.defPercent + this.player.runeBonuses.allPercent);
         ret = ret * this.player.dungeonBonus.defense;
-        ret = ret * (1 + RitualData.getInstance().activePerks.playerdefense * 0.1);
+        ret = ret * (1 + RitualData.getInstance().activePerks.playerdefense * 0.05);
         ret += this.Agility() * this.player.runeBonuses.agiToDef;
         return Math.floor(Math.max(1, ret));
     }
@@ -188,7 +188,7 @@ export class AdventurerBlock extends CreatureBlock {
         ret = ret * (1 + (this.moonData.moonperks.acc.level + MoonlightData.getInstance().challengePoints * 2) * 0.005);
         ret += ret * (this.player.runeBonuses.accPercent + this.player.runeBonuses.allPercent);
         ret = ret * this.player.dungeonBonus.accuracy;
-        ret = ret * (1 + RitualData.getInstance().activePerks.playercrits * 0.20);
+        ret = ret * (1 + RitualData.getInstance().activePerks.playercrits * 0.15);
         return Math.floor(Math.max(1, ret));
     }
     Hit() {
@@ -211,7 +211,7 @@ export class AdventurerBlock extends CreatureBlock {
         var ret = this.statBonuses.critChance;
         ret += this.player.getTalentLevel("crit") * 0.01;
         ret += this.player.runeBonuses.critChance;
-        ret += RitualData.getInstance().activePerks.playercrits * 0.1;
+        ret += RitualData.getInstance().activePerks.playercrits * 0.08;
         return Math.floor(ret * 100) / 100;
     }
     CritResistance() {

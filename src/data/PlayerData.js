@@ -185,8 +185,6 @@ export class PlayerData {
         this.talentPoints = MoonlightData.getInstance().challenges.talent.completions;
         this.statLevel = 1;
         this.talentLevel = 1;
-        this.nextStatCost = Statics.STAT_COST_BASE - StarData.getInstance().perks.statcost.level * 2;
-        this.nextTalentCost = Statics.TALENT_COST_BASE;
         this.resources = [[0, 0, 0, 0, 0, 0], [0, 0, 0, 0, 0, 0], [0, 0, 0, 0, 0, 0], [0, 0, 0, 0, 0, 0],
         [0, 0, 0, 0, 0, 0], [0, 0, 0, 0, 0, 0], [0, 0, 0, 0, 0, 0], [0, 0, 0, 0, 0, 0]];
         this.craftingCosts = [1, 1, 1, 1, 1, 1, 1, 1];
@@ -592,16 +590,27 @@ export class PlayerData {
             (1 + Statics.AGI_EXPLORE_MULTI * Math.pow(this.statBlock.Agility(), Statics.AGI_EXPLORE_POWER + this.runeBonuses.agilityScaling)) *
             (1 + MoonlightData.getInstance().moonperks.farstrider.level * 0.1) *
             this.challengeExploreMulti /
-            (1 + RitualData.getInstance().activePerks.desolation * 0.25);
+            (1 + RitualData.getInstance().activePerks.desolation * 0.5);
     }
 
+    //(ritual.level * (12 + 12 + (ritual.level - 1) * 4)) / 2
     getStatCost(buyAmount) {
-        var ret = 0;
-        var starMod = StarData.getInstance().perks.statcost.level * 2;
-        for (var i = 0; i < buyAmount; i++) {
-            ret += (Statics.STAT_COST_BASE - starMod) + ((Statics.STAT_COST_PER_LEVEL - starMod) * (this.statLevel - 1 + i));
-        }
-        return ret;
+        var cost = (Statics.STAT_COST_BASE - StarData.getInstance().perks.statcost.level * 2);
+        var t = this.statLevel * cost;
+        return (buyAmount * (t + t + ((buyAmount - 1) * cost))) / 2;
+    }
+    //((c * t + (c * t + t(x - 1))) * x) / 2 = y
+    getStatCostMax(percentage) {
+        var cost = (Statics.STAT_COST_BASE - StarData.getInstance().perks.statcost.level * 2);
+        var tShade = this.shade * percentage;
+        var sLvl = this.statLevel;
+        var costSqrt = Math.sqrt(cost);
+        var t1 = Math.sqrt((4 * Math.pow(sLvl, 2) * cost) - (4 * sLvl * cost) + cost + (8 * tShade));
+        var t2 = 2 * sLvl * costSqrt;
+        var t3 = costSqrt;
+        var t4 = 2 * costSqrt;
+        var x = (t1 - t2 + t3) / t4;
+        return Math.max(1, Math.floor(x));
     }
     getTalentCost(buyAmount) {
         var ret = 0;
@@ -610,6 +619,18 @@ export class PlayerData {
             ret += Statics.TALENT_COST_BASE * Math.pow(Statics.TALENT_COST_POWER - challengeMod, (this.talentLevel - 1 + i));
         }
         return ret;
+    }
+    getTalentCostMax(percentage) {
+        var totalShade = this.shade * percentage;
+        var buyAmount = 1;
+        var power = Statics.TALENT_COST_POWER - MoonlightData.getInstance().challenges.talent.completions * 0.008;
+        var totalCost = Statics.TALENT_COST_BASE * Math.pow(power, (this.talentLevel - 1 + buyAmount));
+        while (totalCost < totalShade) {
+            buyAmount += 1;
+            totalCost += Statics.TALENT_COST_BASE * Math.pow(power, (this.talentLevel - 1 + buyAmount));
+        }
+        buyAmount = Math.max(1, buyAmount - 1);
+        return buyAmount;
     }
     getTalentLevel(name) {
         if (this.talents[name] === undefined || DynamicSettings.getInstance().talentsEnabled === false) {
@@ -679,22 +700,14 @@ export class PlayerData {
     }
 
     buyStat(buyAmount) {
-        for (var i = 0; i < buyAmount; i++) {
-            this.statPoints += Statics.STAT_POINTS_PER_BUY + StarData.getInstance().perks.statpoints.level;
-            this.shade -= this.nextStatCost;
-            this.nextStatCost = (Statics.STAT_COST_BASE - StarData.getInstance().perks.statcost.level * 2) +
-                ((Statics.STAT_COST_PER_LEVEL - StarData.getInstance().perks.statcost.level * 2) * this.statLevel);
-            this.statLevel += 1;
-        }
+        this.statPoints += buyAmount * (Statics.STAT_POINTS_PER_BUY + StarData.getInstance().perks.statpoints.level);
+        this.shade -= this.getStatCost(buyAmount);
+        this.statLevel += buyAmount;
     }
     buyTalent(buyAmount) {
-        var challengeMod = MoonlightData.getInstance().challenges.talent.completions * 0.008;
-        for (var i = 0; i < buyAmount; i++) {
-            this.talentPoints += 1;
-            this.shade -= this.nextTalentCost;
-            this.nextTalentCost = Statics.TALENT_COST_BASE * Math.pow(Statics.TALENT_COST_POWER - challengeMod, this.talentLevel);
-            this.talentLevel += 1;
-        }
+        this.talentPoints += buyAmount;
+        this.shade -= this.getTalentCost(buyAmount);
+        this.talentLevel += buyAmount;
         if (this.talentLevel >= 50 && ProgressionStore.getInstance().persistentUnlocks.wizardClass === false) {
             ProgressionStore.getInstance().persistentUnlocks.wizardClass = true;
             ProgressionStore.getInstance().registerFeatureUnlocked(Statics.UNLOCK_GENERIC,
@@ -857,8 +870,6 @@ export class PlayerData {
             tp: this.talentPoints,
             spl: this.statLevel,
             tpl: this.talentLevel,
-            nsp: this.nextStatCost,
-            ntp: this.nextTalentCost,
             res: this.resources,
             rtr: this.resourceTierReached,
             crf: this.craftingCosts,
@@ -890,8 +901,6 @@ export class PlayerData {
         this.talentPoints = saveObj.tp;
         this.statLevel = saveObj.spl;
         this.talentLevel = saveObj.tpl;
-        this.nextStatCost = saveObj.nsp;
-        this.nextTalentCost = saveObj.ntp;
         this.resources = saveObj.res;
         this.resourceTierReached = saveObj.rtr;
         this.craftingCosts = saveObj.crf;

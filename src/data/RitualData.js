@@ -3,7 +3,7 @@ import { StarData } from "./StarData";
 export class RitualData {
     constructor() {
         if (!RitualData.instance) {
-            this.ritualCosts = [500000, 500000, 500000, 500000, 500000, 500000, 100000, 25000];
+            this.ritualCosts = [750000, 750000, 750000, 750000, 750000, 750000, 150000, 25000];
 
             this.moonlightBonus = 1;
             this.starshardBonus = 1;
@@ -52,63 +52,63 @@ export class RitualData {
 
                 // Benefits for next run
                 playeroffense: {
-                    name: "Corrupted Strength", level: 0, pos: [336, 216], moonlight: -0.15, starshards: -0.05,
+                    name: "Corrupted Strength", level: 0, pos: [336, 216], moonlight: -0.2, starshards: -0.1,
                     texture: { sprite: "icons2", tile: 20 }
                 },
                 playerdefense: {
-                    name: "Corrupted Endurance", level: 0, pos: [408, 216], moonlight: -0.05, starshards: -0.15,
+                    name: "Corrupted Endurance", level: 0, pos: [408, 216], moonlight: -0.1, starshards: -0.2,
                     texture: { sprite: "icons2", tile: 21 }
                 },
                 playercrits: {
-                    name: "Corrupted Accuracy", level: 0, pos: [480, 216], moonlight: -0.15, starshards: -0.05,
+                    name: "Corrupted Accuracy", level: 0, pos: [480, 216], moonlight: -0.2, starshards: -0.1,
                     texture: { sprite: "icons2", tile: 19 }
                 },
                 wildgrowth: {
-                    name: "Wild Growth", level: 0, pos: [336, 288], moonlight: -0.05, starshards: -0.15,
+                    name: "Wild Growth", level: 0, pos: [336, 288], moonlight: -0.1, starshards: -0.25,
                     texture: { sprite: "icons2", tile: 23 }
                 },
                 hatchlings: {
-                    name: "Hatchlings", level: 0, pos: [408, 288], moonlight: -0.1, starshards: -0.1,
+                    name: "Hatchlings", level: 0, pos: [408, 288], moonlight: -0.15, starshards: -0.15,
                     texture: { sprite: "icons2", tile: 24 }
                 },
                 offerings: {
-                    name: "Vile Offering", level: 0, pos: [480, 288], moonlight: -0.15, starshards: 0,
+                    name: "Vile Offering", level: 0, pos: [480, 288], moonlight: -0.2, starshards: 0,
                     texture: { sprite: "icons2", tile: 6 }
                 },
                 culttowns: {
-                    name: "Cult Towns", level: 0, pos: [408, 360], moonlight: -0.2, starshards: 0,
+                    name: "Cult Towns", level: 0, pos: [408, 360], moonlight: -0.25, starshards: 0,
                     texture: { sprite: "icons2", tile: 22 }
                 },
 
                 // Difficulty increases
                 ruinouspower: {
-                    name: "Ruinous Powers", level: 0, pos: [624, 216], moonlight: 0.2, starshards: 0,
+                    name: "Ruinous Powers", level: 0, pos: [624, 216], moonlight: 0.15, starshards: 0,
                     texture: { sprite: "icons2", tile: 25 }
                 },
                 betrayersgift: {
-                    name: "Betrayer's Gift", level: 0, pos: [720, 216], moonlight: 0, starshards: 0.25,
+                    name: "Betrayer's Gift", level: 0, pos: [720, 216], moonlight: 0, starshards: 0.18,
                     texture: { sprite: "icons", tile: 42 }
                 },
                 callofthevoid: {
-                    name: "Call of The Void", level: 0, pos: [600, 288], moonlight: 0.1, starshards: 0.15,
+                    name: "Call of The Void", level: 0, pos: [600, 288], moonlight: 0.05, starshards: 0.1,
                     texture: { sprite: "enemyicons", tile: 19 }
                 },
                 desolation: {
-                    name: "Desolation", level: 0, pos: [744, 288], moonlight: 0.15, starshards: 0.25,
+                    name: "Desolation", level: 0, pos: [744, 288], moonlight: 0.10, starshards: 0.18,
                     texture: { sprite: "icons2", tile: 16 }
                 },
                 apathy: {
-                    name: "Apathy", level: 0, pos: [624, 360], moonlight: 0.2, starshards: 0,
+                    name: "Apathy", level: 0, pos: [624, 360], moonlight: 0.125, starshards: 0,
                     texture: { sprite: "icons2", tile: 26 }
                 },
                 vengeance: {
-                    name: "Vengeance", level: 0, pos: [720, 360], moonlight: 0, starshards: 0.25,
+                    name: "Vengeance", level: 0, pos: [720, 360], moonlight: 0, starshards: 0.2,
                     texture: { sprite: "icons", tile: 45 }
                 },
 
                 // moonlight/star shard swapping
                 stargod: {
-                    name: "Ritual of the Star Queen", level: 0, pos: [672, 528], moonlight: -0.2, starshards: 0.25,
+                    name: "Ritual of the Star Queen", level: 0, pos: [672, 528], moonlight: -0.15, starshards: 0.15,
                     texture: { sprite: "icons2", tile: 18 }
                 },
                 betrayer: {
@@ -142,7 +142,7 @@ export class RitualData {
         this.nextMoonlightBonus = 1;
         this.nextStarshardBonus = 1;
         this.ritualPoints = 0;
-        this.ritualCosts = [500000, 500000, 500000, 500000, 500000, 500000, 100000, 25000];
+        this.ritualCosts = [750000, 750000, 750000, 750000, 750000, 750000, 150000, 25000];
 
         for (const prop in this.rituals) {
             this.activePerks[prop] = this.rituals[prop].level;
@@ -152,7 +152,7 @@ export class RitualData {
 
     increaseSacCost(idx) {
         this.ritualPoints += 1;
-        var multi = 10 - 0.5 * StarData.getInstance().perks.mysticism.level;
+        var multi = 13 - 0.5 * StarData.getInstance().perks.mysticism.level;
         this.ritualCosts[idx] = this.ritualCosts[idx] * multi;
     }
 

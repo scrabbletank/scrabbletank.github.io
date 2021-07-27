@@ -359,8 +359,8 @@ export class Region {
         // we use the tile yields as a mask to determine which yields we should add for a given tile
         var yieldMask = RegionRegistry.TILE_TYPES[this.map[py][px].regName].yields;
         var yields = [0, 0, 0, 0, 0, 0];
-        var ritMulti = (1 + RitualData.getInstance().activePerks.wildgrowth * 0.15) /
-            (1 + RitualData.getInstance().activePerks.desolation * 0.25);
+        var ritMulti = (1 + RitualData.getInstance().activePerks.wildgrowth * 0.1) /
+            (1 + RitualData.getInstance().activePerks.desolation * 0.5);
         for (var y = Math.max(0, py - 1); y < Math.min(this.height, py + 2); y++) {
             for (var x = Math.max(0, px - 1); x < Math.min(this.width, px + 2); x++) {
                 for (var i = 0; i < yields.length; i++) {
@@ -784,7 +784,7 @@ export class Region {
 
     _addSighting() {
         var baseTimer = Math.max(DynamicSettings.getInstance().invasionTimer -
-            RitualData.getInstance().activePerks.callofthevoid, 5);
+            RitualData.getInstance().activePerks.callofthevoid * 2, 5);
         var a = Math.min(baseTimer * (1 + this.sightings.length * Statics.SIGHTING_MULTI_PER_SIGHTING),
             Statics.MAX_SIGHTING_SECONDS);
         var b = Math.min(a * 2, Statics.MAX_SIGHTING_SECONDS);
