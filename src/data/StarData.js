@@ -112,7 +112,7 @@ export class StarData {
                     texture: { sprite: "staricons", tile: 12 }
                 },
                 mysticism: { // ritual cost reduction
-                    name: "Betrayer Star: Mysticism", level: 0, maxLevel: 16, requires: [], cost: [25, 25, 1],
+                    name: "Betrayer Star: Mysticism", level: 0, maxLevel: 16, requires: [], cost: [25, 25, 1.2],
                     texture: { sprite: "staricons", tile: 12 }
                 },
             }
