@@ -307,7 +307,7 @@ export class CreatureBlock {
         var scaleStat = Math.pow(Statics.MONSTER_STATSCALE_PER_LEVEL, sLvl) * Math.pow(Statics.MONSTER_STATSCALE_PER_REGION, tier) *
             Math.pow(Statics.MONSTER_STATSCALE_POST_MYRAH, Math.max(0, tier - 10));
         var scaleXp = Math.pow(Statics.MONSTER_XPSCALE_PER_REGION, tier);
-        scaleStat *= (1 + RitualData.getInstance().activePerks.ruinouspower * 0.20);
+        scaleStat *= (1 + RitualData.getInstance().activePerks.ruinouspower * 0.25);
 
         this.stats.strength = (this.stats.strength + flatStat) * scaleBlock.strength * scaleStat;
         this.stats.dexterity = (this.stats.dexterity + flatStat) * scaleBlock.dexterity * scaleStat;
