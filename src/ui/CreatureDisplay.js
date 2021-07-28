@@ -26,25 +26,6 @@ export class CreatureDisplay {
         this.image.displayHeight = 64;
 
         this.nameLabel = sceneContext.add.bitmapText(x + 75, y + 5, "courier20", "");
-        //stats
-        // this.detailsIcons.push(new TooltipImage(this, 20, 170, 16, 16, { sprite: "icons", tile: 25 },
-        //     "Health, when this runs out you die."));
-        // this.detailsIcons.push(new TooltipImage(this, 20, 170, 16, 16, { sprite: "icons", tile: 24 },
-        //     "The damage you deal with each attack. Your damage is reduced by the targets armor, dealing a minimum of 1 damage."));
-        // this.detailsIcons.push(new TooltipImage(this, 20, 170, 16, 16, { sprite: "icons", tile: 26 },
-        //     "Armor. Each point reduces damage from enemy attacks by 1."));
-        // this.detailsIcons.push(new TooltipImage(this, 20, 170, 16, 16, { sprite: "icons", tile: 27 },
-        //     "Hit Chance. Hit increases your attack speed, while enemy Evasion lowers your attack speed."));
-        // this.detailsIcons.push(new TooltipImage(this, 20, 170, 16, 16, { sprite: "icons", tile: 28 },
-        //     "Evasion. Slows enemy attack speed if you have more Evasion then their Hit."));
-        // this.detailsIcons.push(new TooltipImage(this, 20, 170, 16, 16, { sprite: "icons", tile: 29 },
-        //     "Health Regen. You restore this much Health every second. Works in combat."));
-        // this.detailsIcons.push(new TooltipImage(this, 20, 170, 16, 16, { sprite: "icons", tile: 31 },
-        //     "Crit Chance. The chance any hit is a critical hit, dealing extra damage."));
-        // this.detailsIcons.push(new TooltipImage(this, 20, 170, 16, 16, { sprite: "icons", tile: 30 },
-        //     "Crit Power. Increases your crit damage, but is reduced by the targets Crit Resistance."));
-        // this.detailsIcons.push(new TooltipImage(this, 20, 170, 16, 16, { sprite: "icons", tile: 48 },
-        //     "Crit Resistance. Reduces the damage taken by critical hits."));
         this.statIcons = [];
         this.statIcons.push(new TooltipImage(this.sceneContext, this.x + 75, this.y + 25, 16, 16,
             { sprite: "icons", tile: 24 }, "Damage dealt with each attack."));
@@ -109,8 +90,10 @@ export class CreatureDisplay {
         this.traitButtons = [];
         for (var i = 0; i < creature.traits.length; i++) {
             var sprite = TooltipRegistry.getTraitImage(creature.traits[i]);
-            this.traitButtons.push(new TooltipImage(this.sceneContext, this.x + 75 + (i * 20), this.y + 105, 16, 16, sprite,
-                TooltipRegistry.getTraitTooltip(creature.traits[i])));
+            var ix = i % 3;
+            var iy = Math.floor(i / 3);
+            this.traitButtons.push(new TooltipImage(this.sceneContext, this.x + 5 + (ix * 20), this.y + 75 + iy * 20,
+                16, 16, sprite, TooltipRegistry.getTraitTooltip(creature.traits[i])));
         }
     }
 

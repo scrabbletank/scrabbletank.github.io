@@ -222,8 +222,8 @@ export class CombatScene extends SceneUIBase {
         this.invasionCounter.setVisible(false);
         this.monsterDisplays = [];
         this.monsterDisplays.push(new CreatureDisplay(this, this.relativeX(325), this.relativeY(70)));
-        this.monsterDisplays.push(new CreatureDisplay(this, this.relativeX(100), this.relativeY(170)));
-        this.monsterDisplays.push(new CreatureDisplay(this, this.relativeX(550), this.relativeY(170)));
+        this.monsterDisplays.push(new CreatureDisplay(this, this.relativeX(65), this.relativeY(170)));
+        this.monsterDisplays.push(new CreatureDisplay(this, this.relativeX(585), this.relativeY(170)));
 
         this.playerDisplay = new CreatureDisplay(this, this.relativeX(325), this.relativeY(460));
         this.playerDisplay.initWithCreature(this.player.statBlock);
