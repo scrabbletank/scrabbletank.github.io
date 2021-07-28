@@ -13,6 +13,9 @@ import { WorldData } from "../data/WorldData";
 import { Common } from "../utils/Common";
 import { DynamicSettings } from "../data/DynamicSettings";
 
+const BUY_FLAT = [1, 10, 100, 1000];
+const BUY_PERCENT = [0.1, 0.25, 0.5, 1];
+
 export class GearScene extends SceneUIBase {
     constructor(position, name) {
         super(position, name);
@@ -224,7 +227,10 @@ export class GearScene extends SceneUIBase {
         this._setupView();
     }
     _onFuseHandler(gear) {
-        var motesFused = Math.min(this.player.motes, this.scene.get("DarkWorld").buyAmount);
+        var idx = this.scene.get("DarkWorld").buyBtnIdx;
+        var shift = this.scene.get("DarkWorld").shiftModifier;
+        var motesFused = shift === true ? Math.floor(this.player.motes * BUY_PERCENT[idx]) :
+            Math.min(this.player.motes, BUY_FLAT[idx]);
         GearData.getInstance().fuseGear(gear, motesFused);
 
         this._setupView();
