@@ -1090,7 +1090,7 @@ export class Region {
         for (var i = 0; i < this.productionBuildings.length; i++) {
             var tile = this.map[this.productionBuildings[i][0]][this.productionBuildings[i][1]];
             var prodBonus = 1 + (tile.defense * MoonlightData.getInstance().moonperks.moonlightworkers.level * 0.01);
-            prodBonus = prodBonus * (1 + MoonlightData.getInstance().challenges.buildings.completions) *
+            prodBonus = prodBonus * (1 + MoonlightData.getInstance().challenges.buildings.completions * 0.1) *
                 this._getBuildingEfficiency(tile.x, tile.y) * tile.roadBonus;
             switch (tile.building.name) {
                 case "Lumberyard":

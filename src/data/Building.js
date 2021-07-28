@@ -53,9 +53,15 @@ export class Building {
 
     static getTooltip(tile, name, tier, potential = false) {
         var region = WorldData.getInstance().getCurrentRegion();
-        var prodBonus = 1 + (tile.defense * MoonlightData.getInstance().moonperks.moonlightworkers.level * 0.01);
+        var def = tile.defense;
+        if (potential === true) {
+            def += MoonlightData.getInstance().moonperks.hardenedvillagers.level +
+                region.townData.upgrades.reinforcedhouses.level;
+        }
+        var prodBonus = 1 + (def * MoonlightData.getInstance().moonperks.moonlightworkers.level * 0.01);
         var eff = tile.roadBonus * region._getBuildingEfficiency(tile.x, tile.y, potential);
-        var prodBonus = prodBonus * region.townData.getProductionMulti() * eff;
+        prodBonus = prodBonus * region.townData.getProductionMulti() * eff *
+            (1 + MoonlightData.getInstance().challenges.buildings.completions * 0.1);
         switch (name) {
             case "Lumberyard":
                 var prod = tier * tile.yields[0] * prodBonus * PlayerData.getInstance().dungeonBonus.wood;
