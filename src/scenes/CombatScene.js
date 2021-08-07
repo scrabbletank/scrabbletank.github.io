@@ -207,6 +207,7 @@ export class CombatScene extends SceneUIBase {
         this.load.spritesheet("fireball", "./../../assets/anims/fireanim.png", { frameWidth: 32, frameHeight: 32 });
         this.load.spritesheet("haste", "./../../assets/anims/hasteanim.png", { frameWidth: 32, frameHeight: 32 });
         this.load.spritesheet("skull", "./../../assets/anims/killanim.png", { frameWidth: 32, frameHeight: 32 });
+        this.load.spritesheet("glancing", "./../../assets/anims/glancinganim.png", { frameWidth: 128, frameHeight: 128 });
     }
 
     create() {

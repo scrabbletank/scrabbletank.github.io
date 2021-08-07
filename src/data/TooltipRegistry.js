@@ -7,7 +7,7 @@ import { WorldTime } from "./WorldTime";
 export class TooltipRegistry {
 
     static setDefaultNames() {
-        TooltipRegistry.critPowerName = "Crit Power";
+        TooltipRegistry.critPowerName = "Aim";
         TooltipRegistry.defenseName = "Defense";
         TooltipRegistry.accuracyName = "Accuracy";
     }
@@ -34,13 +34,13 @@ export class TooltipRegistry {
             case "Defense":
                 return "Get more armor from Defense. Increases Armor from Defense by " + (lvl * 13) + "% + (13%).";
             case "Accuracy":
-                return "Crit even harder. You gain " + (3 + lvl * 0.5) + " + (0.5) Crit Power per Accuracy.";
+                return "Crit even harder. You gain " + (3 + lvl * 0.5) + " + (0.5) Aim per Accuracy.";
             case "Hit":
                 return "Gain even more Hit from all sources. Increase your Hit by " + (lvl * 4) + "% + (4%).";
             case "Evasion":
                 return "Gain even more Evasion from all sources. Increase your Evasion by " + (lvl * 4) + "% + (4%).";
             case "Critical":
-                return "Everyone loves to crit, so here is some free crit chance. Increase your crit chance by " + (lvl * 1) + "% + (1%).";
+                return "Everyone loves to crit, so here is some free Crit Chance. Increase your Crit Chance by " + (lvl * 3) + "% + (3%).";
             case "Bounty":
                 return "Somehow improves how much loot enemies drop. Increases your perception or something? Gain a " +
                     (lvl * 10) + "% + (10%) chance for enemies to drop loot twice.";
@@ -68,18 +68,18 @@ export class TooltipRegistry {
             case "Dodge":
                 return "All the Hit in the world can't touch you some of the time. You automatically dodge every " +
                     Math.max(3, 13 - lvl) + " - (1) Attacks against you.";
-            case "Defy Death":
-                return "Have you tried just... not dying? The next time you take lethal damage, you survive at 1 Health. Can be used again after " +
-                    (8 - lvl) + " - (1) encounters. I didn't even know I tracked encounters!";
+            case "Magic Resistance":
+                return "Your so strong you have a natural resistance to magic damage! Reduces magic damage taken by " +
+                    (lvl * 5) + "% - (5%).";
             case "Second Wind":
                 return "All the best heroes are able to get right back to it after a beat down. When you drop below 50% health your " +
                     "Health Regen is tripled for 10 seconds. Has a " + (80 - lvl * 10) + " - (10) second cooldown.";
             case "Parry":
-                return "Why block when you can parry? gives a " + (lvl * 5) + "% + (5%) chance an enemy causes a glancing hit, dealing " +
-                    "half damage. Thats still something, right?";
-            case "Double Crit":
-                return "Crit so hard your crits have crits. Gain a chance to crit twice, doubling your crit damage for the attack. Double crit " +
-                    "chance is " + (lvl * 1) + "% + (1%) of your normal crit chance.";
+                return "Why block when you can parry? gives a " + (lvl * 5) + "% + (5%) chance to parry an attack, reducing damage by " +
+                    "half. Thats still something, right?";
+            case "Serration":
+                return "Crit even harder by just ignoring the enemies toughness! Ignores " + Math.min(75, (lvl * 5)) + "% + (5%) of the monsters toughness when " +
+                    "calculating Crit Damage.";
             case "Guardian":
                 return "Invasions are too strong! If you spend some time patrolling you can probably divide Invasion Power by " +
                     (1 + lvl / 5) + " + (0.2).";
@@ -120,7 +120,7 @@ export class TooltipRegistry {
             case "Barrier":
                 return "Only one spell will cast per attack. Every 13th attack you add " + (40 * lvl) + "% + (40%) of your ward to your shield.";
             case "Shell":
-                return "Who needs endurance when you have magic? Increases your Crit Resistance by " + (15 * lvl) + "% + (15%) while your shield is up.";
+                return "Who needs endurance when you have magic? Increases your Toughness by " + (15 * lvl) + "% + (15%) while your shield is up.";
             case "Fireball":
                 return "Only one spell will cast per attack. Every 5th attack you cast the only spell that matters, dealing " + (7 * lvl) +
                     "% + (7%) of your spellpower to all monster in magic damage. You didn't ask how big the room is, you said 'I cast Fireball'.";
@@ -285,13 +285,13 @@ export class TooltipRegistry {
             case "Moon Treads":
                 return "Unlocks the Moon Treads trinket which grants Agility and Evasion. Available up to tier " + (moonlight.level) + " + (1)";
             case "Moonstone":
-                return "Unlocks the Moonstone trinket which grants Endurance, Health, and Crit Resistance. Available up to tier " + (moonlight.level) + " + (1)";
+                return "Unlocks the Moonstone trinket which grants Endurance, Health, and Toughness. Available up to tier " + (moonlight.level) + " + (1)";
             case "Dreamlight Bracer":
                 return "Unlocks the Dreamlight Bracer trinket which grants Recovery and Health Regen. Available up to tier " + (moonlight.level) + " + (1)";
             case "Shadow Veil":
                 return "Unlocks the Shadow Veil trinket which grants Defense and Armor. Available up to tier " + (moonlight.level) + " + (1)";
             case "Nightmare Pendant":
-                return "Unlocks the Nightmare Pendant trinket which grants Accuracy, Crit Chance and Crit Power. Available up to tier " + (moonlight.level) + " + (1)";
+                return "Unlocks the Nightmare Pendant trinket which grants Accuracy, Crit Chance and Aim. Available up to tier " + (moonlight.level) + " + (1)";
             case "Night Labour":
                 return "Unlocks Night Labour for Towns. When active, villagers gold income is reduced by 50% while all production is increased by " +
                     (moonlight.level * 10) + "% + (10%).";
@@ -517,7 +517,7 @@ export class TooltipRegistry {
                 return "Dire " + trait.level + ": Core stats are increased by " + trait.level * 20 + "%, drops motes, and gives " +
                     trait.level * 75 + "% more experience.";
             case Statics.TRAIT_POISONED:
-                return "Poisoned " + trait.level + ": Deals " + trait.level * 2 + "% of its max damage per second as true damage. Damage " +
+                return "Poisoned " + trait.level + ": Deals " + trait.level * 2 + "% of its max damage per second as magic damage. Damage " +
                     "doubles when below half health.";
             case Statics.TRAIT_MONSTROUS:
                 return "Monstrous " + trait.level + ": Attack speed is reduced by 15%. Has " + trait.level * 25 + "% increased health and " +
@@ -525,10 +525,10 @@ export class TooltipRegistry {
             case Statics.TRAIT_QUICK:
                 return "Quick " + trait.level + ": Attack speed is increased by 20%. Has " + trait.level * 25 + "% increased evasion.";
             case Statics.TRAIT_DEADLY:
-                return "Deadly " + trait.level + ": Crit chance is doubled and has " + trait.level * 30 + "% more crit power.";
+                return "Deadly " + trait.level + ": Crit Chance is doubled and has " + trait.level * 30 + "% more Aim.";
             case Statics.TRAIT_SHIELDED:
                 return "Shielded " + trait.level + ": Every second gains " + trait.level * 20 + "% of their armor as a shield that " +
-                    "absorbs incoming damage. Crit Resistance is increased 1000% while shielded.";
+                    "absorbs incoming damage. Toughness is increased 1000% while shielded.";
             case Statics.TRAIT_BESERK:
                 return "Beserk " + trait.level + ": Hit chance is increased by " + trait.level * 20 + "%, health regen by " +
                     trait.level * 10 + "% and has a " + Math.floor(((1 - Math.pow(0.92, trait.level)) * 100)) +
@@ -542,12 +542,15 @@ export class TooltipRegistry {
                 return "Invader: These monsters are infused with a dark power, increasing their stats by " + Common.numberString(inc) +
                     "% and giving " + Common.numberString(reward) + "% more shade, and motes.";
             case Statics.TRAIT_CORROSIVE:
-                return "Corrosive " + trait.level + ": Reduces your armor by " + trait.level + "% of its min damage.";
+                return "Corrosive " + trait.level + ": Reduces your armor by " + trait.level + "% of its Min Damage.";
             case Statics.TRAIT_REGENERATING:
                 return "Regenerating " + trait.level + ": Has " + (trait.level * 30) + "% more health regen.";
             case Statics.TRAIT_THORNS:
                 return "Thorns " + trait.level + ": Has " + (trait.level * 10) + "% more armor. When attacked, it deals 20% " +
-                    "of its armor in magic damage.";
+                    "of its armor in Magic Damage.";
+            case Statics.TRAIT_MAGICAL:
+                return "Magical " + trait.level + ": Every 3rd hit deals an additional " + (trait.level * 20) + "% of its Max Damage as " +
+                    "Magic Damage.";
         }
         return trait.type + ": Missing Tooltip. Better report this to the dev.";
     }
@@ -578,6 +581,8 @@ export class TooltipRegistry {
                 return { sprite: "icons2", tile: 3 };
             case Statics.TRAIT_INVADER:
                 return { sprite: "icons", tile: 39 };
+            case Statics.TRAIT_MAGICAL:
+                return { sprite: "icons", tile: 63 };
         }
         return { sprite: "icons", tile: 0 };
     }
@@ -681,6 +686,12 @@ export class TooltipRegistry {
                 return sign + value + " Guardian Talent";
             case "agilityScaling":
                 return sign + Math.round(value * 200) + " Agility Explore Scaling";
+            case "charismaTalent":
+                return sign + value + " Charisma Talent";
+            case "chromaTalent":
+                return sign + value + " Chromatic Codex Talent";
+            case "defToShield":
+                return sign + Math.round(value * 100) + "% " + TooltipRegistry.defenseName + " to Shield";
         }
         return "";
     }
@@ -962,7 +973,7 @@ export class TooltipRegistry {
                     "Moonlight by " + ml + "% - (~" + (-ritual.moonlight * 100) + "%) and " +
                     "Star Shard Chance by " + ss + "% - (~" + (-ritual.starshards * 100) + "%).";
             case "Corrupted Accuracy":
-                return "Increases your Crit Chance by " + (ritual.level * 8) + "% + (8%) and " +
+                return "Increases your Crit Chance by " + (ritual.level * 10) + "% + (10%) and " +
                     "Accuracy by " + (ritual.level * 15) + "% + (15%), but reduces " +
                     "Moonlight by " + ml + "% - (~" + (-ritual.moonlight * 100) + "%) and " +
                     "Star Shard Chance by " + ss + "% - (~" + (-ritual.starshards * 100) + "%).";
@@ -1016,6 +1027,6 @@ export class TooltipRegistry {
 
 // static fuckery
 
-TooltipRegistry.critPowerName = "Crit Power";
+TooltipRegistry.critPowerName = "Aim";
 TooltipRegistry.defenseName = "Defense";
 TooltipRegistry.accuracyName = "Accuracy";

@@ -65,10 +65,10 @@ export class CreatureDisplay {
         this.armorLabel.setText(Common.numberString(Math.floor(creature.Armor())));
         this.hitnameLabel.setText(Common.numberString(Math.floor(creature.Hit())));
         this.evasionLabel.setText(Common.numberString(Math.floor(creature.Evasion())));
-        this.critResLabel.setText(Common.numberString(Math.floor(creature.CritResistance())));
+        this.critResLabel.setText(Common.numberString(Math.floor(creature.Toughness())));
         this.regenLabel.setText(Common.numberString(Math.floor(creature.HealthRegen())) + "/s");
         this.critLabel.setText(Common.numberString(Math.floor(creature.CritChance() * 100)) + "%");
-        this.critPowLabel.setText(Common.numberString(Math.floor(creature.CritPower())));
+        this.critPowLabel.setText(Common.numberString(Math.floor(creature.Aim())));
         this.backingRect.strokeColor = Phaser.Display.Color.GetColor(200, 0, 0);
 
         var fillTxt = "";

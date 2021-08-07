@@ -89,10 +89,10 @@ export class PlayerData {
                     stun: { name: "Stunning Hit", level: 0, maxLevel: 5, requires: ["cleave"], texture: { sprite: "icons", tile: 16 } },
                     followthrough: { name: "Follow Through", level: 0, maxLevel: 5, requires: ["hit"], texture: { sprite: "icons", tile: 17 } },
                     dodge: { name: "Dodge", level: 0, maxLevel: 5, requires: ["evasion"], texture: { sprite: "icons", tile: 18 } },
-                    defydeath: { name: "Defy Death", level: 0, maxLevel: 5, requires: ["resilient"], texture: { sprite: "icons", tile: 19 } },
+                    magicresist: { name: "Magic Resistance", level: 0, maxLevel: 5, requires: ["resilient"], texture: { sprite: "icons", tile: 19 } },
                     secondwind: { name: "Second Wind", level: 0, maxLevel: 5, requires: ["quickrecovery"], texture: { sprite: "icons", tile: 20 } },
                     parry: { name: "Parry", level: 0, maxLevel: 5, requires: ["block"], texture: { sprite: "icons", tile: 21 } },
-                    doublecrit: { name: "Double Crit", level: 0, maxLevel: -1, requires: ["crit"], texture: { sprite: "icons", tile: 22 } },
+                    serration: { name: "Serration", level: 0, maxLevel: 5, requires: ["crit"], texture: { sprite: "icons", tile: 22 } },
                     bounty: { name: "Bounty", level: 0, maxLevel: -1, requires: [], texture: { sprite: "icons", tile: 7 } },
                     explorer: { name: "Explorer", level: 0, maxLevel: -1, requires: [], texture: { sprite: "icons", tile: 15 } },
                     guardian: { name: "Guardian", level: 0, maxLevel: -1, requires: [], texture: { sprite: "icons", tile: 39 } },
@@ -257,7 +257,10 @@ export class PlayerData {
             allPercent: 0,
             guardianTalent: 0,
             governanceTalent: 0,
-            agilityScaling: 0
+            agilityScaling: 0,
+            charismaTalent: 0,
+            chromaTalent: 0,
+            defToShield: 0
         }
 
         this.dungeonBonus = {
@@ -454,15 +457,15 @@ export class PlayerData {
         switch (this.playerClass) {
             case Statics.CLASS_ADVENTURER:
                 return "Endurance determines your health and resistance against criticals. Each point increases your max Health by " +
-                    (this.classStatics.HP_PER_ENDURANCE + this.getTalentLevel('end')) + " and Crit Resistance by 3." +
-                    "Your Endurance increases Health and Crit Resistance from gear by " +
+                    (this.classStatics.HP_PER_ENDURANCE + this.getTalentLevel('end')) + " and Toughness by 3." +
+                    "Your Endurance increases Health and Toughness from gear by " +
                     Math.floor((this.statBlock._getScale(this.statBlock.Endurance()) - 1) * 100) + "%.";
             case Statics.CLASS_BESERKER:
                 return "";
             case Statics.CLASS_WIZARD:
                 return "Endurance determines your health and resistance against criticals. Each point increases your max Health by " +
-                    (this.classStatics.HP_PER_ENDURANCE + this.getTalentLevel('wizend') * 0.5) + " and Crit Resistance by 3." +
-                    "Your Endurance increases Health and Crit Resistance from gear by " +
+                    (this.classStatics.HP_PER_ENDURANCE + this.getTalentLevel('wizend') * 0.5) + " and Toughness by 3." +
+                    "Your Endurance increases Health and Toughness from gear by " +
                     Math.floor((this.statBlock._getScale(this.statBlock.Endurance()) - 1) * 100) + "%.";
         }
     }
@@ -502,9 +505,9 @@ export class PlayerData {
     accTooltip() {
         switch (this.playerClass) {
             case Statics.CLASS_ADVENTURER:
-                return "Accuracy determines your ability to strike weak points. Each point increases your Crit Power by " +
+                return "Accuracy determines your ability to strike weak points. Each point increases your Aim by " +
                     (this.classStatics.CRITPOWER_PER_ACCURACY + this.getTalentLevel('acc') * 0.5) +
-                    ". Your Accuracy increases Crit Power from gear by " +
+                    ". Your Accuracy increases Aim from gear by " +
                     Math.floor((this.statBlock._getScale(this.statBlock.Accuracy()) - 1) * 100) + "%.";
             case Statics.CLASS_BESERKER:
                 return "";
@@ -521,7 +524,8 @@ export class PlayerData {
     critTooltip() {
         switch (this.playerClass) {
             case Statics.CLASS_ADVENTURER:
-                return "Crit Chance. The chance any hit is a critical hit, dealing extra damage.";
+                return "Crit Chance. The chance any hit is a critical hit, dealing extra damage. Crit Chances above 50% are divided, multiplying " +
+                    "Crit Damage by the same amount. Current divider: " + this.statBlock.CritDamageMulti();
             case Statics.CLASS_BESERKER:
                 return "";
             case Statics.CLASS_WIZARD:
@@ -531,7 +535,7 @@ export class PlayerData {
     critPowerTooltip() {
         switch (this.playerClass) {
             case Statics.CLASS_ADVENTURER:
-                return "Crit Power. Increases your crit damage, but is reduced by the targets Crit Resistance.";
+                return "Aim. Increases damage dealt with Critical Hits and reduces the chance of a Glancing Hit. Opposed by your opponents Toughness.";
             case Statics.CLASS_BESERKER:
                 return "";
             case Statics.CLASS_WIZARD:
@@ -655,7 +659,7 @@ export class PlayerData {
             case "end":
             case "wizend":
             case "resilient":
-            case "defydeath":
+            case "magicresist":
                 return this.talents[name].level + this.runeBonuses.endTalents;
             case "rec":
             case "quickrecovery":
@@ -667,7 +671,7 @@ export class PlayerData {
                 return this.talents[name].level + this.runeBonuses.defTalents;
             case "acc":
             case "crit":
-            case "doublecrit":
+            case "serration":
                 return this.talents[name].level + this.runeBonuses.accTalents;
             case "bounty":
                 return this.talents[name].level + this.runeBonuses.lootTalent;
@@ -675,6 +679,10 @@ export class PlayerData {
                 return this.talents[name].level + this.runeBonuses.governanceTalent;
             case "guardian":
                 return this.talents[name].level + this.runeBonuses.guardianTalent;
+            case "charisma":
+                return this.talents[name].level + this.runeBonuses.charismaTalent;
+            case "codex":
+                return this.talents[name].level + this.runeBonuses.chromaTalent;
         }
         return this.talents[name].level;
     }

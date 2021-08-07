@@ -73,6 +73,7 @@ export class CreatureBlock {
         this.igniteTimer = 0;
         this.igniteDamage = 0;
         this.corrosion = 0;
+        this.magicHitCounter = 0;
         this.dmgType = Statics.DMG_NORMAL;
 
         this.healthChangedHandlers = [];
@@ -122,13 +123,13 @@ export class CreatureBlock {
     }
     CritChance() {
         var ret = this.statBonuses.critChance;
-        return Math.floor(ret * 100) / 100;
+        return ret;
     }
-    CritPower() {
+    Aim() {
         var ret = this.stats.critPower + this.statBonuses.critPower + this.Accuracy() * Statics.CRITPOWER_PER_ACCURACY;
         return Math.floor(Math.max(1, ret));
     }
-    CritResistance() {
+    Toughness() {
         var ret = this.stats.critResistance + this.statBonuses.critResistance + this.Endurance() * Statics.CRITRESISTANCE_PER_ENDURANCE;
         ret = ret * (this.shieldValue > 0 ? 10 : 1);
         return Math.floor(Math.max(1, ret));
@@ -152,8 +153,14 @@ export class CreatureBlock {
     AttackSpeed() {
         return this.attackSpeed;
     }
-    CritDamage(resist) {
-        return Math.max(1, 1 + (-0.5 + (Math.sqrt(this.CritPower()) / Math.sqrt(resist))) * 0.5);
+    CritDamage(tough) {
+        return Math.max(1, 1 + (-0.5 + (Math.sqrt(this.Aim()) / Math.sqrt(tough))) * 0.5);
+    }
+    GlancingChance(tough) {
+        return Math.min(0.5, (1 - (this.Aim() / tough)) / 2);
+    }
+    GlancingDamage(tough) {
+        return Math.min(1, this.Aim() / tough);
     }
 
     registerEvent(event, callback) {
@@ -192,7 +199,7 @@ export class CreatureBlock {
 
     canAttack() { return this.attackCooldown >= this.AttackSpeed(); }
 
-    takeDamage(damage, __isCrit, dmgType) {
+    takeDamage(damage, __hitType, dmgType) {
         var dmg = damage;
         if (dmgType === Statics.DMG_NORMAL) {
             if (this.shieldValue > 0) {
@@ -245,11 +252,11 @@ export class CreatureBlock {
         }
         if (this.igniteTimer > 0) {
             this.igniteTimer -= delta;
-            this.takeDamage(this.igniteDamage * (delta / 1000), false, Statics.DMG_TRUE);
+            this.takeDamage(this.igniteDamage * (delta / 1000), Statics.HIT_NORMAL, Statics.DMG_TRUE);
         }
         if (this.slowTimer > 0) {
             this.slowTimer -= delta;
-            this.takeDamage(this.slowDamage * (delta / 1000), false, Statics.DMG_TRUE);
+            this.takeDamage(this.slowDamage * (delta / 1000), Statics.HIT_NORMAL, Statics.DMG_TRUE);
             delta = delta * (1 - this.slowPercent);
         }
         var oldVal = this.attackCooldown;
@@ -258,19 +265,36 @@ export class CreatureBlock {
             this._onAttackCooldownChanged();
         }
     }
-    attack(creature, isCrit = false) {
+    attack(creature) {
         var rawDmg = this.rollDamage();
-        if (isCrit === true) {
-            rawDmg = rawDmg * this.CritDamage(creature.CritResistance());
+        var anim = this.hitAnim;
+        var hitType = Statics.HIT_NORMAL;
+        var roll = Math.random();
+        if (roll <= this.CritChance()) {
+            anim = this.critAnim;
+            hitType = Statics.HIT_CRIT;
+            rawDmg = rawDmg * this.CritDamage(creature.Toughness());
+        } else if (roll > 1 - this.GlancingChance(creature.Toughness())) {
+            anim = "glancing";
+            hitType = Statics.HIT_GLANCING;
+            rawDmg = rawDmg * this.GlancingDamage(creature.Toughness());
         }
-        var dmg = creature.takeDamage(rawDmg, isCrit, this.dmgType);
-        creature.playAnimation(isCrit === true ? this.critAnim : this.hitAnim);
+        var dmg = creature.takeDamage(rawDmg, hitType, this.dmgType);
+        creature.playAnimation(anim);
         this.attackCooldown = 0;
         //handle beserk trait, giving attack speed refresh
         var beserk = this.findTrait(Statics.TRAIT_BESERK);
         if (beserk !== undefined) {
             if (Math.random() < (1 - Math.pow(0.92, beserk.level))) {
                 this.attackCooldown = this.attackSpeed / 2;
+            }
+        }
+        var magic = this.findTrait(Statics.TRAIT_MAGICAL);
+        if (magic !== undefined) {
+            this.magicHitCounter -= 1;
+            if (this.magicHitCounter <= 0) {
+                creature.takeDamage(this.DamageMax() * 0.20 * magic.level, hitType, Statics.DMG_MAGIC);
+                this.magicHitCounter = 3;
             }
         }
 
@@ -400,7 +424,7 @@ export class CreatureBlock {
                     break;
                 case Statics.TRAIT_DEADLY:
                     extraStats.critChance = this.statBonuses.critChance;
-                    extraStats.critPower += this.CritPower() * (0.3 * trait.level);
+                    extraStats.critPower += this.Aim() * (0.3 * trait.level);
                     break;
                 case Statics.TRAIT_BESERK:
                     extraStats.hit += this.Hit() * (0.2 * trait.level);

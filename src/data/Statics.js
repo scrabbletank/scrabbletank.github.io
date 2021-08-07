@@ -75,8 +75,8 @@ var Statics = {
 
     MONSTER_STAT_PER_LEVEL: 1.15,
     MONSTER_STATSCALE_PER_LEVEL: 1.0225,
-    MONSTER_STATSCALE_PER_REGION: 1.1,
-    MONSTER_STATSCALE_POST_MYRAH: 1.4,
+    MONSTER_STATSCALE_PER_REGION: 1.2,
+    MONSTER_STATSCALE_POST_MYRAH: 1.5,
     MONSTER_XPSCALE_PER_REGION: 1.025,
 
     // PLAYER SHADE VARIABLES
@@ -92,6 +92,11 @@ var Statics = {
     // COMBAT
     COMBAT_COOLDOWN: 2500,
     GLOBAL_ATTACK_COOLDOWN: 100,
+    POISON_TICK_DELAY: 500,
+
+    HIT_NORMAL: 0,
+    HIT_CRIT: 1,
+    HIT_GLANCING: 2,
 
     // TOWN
     BASE_TAX_INCOME: 0.5,
@@ -124,6 +129,7 @@ var Statics = {
     TRAIT_CORROSIVE: 8,
     TRAIT_REGENERATING: 9,
     TRAIT_THORNS: 10,
+    TRAIT_MAGICAL: 11,
     TRAIT_INVADER: 99,
 
     SHIELD_REFRESH: 7000,
@@ -155,7 +161,7 @@ var Statics = {
     FORGE_DIMINISHING_POWER: 0.2,
 
     //REBIRTH
-    MOONLIGHT_REGION_POWER: 1.7,
+    MOONLIGHT_REGION_POWER: 1.5,
 
     //TIME
     MONTH_NAMES: ["Primas", "Twin", "Threed", "Tera", "Pentas", "Hexat", "Septus", "Octor", "Novum", "Deccan", "Hendeka", "Dodecan", "Zenith"],

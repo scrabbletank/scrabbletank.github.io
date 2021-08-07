@@ -89,7 +89,7 @@ var RegionRegistry = {
             enemies: ["elk", "goblin", "lizard", "cactus", "wolf"],
             clr: [200, 120, 40],
             explorationNeeded: 15000,
-            yields: [0, 3, 0, 0.75, 2, 0],
+            yields: [0, 3, 1, 0.75, 2, 0],
             preferredBuilding: "leather",
             buildable: true
         },

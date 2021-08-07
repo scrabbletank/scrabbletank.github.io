@@ -92,7 +92,7 @@ export class WizardBlock extends AdventurerBlock {
         }
         return Math.floor(Math.max(1, ret));
     }
-    CritResistance() {
+    Toughness() {
         var end = this.Endurance();
         var ret = this.stats.critResistance + (this.statBonuses.critResistance * this._getScale(end)) +
             end * this.player.classStatics.CRITRESISTANCE_PER_ENDURANCE;
@@ -101,7 +101,7 @@ export class WizardBlock extends AdventurerBlock {
         }
         return Math.floor(ret);
     }
-    CritPower() {
+    Aim() {
         var acc = this.Accuracy();
         var ret = this.stats.spellPower + (this.statBonuses.spellPower * this._getScale(acc)) +
             acc * this.player.classStatics.SPELL_POWER_PER_POWER * (1 + this.player.getTalentLevel('first') * 0.01) *
@@ -151,6 +151,15 @@ export class WizardBlock extends AdventurerBlock {
         var ret = this.attackSpeed / (1 + this.player.runeBonuses.baseAttackSpeed);
         return ret;
     }
+    CritChance() {
+        var ret = this.statBonuses.critChance;
+        ret += this.player.getTalentLevel("crit") * 0.03;
+        ret += this.player.runeBonuses.critChance;
+        ret += RitualData.getInstance().activePerks.playercrits * 0.1;
+    }
+    CritDamageMulti() {
+        return 1;
+    }
 
     equip(gear) {
         var bonus = gear.getStatBonuses();
@@ -182,16 +191,16 @@ export class WizardBlock extends AdventurerBlock {
     initCombat() {
         this.corrosion = 0;
         this.attackCooldown = 0;
-        this.shieldValue = this.Shield();
+        this.shieldValue = this.Shield() + this.player.runeBonuses.defToShield * this.Defense();
         this._onHealthChanged();
     }
 
-    takeDamage(damage, isCrit, dmgType) {
+    takeDamage(damage, hitType, dmgType) {
         var dmg = damage;
-        if (isCrit === true) {
+        if (hitType === Statics.HIT_CRIT) {
             dmg = dmg * Math.pow(0.92, this.player.runeBonuses.enemyCrit);
         }
-        dmg = super.takeDamage(dmg, isCrit, dmgType);
+        dmg = super.takeDamage(dmg, hitType, dmgType);
         return dmg;
     }
 
@@ -217,14 +226,14 @@ export class WizardBlock extends AdventurerBlock {
     }
 
     _castPowerWordKill(creature) {
-        var max = this.CritPower() * (1 + this.player.getTalentLevel('powerwordkill') * 0.25) + 1;
+        var max = this.Aim() * (1 + this.player.getTalentLevel('powerwordkill') * 0.25) + 1;
         var rawDmg = Common.randint(1, max);
 
         if (this.player.getTalentLevel('powerwordstun') > 0 &&
             rawDmg / max > 0.8 - this.player.getTalentLevel('powerwordstun') * 0.07) {
             creature.stunTimer = 2000;
         }
-        var dmg = creature.takeDamage(rawDmg, false, Statics.DMG_MAGIC);
+        var dmg = creature.takeDamage(rawDmg, Statics.HIT_NORMAL, Statics.DMG_MAGIC);
         creature.playAnimation("skull");
         this.fifthCounter = 9;
         return dmg;
@@ -237,9 +246,9 @@ export class WizardBlock extends AdventurerBlock {
     }
     _castFireball(creatureList) {
         this.thirdCounter = 5;
-        var rawDmg = this.CritPower() * (0.07 * this.player.getTalentLevel('fireball')) + 1;
+        var rawDmg = this.Aim() * (0.07 * this.player.getTalentLevel('fireball')) + 1;
         for (var i = 0; i < creatureList.length; i++) {
-            var dmg = creatureList[i].takeDamage(rawDmg, false, Statics.DMG_MAGIC);
+            var dmg = creatureList[i].takeDamage(rawDmg, Statics.HIT_NORMAL, Statics.DMG_MAGIC);
             if (this.player.getTalentLevel('ignite') > 0) {
                 creatureList[i].igniteTimer = 1000 + 500 * this.player.getTalentLevel('ignite');
                 creatureList[i].igniteDamage = dmg * 0.25;
@@ -271,22 +280,22 @@ export class WizardBlock extends AdventurerBlock {
         return 0;
     }
     _castCantrip(creature) {
-        var rawDmg = this.CritPower() * (0.2 + this.player.getTalentLevel('cantrip') * 0.09) + 1;
+        var rawDmg = this.Aim() * (0.2 + this.player.getTalentLevel('cantrip') * 0.09) + 1;
         creature.playAnimation("magicmissile");
-        return creature.takeDamage(rawDmg, false, Statics.DMG_MAGIC);
+        return creature.takeDamage(rawDmg, Statics.HIT_NORMAL, Statics.DMG_MAGIC);
     }
 
     canCastFireball() {
         return (this.player.getTalentLevel("third") >= 3 && this.player.getTalentLevel('fireball') > 0 && this.thirdCounter <= 0);
     }
 
-    attack(creature, isCrit = false) {
+    attack(creature) {
         var dmg = 0;
         var didCast = false;
 
         var thorns = creature.findTrait(Statics.TRAIT_THORNS);
         if (thorns !== undefined) {
-            this.takeDamage(creature.Armor() * 0.2, false, Statics.DMG_MAGIC);
+            this.takeDamage(creature.Armor() * 0.2, Statics.HIT_NORMAL, Statics.DMG_MAGIC);
         }
 
         if (this.player.getTalentLevel("fifth") >= 5 && this.player.getTalentLevel('powerwordkill') > 0 &&
@@ -313,25 +322,19 @@ export class WizardBlock extends AdventurerBlock {
         this.secondCounter -= 1;
         this.firstCounter -= 1;
         var rawDmg = this.rollDamage();
-        dmg += creature.takeDamage(rawDmg, false, Statics.DMG_NORMAL);
+        dmg += creature.takeDamage(rawDmg, Statics.HIT_NORMAL, Statics.DMG_NORMAL);
         if (didCast === false) {
             creature.playAnimation("mace");
         }
         this._endAttack();
         return dmg;
     }
-    cleave(creature, isCrit = false) {
+    cleave(creature) {
         if (Math.random() < this.player.getTalentLevel("stun") * 0.05) {
             creature.stunTimer = 500;
         }
         var rawDmg = this.Strength() * this.player.getTalentLevel("cleave") * 0.2;
-        if (isCrit === true) {
-            rawDmg = rawDmg * this.CritDamage(creature.CritResistance());
-            if (Math.random() < (this.player.getTalentLevel("doublecrit") * 0.01 * this.CritChance())) {
-                rawDmg = rawDmg * 2;
-            }
-        }
-        return creature.takeDamage(rawDmg, isCrit, Statics.DMG_NORMAL);
+        return creature.takeDamage(rawDmg, Statics.HIT_NORMAL, Statics.DMG_NORMAL);
     }
 
     save() {

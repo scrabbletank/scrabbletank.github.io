@@ -111,7 +111,7 @@ export class WorldData {
                 var inc = Common.randint(0, traits.length);
                 traits[inc].level += 1;
             } else {
-                var traitType = Common.randint(1, 11);
+                var traitType = Common.randint(1, 12);
                 var temp = traits.find(t => t.type === traitType);
                 if (temp !== undefined) {
                     temp.level += 1;

@@ -133,9 +133,9 @@ export class GameScene extends SceneUIBase {
         this.detailsIcons.push(new TooltipImage(this, 20, 170, 16, 16, { sprite: "icons", tile: 31 },
             "Crit Chance. The chance any hit is a critical hit, dealing extra damage."));
         this.detailsIcons.push(new TooltipImage(this, 20, 170, 16, 16, { sprite: "icons", tile: 30 },
-            "Crit Power. Increases your crit damage, but is reduced by the targets Crit Resistance."));
+            "Aim. Increases damage dealt with Critical Hits and reduces the chance of a Glancing Hit. Opposed by your opponents Toughness."));
         this.detailsIcons.push(new TooltipImage(this, 20, 170, 16, 16, { sprite: "icons", tile: 48 },
-            "Crit Resistance. Reduces the damage taken by critical hits."));
+            "Toughness. Reduces the damage taken by Critical Hits and increases enemies chance of a Glancing Hit."));
 
         this.gearLabels = this.add.bitmapText(20, 30, "courier16", "").setOrigin(0);
 
@@ -474,9 +474,9 @@ export class GameScene extends SceneUIBase {
 
     _updateGear() {
         var text = "" +
-            Common.processText(this.player.weapon === undefined ? "None" : this.player.weapon.name + " Lv" + this.player.weapon.level, 20) + "\n" +
-            Common.processText(this.player.armor === undefined ? "None" : this.player.armor.name + " Lv" + this.player.armor.level, 20) + "\n" +
-            Common.processText(this.player.trinket === undefined ? "None" : this.player.trinket.name + " Lv" + this.player.trinket.level, 20);
+            Common.processText(this.player.weapon === undefined ? "None" : this.player.weapon.shortname + " Lv" + this.player.weapon.level, 20) + "\n" +
+            Common.processText(this.player.armor === undefined ? "None" : this.player.armor.shortname + " Lv" + this.player.armor.level, 20) + "\n" +
+            Common.processText(this.player.trinket === undefined ? "None" : this.player.trinket.shortname + " Lv" + this.player.trinket.level, 20);
 
         this.gearLabels.setText(text);
     }
@@ -503,9 +503,9 @@ export class GameScene extends SceneUIBase {
         this.detailsLabels.push(this.add.bitmapText(40, this.detailsStart + 140, "courier16",
             Math.floor(this.player.statBlock.CritChance() * 100) + "%"));
         this.detailsLabels.push(this.add.bitmapText(40, this.detailsStart + 160, "courier16",
-            Common.numberString(this.player.statBlock.CritPower()) + ""));
+            Common.numberString(this.player.statBlock.Aim()) + ""));
         this.detailsLabels.push(this.add.bitmapText(40, this.detailsStart + 180, "courier16",
-            Common.numberString(this.player.statBlock.CritResistance()) + ""));
+            Common.numberString(this.player.statBlock.Toughness()) + ""));
     }
 
     _updateFadingResourceLabels(res, gold, tier) {

@@ -31,6 +31,7 @@ export class CombatManager {
         this.animationChangedCallback = undefined;
         this.fromAutoExplore = false;
         this.totalKills = 0;
+        this.poisonTimer = 0;
     }
 
     registerEvent(event, callback) {
@@ -274,6 +275,17 @@ export class CombatManager {
         }
         var player = PlayerData.getInstance();
         if (this._monstersAlive() === true) {
+
+            this.poisonTimer -= delta;
+            if (this.poisonTimer <= 0 && this.monsters[0].findTrait(Statics.TRAIT_POISONED) !== undefined) {
+                var poison = this.monsters[0].findTrait(Statics.TRAIT_POISONED);
+                for (var i = 0; i < this.monsters.length; i++) {
+                    var poisonDmg = player.statBlock.currentHealth / player.statBlock.MaxHealth() > 0.5 ? 0.02 : 0.04;
+                    player.statBlock.takeDamage(this.monsters[i].DamageMax() * poisonDmg * poison.level * 0.5,
+                        Statics.HIT_NORMAL, Statics.DMG_MAGIC);
+                }
+                this.poisonTimer += Statics.POISON_TICK_DELAY;
+            }
             for (var i = 0; i < this.monsters.length; i++) {
                 if (this.monsters[i].currentHealth <= 0) {
                     continue;
@@ -282,12 +294,6 @@ export class CombatManager {
 
                 this.monsters[i].tickAttackCooldown(delta, multi);
                 this.monsters[i].tickRegen(delta);
-
-                var poison = this.monsters[i].findTrait(Statics.TRAIT_POISONED);
-                if (poison !== undefined) {
-                    var poisonDmg = player.statBlock.currentHealth / player.statBlock.MaxHealth() > 0.5 ? 0.02 : 0.04;
-                    player.statBlock.takeDamage(this.monsters[i].DamageMax() * poisonDmg * poison.level * (delta / 1000), false, Statics.DMG_TRUE);
-                }
 
                 if (this.monsters[i].canAttack() === true) {
                     var crit = this.monsters[i].CritChance() > Math.random();

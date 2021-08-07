@@ -152,6 +152,19 @@ export class GuideWindow {
                     "randomly target an enemy. After defeating all the enemies you'll gain some resources and shade. There's a 2.5 second " +
                     "window between fights where you explore the tile and heal your wounds.";
                 this.guideTexts.push(this.scene.add.bitmapText(this.x + 150, this.y + 70, "courier16", Common.processText(helptxt, 72)));
+                this.guideTexts.push(this.scene.add.bitmapText(this.x + 150, this.y + 160, "courier20", "Criticals and Glancing Hits"));
+                var helptxt = "This is where things get a little complicated. With an infinitely scaling game having a core stat cap out at " +
+                    "100% doesn't make sense. Each time your Crit Chance rises above 50% it's divided by 2 while multiplying your Crit Damage by the " +
+                    "same amount. The key point here is 'divided', to get back up to 50% Crit Chance it's going to take twice as much crit as before. " +
+                    "The next time you reach 50% it's divided AGAIN by 2, also multiplying your Crit Damage. So the multi grows to 2, then 4, 8, 16, etc.\n\n" +
+                    "What is your Crit Damage anyways? That's where Aim and Toughness comes in. Your Crit Damage against any enemy is equal to:\n\n" +
+                    "1 + ((-0.5 + SQRT(Aim) / SQRT(Toughness)) * 0.5 * Crit Chance Multi)\n\n" +
+                    "All this means is having more Aim than the monsters Toughness increases Crit Damage, while having less decreases Crit Damage. " +
+                    "Glancing Hits follow a similar, simpler formula:\n\n" +
+                    "                           Aim / Toughness\n\n" +
+                    "The damage you deal with a Glancing Hit is the formula above, while the chance of a Glancing Hit is that formula divided by 2. " +
+                    "For example, if you had a 10% chance of a Glancing Hit you would deal 20% less damage.";
+                this.guideTexts.push(this.scene.add.bitmapText(this.x + 150, this.y + 195, "courier16", Common.processText(helptxt, 72)));
                 break;
             case 3:
                 this.guideTexts.push(this.scene.add.bitmapText(this.x + 150, this.y + 45, "courier20", "Town"));
