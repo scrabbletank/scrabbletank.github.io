@@ -1,4 +1,5 @@
 import { BuildingRegistry } from "../data/BuildingRegistry";
+import { DynamicSettings } from "../data/DynamicSettings";
 import { MoonlightData } from "../data/MoonlightData";
 import { PlayerData } from "../data/PlayerData";
 import { ProgressionStore } from "../data/ProgressionStore";
@@ -34,8 +35,6 @@ export class RegionView {
         this.tileSelectWindow = undefined;
         this.rebirthDialog = undefined;
 
-        this.autoExploreActive = false;
-        this.autoInvadeActive = false;
         this.updateBuildings = false;
 
         this.upgradeKey = undefined;
@@ -77,8 +76,6 @@ export class RegionView {
         return new TextButton(this.scene, x, y, 24, 20, (idx + 1) + "").onClickHandler(() => {
             WorldData.getInstance().setCurrentRegion(idx);
             this.scene.scene.get("DarkWorld").changeRegion();
-            this.scene.scene.get("RegionScene").changeRegion();
-            this.scene.scene.get("TownScene").changeRegion();
         });
     }
 
@@ -121,8 +118,8 @@ export class RegionView {
         }
         var rect = this.scene.add.rectangle(this.x + (x + 0.5) * WIDTH + this.offsetX,
             this.y + (y + 0.5) * HEIGHT + this.offsetY, WIDTH - 2, HEIGHT - 2, clr);
-        rect.strokeColor = border;
         rect.isStroked = true;
+        rect.strokeColor = border;
         rect.lineWidth = 1.5;
         rect.setInteractive({ useHandCursor: true })
             .on("pointerdown", () => { this._handleTileClick(x, y); })
@@ -270,6 +267,7 @@ export class RegionView {
         this.rebirthDialog.destroy();
         this.rebirthDialog = undefined;
 
+        DynamicSettings.getInstance().saveEnabled = false;
         WorldData.getInstance().handleRunCompletion();
         this.scene.scene.get("MoonlightScene").refresh();
         this.scene.scene.get("MoonlightScene").enableLeveling();
@@ -318,12 +316,10 @@ export class RegionView {
                     "a whole world out there. I was wondering what that last tab was going to be.");
             }
 
-            console.log([WorldData.instance.regionList.length - 1 === tier, WorldData.instance.nextRegions.length === 0,
-            WorldData.instance.regionList.length < 10, ProgressionStore.getInstance().persistentUnlocks.starshards === true])
             if (WorldData.instance.regionList.length - 1 === tier && WorldData.instance.nextRegions.length === 0 &&
                 (WorldData.instance.regionList.length < 10 || ProgressionStore.getInstance().persistentUnlocks.starshards === true)) {
                 WorldData.instance.generateRegionChoices();
-                this.scene.scene.get("WorldScene")._refreshRegions();
+                this.scene.scene.get("WorldScene").refresh();
             }
         }
         if (tile.explored === false) {
@@ -408,17 +404,25 @@ export class RegionView {
 
     triggerAutoExplore(tile, tier) {
         var activeRegion = WorldData.getInstance().regionList[tier];
-        if (this.autoExploreActive === true) {
-            var pos = activeRegion.nextWeakestTile(this.autoInvadeActive);
+        if (DynamicSettings.getInstance().autoExplore === true) {
+            var pos = activeRegion.nextWeakestTile(DynamicSettings.getInstance().autoInvade);
             if (pos[0] !== -1) {
                 if (activeRegion.map[pos[1]][pos[0]].name === "Town") {
                     this._exploreTown(tile.x, tile.y);
-                    var pos = activeRegion.nextWeakestTile(this.autoInvadeActive);
+                    var pos = activeRegion.nextWeakestTile(DynamicSettings.getInstance().autoInvade);
                     if (pos[0] === -1) {
                         return;
                     }
                 }
                 this._exploreTile(activeRegion.map[pos[1]][pos[0]], true);
+            } else if (ProgressionStore.getInstance().persistentUnlocks.autoExplore2 === true &&
+                DynamicSettings.getInstance().autoExploreRegions === true &&
+                WorldData.getInstance().nextRegions.length > 0) {
+                WorldData.getInstance().addRegion(0);
+                WorldData.getInstance().setCurrentRegion(WorldData.getInstance().regionList.length - 1);
+                this.scene.scene.get("DarkWorld").changeRegion();
+                this.scene.scene.get("WorldScene").refresh();
+                this.triggerAutoExplore(tile, WorldData.getInstance().regionList.length - 1);
             }
         }
     }
@@ -436,7 +440,7 @@ export class RegionView {
         this.scene.scene.get("CombatScene").registerEvent("onExplore", (a, t) => { this._onExploredCallback(a, t); });
         this.region.onTileChanged((x) => { this._updateTile(x); });
         this.region.onSighting((x) => { this.scene.scene.get("DarkWorld").notifyRegion(); });
-        WorldData.getInstance().onRegionChanged(() => { this.refreshDetails(); });
+        WorldData.getInstance().onRegionChanged(() => { this.changeRegion(); });
 
         //hotkeys
         this.upgradeKey = this.scene.input.keyboard.addKey(Phaser.Input.Keyboard.KeyCodes.U);
@@ -483,8 +487,8 @@ export class RegionView {
     }
 
     _toggleAutoExplore() {
-        this.autoExploreActive = !this.autoExploreActive;
-        if (this.autoExploreActive === true) {
+        DynamicSettings.getInstance().autoExplore = !DynamicSettings.getInstance().autoExplore;
+        if (DynamicSettings.getInstance().autoExplore === true) {
             this.autoExploreButton.setText("ON");
             this.autoExploreButton.setTextColor(Phaser.Display.Color.GetColor(255, 255, 255));
         } else {
@@ -493,8 +497,8 @@ export class RegionView {
         }
     }
     _toggleAutoInvade() {
-        this.autoInvadeActive = !this.autoInvadeActive;
-        if (this.autoInvadeActive === true) {
+        DynamicSettings.getInstance().autoInvade = !DynamicSettings.getInstance().autoInvade;
+        if (DynamicSettings.getInstance().autoInvade === true) {
             this.autoInvadeButton.setText("ON");
             this.autoInvadeButton.setTextColor(Phaser.Display.Color.GetColor(255, 255, 255));
         } else {
@@ -584,26 +588,39 @@ export class RegionView {
             .onClickHandler(() => { this._setTimeScale(0); });
         this.speed1xButton = new TextButton(this.scene, this.x + 795, h, 30, 20, "1x")
             .onClickHandler(() => { this._setTimeScale(1); });
-        this.speed1xButton.setTextColor(Phaser.Display.Color.GetColor(255, 255, 0));
         this.speed2xButton = new TextButton(this.scene, this.x + 830, h, 30, 20, "2x")
             .onClickHandler(() => { this._setTimeScale(2); });
         this.speed5xButton = new TextButton(this.scene, this.x + 865, h, 30, 20, "5x")
             .onClickHandler(() => { this._setTimeScale(5); });
+        switch (WorldData.getInstance().time.timescale) {
+            case 0:
+                this.speed0xButton.setTextColor(Phaser.Display.Color.GetColor(255, 255, 0));
+                break;
+            case 1:
+                this.speed1xButton.setTextColor(Phaser.Display.Color.GetColor(255, 255, 0));
+                break;
+            case 2:
+                this.speed2xButton.setTextColor(Phaser.Display.Color.GetColor(255, 255, 0));
+                break;
+            case 5:
+                this.speed5xButton.setTextColor(Phaser.Display.Color.GetColor(255, 255, 0));
+                break;
+        }
         h += 30;
 
         this.autoExploreLabel = this.scene.add.bitmapText(this.x + 660, h, "courier20", "Auto Explore:");
         this.autoExploreButton = new TextButton(this.scene, this.x + 795, h, 40, 20,
-            this.autoExploreActive === true ? "ON" : "OFF")
+            DynamicSettings.getInstance().autoExplore === true ? "ON" : "OFF")
             .onClickHandler(() => { this._toggleAutoExplore() });
-        this.autoExploreButton.setTextColor(this.autoExploreActive === true ? Phaser.Display.Color.GetColor(255, 255, 255) :
-            Phaser.Display.Color.GetColor(175, 0, 140));
+        this.autoExploreButton.setTextColor(DynamicSettings.getInstance().autoExplore === true ?
+            Phaser.Display.Color.GetColor(255, 255, 255) : Phaser.Display.Color.GetColor(175, 0, 140));
         h += 30;
         this.autoInvadeLabel = this.scene.add.bitmapText(this.x + 660, h, "courier20", "Auto Invade:");
         this.autoInvadeButton = new TextButton(this.scene, this.x + 795, h, 40, 20,
-            this.autoInvadeActive === true ? "ON" : "OFF")
+            DynamicSettings.getInstance().autoInvade === true ? "ON" : "OFF")
             .onClickHandler(() => { this._toggleAutoInvade() });
-        this.autoInvadeButton.setTextColor(this.autoInvadeActive === true ? Phaser.Display.Color.GetColor(255, 255, 255) :
-            Phaser.Display.Color.GetColor(175, 0, 140));
+        this.autoInvadeButton.setTextColor(DynamicSettings.getInstance().autoInvade === true ?
+            Phaser.Display.Color.GetColor(255, 255, 255) : Phaser.Display.Color.GetColor(175, 0, 140));
         h += 30;
         this.autoUpgradeLabel = this.scene.add.bitmapText(this.x + 660, h, "courier20", "Auto Upgrade:");
         this.autoUpgradeButton = new TextButton(this.scene, this.x + 795, h, 40, 20,
@@ -656,6 +673,10 @@ export class RegionView {
             } else {
                 txt += " " + Statics.RESOURCE_NAMES[i] + ": " + (Math.floor(resources[i] * 100) / 100) + "\n";
             }
+        }
+        if (ProgressionStore.getInstance().persistentUnlocks.starshards === true) {
+            txt += '\nStar Shard Chance: ' + ((this.region.getStarShardChance() * 100) / 1).toString().substr(0, 4) + "%\n" +
+                "Star Shard Amount: " + Common.numberString(this.region.starshardsPerTile);
         }
         this.regionStats = this.scene.add.bitmapText(this.x + 660, h, "courier20", txt);
         this.regionStats.setVisible(this.region.townData.townExplored === true);

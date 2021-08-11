@@ -4,6 +4,7 @@ import { PlayerData } from "../data/PlayerData";
 import { ImageButton } from "./ImageButton";
 import { TooltipRegistry } from "../data/TooltipRegistry";
 import { DynamicSettings } from "../data/DynamicSettings";
+import { GearData } from "../data/GearData";
 
 export class GearCraftDisplay {
     constructor(sceneContext, x, y, gear) {
@@ -46,8 +47,6 @@ export class GearCraftDisplay {
         this.statLabels = []
         var txt = "";
         var bonus = gear.getStatBonuses();
-        const resourceTier = Math.min(7, Math.max(DynamicSettings.getInstance().minResourceTier,
-            DynamicSettings.getInstance().minResourceTier + gear.tier - 1));
         for (const prop in bonus) {
             if (bonus[prop] !== 0) {
                 txt += TooltipRegistry.getBonusText(prop, bonus[prop]) + "\n";
@@ -55,13 +54,13 @@ export class GearCraftDisplay {
         }
         this.statLabels.push(sceneContext.add.bitmapText(x + 5, y + 45, "courier16", txt));
         if (progression.unlocks.resourceUI === true) {
+            var cost = GearData.getInstance().getGearCost(gear);
             var player = new PlayerData();
-            var craftCostMulti = gear.tier <= 0 ? 1 : player.getCraftingCosts(gear.tier - 1);
             var idx = 0;
-            for (var i = 0; i < gear.costs.length; i++) {
-                if (gear.costs[i] !== 0) {
-                    txt = TooltipRegistry.getCostText(i, Math.floor(gear.costs[i] * craftCostMulti));
-                    var clr = player.resources[resourceTier][i] >= gear.costs[i] * craftCostMulti ?
+            for (var i = 0; i < cost[0].length; i++) {
+                if (cost[0][i] !== 0) {
+                    txt = TooltipRegistry.getCostText(i, Math.floor(cost[0][i]));
+                    var clr = player.resources[cost[1]][i] >= cost[0][i] ?
                         Phaser.Display.Color.GetColor(255, 255, 255) : Phaser.Display.Color.GetColor(255, 80, 80);
                     var label = sceneContext.add.bitmapText(x + 148, y + 45 + (17 * idx), "courier16", txt);
                     label.setTint(clr);

@@ -10,6 +10,11 @@ import { GearRuneWindow } from "../ui/GearRuneWindow";
 import { ImageButton } from "../ui/ImageButton";
 import { RuneUpgradeWindow } from "../ui/RuneUpgradeWindow";
 import { WorldData } from "../data/WorldData";
+import { Common } from "../utils/Common";
+import { DynamicSettings } from "../data/DynamicSettings";
+
+const BUY_FLAT = [1, 10, 100, 1000];
+const BUY_PERCENT = [0.1, 0.25, 0.5, 1];
 
 export class GearScene extends SceneUIBase {
     constructor(position, name) {
@@ -74,14 +79,25 @@ export class GearScene extends SceneUIBase {
         this.nextPageBtn = new TextButton(this, this.relativeX(870), this.relativeY(10), 20, 20, ">")
             .onClickHandler(() => { this._nextPage(); });
 
-        this.craftingCostLabel = this.add.bitmapText(this.relativeX(10), this.relativeY(10), "courier16", "Crafting Cost: 100%");
+        this.buyMaxLabel = this.add.bitmapText(this.relativeX(10), this.relativeY(10), "courier20", "Upgrade Amount:");
+        this.buyMaxButton = new TextButton(this, this.relativeX(170), this.relativeY(10), 40, 20, "1x")
+            .onClickHandler(() => { this._toggleBuyMax(); });
+        this.autoUpgradeLabel = this.add.bitmapText(this.relativeX(10), this.relativeY(40), "courier20", "Auto Upgrade:");
+        this.autoUpgradeButton = new TextButton(this, this.relativeX(170), this.relativeY(40), 40, 20, "OFF")
+            .onClickHandler(() => { this._toggleAutoUpgrade(); });
+        this.autoUpgradeLabel.setVisible(false);
+        this.autoUpgradeButton.setVisible(false);
+        this.craftingCostLabel = this.add.bitmapText(this.relativeX(10), this.relativeY(90), "courier16", "Crafting Cost: 100%");
         this.weaponLabel = this.add.bitmapText(this.relativeX(0), this.relativeY(0), "courier20", "Weapon");
         this.armorLabel = this.add.bitmapText(this.relativeX(0), this.relativeY(0), "courier20", "Armor");
         this.trinketLabel = this.add.bitmapText(this.relativeX(0), this.relativeY(0), "courier20", "Trinket");
 
+
         this._updateTierButtons();
         this._setupGearDisplays();
         this._changeFilter(-1);
+
+        this.buyMax = false;
 
         var progression = new ProgressionStore();
         progression.addOnUnlockHandler((type, count, text) => { this._handleProgressionEvents(type, count, text); });
@@ -111,6 +127,20 @@ export class GearScene extends SceneUIBase {
         this.tier8Btn.setVisible(gearData.tiersAvailable >= 8);
     }
 
+    _toggleBuyMax() {
+        this.buyMax = this.buyMax === true ? false : true;
+        this.buyMaxButton.setText(this.buyMax === true ? "Max" : "1x");
+    }
+
+    _toggleAutoUpgrade() {
+        DynamicSettings.getInstance().autoGearUpgrade = DynamicSettings.getInstance().autoGearUpgrade === true ? false : true;
+        if (DynamicSettings.getInstance().autoGearUpgrade === true) {
+            this.autoUpgradeButton.setText("ON");
+        } else {
+            this.autoUpgradeButton.setText("OFF");
+        }
+    }
+
     _nextPage() {
         if (this.page * 6 + 6 < this.gearList.length) {
             this.page += 1;
@@ -125,9 +155,7 @@ export class GearScene extends SceneUIBase {
     }
 
     _changeFilter(filter) {
-        if (filter === -2) {
-            this.craftingCostLabel.setText("Crafting Cost: N/A");
-        } else if (filter === -1) {
+        if (filter === -2 || filter === -1) {
             this.craftingCostLabel.setText("Crafting Cost: N/A");
         } else if (filter === 0) {
             this.craftingCostLabel.setText("Crafting Cost: 100%");
@@ -154,8 +182,16 @@ export class GearScene extends SceneUIBase {
         }
         this.gearDisplays = [];
 
-        this.weaponLabel.setPosition(this.relativeX(10), this.relativeY(30));
-        var h = 35 + this.weaponLabel.getTextBounds(true).local.height;
+        this.autoUpgradeButton.setVisible(ProgressionStore.getInstance().persistentUnlocks.autoGear);
+        this.autoUpgradeLabel.setVisible(ProgressionStore.getInstance().persistentUnlocks.autoGear);
+        if (DynamicSettings.getInstance().autoGearUpgrade === true) {
+            this.autoUpgradeButton.setText("ON");
+        } else {
+            this.autoUpgradeButton.setText("OFF");
+        }
+
+        this.weaponLabel.setPosition(this.relativeX(10), this.relativeY(110));
+        var h = 110 + this.weaponLabel.getTextBounds(true).local.height;
 
         this.gearDisplays.push(new GearDisplay(this, this.relativeX(20), this.relativeY(h), this.player.weapon));
         h += 20 + this.gearDisplays[0].getTextBounds();
@@ -178,12 +214,23 @@ export class GearScene extends SceneUIBase {
         this._setupGearDisplays();
     }
     _onUpgradeHandler(gear) {
-        GearData.getInstance().upgradeGear(gear);
+        if (this.buyMax === true) {
+            var cost = GearData.getInstance().getGearCost(gear);
+            while (Common.canCraft(cost[0], PlayerData.getInstance().resources[cost[1]])) {
+                GearData.getInstance().upgradeGear(gear);
+                cost = GearData.getInstance().getGearCost(gear);
+            }
+        } else {
+            GearData.getInstance().upgradeGear(gear);
+        }
         this._setupGearDisplays();
         this._setupView();
     }
     _onFuseHandler(gear) {
-        var motesFused = Math.min(this.player.motes, this.scene.get("DarkWorld").buyAmount);
+        var idx = this.scene.get("DarkWorld").buyBtnIdx;
+        var shift = this.scene.get("DarkWorld").shiftModifier;
+        var motesFused = shift === true ? Math.floor(this.player.motes * BUY_PERCENT[idx]) :
+            Math.min(this.player.motes, BUY_FLAT[idx]);
         GearData.getInstance().fuseGear(gear, motesFused);
 
         this._setupView();

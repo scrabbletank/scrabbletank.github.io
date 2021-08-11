@@ -116,14 +116,12 @@ export class TownScene extends SceneUIBase {
 
     refresh() {
         this._updateStatus();
-        this.updateResearchButton();
     }
 
     rebirth() {
         this.selectedTab = 0;
         this._updateStatus();
         this._refreshTechs();
-        this.upgradesBtn.setVisible(false);
         this.dungeonsBtn.setVisible(false);
     }
 
@@ -131,11 +129,6 @@ export class TownScene extends SceneUIBase {
         this.selectedTab = 0;
         this._updateStatus();
         this._refreshTechs();
-        this.updateResearchButton();
-    }
-
-    updateResearchButton() {
-        this.upgradesBtn.setVisible(WorldData.instance.getCurrentRegion().townData.researchEnabled);
     }
 
     create() {
@@ -144,21 +137,25 @@ export class TownScene extends SceneUIBase {
             .setOrigin(0)
             .setInteractive();
 
-        this.townNameLabel = this.add.bitmapText(this.relativeX(10), this.relativeY(10), "courier20", "Town");
-        this.regionNameLabel = this.add.bitmapText(this.relativeX(10), this.relativeY(30), "courier16", "Region ");
-        this.statsLabel = this.add.bitmapText(this.relativeX(15), this.relativeY(50), "courier16", "");
-        this.nightLabourBtn = new TextButton(this, this.relativeX(15), this.relativeY(50), 220, 20, "Turn On Night Labour")
+        this.townNameLabel = this.add.bitmapText(this.relativeX(10), this.relativeY(100), "courier20", "Town");
+        this.regionNameLabel = this.add.bitmapText(this.relativeX(10), this.relativeY(120), "courier16", "Region ");
+        this.statsLabel = this.add.bitmapText(this.relativeX(15), this.relativeY(140), "courier16", "");
+        this.nightLabourBtn = new TextButton(this, this.relativeX(15), this.relativeY(140), 220, 20, "Turn On Night Labour")
             .onClickHandler(() => { this._toggleNightLabour(); });
         this.nightLabourBtn.setVisible(false);
+        this.townUpgradeBtn = new TextButton(this, this.relativeX(15), this.relativeY(140), 220, 20, "Auto Upgrade: OFF")
+            .onClickHandler(() => { this._toggleAutoUpgrade(); });
+        this.townUpgradeBtn.setVisible(false);
 
         this.buildingBtn = new TextButton(this, this.relativeX(240), this.relativeY(10), 120, 20, "Buildings")
             .onClickHandler(() => { this._selectTab(0); });
         this.upgradesBtn = new TextButton(this, this.relativeX(370), this.relativeY(10), 120, 20, "Research")
             .onClickHandler(() => { this._selectTab(1); });
-        this.upgradesBtn.setVisible(WorldData.getInstance().getCurrentRegion().townData.researchEnabled);
         this.dungeonsBtn = new TextButton(this, this.relativeX(500), this.relativeY(10), 120, 20, "Dungeons")
             .onClickHandler(() => { this._selectTab(2); });
         this.dungeonsBtn.setVisible(WorldData.getInstance().getCurrentRegion().townData.dungeons.length > 0);
+
+        this.regionSelectElements = [];
 
         this.buildingDisplays = []
 
@@ -187,6 +184,13 @@ export class TownScene extends SceneUIBase {
         this._updateStatus();
         this._refreshTechs();
         WorldData.getInstance().time.registerEvent("onDayEnd", () => { this._endOfDay(); });
+        WorldData.getInstance().onRegionChanged(() => { this._updateStatus(); this._refreshTechs(); });
+    }
+    _setupRegionButton(idx, x, y) {
+        return new TextButton(this, x, y, 27, 20, (idx + 1) + "").onClickHandler(() => {
+            WorldData.getInstance().setCurrentRegion(idx);
+            this.scene.get("DarkWorld").changeRegion();
+        });
     }
 
     _setupTechDisplay(x, y, tech, tier) {
@@ -234,21 +238,44 @@ export class TownScene extends SceneUIBase {
         this._updateStatus();
     }
 
+    _toggleAutoUpgrade() {
+        DynamicSettings.getInstance().autoTownUpgrade = DynamicSettings.getInstance().autoTownUpgrade === true ? false : true;
+        if (DynamicSettings.getInstance().autoTownUpgrade === true) {
+            this.townUpgradeBtn.setText("Auto Upgrade: ON");
+        } else {
+            this.townUpgradeBtn.setText("Auto Upgrade: OFF");
+        }
+        this._updateStatus();
+    }
+
     _selectTab(value) {
         this.selectedTab = value;
         this._refreshTechs();
     }
 
     _updateStatus() {
-        var region = WorldData.instance.getCurrentRegion();
+        var region = WorldData.getInstance().getCurrentRegion();
         var player = new PlayerData();
         var prodBonus = region.townData.getProductionMulti();
         var govBonus = (1 + player.getTalentLevel("governance") * 0.04);
 
+        for (var i = 0; i < this.regionSelectElements.length; i++) {
+            this.regionSelectElements[i].destroy();
+        }
+        if (WorldData.getInstance().regionList.length > 1) {
+            this.regionSelectElements = [this.add.bitmapText(this.relativeX(10), this.relativeY(10), "courier20", "Town:")];
+            for (var i = 0; i < WorldData.getInstance().regionList.length; i++) {
+                var x = this.relativeX(10 + (i % 8) * 27);
+                var y = this.relativeY(30 + Math.floor(i / 8) * 20);
+                this.regionSelectElements.push(this._setupRegionButton(i, x, y));
+            }
+        }
+
+
         var txt = "Population: " + Math.round(region.townData.currentPopulation) + "/" + Math.floor(region.townData.getMaxPopulation()) + "\n" +
             "Tax Income: " + Math.round(region.townData.getTownIncome()) + "g/week\n" +
             "T" + region.townData.tier + " Crafting Cost: " + (Math.round(player.getCraftingCosts(region.townData.tier - 1) * 10000) / 100) + "%\n" +
-            "Economy: " + Math.round(region.townData.economyMulti * 100 * govBonus) + "%\n" +
+            "Economy: " + Math.round(region.townData.getEconomyMulti() * 100 * govBonus) + "%\n" +
             "Production: " + Math.round(prodBonus * 100) + "%\n" +
             "Bounty Gold: " + Math.round(region.townData.bountyMulti * 100) + "%\n" +
             "Friendship: " + Math.floor(region.townData.friendship) + "/" + region.townData.friendshipToNext + "\n" +
@@ -270,7 +297,7 @@ export class TownScene extends SceneUIBase {
 
         this.statsLabel.setText(txt);
         this.regionNameLabel.setText("Region " + (region.regionLevel + 1));
-        var h = this.statsLabel.getTextBounds().local.height + 60;
+        var h = this.statsLabel.getTextBounds().local.height + 160;
         if (ProgressionStore.getInstance().persistentUnlocks.dungeons === true) {
             for (var i = 0; i < this.dungeonLabels.length; i++) {
                 this.dungeonLabels[i].destroy();
@@ -295,7 +322,24 @@ export class TownScene extends SceneUIBase {
 
         if (MoonlightData.getInstance().moonperks.nightlabour.level > 0) {
             this.nightLabourBtn.setPosition(this.relativeX(15), this.relativeY(h));
+            h += 30;
             this.nightLabourBtn.setVisible(true);
+            if (region.townData.nightLabourActive === true) {
+                this.nightLabourBtn.setText("Turn Off Night Labour");
+            } else {
+                this.nightLabourBtn.setText("Turn On Night Labour");
+            }
+        }
+
+        if (ProgressionStore.getInstance().persistentUnlocks.autoTown === true) {
+            this.townUpgradeBtn.setPosition(this.relativeX(15), this.relativeY(h));
+            h += 30;
+            this.townUpgradeBtn.setVisible(true);
+            if (DynamicSettings.getInstance().autoTownUpgrade === true) {
+                this.townUpgradeBtn.setText("Auto Upgrade: ON");
+            } else {
+                this.townUpgradeBtn.setText("Auto Upgrade: OFF");
+            }
         }
     }
 
@@ -344,6 +388,7 @@ export class TownScene extends SceneUIBase {
 
     _endOfDay() {
         this._updateStatus();
+        this._refreshTechs();
     }
 
 

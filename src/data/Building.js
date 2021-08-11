@@ -53,9 +53,14 @@ export class Building {
 
     static getTooltip(tile, name, tier, potential = false) {
         var region = WorldData.getInstance().getCurrentRegion();
-        var prodBonus = 1 + (tile.defense * MoonlightData.getInstance().moonperks.moonlightworkers.level * 0.01);
+        var def = tile.defense;
+        if (potential === true) {
+            def += MoonlightData.getInstance().moonperks.hardenedvillagers.level +
+                region.townData.upgrades.reinforcedhouses.level;
+        }
+        var prodBonus = 1 + (def * MoonlightData.getInstance().moonperks.moonlightworkers.level * 0.01);
         var eff = tile.roadBonus * region._getBuildingEfficiency(tile.x, tile.y, potential);
-        var prodBonus = prodBonus * region.townData.getProductionMulti() * eff;
+        prodBonus = prodBonus * region.townData.getProductionMulti() * eff;
         switch (name) {
             case "Lumberyard":
                 var prod = tier * tile.yields[0] * prodBonus * PlayerData.getInstance().dungeonBonus.wood;
@@ -95,15 +100,17 @@ export class Building {
                 if (tile.roadBuildable !== true && potential === false) {
                     return "The market is too far from the road. It must be next to a road to increase the economy.";
                 }
+                var exchange = [5, 10, 25, 50, 100];
                 var points = []
                 for (var i = 0; i < region.markets.length; i++) {
                     points.push({ x: region.markets[i][1], y: region.markets[i][0] });
                 }
+                var amount = Common.numberString(Math.floor(exchange[tier] * tile.parent.townData.getProductionMulti()));
                 var closest = Common.nearestPointInList(tile.x, tile.y, points, true);
                 var max = 5 + MoonlightData.getInstance().moonperks.nightmarket.level;
                 var bonus = Math.max(0, Math.min(max, (closest[1] / Statics.TRADE_HOUSE_MAX_DISTANCE) * max)) * tier / 100;
                 return "Increases the Town's economy by " + Math.floor(bonus * 10000) / 100 + "%, based on distance to " +
-                    "the Town and other Markets.";
+                    "the Town and other Markets. Exchanges up to " + amount + " resources with resources in short supply.";
             case "Tavern":
                 var maxDist = 1 + MoonlightData.getInstance().moonperks.moonwine.level;
                 var bonus = 0;
@@ -125,7 +132,7 @@ export class Building {
                     "produce nothing when more than " + tier + " tiles away." + disconnectedText;
             case "Docks":
                 var dockEff = region._getDockEfficiency(tile.x, tile.y, potential);
-                var bonus = tier * Statics.DOCK_BASE_ECON * region.townData.economyMulti * dockEff;
+                var bonus = tier * Statics.DOCK_BASE_ECON * region.townData.getEconomyMulti() * dockEff;
                 return "Docks don't need roads and enables roads to be built beside them. Increases gold earned per week by " +
                     Math.floor(bonus) + ".";
             case "Alchemy Lab":

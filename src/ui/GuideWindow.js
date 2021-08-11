@@ -77,9 +77,16 @@ export class GuideWindow {
             new TextButton(scene, x + 5, by, 120, 20, "Dungeons").onClickHandler(() => { this._setGuide(14); }) :
             new TextButton(scene, x + 5, by, 120, 20, "???");
         by += 22;
+        this.starshardBtn = ProgressionStore.getInstance().persistentUnlocks.starshards === true ?
+            new TextButton(scene, x + 5, by, 120, 20, "Star Shards").onClickHandler(() => { this._setGuide(15); }) :
+            new TextButton(scene, x + 5, by, 120, 20, "???");
+        by += 22;
+        this.ritualBtn = ProgressionStore.getInstance().persistentUnlocks.rituals === true ?
+            new TextButton(scene, x + 5, by, 120, 20, "Rituals").onClickHandler(() => { this._setGuide(16); }) :
+            new TextButton(scene, x + 5, by, 120, 20, "???");
         this.btns = [this.hotkeyBtn, this.gearBtn, this.exploreBtn, this.combatBtn, this.townBtn, this.talentsBtn, this.worldBtn, this.infuseBtn,
         this.resourceBtn, this.craftingBtn, this.buildingsBtn, this.moteBtn, this.runeBtn, this.challengeBtn, this.automationBtn,
-        this.dungeonBtn];
+        this.dungeonBtn, this.starshardBtn, this.ritualBtn];
         this.guideTexts = [];
         this.closeButton = new TextButton(scene, x + 630, y + 620, 110, 20, "Back");
     }
@@ -102,6 +109,7 @@ export class GuideWindow {
                     "* 'T' to build a tavern\n" +
                     "* 'W' to build a warehouse\n" +
                     "* 'A' to build a alchemy lab\n" +
+                    "* 'J' to build a dojo\n" +
                     "* 'D' to destroy a building\n" +
                     "* 'P' to build a production building matching the tile (eg: Mountains build mines)\n" +
                     "* '1' - '6' to build a specific production building (Wood -> Leather - > Metal -> Fiber - > Stone -> Crystal)\n" +
@@ -144,6 +152,19 @@ export class GuideWindow {
                     "randomly target an enemy. After defeating all the enemies you'll gain some resources and shade. There's a 2.5 second " +
                     "window between fights where you explore the tile and heal your wounds.";
                 this.guideTexts.push(this.scene.add.bitmapText(this.x + 150, this.y + 70, "courier16", Common.processText(helptxt, 72)));
+                this.guideTexts.push(this.scene.add.bitmapText(this.x + 150, this.y + 160, "courier20", "Criticals and Glancing Hits"));
+                var helptxt = "This is where things get a little complicated. With an infinitely scaling game having a core stat cap out at " +
+                    "100% doesn't make sense. Each time your Crit Chance rises above 50% it's divided by 2 while multiplying your Crit Damage by the " +
+                    "same amount. The key point here is 'divided', to get back up to 50% Crit Chance it's going to take twice as much crit as before. " +
+                    "The next time you reach 50% it's divided AGAIN by 2, also multiplying your Crit Damage. So the multi grows to 2, then 4, 8, 16, etc.\n\n" +
+                    "What is your Crit Damage anyways? That's where Aim and Toughness comes in. Your Crit Damage against any enemy is equal to:\n\n" +
+                    "1 + ((-0.5 + SQRT(Aim) / SQRT(Toughness)) * 0.5 * Crit Chance Multi)\n\n" +
+                    "All this means is having more Aim than the monsters Toughness increases Crit Damage, while having less decreases Crit Damage. " +
+                    "Glancing Hits follow a similar, simpler formula:\n\n" +
+                    "                           Aim / Toughness\n\n" +
+                    "The damage you deal with a Glancing Hit is the formula above, while the chance of a Glancing Hit is that formula divided by 2. " +
+                    "For example, if you had a 10% chance of a Glancing Hit you would deal 20% less damage.";
+                this.guideTexts.push(this.scene.add.bitmapText(this.x + 150, this.y + 195, "courier16", Common.processText(helptxt, 72)));
                 break;
             case 3:
                 this.guideTexts.push(this.scene.add.bitmapText(this.x + 150, this.y + 45, "courier20", "Town"));
@@ -260,10 +281,16 @@ export class GuideWindow {
                 this.guideTexts.push(this.scene.add.bitmapText(this.x + 150, this.y + py + 25, "courier16", Common.processText(helptxt, 72)));
                 py += 60;
                 this.guideTexts.push(this.scene.add.bitmapText(this.x + 150, this.y + py, "courier20", "Auto Explore"));
-                helptxt = "With auto explore on, every time you fully explore a tile it will jump to the next available tile. It doesn't " +
-                    "continue when you die, and doesn't cross regions.";
+                helptxt = "With auto explore on, every time you fully explore a tile it will jump to the next available tile. If you die " +
+                    "it continues after healing to full.";
                 this.guideTexts.push(this.scene.add.bitmapText(this.x + 150, this.y + py + 25, "courier16", Common.processText(helptxt, 72)));
                 py += 80;
+                if (ProgressionStore.getInstance().persistentUnlocks.autoGear === true) {
+                    this.guideTexts.push(this.scene.add.bitmapText(this.x + 150, this.y + py, "courier20", "Auto Upgrade Gear"));
+                    helptxt = "At the end of every week this will try to upgrade your equiped gear one level.";
+                    this.guideTexts.push(this.scene.add.bitmapText(this.x + 150, this.y + py + 25, "courier16", Common.processText(helptxt, 72)));
+                    py += 60;
+                }
                 if (MoonlightData.getInstance().challenges.invasion.completions > 0) {
                     this.guideTexts.push(this.scene.add.bitmapText(this.x + 150, this.y + py, "courier20", "Auto Invade"));
                     helptxt = "With this on Auto Explore will clear up any invasions first before exploring new tiles. Fighting Invasions " +
@@ -271,8 +298,14 @@ export class GuideWindow {
                     this.guideTexts.push(this.scene.add.bitmapText(this.x + 150, this.y + py + 25, "courier16", Common.processText(helptxt, 72)));
                     py += 80;
                 }
+                if (ProgressionStore.getInstance().persistentUnlocks.autoTown === true) {
+                    this.guideTexts.push(this.scene.add.bitmapText(this.x + 150, this.y + py, "courier20", "Auto Upgrade Town"));
+                    helptxt = "At the end of every week this will try to upgrade town buildings (not research) one level.";
+                    this.guideTexts.push(this.scene.add.bitmapText(this.x + 150, this.y + py + 25, "courier16", Common.processText(helptxt, 72)));
+                    py += 60;
+                }
                 if (MoonlightData.getInstance().challenges.outcast.completions > 0) {
-                    this.guideTexts.push(this.scene.add.bitmapText(this.x + 150, this.y + py, "courier20", "Auto Upgrade"));
+                    this.guideTexts.push(this.scene.add.bitmapText(this.x + 150, this.y + py, "courier20", "Auto Upgrade Buildings"));
                     helptxt = "Finally, some building automation. This is toggled on each region and will attempt to upgrade a handful of " +
                         "buildings each day, assuming you can afford it. Each day, it will upgrade one production building, house, road, market, " +
                         "tavern, and warehouse. Why those? Because I already have lists for those and I'm too lazy to code something else.";
@@ -295,6 +328,37 @@ export class GuideWindow {
                     "Tier 1: Resources, Shade, Motes, Runes, Gear Levels, Gold.\n" +
                     "Tier 2: Resource production boost to all regions for a given type, Econ/Production boost to this region.\n" +
                     "Tier 3: % Stat increases, % Moonlight earned this run, Free Talents, Permanent Villager Power/Health (persists through rebirths).";
+                this.guideTexts.push(this.scene.add.bitmapText(this.x + 150, this.y + 70, "courier16", Common.processText(helptxt, 72)));
+                break;
+            case 15:
+                this.guideTexts.push(this.scene.add.bitmapText(this.x + 150, this.y + 45, "courier20", "Star Shards"));
+                var helptxt = "Once you've beaten the void at Region 10 you unlock Star Shards and the Constellation perks. " +
+                    "These perks give even stronger bonuses than the Moonlight perks, and as such Star Shards are very hard to " +
+                    "come by, at least for now anyways.\n\n" +
+                    "To earn starshards you need to clear a 'Starlight' tile. Each tile has a random chance to be a Starlight tile, " +
+                    "following this formula:\n\n                        0.025% * Region Level\n\n" +
+                    "A Starlight tile glows pink and has it's enemies replaced with stars. As the chance for a Starlight tile is " +
+                    "based on Region level, you find more star shards the higher region you go. When the chance reaches 10% the " +
+                    "chance is cut in half and Starlight tiles drop double the number of shards.";
+                this.guideTexts.push(this.scene.add.bitmapText(this.x + 150, this.y + 70, "courier16", Common.processText(helptxt, 72)));
+                break;
+            case 16:
+                this.guideTexts.push(this.scene.add.bitmapText(this.x + 150, this.y + 45, "courier20", "Rituals"));
+                var helptxt = "Now that you defeated the Cult of the Betrayer Star you have access to all their crazy Rituals. " +
+                    "Rituals change the difficulty of the next rebirth, allowing you to make it easier or harder along with " +
+                    "changing how much moonlight or star shards you earn.\n\nRituals require Ritual Points, which are " +
+                    "earned by sacrificing huge sums of T8 resources, gold, or motes of darkness. Each time you sacrifice a " +
+                    "resource the cost for that resource increases dramatically. Rituals a broken down into 4 categories:\n\n" +
+                    "-Rituals of Empowerment: These give PERMANENT boosts to a given stat, increasing it by a flat amount. " +
+                    "Each point gives more than the last.\n\n" +
+                    "-Rituals of Corruption: These rituals increase various stats in exchange for decreasing your moonlight or " +
+                    "star shards earned.\n\n" +
+                    "-Rituals of Destruction: These rituals increase the difficulty in exchange for increasing your moonlight or " +
+                    "star shards earned.\n\n" +
+                    "-Rituals of Exchange: Increases moonlight or star shards earned in exchange for decreasing the other one.\n\n" +
+                    "Rituals are multiplicative with each other. For example if you have two rituals that give a 25% bonus to moonlight, " +
+                    "it's calculated as 1.25 x 1.25 = 1.56x increase to moonlight. All rituals (except Empowerment) last for the next " +
+                    "rebirth. They work in challenges too!";
                 this.guideTexts.push(this.scene.add.bitmapText(this.x + 150, this.y + 70, "courier16", Common.processText(helptxt, 72)));
                 break;
         }

@@ -16,6 +16,7 @@ export class Combat {
             case "barrier":
             case "mace":
             case "skull":
+            case "glancing":
                 animInfo.push({ frameId: 0, duration: 80 });
                 animInfo.push({ frameId: 1, duration: 80 });
                 animInfo.push({ frameId: 2, duration: 80 });

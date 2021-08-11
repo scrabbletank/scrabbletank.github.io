@@ -29,6 +29,10 @@ import { WorldTime } from "../data/WorldTime";
 import { FadingNumberLabel } from "../ui/FadingNumberLabel";
 import { StarData } from "../data/StarData";
 import { MyrahScene } from "./MyrahScene";
+import { RitualData } from "../data/RitualData";
+
+const BUY_FLAT = [[1, 10, 100, 1000], ["1", "10", "100", "1K"]];
+const BUY_PERCENT = [[0.1, 0.25, 0.5, 1], ["10%", "25%", "50%", "MAX"]];
 
 export class GameScene extends SceneUIBase {
     constructor(position, name) {
@@ -49,12 +53,14 @@ export class GameScene extends SceneUIBase {
         this.resourceStart = 0;
         this.resourceTierSelected = 0;
         this.saveTimer = Statics.AUTOSAVE_TIMER;
-        this.buyAmount = 1;
+        this.statBuyAmount = 1;
+        this.talentBuyAmount = 1;
         this.talentCost = 0;
         this.statCost = 0;
         this.lastFrame = 0;
         this.showTimeThisRun = false;
-
+        this.shiftModifier = false;
+        this.buyBtnIdx = 0;
         //try loading save data if it exists
         this.loadGame();
     }
@@ -127,9 +133,9 @@ export class GameScene extends SceneUIBase {
         this.detailsIcons.push(new TooltipImage(this, 20, 170, 16, 16, { sprite: "icons", tile: 31 },
             "Crit Chance. The chance any hit is a critical hit, dealing extra damage."));
         this.detailsIcons.push(new TooltipImage(this, 20, 170, 16, 16, { sprite: "icons", tile: 30 },
-            "Crit Power. Increases your crit damage, but is reduced by the targets Crit Resistance."));
+            "Aim. Increases damage dealt with Critical Hits and reduces the chance of a Glancing Hit. Opposed by your opponents Toughness."));
         this.detailsIcons.push(new TooltipImage(this, 20, 170, 16, 16, { sprite: "icons", tile: 48 },
-            "Crit Resistance. Reduces the damage taken by critical hits."));
+            "Toughness. Reduces the damage taken by Critical Hits and increases enemies chance of a Glancing Hit."));
 
         this.gearLabels = this.add.bitmapText(20, 30, "courier16", "").setOrigin(0);
 
@@ -179,14 +185,14 @@ export class GameScene extends SceneUIBase {
 
         this.buyButtons = [];
         this.buyButtons.push(new TextButton(this, 10, 780, 30, 18, "x1")
-            .onClickHandler(() => { this._setBuyAmount(1, 0); })
+            .onClickHandler(() => { this._setBuyAmount(0); })
             .setTextColor(Phaser.Display.Color.GetColor(255, 255, 0)));
         this.buyButtons.push(new TextButton(this, 45, 780, 30, 18, "x10")
-            .onClickHandler(() => { this._setBuyAmount(10, 1); }));
+            .onClickHandler(() => { this._setBuyAmount(1); }));
         this.buyButtons.push(new TextButton(this, 80, 780, 40, 18, "x100")
-            .onClickHandler(() => { this._setBuyAmount(100, 2); }));
+            .onClickHandler(() => { this._setBuyAmount(2); }));
         this.buyButtons.push(new TextButton(this, 125, 780, 40, 18, "x1K")
-            .onClickHandler(() => { this._setBuyAmount(1000, 3); }));
+            .onClickHandler(() => { this._setBuyAmount(3); }));
 
         this.infuseLabel = this.add.bitmapText(10, 10, "courier20", "Infuse");
         this.shadeLabel = this.add.bitmapText(20, 10, "courier16", "Shade: " + this.player.shade);
@@ -290,9 +296,10 @@ export class GameScene extends SceneUIBase {
         });
         this.player.registerEvent("onTalentChanged", () => {
             this.updateStatIcons();
-            this.worldScene._onInvasionPowerChanged();
         });
         this.player.registerEvent("onClassSelected", () => { this._handleClassSelected(); });
+        this.worldData.time.registerEvent("onWeekEnd", () => { this._updateWeek(); });
+        this.shiftKey = this.input.keyboard.addKey(Phaser.Input.Keyboard.KeyCodes.SHIFT);
 
         if (this.progression.unlocks.gearTab === false) {
             this.loreScene.addText("You open your eyes and see a vast wilderness before you. " +
@@ -305,11 +312,24 @@ export class GameScene extends SceneUIBase {
         // we make sure we handle class specific UI here.
         this._handleClassSelected();
         this._layoutStats();
-        this._setBuyAmount(1, 0);
+        this._setBuyAmount(0);
     }
 
-    _setBuyAmount(amount, idx) {
-        this.buyAmount = amount;
+    _setBuyAmount(idx) {
+        this.buyBtnIdx = idx;
+        if (this.shiftModifier === true) {
+            this.statBuyAmount = this.player.getStatCostMax(BUY_PERCENT[0][idx]);
+            this.talentBuyAmount = this.player.getTalentCostMax(BUY_PERCENT[0][idx]);
+            for (var i = 0; i < this.buyButtons.length; i++) {
+                this.buyButtons[i].setText(BUY_PERCENT[1][i]);
+            }
+        } else {
+            this.statBuyAmount = BUY_FLAT[0][idx];
+            this.talentBuyAmount = BUY_FLAT[0][idx];
+            for (var i = 0; i < this.buyButtons.length; i++) {
+                this.buyButtons[i].setText(BUY_FLAT[1][i]);
+            }
+        }
         this._updateInfuseCosts();
         for (var i = 0; i < this.buyButtons.length; i++) {
             this.buyButtons[i].setTextColor(Phaser.Display.Color.GetColor(255, 255, 255));
@@ -318,8 +338,8 @@ export class GameScene extends SceneUIBase {
     }
 
     _updateInfuseCosts() {
-        this.statCost = this.player.getStatCost(this.buyAmount);
-        this.talentCost = this.player.getTalentCost(this.buyAmount);
+        this.statCost = this.player.getStatCost(this.statBuyAmount);
+        this.talentCost = this.player.getTalentCost(this.talentBuyAmount);
         this.statProgressBar.setFillPercent(this.player.shade / this.statCost,
             Common.numberString(Math.floor(Math.min(this.player.shade, this.statCost))) + '/' + Common.numberString(this.statCost));
         this.talentProgressBar.setFillPercent(this.player.shade / this.talentCost,
@@ -408,6 +428,11 @@ export class GameScene extends SceneUIBase {
             case Statics.UNLOCK_MOTES_UI:
                 this._updateResources();
                 break;
+            default:
+                this.worldButton.setVisible(ProgressionStore.getInstance().unlocks.worldTab === true ||
+                    ProgressionStore.getInstance().persistentUnlocks.rituals === true);
+                this.worldScene.refreshButtons();
+                break;
         }
     }
 
@@ -449,9 +474,9 @@ export class GameScene extends SceneUIBase {
 
     _updateGear() {
         var text = "" +
-            Common.processText(this.player.weapon === undefined ? "None" : this.player.weapon.name + " Lv" + this.player.weapon.level, 20) + "\n" +
-            Common.processText(this.player.armor === undefined ? "None" : this.player.armor.name + " Lv" + this.player.armor.level, 20) + "\n" +
-            Common.processText(this.player.trinket === undefined ? "None" : this.player.trinket.name + " Lv" + this.player.trinket.level, 20);
+            Common.processText(this.player.weapon === undefined ? "None" : this.player.weapon.shortname + " Lv" + this.player.weapon.level, 20) + "\n" +
+            Common.processText(this.player.armor === undefined ? "None" : this.player.armor.shortname + " Lv" + this.player.armor.level, 20) + "\n" +
+            Common.processText(this.player.trinket === undefined ? "None" : this.player.trinket.shortname + " Lv" + this.player.trinket.level, 20);
 
         this.gearLabels.setText(text);
     }
@@ -478,9 +503,9 @@ export class GameScene extends SceneUIBase {
         this.detailsLabels.push(this.add.bitmapText(40, this.detailsStart + 140, "courier16",
             Math.floor(this.player.statBlock.CritChance() * 100) + "%"));
         this.detailsLabels.push(this.add.bitmapText(40, this.detailsStart + 160, "courier16",
-            Common.numberString(this.player.statBlock.CritPower()) + ""));
+            Common.numberString(this.player.statBlock.Aim()) + ""));
         this.detailsLabels.push(this.add.bitmapText(40, this.detailsStart + 180, "courier16",
-            Common.numberString(this.player.statBlock.CritResistance()) + ""));
+            Common.numberString(this.player.statBlock.Toughness()) + ""));
     }
 
     _updateFadingResourceLabels(res, gold, tier) {
@@ -600,9 +625,9 @@ export class GameScene extends SceneUIBase {
     }
 
     _buyStatPoint() {
-        this.progression.registerStatPointGain(this.buyAmount);
-        this.player.buyStat(this.buyAmount);
-        this._updateInfuseCosts();
+        this.progression.registerStatPointGain(this.statBuyAmount);
+        this.player.buyStat(this.statBuyAmount);
+        this._setBuyAmount(this.buyBtnIdx);
         this._updateStats();
         this._updateShade();
     }
@@ -613,18 +638,22 @@ export class GameScene extends SceneUIBase {
                 "in the game. Since they're not you just get 1 measly talent point to spend on the " +
                 "basic bitch talents.");
         }
-        this.player.buyTalent(this.buyAmount);
-        this._updateInfuseCosts();
+        this.player.buyTalent(this.talentBuyAmount);
+        this._setBuyAmount(this.buyBtnIdx);
         this._updateShade();
     }
 
     _increaseStat(stat) {
-        this.player.increaseStat(stat, this.buyAmount);
+        var amount = this.shiftModifier === true ?
+            Math.max(1, Math.floor(this.player.statPoints * BUY_PERCENT[0][this.buyBtnIdx])) :
+            BUY_FLAT[0][this.buyBtnIdx];
+        this.player.increaseStat(stat, amount);
     }
 
     _onRewardCallback(rewards) {
         if (this.progression.unlocks.craftingUI === true) {
-            GearData.getInstance().tiersAvailable = Math.max(GearData.getInstance().tiersAvailable, rewards.regionLevel + 1);
+            GearData.getInstance().tiersAvailable = Math.min(DynamicSettings.getInstance().maxGearTier,
+                Math.max(GearData.getInstance().tiersAvailable, rewards.regionLevel + 1));
             this.gearScene._updateTierButtons();
         }
         this.player.addShade(rewards.shade);
@@ -664,7 +693,24 @@ export class GameScene extends SceneUIBase {
         }
     }
 
+    _updateWeek() {
+        if (DynamicSettings.getInstance().autoGearUpgrade === true) {
+            if (this.player.weapon !== undefined) {
+                GearData.getInstance().upgradeGear(this.player.weapon);
+            }
+            if (this.player.armor !== undefined) {
+                GearData.getInstance().upgradeGear(this.player.armor);
+            }
+            if (this.player.trinket !== undefined) {
+                GearData.getInstance().upgradeGear(this.player.trinket);
+            }
+            this.gearScene.refresh(false);
+        }
+    }
+
     rebirth() {
+        this.player.applyRitualBonuses();
+        RitualData.getInstance().rebirth();
         this.player.rebirth();
         var gear = new GearData();
         gear.rebirth();
@@ -766,6 +812,14 @@ export class GameScene extends SceneUIBase {
             this.saveTimer = Statics.AUTOSAVE_TIMER;
             this.save();
         }
+
+        if (Phaser.Input.Keyboard.JustUp(this.shiftKey)) {
+            this.shiftModifier = false;
+            this._setBuyAmount(this.buyBtnIdx);
+        } else if (Phaser.Input.Keyboard.JustDown(this.shiftKey)) {
+            this.shiftModifier = true;
+            this._setBuyAmount(this.buyBtnIdx);
+        }
     }
 
     copyToClipboard() {
@@ -805,10 +859,14 @@ export class GameScene extends SceneUIBase {
             progression: this.progression.save(),
             moon: this.moonlight.save(),
             star: this.starData.save(),
+            ritual: RitualData.getInstance().save(),
             lore: LoreStore.getInstance().save()
         }
     }
     save() {
+        if (DynamicSettings.getInstance().saveEnabled === false) {
+            return;
+        }
         var saveObj = this._getSaveObj();
 
         localStorage.setItem("save", JSON.stringify(saveObj));
@@ -837,6 +895,9 @@ export class GameScene extends SceneUIBase {
         if (saveObj.star !== undefined) {
             this.starData.load(saveObj.star, saveObj.version);
         }
+        if (saveObj.ritual !== undefined) {
+            RitualData.getInstance().load(saveObj.ritual, saveObj.version);
+        }
         gearData.load(saveObj.gear, saveObj.version);
         //player needs to load after gear
         this.player.load(saveObj.player, saveObj.version);
@@ -846,5 +907,9 @@ export class GameScene extends SceneUIBase {
         if (timeOffline > 60000) {
             this.worldData.time.addOfflineTime(timeOffline);
         }
+
+        //handle new progression milestones here:
+        this.progression.persistentUnlocks.autoGear = this.moonlight.challenges.forge.completions > 0;
+        this.progression.persistentUnlocks.autoTown = this.moonlight.challenges.buildings.completions > 0;
     }
 }

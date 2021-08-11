@@ -23,6 +23,7 @@ export class CombatScene extends SceneUIBase {
         this.onRewardHandlers = [];
         this.onExploreHandlers = [];
         this.regionTier = 0;
+        this.restartAfterRegen = false;
 
         this.playerHitAnim = undefined;
         this.monsterHitAnim = [undefined, undefined, undefined];
@@ -87,7 +88,7 @@ export class CombatScene extends SceneUIBase {
         this.restButton.setText("Rest");
 
         if (DynamicSettings.getInstance().autoExploreOptions === Statics.AUTOEXPLORE_HOLD &&
-            this.scene.get("RegionScene").getAutoInvadeActive() === true && this.combatManager.activeTile.isInvaded === false) {
+            DynamicSettings.getInstance().autoInvade === true && this.combatManager.activeTile.isInvaded === false) {
             this.scene.get("RegionScene").triggerAutoExplore(this.combatManager.activeTile,
                 this.combatManager.activeTile.parent.regionLevel);
         }
@@ -98,6 +99,7 @@ export class CombatScene extends SceneUIBase {
     }
 
     _playerDefeatCallback() {
+        this.restartAfterRegen = true;
         this._hideEnemyDisplays();
         this.progression.registerDeath(1);
         this.restButton.setVisible(true);
@@ -205,6 +207,7 @@ export class CombatScene extends SceneUIBase {
         this.load.spritesheet("fireball", "./../../assets/anims/fireanim.png", { frameWidth: 32, frameHeight: 32 });
         this.load.spritesheet("haste", "./../../assets/anims/hasteanim.png", { frameWidth: 32, frameHeight: 32 });
         this.load.spritesheet("skull", "./../../assets/anims/killanim.png", { frameWidth: 32, frameHeight: 32 });
+        this.load.spritesheet("glancing", "./../../assets/anims/glancinganim.png", { frameWidth: 128, frameHeight: 128 });
     }
 
     create() {
@@ -220,8 +223,8 @@ export class CombatScene extends SceneUIBase {
         this.invasionCounter.setVisible(false);
         this.monsterDisplays = [];
         this.monsterDisplays.push(new CreatureDisplay(this, this.relativeX(325), this.relativeY(70)));
-        this.monsterDisplays.push(new CreatureDisplay(this, this.relativeX(100), this.relativeY(170)));
-        this.monsterDisplays.push(new CreatureDisplay(this, this.relativeX(550), this.relativeY(170)));
+        this.monsterDisplays.push(new CreatureDisplay(this, this.relativeX(65), this.relativeY(170)));
+        this.monsterDisplays.push(new CreatureDisplay(this, this.relativeX(585), this.relativeY(170)));
 
         this.playerDisplay = new CreatureDisplay(this, this.relativeX(325), this.relativeY(460));
         this.playerDisplay.initWithCreature(this.player.statBlock);
@@ -280,7 +283,7 @@ export class CombatScene extends SceneUIBase {
     }
 
     _onInvasionEndCallback() {
-        if (this.scene.get("RegionScene").getAutoInvadeActive() === true) {
+        if (DynamicSettings.getInstance().autoInvade === true) {
             this.scene.get("RegionScene").triggerAutoExplore(this.combatManager.activeTile,
                 this.combatManager.activeTile.parent.regionLevel);
         }
@@ -294,5 +297,15 @@ export class CombatScene extends SceneUIBase {
         this._updateAnimations(fDelta);
 
         this.combatManager.update(fDelta);
+
+        if (this.restartAfterRegen === true && this.combatManager.combatActive === false &&
+            this.player.statBlock.currentHealth >= this.player.statBlock.MaxHealth() &&
+            DynamicSettings.getInstance().autoExplore === true) {
+            this.combatManager.initFight(true);
+            this.restartAfterRegen = false;
+        }
+        if (this.combatManager.combatActive === true) {
+            this.restartAfterRegen = false;
+        }
     }
 }

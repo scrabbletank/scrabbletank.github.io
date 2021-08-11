@@ -4,10 +4,11 @@ import { StarData } from './StarData';
 import { Statics } from './Statics';
 
 export class Gear {
-    constructor(name, tier, slotType, stats, costs, costsLvl) {
+    constructor(name, shortname, tier, slotType, stats, costs, costsLvl) {
         this.tier = tier;
         this.slotType = slotType;
         this.name = name;
+        this.shortname = shortname;
         this.statBonuses = stats;
         this.statsPerLevel = { critChance: 0 };
         this._totalBonuses = stats;

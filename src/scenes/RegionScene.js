@@ -28,8 +28,6 @@ export class RegionScene extends SceneUIBase {
         }
     }
 
-    getAutoInvadeActive() { return this.regionViewContainer.autoInvadeActive; }
-
     triggerAutoExplore(tile, tier) {
         this.regionViewContainer.triggerAutoExplore(tile, tier);
     }

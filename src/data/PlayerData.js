@@ -9,6 +9,7 @@ import { ProgressionStore } from "./ProgressionStore";
 import { TooltipRegistry } from "./TooltipRegistry";
 import { Blueprint } from "./Blueprint";
 import { StarData } from "./StarData";
+import { RitualData } from "./RitualData";
 
 
 
@@ -23,6 +24,15 @@ export class PlayerData {
             this.baseVillagerPower = 1;
             this.baseVillagerHealth = 10;
             this.blueprints = [];
+            this.baseStats = {
+                strength: 5,
+                dexterity: 5,
+                agility: 5,
+                endurance: 5,
+                recovery: 5,
+                defense: 5,
+                accuracy: 5
+            }
             for (var i = 0; i < 5; i++) {
                 this.blueprints.push(new Blueprint());
             }
@@ -79,10 +89,10 @@ export class PlayerData {
                     stun: { name: "Stunning Hit", level: 0, maxLevel: 5, requires: ["cleave"], texture: { sprite: "icons", tile: 16 } },
                     followthrough: { name: "Follow Through", level: 0, maxLevel: 5, requires: ["hit"], texture: { sprite: "icons", tile: 17 } },
                     dodge: { name: "Dodge", level: 0, maxLevel: 5, requires: ["evasion"], texture: { sprite: "icons", tile: 18 } },
-                    defydeath: { name: "Defy Death", level: 0, maxLevel: 5, requires: ["resilient"], texture: { sprite: "icons", tile: 19 } },
+                    magicresist: { name: "Magic Resistance", level: 0, maxLevel: 5, requires: ["resilient"], texture: { sprite: "icons", tile: 19 } },
                     secondwind: { name: "Second Wind", level: 0, maxLevel: 5, requires: ["quickrecovery"], texture: { sprite: "icons", tile: 20 } },
                     parry: { name: "Parry", level: 0, maxLevel: 5, requires: ["block"], texture: { sprite: "icons", tile: 21 } },
-                    doublecrit: { name: "Double Crit", level: 0, maxLevel: -1, requires: ["crit"], texture: { sprite: "icons", tile: 22 } },
+                    serration: { name: "Serration", level: 0, maxLevel: 5, requires: ["crit"], texture: { sprite: "icons", tile: 22 } },
                     bounty: { name: "Bounty", level: 0, maxLevel: -1, requires: [], texture: { sprite: "icons", tile: 7 } },
                     explorer: { name: "Explorer", level: 0, maxLevel: -1, requires: [], texture: { sprite: "icons", tile: 15 } },
                     guardian: { name: "Guardian", level: 0, maxLevel: -1, requires: [], texture: { sprite: "icons", tile: 39 } },
@@ -175,17 +185,17 @@ export class PlayerData {
         this.talentPoints = MoonlightData.getInstance().challenges.talent.completions;
         this.statLevel = 1;
         this.talentLevel = 1;
-        this.nextStatCost = Statics.STAT_COST_BASE - StarData.getInstance().perks.statcost.level * 2;
-        this.nextTalentCost = Statics.TALENT_COST_BASE;
         this.resources = [[0, 0, 0, 0, 0, 0], [0, 0, 0, 0, 0, 0], [0, 0, 0, 0, 0, 0], [0, 0, 0, 0, 0, 0],
         [0, 0, 0, 0, 0, 0], [0, 0, 0, 0, 0, 0], [0, 0, 0, 0, 0, 0], [0, 0, 0, 0, 0, 0]];
         this.craftingCosts = [1, 1, 1, 1, 1, 1, 1, 1];
+        this.dimCraftingCosts = [1, 1, 1, 1, 1, 1, 1, 1];
         for (var i = 0; i < this.craftingCosts.length; i++) {
             this.craftingCosts[i] = this.craftingCosts[i] * DynamicSettings.getInstance().gearCostMulti;
             this.craftingCosts[i] = this.craftingCosts[i] * Math.pow(0.925,
                 MoonlightData.getInstance().challenges.forge.completions);
         }
         this.starperkCostReduction = Math.pow(0.95, StarData.getInstance().perks.forge.level);
+        this.starperkCostReduction *= Math.pow(0.95, MoonlightData.getInstance().challenges.forge2.completions);
         this.resourceTierReached = DynamicSettings.getInstance().minResourceTier;
         this.gold = 0;
         this.motes = 0;
@@ -247,7 +257,10 @@ export class PlayerData {
             allPercent: 0,
             guardianTalent: 0,
             governanceTalent: 0,
-            agilityScaling: 0
+            agilityScaling: 0,
+            charismaTalent: 0,
+            chromaTalent: 0,
+            defToShield: 0
         }
 
         this.dungeonBonus = {
@@ -310,8 +323,19 @@ export class PlayerData {
 
     reduceCraftingCosts(tier, amount) {
         for (var i = 0; i < Math.min(tier, 8); i++) {
-            this.craftingCosts[i] = Math.max(0.1, this.craftingCosts[i] * amount);
+            if (this.craftingCosts[i] <= 0.1 && MoonlightData.getInstance().challenges.forge2.completions > 0) {
+                this.dimCraftingCosts[i] = this.dimCraftingCosts[i] * amount;
+            } else {
+                this.craftingCosts[i] = Math.max(0.1, this.craftingCosts[i] * amount);
+            }
         }
+    }
+    getCraftingCosts(tier) {
+        if (tier < 0 || tier >= 8) {
+            return 1;
+        }
+        return this.craftingCosts[tier] * this.starperkCostReduction *
+            Math.pow(this.dimCraftingCosts[tier], Statics.FORGE_DIMINISHING_POWER);
     }
     getCraftingCosts(tier) {
         if (tier < 0 || tier >= 8) {
@@ -326,6 +350,22 @@ export class PlayerData {
         block.rebirth();
         block.copyHandlers(this.statBlock);
         this.statBlock = block;
+    }
+
+    applyRitualBonuses() {
+        var statHelper = (ritual) => { return (ritual.level * (12 + 12 + (ritual.level - 1) * 4)) / 2; };
+        // permanent stats
+        const rituals = RitualData.getInstance().rituals;
+        this.baseStats.strength += statHelper(rituals.permstr);
+        this.baseStats.dexterity += statHelper(rituals.permdex);
+        this.baseStats.agility += statHelper(rituals.permagi);
+        this.baseStats.endurance += statHelper(rituals.permend);
+        this.baseStats.recovery += statHelper(rituals.permrec);
+        this.baseStats.defense += statHelper(rituals.permdef);
+        this.baseStats.accuracy += statHelper(rituals.permacc);
+
+        this.baseVillagerPower += statHelper(rituals.permvp) / 2;
+        this.baseVillagerHealth += statHelper(rituals.permvh) * 5;
     }
 
     increaseStat(stat, val) {
@@ -417,15 +457,15 @@ export class PlayerData {
         switch (this.playerClass) {
             case Statics.CLASS_ADVENTURER:
                 return "Endurance determines your health and resistance against criticals. Each point increases your max Health by " +
-                    (this.classStatics.HP_PER_ENDURANCE + this.getTalentLevel('end')) + " and Crit Resistance by 3." +
-                    "Your Endurance increases Health and Crit Resistance from gear by " +
+                    (this.classStatics.HP_PER_ENDURANCE + this.getTalentLevel('end')) + " and Toughness by 3." +
+                    "Your Endurance increases Health and Toughness from gear by " +
                     Math.floor((this.statBlock._getScale(this.statBlock.Endurance()) - 1) * 100) + "%.";
             case Statics.CLASS_BESERKER:
                 return "";
             case Statics.CLASS_WIZARD:
                 return "Endurance determines your health and resistance against criticals. Each point increases your max Health by " +
-                    (this.classStatics.HP_PER_ENDURANCE + this.getTalentLevel('wizend') * 0.5) + " and Crit Resistance by 3." +
-                    "Your Endurance increases Health and Crit Resistance from gear by " +
+                    (this.classStatics.HP_PER_ENDURANCE + this.getTalentLevel('wizend') * 0.5) + " and Toughness by 3." +
+                    "Your Endurance increases Health and Toughness from gear by " +
                     Math.floor((this.statBlock._getScale(this.statBlock.Endurance()) - 1) * 100) + "%.";
         }
     }
@@ -465,9 +505,9 @@ export class PlayerData {
     accTooltip() {
         switch (this.playerClass) {
             case Statics.CLASS_ADVENTURER:
-                return "Accuracy determines your ability to strike weak points. Each point increases your Crit Power by " +
+                return "Accuracy determines your ability to strike weak points. Each point increases your Aim by " +
                     (this.classStatics.CRITPOWER_PER_ACCURACY + this.getTalentLevel('acc') * 0.5) +
-                    ". Your Accuracy increases Crit Power from gear by " +
+                    ". Your Accuracy increases Aim from gear by " +
                     Math.floor((this.statBlock._getScale(this.statBlock.Accuracy()) - 1) * 100) + "%.";
             case Statics.CLASS_BESERKER:
                 return "";
@@ -484,7 +524,8 @@ export class PlayerData {
     critTooltip() {
         switch (this.playerClass) {
             case Statics.CLASS_ADVENTURER:
-                return "Crit Chance. The chance any hit is a critical hit, dealing extra damage.";
+                return "Crit Chance. The chance any hit is a critical hit, dealing extra damage. Crit Chances above 50% are divided, multiplying " +
+                    "Crit Damage by the same amount. Current divider: " + this.statBlock.CritDamageMulti();
             case Statics.CLASS_BESERKER:
                 return "";
             case Statics.CLASS_WIZARD:
@@ -494,7 +535,7 @@ export class PlayerData {
     critPowerTooltip() {
         switch (this.playerClass) {
             case Statics.CLASS_ADVENTURER:
-                return "Crit Power. Increases your crit damage, but is reduced by the targets Crit Resistance.";
+                return "Aim. Increases damage dealt with Critical Hits and reduces the chance of a Glancing Hit. Opposed by your opponents Toughness.";
             case Statics.CLASS_BESERKER:
                 return "";
             case Statics.CLASS_WIZARD:
@@ -539,9 +580,12 @@ export class PlayerData {
     }
 
     earnableMoonlight(gateReached) {
+        var challengeBonus = MoonlightData.getInstance().challenges.time2.completions <= 4 ? 1 :
+            1 + MoonlightData.getInstance().challengePoints * 0.05 * 0.01;
         return MoonlightData.getMoonlightEarned((this.statLevel - 1) + (this.talentLevel - 1) *
             (3 + StarData.getInstance().perks.knowledge.level * 2), gateReached) *
-            (1 + 0.15 * MoonlightData.getInstance().challenges.time.completions) * this.dungeonBonus.moonlight;
+            (1 + 0.15 * MoonlightData.getInstance().challenges.time.completions) * this.dungeonBonus.moonlight *
+            RitualData.getInstance().moonlightBonus * challengeBonus;
     }
 
     getExploreMulti() {
@@ -549,16 +593,28 @@ export class PlayerData {
             (1 + this.runeBonuses.exploreSpeed) *
             (1 + Statics.AGI_EXPLORE_MULTI * Math.pow(this.statBlock.Agility(), Statics.AGI_EXPLORE_POWER + this.runeBonuses.agilityScaling)) *
             (1 + MoonlightData.getInstance().moonperks.farstrider.level * 0.1) *
-            this.challengeExploreMulti;
+            this.challengeExploreMulti /
+            (1 + RitualData.getInstance().activePerks.desolation * 0.5);
     }
 
+    //(ritual.level * (12 + 12 + (ritual.level - 1) * 4)) / 2
     getStatCost(buyAmount) {
-        var ret = 0;
-        var starMod = StarData.getInstance().perks.statcost.level * 2;
-        for (var i = 0; i < buyAmount; i++) {
-            ret += (Statics.STAT_COST_BASE - starMod) + ((Statics.STAT_COST_PER_LEVEL - starMod) * (this.statLevel - 1 + i));
-        }
-        return ret;
+        var cost = (Statics.STAT_COST_BASE - StarData.getInstance().perks.statcost.level * 2);
+        var t = this.statLevel * cost;
+        return (buyAmount * (t + t + ((buyAmount - 1) * cost))) / 2;
+    }
+    //((c * t + (c * t + t(x - 1))) * x) / 2 = y
+    getStatCostMax(percentage) {
+        var cost = (Statics.STAT_COST_BASE - StarData.getInstance().perks.statcost.level * 2);
+        var tShade = this.shade * percentage;
+        var sLvl = this.statLevel;
+        var costSqrt = Math.sqrt(cost);
+        var t1 = Math.sqrt((4 * Math.pow(sLvl, 2) * cost) - (4 * sLvl * cost) + cost + (8 * tShade));
+        var t2 = 2 * sLvl * costSqrt;
+        var t3 = costSqrt;
+        var t4 = 2 * costSqrt;
+        var x = (t1 - t2 + t3) / t4;
+        return Math.max(1, Math.floor(x));
     }
     getTalentCost(buyAmount) {
         var ret = 0;
@@ -567,6 +623,18 @@ export class PlayerData {
             ret += Statics.TALENT_COST_BASE * Math.pow(Statics.TALENT_COST_POWER - challengeMod, (this.talentLevel - 1 + i));
         }
         return ret;
+    }
+    getTalentCostMax(percentage) {
+        var totalShade = this.shade * percentage;
+        var buyAmount = 1;
+        var power = Statics.TALENT_COST_POWER - MoonlightData.getInstance().challenges.talent.completions * 0.008;
+        var totalCost = Statics.TALENT_COST_BASE * Math.pow(power, (this.talentLevel - 1 + buyAmount));
+        while (totalCost < totalShade) {
+            buyAmount += 1;
+            totalCost += Statics.TALENT_COST_BASE * Math.pow(power, (this.talentLevel - 1 + buyAmount));
+        }
+        buyAmount = Math.max(1, buyAmount - 1);
+        return buyAmount;
     }
     getTalentLevel(name) {
         if (this.talents[name] === undefined || DynamicSettings.getInstance().talentsEnabled === false) {
@@ -591,7 +659,7 @@ export class PlayerData {
             case "end":
             case "wizend":
             case "resilient":
-            case "defydeath":
+            case "magicresist":
                 return this.talents[name].level + this.runeBonuses.endTalents;
             case "rec":
             case "quickrecovery":
@@ -603,7 +671,7 @@ export class PlayerData {
                 return this.talents[name].level + this.runeBonuses.defTalents;
             case "acc":
             case "crit":
-            case "doublecrit":
+            case "serration":
                 return this.talents[name].level + this.runeBonuses.accTalents;
             case "bounty":
                 return this.talents[name].level + this.runeBonuses.lootTalent;
@@ -611,6 +679,10 @@ export class PlayerData {
                 return this.talents[name].level + this.runeBonuses.governanceTalent;
             case "guardian":
                 return this.talents[name].level + this.runeBonuses.guardianTalent;
+            case "charisma":
+                return this.talents[name].level + this.runeBonuses.charismaTalent;
+            case "codex":
+                return this.talents[name].level + this.runeBonuses.chromaTalent;
         }
         return this.talents[name].level;
     }
@@ -636,22 +708,14 @@ export class PlayerData {
     }
 
     buyStat(buyAmount) {
-        for (var i = 0; i < buyAmount; i++) {
-            this.statPoints += Statics.STAT_POINTS_PER_BUY + StarData.getInstance().perks.statpoints.level;
-            this.shade -= this.nextStatCost;
-            this.nextStatCost = (Statics.STAT_COST_BASE - StarData.getInstance().perks.statcost.level * 2) +
-                ((Statics.STAT_COST_PER_LEVEL - StarData.getInstance().perks.statcost.level * 2) * this.statLevel);
-            this.statLevel += 1;
-        }
+        this.statPoints += buyAmount * (Statics.STAT_POINTS_PER_BUY + StarData.getInstance().perks.statpoints.level);
+        this.shade -= this.getStatCost(buyAmount);
+        this.statLevel += buyAmount;
     }
     buyTalent(buyAmount) {
-        var challengeMod = MoonlightData.getInstance().challenges.talent.completions * 0.008;
-        for (var i = 0; i < buyAmount; i++) {
-            this.talentPoints += 1;
-            this.shade -= this.nextTalentCost;
-            this.nextTalentCost = Statics.TALENT_COST_BASE * Math.pow(Statics.TALENT_COST_POWER - challengeMod, this.talentLevel);
-            this.talentLevel += 1;
-        }
+        this.talentPoints += buyAmount;
+        this.shade -= this.getTalentCost(buyAmount);
+        this.talentLevel += buyAmount;
         if (this.talentLevel >= 50 && ProgressionStore.getInstance().persistentUnlocks.wizardClass === false) {
             ProgressionStore.getInstance().persistentUnlocks.wizardClass = true;
             ProgressionStore.getInstance().registerFeatureUnlocked(Statics.UNLOCK_GENERIC,
@@ -693,7 +757,7 @@ export class PlayerData {
     }
     addGold(amount) {
         var worldData = new WorldData();
-        this.gold = Math.min(worldData.getGoldCap(), this.gold + amount);
+        this.gold = Math.max(0, Math.min(worldData.getGoldCap(), this.gold + amount));
         this._onResourcesChanged([0, 0, 0, 0, 0, 0], amount, 0);
     }
     addMote(amount) {
@@ -814,14 +878,14 @@ export class PlayerData {
             tp: this.talentPoints,
             spl: this.statLevel,
             tpl: this.talentLevel,
-            nsp: this.nextStatCost,
-            ntp: this.nextTalentCost,
             res: this.resources,
             rtr: this.resourceTierReached,
             crf: this.craftingCosts,
+            dcf: this.dimCraftingCosts,
             csp: this.starperkCostReduction,
             pc: this.playerClass,
             cc: this.classChosen,
+            bs: this.baseStats,
             gold: this.gold,
             mote: this.motes,
             talents: this.talents,
@@ -845,19 +909,28 @@ export class PlayerData {
         this.talentPoints = saveObj.tp;
         this.statLevel = saveObj.spl;
         this.talentLevel = saveObj.tpl;
-        this.nextStatCost = saveObj.nsp;
-        this.nextTalentCost = saveObj.ntp;
         this.resources = saveObj.res;
         this.resourceTierReached = saveObj.rtr;
         this.craftingCosts = saveObj.crf;
         this.playerClass = saveObj.pc === undefined ? Statics.CLASS_ADVENTURER : saveObj.pc;
         this.gold = saveObj.gold;
         this.motes = saveObj.mote;
+        var tempStats = {
+            strength: 5,
+            dexterity: 5,
+            agility: 5,
+            endurance: 5,
+            recovery: 5,
+            defense: 5,
+            accuracy: 5
+        };
+        this.baseStats = saveObj.bs === undefined ? tempStats : saveObj.bs;
         this.runes = saveObj.runes === undefined ? [] : saveObj.runes;
         this.baseVillagerPower = saveObj.vp === undefined ? 1 : saveObj.vp;
         this.baseVillagerHealth = saveObj.vh === undefined ? 10 : saveObj.vh;
         this.dungeonBonus = saveObj.db === undefined ? this.dungeonBonus : saveObj.db;
         this.starperkCostReduction = saveObj.csp === undefined ? 1 : saveObj.csp;
+        this.dimCraftingCosts = saveObj.dcf === undefined ? [1, 1, 1, 1, 1, 1, 1, 1] : saveObj.dcf;
 
         this.selectClass(this.playerClass);
         var keys = Object.keys(saveObj.talents);

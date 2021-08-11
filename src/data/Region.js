@@ -24,6 +24,7 @@ import { WorldData } from './WorldData';
 import { ProgressionStore } from './ProgressionStore';
 import { RuneRegistry } from './RuneRegistry';
 import { StarData } from './StarData';
+import { RitualData } from './RitualData';
 
 export class TileData {
 
@@ -97,7 +98,6 @@ export class TileData {
         tile.hasShard = saveObj.hs === undefined ? false : saveObj.hs;
         tile.x = saveObj.x;
         tile.y = saveObj.y;
-
         return tile;
     }
 
@@ -169,7 +169,8 @@ export class TileData {
     generateMonsters() {
         var enemyList = [];
         if (this.isInvaded === true) {
-            var bonusDif = DynamicSettings.getInstance().invasionLevelBonus;
+            var bonusDif = DynamicSettings.getInstance().invasionLevelBonus +
+                RitualData.getInstance().activePerks.callofthevoid;
             var bossDif = this.difficulty + this.getInvasionMulti();
             enemyList.push(CreatureRegistry.GetCreatureByName(this.enemies[Common.randint(0, this.enemies.length)],
                 bossDif + bonusDif, this.parent.regionLevel));
@@ -199,7 +200,7 @@ export class TileData {
 
         for (var i = 0; i < enemyList.length; i++) {
             if (enemyList[i].level > 100) {
-                if (Math.random() < 0.05) {
+                if (Math.random() < 0.15) {
                     enemyList[i].addTrait(Statics.TRAIT_DIRE, 1);
                 }
             }
@@ -226,12 +227,15 @@ export class Region {
         this.productionBuildings = [];
         this.warehouses = [];
         this.houses = [];
+        this.towers = [];
         this.alchemyDrain = 0;
         this.alchemyGain = 0;
+        this.exchangePower = 0;
         this.villagerStatGain = [0, 0];
         this.dungeonLocations = [];
         this.autoUpgrade = false;
         this.blueprint = -1;
+        this.starshardsPerTile = 1;
 
         if (ignoreGen === true) {
             return true;
@@ -303,7 +307,8 @@ export class Region {
             dl: this.dungeonLocations,
             au: this.autoUpgrade,
             bp: this.blueprint,
-            rt: this.resourceTier
+            rt: this.resourceTier,
+            sst: this.starshardsPerTile
         }
 
         return saveObj;
@@ -328,6 +333,7 @@ export class Region {
         region.autoUpgrade = saveObj.au === undefined ? false : saveObj.au;
         region.blueprint = saveObj.bp === undefined ? -1 : saveObj.bp;
         region.resourceTier = saveObj.rt === undefined ? Math.min(7, region.regionLevel) : saveObj.rt;
+        region.starshardsPerTile = saveObj.sst === undefined ? 1 : saveObj.sst;
         region.map = []
         for (var i = 0; i < saveObj.map.length; i++) {
             var row = [];
@@ -354,6 +360,8 @@ export class Region {
         // we use the tile yields as a mask to determine which yields we should add for a given tile
         var yieldMask = RegionRegistry.TILE_TYPES[this.map[py][px].regName].yields;
         var yields = [0, 0, 0, 0, 0, 0];
+        var ritMulti = (1 + RitualData.getInstance().activePerks.wildgrowth * 0.1) /
+            (1 + RitualData.getInstance().activePerks.desolation * 0.5);
         for (var y = Math.max(0, py - 1); y < Math.min(this.height, py + 2); y++) {
             for (var x = Math.max(0, px - 1); x < Math.min(this.width, px + 2); x++) {
                 for (var i = 0; i < yields.length; i++) {
@@ -364,12 +372,12 @@ export class Region {
                 }
             }
         }
-        yields[0] = yields[0] * (1 + MoonlightData.getInstance().moonperks.wood.level * 0.05);
-        yields[1] = yields[1] * (1 + MoonlightData.getInstance().moonperks.leather.level * 0.05);
-        yields[2] = yields[2] * (1 + MoonlightData.getInstance().moonperks.metal.level * 0.05);
-        yields[3] = yields[3] * (1 + MoonlightData.getInstance().moonperks.fiber.level * 0.05);
-        yields[4] = yields[4] * (1 + MoonlightData.getInstance().moonperks.stone.level * 0.05);
-        yields[5] = yields[5] * (1 + MoonlightData.getInstance().moonperks.crystal.level * 0.05);
+        yields[0] = yields[0] * (1 + MoonlightData.getInstance().moonperks.wood.level * 0.05) * ritMulti;
+        yields[1] = yields[1] * (1 + MoonlightData.getInstance().moonperks.leather.level * 0.05) * ritMulti;
+        yields[2] = yields[2] * (1 + MoonlightData.getInstance().moonperks.metal.level * 0.05) * ritMulti;
+        yields[3] = yields[3] * (1 + MoonlightData.getInstance().moonperks.fiber.level * 0.05) * ritMulti;
+        yields[4] = yields[4] * (1 + MoonlightData.getInstance().moonperks.stone.level * 0.05) * ritMulti;
+        yields[5] = yields[5] * (1 + MoonlightData.getInstance().moonperks.crystal.level * 0.05) * ritMulti;
         return yields;
     }
 
@@ -417,6 +425,48 @@ export class Region {
     generateTerrain(pointList) {
         var minDiff = this.regionLevel * DynamicSettings.getInstance().regionDifficultyIncrease;
         var maxDiff = minDiff + DynamicSettings.getInstance().regionDifficultyIncrease;
+
+        var starfields = ['starfield', 'starfield2', 'starfield3'];
+
+        for (var y = 0; y < voidMap.length; y++) {
+            for (var x = 0; x < voidMap[y].length; x++) {
+                var base = minDiff + ((Common.getDistance(x, y, 5, 11) / (this.height * 0.79)) *
+                    DynamicSettings.getInstance().regionDifficultyIncrease);
+                var difficulty = Math.max(minDiff, Math.min(maxDiff, base));
+                var regName;
+                switch (voidMap[y][x]) {
+                    case 0:
+                        regName = 'void';
+                        difficulty = Math.min(maxDiff, difficulty + 5);
+                        break;
+                    case 1:
+                        regName = starfields[Common.randint(0, starfields.length)];
+                        break;
+                    case 2:
+                        regName = 'starpalace';
+                        difficulty = maxDiff + 1;
+                        break;
+                }
+                this.map[y][x].init(regName, Math.floor(difficulty), minDiff, this);
+            }
+        }
+
+        // yields for a tile are based on their surrounding tiles
+        for (var i = 0; i < this.height; i++) {
+            for (var t = 0; t < this.width; t++) {
+                this.map[i][t].yields = this._getTileYields(t, i);
+            }
+        }
+
+        this._calculateTileBonuses();
+        this.map[11][5].revealed = true;
+    }
+
+    generateTerrain(pointList) {
+        var minDiff = this.regionLevel * (DynamicSettings.getInstance().regionDifficultyIncrease +
+            RitualData.getInstance().activePerks.vengeance);
+        var maxDiff = minDiff + (DynamicSettings.getInstance().regionDifficultyIncrease +
+            RitualData.getInstance().activePerks.vengeance);
         // spawn point is always within 2 tiles of town (ignoring north points)
         var townPoint = [Math.floor(this.width / 2), this.height - 3]
         var spawnPoint = [townPoint[0] + Math.floor(Math.random() * 2)]
@@ -495,12 +545,26 @@ export class Region {
             ProgressionStore.getInstance().persistentUnlocks.dungeons === false && this.regionLevel === 4) {
             // place the crypt on a random tile 5 rows from the top
             var x = Common.randint(0, this.width);
-            this.map[this.height - 5][x].init("crypt", maxDiff, minDiff, this);
+            this.map[6][x].init("crypt", maxDiff, minDiff, this);
+        }
+
+        // For unlocking Rituals, place a cultist fortress in region 12
+        if (DynamicSettings.getInstance().challengeName === "" &&
+            ProgressionStore.getInstance().persistentUnlocks.rituals === false && this.regionLevel === 11) {
+            // the cultist lair is ontop of mount doom, a 5 tile area shaped like a '+'
+            var x = Common.randint(1, this.width - 1);
+            this.map[3][x].init("doomhill", maxDiff - 2, minDiff, this);
+            this.map[5][x].init("doomhill", maxDiff - 2, minDiff, this);
+            this.map[4][x - 1].init("doomhill", maxDiff - 2, minDiff, this);
+            this.map[4][x + 1].init("doomhill", maxDiff - 2, minDiff, this);
+            this.map[4][x].init("mtdoom", maxDiff, minDiff, this);
         }
 
         //if runes appear on the map, add spawn locations here
-        var runeCount = MoonlightData.getInstance().moonperks.runes.level > 0 ? 5 : 0;
-        runeCount += MoonlightData.getInstance().moonperks.runelands.level;
+        var runeCount = 0;
+        if (MoonlightData.getInstance().moonperks.runes.level > 0) {
+            runeCount = 5 + MoonlightData.getInstance().moonperks.runelands.level % 5;
+        }
         // we can't place runes on the town or gate squares, or on places that already have runes.
         var validFunc = (x, y) => {
             return this.map[y][x].hasRune === false && (x !== townPoint[0] || y !== townPoint[1]) && (x !== gatePos[1] || y !== gatePos[0]);
@@ -561,7 +625,14 @@ export class Region {
 
         // add shard locations
         if (ProgressionStore.getInstance().persistentUnlocks.starshards === true) {
-            var chance = Statics.BASE_STARSHARD_CHANCE * (1 + this.regionLevel * Statics.STARSHARD_REGION_MULTI);
+            var starLevel = this.regionLevel + MoonlightData.getInstance().challenges.time2.completions;
+            var chance = Statics.BASE_STARSHARD_CHANCE * (1 + starLevel * Statics.STARSHARD_REGION_MULTI) *
+                RitualData.getInstance().starshardBonus;
+            this.starshardsPerTile = 1;
+            while (chance > 0.1) {
+                chance = chance / 2;
+                this.starshardsPerTile = this.starshardsPerTile * 2;
+            }
             for (var y = 0; y < this.height; y++) {
                 for (var x = 0; x < this.width; x++) {
                     if (Math.random() < chance) {
@@ -588,6 +659,15 @@ export class Region {
         }
     }
 
+    getStarShardChance() {
+        var starLevel = this.regionLevel + MoonlightData.getInstance().challenges.time2.completions;
+        var chance = Statics.BASE_STARSHARD_CHANCE * (1 + starLevel * Statics.STARSHARD_REGION_MULTI) *
+            RitualData.getInstance().starshardBonus;
+        while (chance > 0.1) {
+            chance = chance / 2;
+        }
+        return chance;
+    }
     getExplorePercent() {
         return this.tilesExplored / (this.width * this.height);
     }
@@ -612,7 +692,9 @@ export class Region {
             this.townData.addFriendship(10 * MoonlightData.getInstance().moonperks.discovery.level);
             if (this.map[y][x].hasRune === true) {
                 this.map[y][x].hasRune = false;
-                var rune = RuneRegistry.getRandomRuneAtLevel(Math.floor(this.regionLevel / 2) + 1);
+                var runeLvl = Math.floor(this.regionLevel / 2) + 1 +
+                    Math.floor(MoonlightData.getInstance().moonperks.runelands.level / 5);
+                var rune = RuneRegistry.getRandomRuneAtLevel(runeLvl);
                 PlayerData.getInstance().addRune(rune);
             }
             if (this.map[y][x].name === "Town") {
@@ -646,7 +728,7 @@ export class Region {
             }
             if (this.map[y][x].hasShard === true) {
                 this.map[y][x].hasShard = false;
-                WorldData.getInstance().starshardsEarned += 1;
+                WorldData.getInstance().starshardsEarned += this.starshardsPerTile;
             }
             if (this.map[y][x].name === "Ancient Crypt" && ProgressionStore.getInstance().persistentUnlocks.dungeons === false) {
                 ProgressionStore.getInstance().persistentUnlocks.dungeons = true;
@@ -662,6 +744,13 @@ export class Region {
                     "You're pretty sure the villagers can handle it, and if not it only takes a week for them to breed a fully adult " +
                     "villager. What's with that anyway?\n" +
                     "VILLAGER DUNEGONS UNLOCKED! On your next rebirth you'll find dungeons to throw your villagers in.");
+            }
+            if (this.map[y][x].name === "Cultist Foothills") {
+                ProgressionStore.getInstance().registerLore("cultists1");
+            }
+            if (this.map[y][x].name === "Doom Mountain" && ProgressionStore.getInstance().persistentUnlocks.rituals === false) {
+                ProgressionStore.getInstance().persistentUnlocks.rituals = true;
+                ProgressionStore.getInstance().registerLore("cultists2");
             }
         }
         if (this.regionLevel > 0 && this.regionLevel <= 8 && WorldData.getInstance().getRegion(this.regionLevel - 1).townData.alchemyEnabled === false) {
@@ -695,7 +784,9 @@ export class Region {
     }
 
     _addSighting() {
-        var a = Math.min(DynamicSettings.getInstance().invasionTimer * (1 + this.sightings.length * Statics.SIGHTING_MULTI_PER_SIGHTING),
+        var baseTimer = Math.max(DynamicSettings.getInstance().invasionTimer -
+            RitualData.getInstance().activePerks.callofthevoid * 2, 5);
+        var a = Math.min(baseTimer * (1 + this.sightings.length * Statics.SIGHTING_MULTI_PER_SIGHTING),
             Statics.MAX_SIGHTING_SECONDS);
         var b = Math.min(a * 2, Statics.MAX_SIGHTING_SECONDS);
         this.sightingsDelay = Common.randint(a, b) * 1000;
@@ -753,6 +844,7 @@ export class Region {
         this.taverns = [];
         this.productionBuildings = [];
         this.warehouses = [];
+        this.towers = [];
 
         for (var i = 0; i < this.height; i++) {
             for (var t = 0; t < this.width; t++) {
@@ -767,7 +859,9 @@ export class Region {
                         this.warehouses.push([i, t]);
                     } else if (this.map[i][t].building.name === "Town House") {
                         this.houses.push([i, t]);
-                    } else if (this.map[i][t].building.name !== "Watch Tower") {
+                    } else if (this.map[i][t].building.name === "Watch Tower") {
+                        this.towers.push([i, t]);
+                    } else {
                         this.productionBuildings.push([i, t]);
                     }
                 }
@@ -860,6 +954,7 @@ export class Region {
         this.resourcesPerDay = [0, 0, 0, 0, 0, 0];
         this.alchemyDrain = 0;
         this.alchemyGain = 0;
+        this.exchangePower = 0;
         this.villagerStatGain = [0, 0];
         for (var i = 0; i < this.height; i++) {
             for (var t = 0; t < this.width; t++) {
@@ -922,6 +1017,7 @@ export class Region {
 
         //get market bonuses
         var points = []
+        var exchange = [5, 10, 25, 50, 100];
         for (var i = 0; i < this.markets.length; i++) {
             points.push({ x: this.markets[i][1], y: this.markets[i][0] });
         }
@@ -931,6 +1027,7 @@ export class Region {
                 var tier = this.map[this.markets[i][0]][this.markets[i][1]].building.tier;
                 var closest = Common.nearestPointInList(this.markets[i][1], this.markets[i][0], points, true);
                 econBonus += Math.max(0, Math.min(max, (closest[1] / Statics.TRADE_HOUSE_MAX_DISTANCE) * max)) * tier / 100;
+                this.exchangePower += exchange[tier];
             }
         }
         //get tavern bonuses
@@ -996,8 +1093,7 @@ export class Region {
         var gain = [0.05, 0.3, 0.9, 3, 8];
         for (var i = 0; i < this.productionBuildings.length; i++) {
             var tile = this.map[this.productionBuildings[i][0]][this.productionBuildings[i][1]];
-            var prodBonus = 1 + (tile.defense * MoonlightData.getInstance().moonperks.moonlightworkers.level * 0.01);
-            prodBonus = prodBonus * (1 + MoonlightData.getInstance().challenges.buildings.completions) *
+            var prodBonus = 1 + (tile.defense * MoonlightData.getInstance().moonperks.moonlightworkers.level * 0.01) *
                 this._getBuildingEfficiency(tile.x, tile.y) * tile.roadBonus;
             switch (tile.building.name) {
                 case "Lumberyard":
@@ -1115,6 +1211,7 @@ export class Region {
                 this.houses.push([tile.y, tile.x]);
                 break;
             case "Watch Tower":
+                this.towers.push([tile.y, tile.x]);
                 for (var y = Math.max(0, tile.y - 2); y < Math.min(this.height, tile.y + 3); y++) {
                     for (var x = Math.max(0, tile.x - 2); x < Math.min(this.width, tile.x + 3); x++) {
                         if (Math.abs(x - tile.x) + Math.abs(y - tile.y) <= 2) {
@@ -1157,6 +1254,7 @@ export class Region {
                 this.productionBuildings = this.productionBuildings.filter(p => p[1] !== tile.x || p[0] !== tile.y);
                 break;
             case "Watch Tower":
+                this.towers = this.towers.filter(p => p[1] !== tile.x || p[0] !== tile.y);
                 for (var y = Math.max(0, tile.y - 2); y < Math.min(this.height, tile.y + 3); y++) {
                     for (var x = Math.max(0, tile.x - 2); x < Math.min(this.width, tile.x + 3); x++) {
                         if (Math.abs(x - tile.x) + Math.abs(y - tile.y) <= 2) {
@@ -1210,6 +1308,10 @@ export class Region {
             }
         }
         return pos;
+    }
+
+    getProdBuildingCount() {
+        return this.productionBuildings.length;
     }
 
     nextWeakestTile(autoInvasion) {
@@ -1267,10 +1369,8 @@ export class Region {
 
     _getResourcesPerDay() {
         var resource = [];
-        var prodBonus = this.townData.getProductionMulti() *
-            (1 + PlayerData.getInstance().getTalentLevel("governance") * 0.04);
         for (var i = 0; i < this.resourcesPerDay.length; i++) {
-            resource.push(Math.max(0, this.resourcesPerDay[i] * prodBonus));
+            resource.push(Math.max(0, this.resourcesPerDay[i] * this.townData.getProductionMulti()));
         }
         resource[0] *= PlayerData.getInstance().dungeonBonus.wood;
         resource[1] *= PlayerData.getInstance().dungeonBonus.leather;
@@ -1312,6 +1412,25 @@ export class Region {
             }
             player.addResource(resource, Math.min(this.resourceTier + 1, 7));
         }
+        // markets exchange resources, subtracting resources proportional to their amount and adding
+        // resources evenly distributed
+        if (this.exchangePower > 0) {
+            var pow = this.exchangePower * this.townData.getProductionMulti();
+            var exchange = [0, 0, 0, 0, 0, 0];
+            var exchangeTotal = 0;
+            var resources = player.resources[this.resourceTier];
+            var resSum = resources.reduce((a, b) => { return a + b });
+            // subtract resources based on the normalization values
+            for (var i = 0; i < resources.length; i++) {
+                exchange[i] = -Math.min(pow * resources[i] / resSum, resources[i]);
+                exchangeTotal += -exchange[i];
+            }
+            // add resources based on the inverse norm (1 - norm)
+            for (var i = 0; i < resources.length; i++) {
+                exchange[i] += exchangeTotal / 6;
+            }
+            player.addResource(exchange, this.resourceTier);
+        }
 
         if (this.tilesExplored >= 11 && this.regionLevel === WorldData.getInstance().invasionRegion) {
             this.sightingsDelay -= Statics.TIME_PER_DAY;
@@ -1338,6 +1457,7 @@ export class Region {
             this._tryUpgradeList(this.taverns);
             this._tryUpgradeList(this.roads);
             this._tryUpgradeList(this.warehouses);
+            this._tryUpgradeList(this.towers);
         }
     }
 
@@ -1373,6 +1493,6 @@ export class Region {
                 }
             }
         }
-        this.townData.endOfWeek();
+        this.townData.endOfWeek(this);
     }
 }

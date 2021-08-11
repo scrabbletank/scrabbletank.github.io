@@ -7,7 +7,7 @@ import { WorldTime } from "./WorldTime";
 export class TooltipRegistry {
 
     static setDefaultNames() {
-        TooltipRegistry.critPowerName = "Crit Power";
+        TooltipRegistry.critPowerName = "Aim";
         TooltipRegistry.defenseName = "Defense";
         TooltipRegistry.accuracyName = "Accuracy";
     }
@@ -34,13 +34,13 @@ export class TooltipRegistry {
             case "Defense":
                 return "Get more armor from Defense. Increases Armor from Defense by " + (lvl * 13) + "% + (13%).";
             case "Accuracy":
-                return "Crit even harder. You gain " + (3 + lvl * 0.5) + " + (0.5) Crit Power per Accuracy.";
+                return "Crit even harder. You gain " + (3 + lvl * 0.5) + " + (0.5) Aim per Accuracy.";
             case "Hit":
                 return "Gain even more Hit from all sources. Increase your Hit by " + (lvl * 4) + "% + (4%).";
             case "Evasion":
                 return "Gain even more Evasion from all sources. Increase your Evasion by " + (lvl * 4) + "% + (4%).";
             case "Critical":
-                return "Everyone loves to crit, so here is some free crit chance. Increase your crit chance by " + (lvl * 1) + "% + (1%).";
+                return "Everyone loves to crit, so here is some free Crit Chance. Increase your Crit Chance by " + (lvl * 3) + "% + (3%).";
             case "Bounty":
                 return "Somehow improves how much loot enemies drop. Increases your perception or something? Gain a " +
                     (lvl * 10) + "% + (10%) chance for enemies to drop loot twice.";
@@ -68,18 +68,18 @@ export class TooltipRegistry {
             case "Dodge":
                 return "All the Hit in the world can't touch you some of the time. You automatically dodge every " +
                     Math.max(3, 13 - lvl) + " - (1) Attacks against you.";
-            case "Defy Death":
-                return "Have you tried just... not dying? The next time you take lethal damage, you survive at 1 Health. Can be used again after " +
-                    (8 - lvl) + " - (1) encounters. I didn't even know I tracked encounters!";
+            case "Magic Resistance":
+                return "Your so strong you have a natural resistance to magic damage! Reduces magic damage taken by " +
+                    (lvl * 5) + "% - (5%).";
             case "Second Wind":
                 return "All the best heroes are able to get right back to it after a beat down. When you drop below 50% health your " +
                     "Health Regen is tripled for 10 seconds. Has a " + (80 - lvl * 10) + " - (10) second cooldown.";
             case "Parry":
-                return "Why block when you can parry? gives a " + (lvl * 5) + "% + (5%) chance an enemy causes a glancing hit, dealing " +
-                    "half damage. Thats still something, right?";
-            case "Double Crit":
-                return "Crit so hard your crits have crits. Gain a chance to crit twice, doubling your crit damage for the attack. Double crit " +
-                    "chance is " + (lvl * 1) + "% + (1%) of your normal crit chance.";
+                return "Why block when you can parry? gives a " + (lvl * 5) + "% + (5%) chance to parry an attack, reducing damage by " +
+                    "half. Thats still something, right?";
+            case "Serration":
+                return "Crit even harder by just ignoring the enemies toughness! Ignores " + Math.min(75, (lvl * 5)) + "% + (5%) of the monsters toughness when " +
+                    "calculating Crit Damage.";
             case "Guardian":
                 return "Invasions are too strong! If you spend some time patrolling you can probably divide Invasion Power by " +
                     (1 + lvl / 5) + " + (0.2).";
@@ -120,7 +120,7 @@ export class TooltipRegistry {
             case "Barrier":
                 return "Only one spell will cast per attack. Every 13th attack you add " + (40 * lvl) + "% + (40%) of your ward to your shield.";
             case "Shell":
-                return "Who needs endurance when you have magic? Increases your Crit Resistance by " + (15 * lvl) + "% + (15%) while your shield is up.";
+                return "Who needs endurance when you have magic? Increases your Toughness by " + (15 * lvl) + "% + (15%) while your shield is up.";
             case "Fireball":
                 return "Only one spell will cast per attack. Every 5th attack you cast the only spell that matters, dealing " + (7 * lvl) +
                     "% + (7%) of your spellpower to all monster in magic damage. You didn't ask how big the room is, you said 'I cast Fireball'.";
@@ -236,7 +236,8 @@ export class TooltipRegistry {
             case "Blackiron Gear":
                 return "Motes of Darkness can reach a " + (20 + moonlight.level * 10) + "% + (10%) bonus before diminishing returns.";
             case "Runelands":
-                return "Each region contains " + (5 + moonlight.level) + " + (1) hidden runes.";
+                return "Each region contains " + (5 + (moonlight.level % 5)) + " + (1) hidden runes. Runes have +" +
+                    Math.floor(moonlight.level / 5) + " levels.";
             case "Moonlight Workers":
                 return "Production buildings generate " + (moonlight.level) + "% + (1%) more resources per defense.";
             case "Hero's Pouch":
@@ -276,7 +277,7 @@ export class TooltipRegistry {
             case "Mystic Cauldron":
                 return "Alchemy Labs create " + (moonlight.level * 10) + "% + (10%) more resources from the same inputs.";
             case "Shadow's Harvest":
-                return "Each day you gain " + (moonlight.level) / 10 + " + (0.1) shade per villager. This bonus is increased by Shadow's Blessing.";
+                return "Each day you gain " + (moonlight.level) * 0.75 + " + (0.75) shade per villager. This bonus is increased by Shadow's Blessing and town production.";
             case "Shadow Wolf Charm":
                 return "Unlocks the Shadow Wolf Charm trinket which grants Strength and Damage. Available up to tier " + (moonlight.level) + " + (1)";
             case "Moonlight Circlet":
@@ -284,13 +285,13 @@ export class TooltipRegistry {
             case "Moon Treads":
                 return "Unlocks the Moon Treads trinket which grants Agility and Evasion. Available up to tier " + (moonlight.level) + " + (1)";
             case "Moonstone":
-                return "Unlocks the Moonstone trinket which grants Endurance, Health, and Crit Resistance. Available up to tier " + (moonlight.level) + " + (1)";
+                return "Unlocks the Moonstone trinket which grants Endurance, Health, and Toughness. Available up to tier " + (moonlight.level) + " + (1)";
             case "Dreamlight Bracer":
                 return "Unlocks the Dreamlight Bracer trinket which grants Recovery and Health Regen. Available up to tier " + (moonlight.level) + " + (1)";
             case "Shadow Veil":
                 return "Unlocks the Shadow Veil trinket which grants Defense and Armor. Available up to tier " + (moonlight.level) + " + (1)";
             case "Nightmare Pendant":
-                return "Unlocks the Nightmare Pendant trinket which grants Accuracy, Crit Chance and Crit Power. Available up to tier " + (moonlight.level) + " + (1)";
+                return "Unlocks the Nightmare Pendant trinket which grants Accuracy, Crit Chance and Aim. Available up to tier " + (moonlight.level) + " + (1)";
             case "Night Labour":
                 return "Unlocks Night Labour for Towns. When active, villagers gold income is reduced by 50% while all production is increased by " +
                     (moonlight.level * 10) + "% + (10%).";
@@ -357,6 +358,7 @@ export class TooltipRegistry {
                     " times as much.\n\n" +
                     "Restrictions: Gear costs increased by " + (10 + completions * 10) + " times.\n" +
                     "              Reach the 2nd Gate.\n\n" +
+                    "On First Completion: Unlocks Auto Gear Upgrade.\n" +
                     "On Every Completion: Gear costs are multiplied by x0.925\n" +
                     "                     +2 Challenge Points\n\n" +
                     "Completions: " + challenge.completions + "/" + challenge.maxCompletions + "\n" +
@@ -375,10 +377,12 @@ export class TooltipRegistry {
                     "Oh, also invasion monsters have +" + (5 + 5 * completions) + " levels, and if you lose a tile to an invasion it's " +
                     "difficulty increases by the same amount.\n\n" +
                     "Restrictions: Reach Gate " + (1 + completions) + ".\n\n" +
-                    "On First Completion: Auto explore auto fights invasions, giving 25% motes.\n" +
-                    "On Every Completion: Invasions take 25% longer to destroy a tile.\n" +
-                    "                     +3 Challenge Points\n\n" +
-                    "On Final Completion: Auto explore gives 100% motes.\n" +
+                    "On First Completion: Auto explore auto fights invasions,\n" +
+                    "                     giving 25% motes.\n" +
+                    "On Every Completion: Invasions take 25% longer to destroy\n" +
+                    "                     a tile.\n" +
+                    "                     +3 Challenge Points\n" +
+                    "On Final Completion: Auto explore gives 100% motes.\n\n" +
                     "Completions: " + challenge.completions + "/" + challenge.maxCompletions + "\n" +
                     "Fastest Time: " + new WorldTime(challenge.fastestTime).getTimespanText();
             case "Talentless":
@@ -395,7 +399,7 @@ export class TooltipRegistry {
                     "Restrictions: Production buildings are unavailable.\n" +
                     "              Reach Gate " + (3 + completions) + ".\n\n" +
                     "On First Completion: Unlock the Warehouse building.\n" +
-                    "                     Unlocks Blueprints\n\n" +
+                    "                     Unlocks Blueprints and Auto Town Upgrade\n" +
                     "On Every Completion: Increases building production by 10%\n" +
                     "                     +4 Challenge Points\n\n" +
                     "Completions: " + challenge.completions + "/" + challenge.maxCompletions + "\n" +
@@ -405,7 +409,8 @@ export class TooltipRegistry {
                     " traits. That's how many.\n\n" +
                     "Restrictions: Monsters start with " + (4 + completions * 2) + " traits.\n" +
                     "              Reach Gate " + (5 + completions) + ".\n\n" +
-                    "On Every Completion: Monsters give 5% more shade, plus 1% per trait.\n" +
+                    "On Every Completion: Monsters give 5% more shade, plus 1%\n" +
+                    "                     per trait.\n" +
                     "                     +5 Challenge Points\n\n" +
                     "Completions: " + challenge.completions + "/" + challenge.maxCompletions + "\n" +
                     "Fastest Time: " + new WorldTime(challenge.fastestTime).getTimespanText();
@@ -415,9 +420,10 @@ export class TooltipRegistry {
                     "              Town Upgrades cost 1 level of friendship.\n" +
                     "              Region spans " + (30 + (completions * 5)) + " levels.\n" +
                     "              Reach Gate " + (4 + completions) + ".\n\n" +
-                    "On First Completion: Unlocks Auto Upgrade.\n" +
+                    "On First Completion: Unlocks Auto Building Upgrade.\n" +
                     "On Every Completion: Gain 10% more friendship.\n" +
-                    "                     Friendship tiers scale slightly slower.\n" +
+                    "                     Friendship tiers scale slightly\n" +
+                    "                     slower.\n" +
                     "                     +5 Challenge Points\n\n" +
                     "Completions: " + challenge.completions + "/" + challenge.maxCompletions + "\n" +
                     "Fastest Time: " + new WorldTime(challenge.fastestTime).getTimespanText();
@@ -438,33 +444,67 @@ export class TooltipRegistry {
                     "Fastest Time: " + new WorldTime(challenge.fastestTime).getTimespanText();
             case "A Matter of Decades":
                 return "Did you finish all the normal challenges yet? I'm feeling kind, so consider this a warmup.\n\n" +
-                    "Restrictions: Reach the 10th Gate within " + (10 - completions * 2) + " Years.\n\n" +
+                    "Restrictions: Reach the 10th Gate within " + (10 - completions * 2) + " Years.\n" +
                     "              Regions span 25 levels.\n\n" +
-                    "On First Completion: Auto Explore will continue to a random region if the current region is complete.\n" +
-                    "On Every Completion: Increases Starshard drop chance as if you were 1 region further.\n" +
-                    "                     +10 Challenge Points\n\n" +
+                    "On First Completion: Auto Explore will continue to a\n" +
+                    "                     random region if the current region\n" +
+                    "                     is complete.\n" +
+                    "On Every Completion: Increases Star Shard Chance as if\n" +
+                    "                     you were 1 region further.\n" +
+                    "                     +7 Challenge Points\n\n" +
+                    "On Final Completion: 5% of your Challenge Points apply to Moonlight gain.\n" +
                     "It is possible to fail this challenge!\n\n" +
                     "Completions: " + challenge.completions + "/" + challenge.maxCompletions + "\n" +
                     "Fastest Time: " + new WorldTime(challenge.fastestTime).getTimespanText();
             case "Forged Ahead 2: Reforged":
                 return "You didn't actually want to equip gear, did you? In this world Gear costs 1000 times as much.\n\n" +
                     "Restrictions: Gear costs increased x1000.\n" +
-                    "              Can only use up to Tier " + (8 - challenge.completions) + " Gear\n\n" +
+                    "              Can only use up to Tier " + (8 - challenge.completions) + " Gear\n" +
+                    "              Regions span 25 levels.\n" +
                     "              Reach the 10th Gate.\n\n" +
-                    "On First Completion: Forge Upgrades can pass the 10% softcap at a greatly reduced rate.\n" +
+                    "On First Completion: Forge Upgrades can pass the 10%\n" +
+                    "                     softcap at a greatly reduced rate.\n" +
                     "On Every Completion: Gear costs are multiplied by x0.95\n" +
-                    "                     +12 Challenge Points\n\n" +
+                    "                     +8 Challenge Points\n\n" +
                     "Completions: " + challenge.completions + "/" + challenge.maxCompletions + "\n" +
                     "Fastest Time: " + new WorldTime(challenge.fastestTime).getTimespanText();
             case "Capitalism":
                 return "The people of this world actually want to be paid for their work, can you imagine that? They won't work " +
                     "without gold, good thing you got those taxes!\n\n" +
                     "Restrictions: production buildings cost " + (250 + challenge.completions * 250) + "g per day.\n" +
-                    "              Tax loopholes mean you earn 50% less tax.\n\n" +
+                    "              Tax loopholes mean you earn 50% less tax.\n" +
+                    "              Regions span 25 levels.\n" +
                     "              Reach the 10th Gate.\n\n" +
-                    "On Every Completion: Gold cost of Town upgrades reduced by 10%\n" +
-                    "                     +250 base gold cap per Town\n\n" +
-                    "                     +15 Challenge Points\n\n" +
+                    "On Every Completion: Gold cost of Town upgrades reduced\n" +
+                    "                     by 10%.\n" +
+                    "                     +250 base gold cap per Town\n" +
+                    "                     +10 Challenge Points\n\n" +
+                    "Completions: " + challenge.completions + "/" + challenge.maxCompletions + "\n" +
+                    "Fastest Time: " + new WorldTime(challenge.fastestTime).getTimespanText();
+            case "Cult Dimension":
+                var powerNeeded = [1000000000, 5000000000, 25000000000, 100000000000, 250000000000];
+                return "Welcome to the Cult Dimension! The Heretics in this world think they can improve upon traditional " +
+                    "rituals, they just need a small investment of " + Common.numberString(powerNeeded[challenge.completions]) +
+                    " Ritual Power, which they say they can make from your resources!\n\n" +
+                    "Restrictions: 99% of production is converted to Ritual Power. Higher tiers convert at a better rate.\n" +
+                    "              Invasions can happen anywhere. Instead of destroying tiles they consume " +
+                    (challenge.completions + 1) + "% of your Max Ritual Power.\n" +
+                    "              Mystic Gates are replaced with Cult Fortresses. Each Fortress conquered increases " +
+                    "Ritual Power gain by 10%.\n\n" +
+                    "On Every Completion: Sacrifices are 5% cheaper\n" +
+                    "                     +12 Challenge Points\n" +
+                    "On Final Completion: Rituals of Destruction have +3% Moonlight/Star Shard Chance per level.\n\n" +
+                    "Completions: " + challenge.completions + "/" + challenge.maxCompletions + "\n" +
+                    "Fastest Time: " + new WorldTime(challenge.fastestTime).getTimespanText();
+            case "Star Invaders":
+                return "Invasions, everyones favourite feature! I made the invasion timer reaaal small so you can enjoy it to the fullest. " +
+                    "Oh, also invasion monsters have +" + (5 + 5 * completions) + " levels, and if you lose a tile to an invasion it's " +
+                    "difficulty increases by the same amount.\n\n" +
+                    "Restrictions: Reach Gate " + (1 + completions) + ".\n\n" +
+                    "On First Completion: Auto explore auto fights invasions, giving 25% motes.\n" +
+                    "On Every Completion: Invasions take 25% longer to destroy a tile.\n" +
+                    "                     +12 Challenge Points\n\n" +
+                    "On Final Completion: Defending an Invasion increases your Moonlight earned by 1% (heavily diminished returns).\n" +
                     "Completions: " + challenge.completions + "/" + challenge.maxCompletions + "\n" +
                     "Fastest Time: " + new WorldTime(challenge.fastestTime).getTimespanText();
         }
@@ -477,7 +517,7 @@ export class TooltipRegistry {
                 return "Dire " + trait.level + ": Core stats are increased by " + trait.level * 20 + "%, drops motes, and gives " +
                     trait.level * 75 + "% more experience.";
             case Statics.TRAIT_POISONED:
-                return "Poisoned " + trait.level + ": Deals " + trait.level * 2 + "% of its max damage per second as true damage. Damage " +
+                return "Poisoned " + trait.level + ": Deals " + trait.level * 2 + "% of its max damage per second as magic damage. Damage " +
                     "doubles when below half health.";
             case Statics.TRAIT_MONSTROUS:
                 return "Monstrous " + trait.level + ": Attack speed is reduced by 15%. Has " + trait.level * 25 + "% increased health and " +
@@ -485,10 +525,10 @@ export class TooltipRegistry {
             case Statics.TRAIT_QUICK:
                 return "Quick " + trait.level + ": Attack speed is increased by 20%. Has " + trait.level * 25 + "% increased evasion.";
             case Statics.TRAIT_DEADLY:
-                return "Deadly " + trait.level + ": Crit chance is doubled and has " + trait.level * 30 + "% more crit power.";
+                return "Deadly " + trait.level + ": Crit Chance is doubled and has " + trait.level * 30 + "% more Aim.";
             case Statics.TRAIT_SHIELDED:
                 return "Shielded " + trait.level + ": Every second gains " + trait.level * 20 + "% of their armor as a shield that " +
-                    "absorbs incoming damage. Crit Resistance is increased 1000% while shielded.";
+                    "absorbs incoming damage. Toughness is increased 1000% while shielded.";
             case Statics.TRAIT_BESERK:
                 return "Beserk " + trait.level + ": Hit chance is increased by " + trait.level * 20 + "%, health regen by " +
                     trait.level * 10 + "% and has a " + Math.floor(((1 - Math.pow(0.92, trait.level)) * 100)) +
@@ -502,12 +542,15 @@ export class TooltipRegistry {
                 return "Invader: These monsters are infused with a dark power, increasing their stats by " + Common.numberString(inc) +
                     "% and giving " + Common.numberString(reward) + "% more shade, and motes.";
             case Statics.TRAIT_CORROSIVE:
-                return "Corrosive " + trait.level + ": Reduces your armor by " + trait.level + "% of its min damage.";
+                return "Corrosive " + trait.level + ": Reduces your armor by " + trait.level + "% of its Min Damage.";
             case Statics.TRAIT_REGENERATING:
                 return "Regenerating " + trait.level + ": Has " + (trait.level * 30) + "% more health regen.";
             case Statics.TRAIT_THORNS:
                 return "Thorns " + trait.level + ": Has " + (trait.level * 10) + "% more armor. When attacked, it deals 20% " +
-                    "of its armor in magic damage.";
+                    "of its armor in Magic Damage.";
+            case Statics.TRAIT_MAGICAL:
+                return "Magical " + trait.level + ": Every 3rd hit deals an additional " + (trait.level * 20) + "% of its Max Damage as " +
+                    "Magic Damage.";
         }
         return trait.type + ": Missing Tooltip. Better report this to the dev.";
     }
@@ -538,6 +581,8 @@ export class TooltipRegistry {
                 return { sprite: "icons2", tile: 3 };
             case Statics.TRAIT_INVADER:
                 return { sprite: "icons", tile: 39 };
+            case Statics.TRAIT_MAGICAL:
+                return { sprite: "icons", tile: 63 };
         }
         return { sprite: "icons", tile: 0 };
     }
@@ -641,6 +686,12 @@ export class TooltipRegistry {
                 return sign + value + " Guardian Talent";
             case "agilityScaling":
                 return sign + Math.round(value * 200) + " Agility Explore Scaling";
+            case "charismaTalent":
+                return sign + value + " Charisma Talent";
+            case "chromaTalent":
+                return sign + value + " Chromatic Codex Talent";
+            case "defToShield":
+                return sign + Math.round(value * 100) + "% " + TooltipRegistry.defenseName + " to Shield";
         }
         return "";
     }
@@ -762,6 +813,10 @@ export class TooltipRegistry {
                 return "Body oil that makes the villagers muscles glisten, permanently increasing Villager Power by " + Math.floor(reward.amount * 100) / 100 + ".";
             case Statics.DUNGEON.PERM_VHEALTH:
                 return "A pot of dubious looking stew, permanently increasing Villager Health by " + Math.floor(reward.amount * 100) / 100 + ".";
+            case Statics.DUNGEON.STARSHARDS:
+                return "A dead star which you can brutally harvest for " + reward.amount + " star shards.";
+            case Statics.DUNGEON.RITUAL_POINTS:
+                return "You found a cult leader. You can take his lunch money to get " + reward.amount + " ritual points.";
         }
     }
 
@@ -794,7 +849,7 @@ export class TooltipRegistry {
             case Statics.DUNGEON.PRODUCTION:
                 return { sprite: "icons", tile: 50 };
             case Statics.DUNGEON.ECONOMY:
-                return { sprite: "bldicons", tile: 32 };
+                return { sprite: "bldicons", tile: 8 };
             case Statics.DUNGEON.STRENGTH:
                 return { sprite: "icons", tile: 8 };
             case Statics.DUNGEON.DEXTERITY:
@@ -817,6 +872,10 @@ export class TooltipRegistry {
                 return { sprite: "icons", tile: 24 };
             case Statics.DUNGEON.PERM_VHEALTH:
                 return { sprite: "icons", tile: 26 };
+            case Statics.DUNGEON.STARSHARDS:
+                return { sprite: "icons2", tile: 4 };
+            case Statics.DUNGEON.RITUAL_POINTS:
+                return { sprite: "icons2", tile: 6 };
         }
         return { sprite: "icons", tile: 0 };
     }
@@ -844,7 +903,7 @@ export class TooltipRegistry {
             case "Ingram's Bell: Bounty":
                 return "Monsters drop " + (perk.level * 50) + "% + (50%) more resources.";
             case "Myrah's Spear: Forge":
-                return "Reduces gear costs by " + Math.floor((1 - Math.pow(0.95, perk.level)) * 100) + "% + (~5%). This ignores the gear cost softcap.";
+                return "Reduces gear costs by " + Math.floor((1 - Math.pow(0.95, perk.level)) * 100) + "% - (~5%). This ignores the gear cost softcap.";
             case "Myrah's Spear: Stellar Enchantments":
                 return "Gear gives " + (perk.level * 10) + "% + (10%) more stats.";
             case "Myrah's Spear: Proficiency":
@@ -874,13 +933,100 @@ export class TooltipRegistry {
             case "Betrayer Star: Forbidden Knowledge":
                 return "Talents give " + (perk.level * 2) + " + (2) more moonlight, before multipliers.";
             case "Betrayer Star: Mysticism":
-                return "Cost multiplier for sacrificing resources becomes x" + (10 - perk.level / 2) + " - (0.5).";
+                return "Cost multiplier for sacrificing resources becomes x" + (13 - perk.level / 2) + " - (0.5).";
+        }
+    }
+
+    static getRitualTooltip(ritual) {
+        var statGrowth = (ritual.level * (12 + 12 + (ritual.level - 1) * 4)) / 2;
+        var ml = ritual.level === 0 ? 0 :
+            (ritual.moonlight < 0 ? Math.pow(1 + ritual.moonlight, ritual.level) * 100 : ritual.moonlight * ritual.level * 100);
+        ml = Common.numberString(Math.floor(ml));
+        var ss = ritual.level === 0 ? 0 :
+            (ritual.starshards < 0 ? Math.pow(1 + ritual.starshards, ritual.level) * 100 : ritual.starshards * ritual.level * 100);
+        ss = Common.numberString(Math.floor(ss));
+        switch (ritual.name) {
+            case "Empower Strength":
+                return "Permanently increases your Strength by " + statGrowth + " + (" + (12 + ritual.level * 4) + ").";
+            case "Empower Dexterity":
+                return "Permanently increases your Dexterity by " + statGrowth + " + (" + (12 + ritual.level * 4) + ").";
+            case "Empower Agility":
+                return "Permanently increases your Agility by " + statGrowth + " + (" + (12 + ritual.level * 4) + ").";
+            case "Empower Endurance":
+                return "Permanently increases your Endurance by " + statGrowth + " + (" + (12 + ritual.level * 4) + ").";
+            case "Empower Recovery":
+                return "Permanently increases your Recovery by " + statGrowth + " + (" + (12 + ritual.level * 4) + ").";
+            case "Empower Defense":
+                return "Permanently increases your Defense by " + statGrowth + " + (" + (12 + ritual.level * 4) + ").";
+            case "Empower Accuracy":
+                return "Permanently increases your Accuracy by " + statGrowth + " + (" + (12 + ritual.level * 4) + ").";
+            case "Cult Infiltrators":
+                return "Permanently increases Villager Power by " + (statGrowth / 2) + " + (" + (6 + ritual.level * 2) + ").";
+            case "Cult Warders":
+                return "Permanently increases Villager Health by " + (statGrowth * 5) + " + (" + (60 + ritual.level * 20) + ").";
+            case "Corrupted Strength":
+                return "Increases your Strength, Dexterity, and Agility by " + (ritual.level * 5) + "% + (5%), but reduces " +
+                    "Moonlight by " + ml + "% - (~" + (-ritual.moonlight * 100) + "%) and " +
+                    "Star Shard Chance by " + ss + "% - (~" + (-ritual.starshards * 100) + "%).";
+            case "Corrupted Endurance":
+                return "Increases your Endurance, Recovery, and Defense by " + (ritual.level * 5) + "% + (5%), but reduces " +
+                    "Moonlight by " + ml + "% - (~" + (-ritual.moonlight * 100) + "%) and " +
+                    "Star Shard Chance by " + ss + "% - (~" + (-ritual.starshards * 100) + "%).";
+            case "Corrupted Accuracy":
+                return "Increases your Crit Chance by " + (ritual.level * 10) + "% + (10%) and " +
+                    "Accuracy by " + (ritual.level * 15) + "% + (15%), but reduces " +
+                    "Moonlight by " + ml + "% - (~" + (-ritual.moonlight * 100) + "%) and " +
+                    "Star Shard Chance by " + ss + "% - (~" + (-ritual.starshards * 100) + "%).";
+            case "Wild Growth":
+                return "Increases tile yields by " + (ritual.level * 10) + "% + (10%), but reduces " +
+                    "Moonlight by " + ml + "% - (~" + (-ritual.moonlight * 100) + "%) and " +
+                    "Star Shard Chance by " + ss + "% - (~" + (-ritual.starshards * 100) + "%).";
+            case "Hatchlings":
+                return "Town population grows " + (ritual.level * 15) + "% + (15%) faster and " +
+                    "Max Population is increased by " + (ritual.level * 5) + "% + (5%), but reduces " +
+                    "Moonlight by " + ml + "% - (~" + (-ritual.moonlight * 100) + "%) and " +
+                    "Star Shard Chance by " + ss + "% - (~" + (-ritual.starshards * 100) + "%).";
+            case "Vile Offering":
+                return "Increases Resource and Mote of Darkness drops by " + (ritual.level * 15) + "% + (15%), but reduces " +
+                    "Moonlight by " + ml + "% - (~" + (-ritual.moonlight * 100) + "%).";
+            case "Cult Towns":
+                return "Increases Villager Power and Health by " + (ritual.level * 20) + "% + (20%), but reduces " +
+                    "Moonlight by " + ml + "% - (~" + (-ritual.moonlight * 100) + "%).";
+            case "Ruinous Powers":
+                return "Enemy stats are increased by " + (ritual.level * 25) + "% + (25%). Increases " +
+                    "Moonlight by " + ml + "% + (" + (ritual.moonlight * 100) + "%).";
+            case "Betrayer's Gift":
+                return "All enemy trait levels are increased by " + (ritual.level) + " + (1). Increases " +
+                    "Star Shard Chance by " + ss + "% + (" + (ritual.starshards * 100) + "%).";
+            case "Call of The Void":
+                return "Base time between Invasions is reduced by " + (ritual.level * 2) + "s + (2s), " +
+                    "Invaders are " + (ritual.level) + " + (1) level higher. Increases " +
+                    "Moonlight by " + ml + "% + (" + (ritual.moonlight * 100) + "%) and " +
+                    "Star Shard Chance by " + ss + "% + (" + (ritual.starshards * 100) + "%).";
+            case "Desolation":
+                return "Tile Yields and Explore Speed are divided by " + (1 + ritual.level * 0.5) + " + (0.5). Increases " +
+                    "Moonlight by " + ml + "% + (" + (ritual.moonlight * 100) + "%) and " +
+                    "Star Shard Chance by " + ss + "% + (" + (ritual.starshards * 100) + "%).";
+            case "Apathy":
+                return "Town Growth, Taxes, Villager Power, and Villager Health are divided by " + (1 + ritual.level * 0.5) + " + (0.5). Increases " +
+                    "Moonlight by " + ml + "% + (" + (ritual.moonlight * 100) + "%).";
+            case "Vengeance":
+                return "Regions span " + (ritual.level) + " + (1) more level. Increases " +
+                    "Star Shard Chance by " + ss + "% + (" + (ritual.starshards * 100) + "%).";
+            case "Ritual of the Star Queen":
+                return "Give an offering of moonlight to the Star Queen. Reduces " +
+                    "Moonlight by " + ml + "% - (~" + (-ritual.moonlight * 100) + "%) and increases " +
+                    "Star Shard Chance by " + ss + "% + (" + (ritual.starshards * 100) + "%).";
+            case "Ritual of the Betrayer Star":
+                return "Give an offering of star shards to the Betrayer Star. Increases " +
+                    "Moonlight by " + ml + "% + (" + (-ritual.moonlight * 100) + "%) and reduces " +
+                    "Star Shard Chance by " + ss + "% - (~" + (ritual.starshards * 100) + "%).";
         }
     }
 }
 
 // static fuckery
 
-TooltipRegistry.critPowerName = "Crit Power";
+TooltipRegistry.critPowerName = "Aim";
 TooltipRegistry.defenseName = "Defense";
 TooltipRegistry.accuracyName = "Accuracy";

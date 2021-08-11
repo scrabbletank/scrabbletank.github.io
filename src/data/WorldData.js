@@ -7,6 +7,7 @@ import { MoonlightData } from "./MoonlightData";
 import { ProgressionStore } from "./ProgressionStore";
 import { Statics } from "./Statics";
 import { StarData } from "./StarData";
+import { RitualData } from "./RitualData";
 
 export class WorldData {
     constructor() {
@@ -110,7 +111,7 @@ export class WorldData {
                 var inc = Common.randint(0, traits.length);
                 traits[inc].level += 1;
             } else {
-                var traitType = Common.randint(1, 11);
+                var traitType = Common.randint(1, 12);
                 var temp = traits.find(t => t.type === traitType);
                 if (temp !== undefined) {
                     temp.level += 1;
@@ -120,6 +121,9 @@ export class WorldData {
             }
         }
         traits = traits.sort((a, b) => { return b.level - a.level });
+        for (var i = 0; i < traits.length; i++) {
+            traits[i].level += RitualData.getInstance().activePerks.betrayersgift;
+        }
         return traits;
     }
 
@@ -156,6 +160,9 @@ export class WorldData {
     }
 
     addRegion(index) {
+        if (this.nextRegions.length === 0) {
+            return;
+        }
         var regSize = DynamicSettings.getInstance().regionSize;
         this.regionList.push(new Region(regSize[0], regSize[1], this.regionList.length, this.nextRegions[index].type, this.nextRegions[index].traits));
         this.regionList[this.regionList.length - 1].worldHeight = Math.floor((index + 1) * (700 / (this.nextRegions.length + 1)));
@@ -181,6 +188,9 @@ export class WorldData {
         if (this.getCurrentRegion().regionLevel >= 6) {
             MoonlightData.getInstance().challenges.outcast.unlocked = true;
         }
+        if (this.getCurrentRegion().regionLevel >= 9) {
+            MoonlightData.getInstance().challenges.time2.unlocked = true;
+        }
 
         //handle challenge completion here
         if (DynamicSettings.getInstance().maxRunTime === -1 || this.time.time - this.timeAtRunStart < DynamicSettings.getInstance().maxRunTime) {
@@ -195,6 +205,7 @@ export class WorldData {
                             MoonlightData.getInstance().challengePoints += 2;
                             break;
                         case "Forged Ahead":
+                            ProgressionStore.getInstance().persistentUnlocks.autoGear = true;
                             MoonlightData.getInstance().challengePoints += 2;
                             break;
                         case "Giant Lands":
@@ -204,6 +215,7 @@ export class WorldData {
                             MoonlightData.getInstance().challengePoints += 3;
                             break;
                         case "Lazy Townsfolk":
+                            ProgressionStore.getInstance().persistentUnlocks.autoTown = true;
                             MoonlightData.getInstance().challengePoints += 4;
                             break;
                         case "Talentless":
@@ -214,6 +226,18 @@ export class WorldData {
                             break;
                         case "Outcast":
                             MoonlightData.getInstance().challengePoints += 5;
+                            break;
+                        case "A Matter of Decades":
+                            MoonlightData.getInstance().challengePoints += 7;
+                            MoonlightData.getInstance().challenges.forge2.unlocked = true;
+                            MoonlightData.getInstance().challenges.capitalism.unlocked = true;
+                            ProgressionStore.getInstance().persistentUnlocks.autoExplore2 = true;
+                            break;
+                        case "Forged Ahead 2: Reforged":
+                            MoonlightData.getInstance().challengePoints += 8;
+                            break;
+                        case "Capitalism":
+                            MoonlightData.getInstance().challengePoints += 10;
                             break;
                     }
                     challenge.completions += 1;
