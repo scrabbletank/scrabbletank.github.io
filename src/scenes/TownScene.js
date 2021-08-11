@@ -116,14 +116,12 @@ export class TownScene extends SceneUIBase {
 
     refresh() {
         this._updateStatus();
-        this.updateResearchButton();
     }
 
     rebirth() {
         this.selectedTab = 0;
         this._updateStatus();
         this._refreshTechs();
-        this.upgradesBtn.setVisible(false);
         this.dungeonsBtn.setVisible(false);
     }
 
@@ -131,11 +129,6 @@ export class TownScene extends SceneUIBase {
         this.selectedTab = 0;
         this._updateStatus();
         this._refreshTechs();
-        this.updateResearchButton();
-    }
-
-    updateResearchButton() {
-        this.upgradesBtn.setVisible(WorldData.instance.getCurrentRegion().townData.researchEnabled);
     }
 
     create() {
@@ -158,7 +151,6 @@ export class TownScene extends SceneUIBase {
             .onClickHandler(() => { this._selectTab(0); });
         this.upgradesBtn = new TextButton(this, this.relativeX(370), this.relativeY(10), 120, 20, "Research")
             .onClickHandler(() => { this._selectTab(1); });
-        this.upgradesBtn.setVisible(WorldData.getInstance().getCurrentRegion().townData.researchEnabled);
         this.dungeonsBtn = new TextButton(this, this.relativeX(500), this.relativeY(10), 120, 20, "Dungeons")
             .onClickHandler(() => { this._selectTab(2); });
         this.dungeonsBtn.setVisible(WorldData.getInstance().getCurrentRegion().townData.dungeons.length > 0);

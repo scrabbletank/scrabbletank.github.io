@@ -230,6 +230,7 @@ export class Region {
         this.towers = [];
         this.alchemyDrain = 0;
         this.alchemyGain = 0;
+        this.exchangePower = 0;
         this.villagerStatGain = [0, 0];
         this.dungeonLocations = [];
         this.autoUpgrade = false;
@@ -953,6 +954,7 @@ export class Region {
         this.resourcesPerDay = [0, 0, 0, 0, 0, 0];
         this.alchemyDrain = 0;
         this.alchemyGain = 0;
+        this.exchangePower = 0;
         this.villagerStatGain = [0, 0];
         for (var i = 0; i < this.height; i++) {
             for (var t = 0; t < this.width; t++) {
@@ -1015,6 +1017,7 @@ export class Region {
 
         //get market bonuses
         var points = []
+        var exchange = [5, 10, 25, 50, 100];
         for (var i = 0; i < this.markets.length; i++) {
             points.push({ x: this.markets[i][1], y: this.markets[i][0] });
         }
@@ -1024,6 +1027,7 @@ export class Region {
                 var tier = this.map[this.markets[i][0]][this.markets[i][1]].building.tier;
                 var closest = Common.nearestPointInList(this.markets[i][1], this.markets[i][0], points, true);
                 econBonus += Math.max(0, Math.min(max, (closest[1] / Statics.TRADE_HOUSE_MAX_DISTANCE) * max)) * tier / 100;
+                this.exchangePower += exchange[tier];
             }
         }
         //get tavern bonuses
@@ -1089,8 +1093,7 @@ export class Region {
         var gain = [0.05, 0.3, 0.9, 3, 8];
         for (var i = 0; i < this.productionBuildings.length; i++) {
             var tile = this.map[this.productionBuildings[i][0]][this.productionBuildings[i][1]];
-            var prodBonus = 1 + (tile.defense * MoonlightData.getInstance().moonperks.moonlightworkers.level * 0.01);
-            prodBonus = prodBonus * (1 + MoonlightData.getInstance().challenges.buildings.completions * 0.1) *
+            var prodBonus = 1 + (tile.defense * MoonlightData.getInstance().moonperks.moonlightworkers.level * 0.01) *
                 this._getBuildingEfficiency(tile.x, tile.y) * tile.roadBonus;
             switch (tile.building.name) {
                 case "Lumberyard":
@@ -1366,10 +1369,8 @@ export class Region {
 
     _getResourcesPerDay() {
         var resource = [];
-        var prodBonus = this.townData.getProductionMulti() *
-            (1 + PlayerData.getInstance().getTalentLevel("governance") * 0.04);
         for (var i = 0; i < this.resourcesPerDay.length; i++) {
-            resource.push(Math.max(0, this.resourcesPerDay[i] * prodBonus));
+            resource.push(Math.max(0, this.resourcesPerDay[i] * this.townData.getProductionMulti()));
         }
         resource[0] *= PlayerData.getInstance().dungeonBonus.wood;
         resource[1] *= PlayerData.getInstance().dungeonBonus.leather;
@@ -1410,6 +1411,25 @@ export class Region {
                 resource[i] = (resource[i] / this.alchemyDrain) * this.alchemyGain * moonlightBonus;
             }
             player.addResource(resource, Math.min(this.resourceTier + 1, 7));
+        }
+        // markets exchange resources, subtracting resources proportional to their amount and adding
+        // resources evenly distributed
+        if (this.exchangePower > 0) {
+            var pow = this.exchangePower * this.townData.getProductionMulti();
+            var exchange = [0, 0, 0, 0, 0, 0];
+            var exchangeTotal = 0;
+            var resources = player.resources[this.resourceTier];
+            var resSum = resources.reduce((a, b) => { return a + b });
+            // subtract resources based on the normalization values
+            for (var i = 0; i < resources.length; i++) {
+                exchange[i] = -Math.min(pow * resources[i] / resSum, resources[i]);
+                exchangeTotal += -exchange[i];
+            }
+            // add resources based on the inverse norm (1 - norm)
+            for (var i = 0; i < resources.length; i++) {
+                exchange[i] += exchangeTotal / 6;
+            }
+            player.addResource(exchange, this.resourceTier);
         }
 
         if (this.tilesExplored >= 11 && this.regionLevel === WorldData.getInstance().invasionRegion) {

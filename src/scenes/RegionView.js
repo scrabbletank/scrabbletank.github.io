@@ -588,11 +588,24 @@ export class RegionView {
             .onClickHandler(() => { this._setTimeScale(0); });
         this.speed1xButton = new TextButton(this.scene, this.x + 795, h, 30, 20, "1x")
             .onClickHandler(() => { this._setTimeScale(1); });
-        this.speed1xButton.setTextColor(Phaser.Display.Color.GetColor(255, 255, 0));
         this.speed2xButton = new TextButton(this.scene, this.x + 830, h, 30, 20, "2x")
             .onClickHandler(() => { this._setTimeScale(2); });
         this.speed5xButton = new TextButton(this.scene, this.x + 865, h, 30, 20, "5x")
             .onClickHandler(() => { this._setTimeScale(5); });
+        switch (WorldData.getInstance().time.timescale) {
+            case 0:
+                this.speed0xButton.setTextColor(Phaser.Display.Color.GetColor(255, 255, 0));
+                break;
+            case 1:
+                this.speed1xButton.setTextColor(Phaser.Display.Color.GetColor(255, 255, 0));
+                break;
+            case 2:
+                this.speed2xButton.setTextColor(Phaser.Display.Color.GetColor(255, 255, 0));
+                break;
+            case 5:
+                this.speed5xButton.setTextColor(Phaser.Display.Color.GetColor(255, 255, 0));
+                break;
+        }
         h += 30;
 
         this.autoExploreLabel = this.scene.add.bitmapText(this.x + 660, h, "courier20", "Auto Explore:");

@@ -175,7 +175,8 @@ export class TownData {
             (1 + this.friendshipLevel * 0.01 * MoonlightData.getInstance().moonperks.motivatedlabor.level) *
             nightLabourBonus * DynamicSettings.getInstance().productionMulti * this.dungeonProdMulti *
             (1 + PlayerData.getInstance().getTalentLevel("governance") * 0.04) *
-            (1 + StarData.getInstance().perks.tools.level * 0.25) * this.paidProdMulti;
+            (1 + StarData.getInstance().perks.tools.level * 0.25) * this.paidProdMulti *
+            (1 + MoonlightData.getInstance().challenges.buildings.completions * 0.1);
         if (DynamicSettings.getInstance().friendshipToProduction === true) {
             return multi + this.friendshipLevel * 0.05;
         } else {
