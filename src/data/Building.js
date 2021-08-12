@@ -105,7 +105,7 @@ export class Building {
                 for (var i = 0; i < region.markets.length; i++) {
                     points.push({ x: region.markets[i][1], y: region.markets[i][0] });
                 }
-                var amount = Common.numberString(Math.floor(exchange[tier] * tile.parent.townData.getProductionMulti()));
+                var amount = Common.numberString(Math.floor(exchange[tier - 1] * tile.parent.townData.getProductionMulti()));
                 var closest = Common.nearestPointInList(tile.x, tile.y, points, true);
                 var max = 5 + MoonlightData.getInstance().moonperks.nightmarket.level;
                 var bonus = Math.max(0, Math.min(max, (closest[1] / Statics.TRADE_HOUSE_MAX_DISTANCE) * max)) * tier / 100;
