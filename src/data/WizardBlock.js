@@ -2,6 +2,7 @@ import { Statics } from "./Statics";
 import { MoonlightData } from "./MoonlightData";
 import { Common } from "../utils/Common";
 import { AdventurerBlock } from "./AdventurerBlock";
+import { RitualData } from "./RitualData";
 
 export class WizardBlock extends AdventurerBlock {
     constructor(player) {
