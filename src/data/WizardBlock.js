@@ -157,6 +157,7 @@ export class WizardBlock extends AdventurerBlock {
         ret += this.player.getTalentLevel("crit") * 0.03;
         ret += this.player.runeBonuses.critChance;
         ret += RitualData.getInstance().activePerks.playercrits * 0.1;
+        return ret;
     }
     CritDamageMulti() {
         return 1;
