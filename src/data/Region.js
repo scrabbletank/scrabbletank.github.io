@@ -1420,16 +1420,18 @@ export class Region {
             var exchangeTotal = 0;
             var resources = player.resources[this.resourceTier];
             var resSum = resources.reduce((a, b) => { return a + b });
-            // subtract resources based on the normalization values
-            for (var i = 0; i < resources.length; i++) {
-                exchange[i] = -Math.min(pow * resources[i] / resSum, resources[i]);
-                exchangeTotal += -exchange[i];
+            if (resSum > 0) {
+                // subtract resources based on the normalization values
+                for (var i = 0; i < resources.length; i++) {
+                    exchange[i] = -Math.min(pow * resources[i] / resSum, resources[i]);
+                    exchangeTotal += -exchange[i];
+                }
+                // add resources based on the inverse norm (1 - norm)
+                for (var i = 0; i < resources.length; i++) {
+                    exchange[i] += exchangeTotal / 6;
+                }
+                player.addResource(exchange, this.resourceTier);
             }
-            // add resources based on the inverse norm (1 - norm)
-            for (var i = 0; i < resources.length; i++) {
-                exchange[i] += exchangeTotal / 6;
-            }
-            player.addResource(exchange, this.resourceTier);
         }
 
         if (this.tilesExplored >= 11 && this.regionLevel === WorldData.getInstance().invasionRegion) {
