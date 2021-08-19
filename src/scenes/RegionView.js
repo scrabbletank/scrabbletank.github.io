@@ -702,6 +702,8 @@ export class RegionView {
         this.speed1xButton.setTextColor(Phaser.Display.Color.GetColor(255, 255, 255));
         this.speed2xButton.setTextColor(Phaser.Display.Color.GetColor(255, 255, 255));
         this.speed5xButton.setTextColor(Phaser.Display.Color.GetColor(255, 255, 255));
+        this.speed10xButton.setTextColor(Phaser.Display.Color.GetColor(255, 255, 255));
+        this.speed25xButton.setTextColor(Phaser.Display.Color.GetColor(255, 255, 255));
         switch (value) {
             case 0:
                 this.speed0xButton.setTextColor(Phaser.Display.Color.GetColor(255, 255, 0));
