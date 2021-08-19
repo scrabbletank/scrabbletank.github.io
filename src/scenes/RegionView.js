@@ -692,8 +692,9 @@ export class RegionView {
         this.regionStats.setVisible(this.region.townData.townExplored === true);
 
         this.detailsContainer.push(this.invasionLabel, this.offlineLabel, this.speed0xButton, this.speed1xButton, this.speed2xButton,
-            this.speed5xButton, this.autoExploreLabel, this.autoExploreButton, this.autoInvadeLabel, this.autoInvadeButton,
-            this.autoUpgradeLabel, this.autoUpgradeButton, this.exploreLabel, this.exploreProgressBar, this.regionStats);
+            this.speed5xButton, this.speed10xButton, this.speed25xButton, this.autoExploreLabel, this.autoExploreButton,
+            this.autoInvadeLabel, this.autoInvadeButton, this.autoUpgradeLabel, this.autoUpgradeButton, this.exploreLabel,
+            this.exploreProgressBar, this.regionStats);
     }
 
     _setTimeScale(value, fskip = 1) {
