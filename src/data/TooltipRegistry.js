@@ -69,8 +69,8 @@ export class TooltipRegistry {
                 return "All the Hit in the world can't touch you some of the time. You automatically dodge every " +
                     Math.max(3, 13 - lvl) + " - (1) Attacks against you.";
             case "Magic Resistance":
-                return "Your so strong you have a natural resistance to magic damage! Reduces magic damage taken by " +
-                    Math.round(Math.pow(0.96, lvl) * 100) + "% - (~4%).";
+                return "Your so strong you have a natural resistance to magic damage! Magic damage is reduced by " +
+                    (100 - Math.round(Math.pow(0.96, lvl) * 100)) + "% + (~4%).";
             case "Second Wind":
                 return "All the best heroes are able to get right back to it after a beat down. When you drop below 50% health your " +
                     "Health Regen is tripled for 10 seconds. Has a " + (80 - lvl * 10) + " - (10) second cooldown.";
