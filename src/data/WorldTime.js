@@ -10,6 +10,7 @@ export class WorldTime {
         this.onDayEndHandlers = [];
         this.onWeekEndHandlers = [];
         this.pauseTimestamp = -1;
+        this.fskip = 1;
     }
 
     getYears() { return Math.floor(this.time / Statics.TIME_PER_YEAR); }
@@ -42,7 +43,7 @@ export class WorldTime {
         }
     }
 
-    setTimeScale(scale) {
+    setTimeScale(scale, fskip = 1) {
         if (scale === 0 && this.timescale !== 0) {
             this.timescale = scale;
             this.pauseTimestamp = Date.now();
@@ -58,6 +59,7 @@ export class WorldTime {
             return;
         }
         this.timescale = scale;
+        this.fskip = fskip;
     }
 
     setFrameDelta(delta) {
@@ -66,7 +68,7 @@ export class WorldTime {
     }
 
     addOfflineTime(timeOffline) {
-        this.offlineTime = Math.min(86400000, this.offlineTime + timeOffline);
+        this.offlineTime = Math.min(Statics.MAX_OFFLINE_TIME, this.offlineTime + timeOffline);
     }
 
     update(delta) {
@@ -84,6 +86,7 @@ export class WorldTime {
             if (this.offlineTime <= 0) {
                 this.timescale = 1;
                 this.offlineTime = 0;
+                this.fskip = 1;
             }
         }
     }

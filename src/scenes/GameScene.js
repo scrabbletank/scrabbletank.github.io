@@ -786,13 +786,16 @@ export class GameScene extends SceneUIBase {
         this.worldData.time.setFrameDelta(Math.min(500, lastFrameTime));
         this.lastFrame = time;
         var fDelta = this.worldData.time.frameDelta;
-        this.worldData.update(fDelta);
-        this.player.statBlock.tickRegen(fDelta, this.combatScene.isInCombat());
-        if (this.showTimeThisRun === true) {
-            var runTime = WorldData.getInstance().time.time - WorldData.getInstance().timeAtRunStart;
-            this.worldTimeLabel.setText("Current Run: " + new WorldTime(runTime).getTimespanText());
-        } else {
-            this.worldTimeLabel.setText(this.worldData.time.getText());
+        
+        for (var i = 0; i < this.worldData.time.fskip; i++) {
+            this.worldData.update(fDelta);
+            this.player.statBlock.tickRegen(fDelta, this.combatScene.isInCombat());
+            if (this.showTimeThisRun === true) {
+                var runTime = WorldData.getInstance().time.time - WorldData.getInstance().timeAtRunStart;
+                this.worldTimeLabel.setText("Current Run: " + new WorldTime(runTime).getTimespanText());
+            } else {
+                this.worldTimeLabel.setText(this.worldData.time.getText());
+            }
         }
 
         if (this.progression.unlocks.gearTab !== true) {
@@ -803,7 +806,7 @@ export class GameScene extends SceneUIBase {
         }
 
         for (var i = 0; i < this.resourceIncLabels.length; i++) {
-            this.resourceIncLabels[i].update(fDelta);
+            this.resourceIncLabels[i].update(this.worldData.time.delta);
         }
 
         // regardless of time dialation we still only want to save every minute

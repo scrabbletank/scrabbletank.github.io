@@ -70,7 +70,7 @@ export class TooltipRegistry {
                     Math.max(3, 13 - lvl) + " - (1) Attacks against you.";
             case "Magic Resistance":
                 return "Your so strong you have a natural resistance to magic damage! Reduces magic damage taken by " +
-                    (lvl * 5) + "% - (5%).";
+                    Math.round(Math.pow(0.96, lvl) * 100) + "% - (~4%).";
             case "Second Wind":
                 return "All the best heroes are able to get right back to it after a beat down. When you drop below 50% health your " +
                     "Health Regen is tripled for 10 seconds. Has a " + (80 - lvl * 10) + " - (10) second cooldown.";
@@ -78,7 +78,7 @@ export class TooltipRegistry {
                 return "Why block when you can parry? gives a " + (lvl * 5) + "% + (5%) chance to parry an attack, reducing damage by " +
                     "half. Thats still something, right?";
             case "Serration":
-                return "Crit even harder by just ignoring the enemies toughness! Ignores " + Math.min(75, (lvl * 5)) + "% + (5%) of the monsters toughness when " +
+                return "Crit even harder by just ignoring the enemies toughness! Ignores " + (100 - Math.round(Math.pow(0.96, lvl) * 100)) + "% + (~4%) of the monsters toughness when " +
                     "calculating Crit Damage.";
             case "Guardian":
                 return "Invasions are too strong! If you spend some time patrolling you can probably divide Invasion Power by " +
@@ -517,7 +517,7 @@ export class TooltipRegistry {
                 return "Dire " + trait.level + ": Core stats are increased by " + trait.level * 20 + "%, drops motes, and gives " +
                     trait.level * 75 + "% more experience.";
             case Statics.TRAIT_POISONED:
-                return "Poisoned " + trait.level + ": Deals " + trait.level * 2 + "% of its max damage per second as magic damage. Damage " +
+                return "Poisoned " + trait.level + ": Deals " + (4 + trait.level) + "% of its max damage per second as magic damage. Damage " +
                     "doubles when below half health.";
             case Statics.TRAIT_MONSTROUS:
                 return "Monstrous " + trait.level + ": Attack speed is reduced by 15%. Has " + trait.level * 25 + "% increased health and " +

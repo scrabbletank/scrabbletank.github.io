@@ -292,20 +292,20 @@ export class CombatScene extends SceneUIBase {
     isInCombat() { return this.combatManager.isInCombat(); }
 
     update(__time, __delta) {
-        //ANIMATIONS
-        var fDelta = WorldData.instance.time.frameDelta;
-        this._updateAnimations(fDelta);
-
-        this.combatManager.update(fDelta);
-
-        if (this.restartAfterRegen === true && this.combatManager.combatActive === false &&
-            this.player.statBlock.currentHealth >= this.player.statBlock.MaxHealth() &&
-            DynamicSettings.getInstance().autoExplore === true) {
-            this.combatManager.initFight(true);
-            this.restartAfterRegen = false;
-        }
-        if (this.combatManager.combatActive === true) {
-            this.restartAfterRegen = false;
+        var fDelta = WorldData.getInstance().time.frameDelta;
+        for (var i = 0; i < WorldData.getInstance().time.fskip; i++) {
+            this._updateAnimations(fDelta);
+            this.combatManager.update(fDelta);
+    
+            if (this.restartAfterRegen === true && this.combatManager.combatActive === false &&
+                this.player.statBlock.currentHealth >= this.player.statBlock.MaxHealth() &&
+                DynamicSettings.getInstance().autoExplore === true) {
+                this.combatManager.initFight(true);
+                this.restartAfterRegen = false;
+            }
+            if (this.combatManager.combatActive === true) {
+                this.restartAfterRegen = false;
+            }
         }
     }
 }

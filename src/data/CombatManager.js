@@ -160,6 +160,7 @@ export class CombatManager {
         if (this.combatCallback !== undefined) {
             this.combatCallback(this.activeTile.isInvaded);
         }
+        this.poisonTimer = 0;
     }
 
     isInCombat() { return this.combatActive === true && this.fightCooldown <= 0; }
@@ -280,8 +281,9 @@ export class CombatManager {
             if (this.poisonTimer <= 0 && this.monsters[0].findTrait(Statics.TRAIT_POISONED) !== undefined) {
                 var poison = this.monsters[0].findTrait(Statics.TRAIT_POISONED);
                 for (var i = 0; i < this.monsters.length; i++) {
-                    var poisonDmg = player.statBlock.currentHealth / player.statBlock.MaxHealth() > 0.5 ? 0.02 : 0.04;
-                    player.statBlock.takeDamage(this.monsters[i].DamageMax() * poisonDmg * poison.level * 0.5,
+                    var poisonDmg = player.statBlock.currentHealth / player.statBlock.MaxHealth() > 0.5 ?
+                        0.04 + poison.level * 0.01 : 0.08 + poison.level * 0.02;
+                    player.statBlock.takeDamage(this.monsters[i].DamageMax() * poisonDmg,
                         Statics.HIT_NORMAL, Statics.DMG_MAGIC);
                 }
                 this.poisonTimer += Statics.POISON_TICK_DELAY;

@@ -393,6 +393,8 @@ export class TownScene extends SceneUIBase {
 
 
     update(__time, __delta) {
-        this.dungeonManager.update(WorldData.getInstance().time.frameDelta);
+        for (var i = 0; i < WorldData.getInstance().time.fskip; i++) {
+            this.dungeonManager.update(WorldData.getInstance().time.frameDelta);
+        }
     }
 }

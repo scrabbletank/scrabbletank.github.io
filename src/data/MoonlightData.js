@@ -264,7 +264,7 @@ export class MoonlightData {
             return;
         }
         var cost = Math.floor((perk.cost[0] + perk.cost[1] * (perk.level)) * Math.pow(perk.cost[2], perk.level));
-        if (this.moonlight < cost || this._haveMoonlightRequirements(perk) === false) {
+        if (this.moonlight <= cost || this._haveMoonlightRequirements(perk) === false) {
             return;
         }
         this.moonlight -= cost;

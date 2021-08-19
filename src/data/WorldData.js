@@ -250,6 +250,7 @@ export class WorldData {
             }
         }
         DynamicSettings.getInstance().reset();
+        DynamicSettings.getInstance().saveEnabled = false;
     }
 
 

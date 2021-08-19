@@ -306,7 +306,7 @@ export class AdventurerBlock extends CreatureBlock {
             dmg = Math.max(2, dmg - this.Endurance() * 0.05 * this.player.getTalentLevel("resilient"));
         }
         if (dmgType === Statics.DMG_MAGIC) {
-            dmg = dmg * (1 - Math.min(0.75, this.player.getTalentLevel("magicresist") * 0.05));
+            dmg = dmg * Math.pow(0.96, this.player.getTalentLevel("magicresist"));
         }
         if (Math.random() < this.player.getTalentLevel("parry") * 0.05) {
             dmg = dmg / 2;
@@ -359,7 +359,7 @@ export class AdventurerBlock extends CreatureBlock {
             anim = this.critAnim;
             hitType = Statics.HIT_CRIT;
             rawDmg = rawDmg * this.CritDamage(creature.Toughness() *
-                (1 - Math.min(0.75, this.player.getTalentLevel("serration") * 0.05)));
+                Math.pow(0.96, this.player.getTalentLevel("serration")));
         } else if (roll > 1 - this.GlancingChance(creature.Toughness())) {
             anim = "glancing";
             hitType = Statics.HIT_GLANCING;

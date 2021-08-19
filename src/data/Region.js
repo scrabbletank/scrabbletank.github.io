@@ -743,7 +743,7 @@ export class Region {
                     "have time to do the dungeons yourself, and it's not because your afraid of whatever unspeakable horrors are inside. " +
                     "You're pretty sure the villagers can handle it, and if not it only takes a week for them to breed a fully adult " +
                     "villager. What's with that anyway?\n" +
-                    "VILLAGER DUNEGONS UNLOCKED! On your next rebirth you'll find dungeons to throw your villagers in.");
+                    "VILLAGER DUNGEONS UNLOCKED! On your next rebirth you'll find dungeons to throw your villagers in.");
             }
             if (this.map[y][x].name === "Cultist Foothills") {
                 ProgressionStore.getInstance().registerLore("cultists1");

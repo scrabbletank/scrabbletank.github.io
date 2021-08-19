@@ -60,6 +60,7 @@ export class RegionView {
         this.regionTiles = [];
         this.regionStats = undefined;
         this.activeTile = undefined;
+        this.lastTileHotkeyed = [-1, -1];
 
         this.detailsContainer = [];
         this.tileElements = [];
@@ -267,7 +268,6 @@ export class RegionView {
         this.rebirthDialog.destroy();
         this.rebirthDialog = undefined;
 
-        DynamicSettings.getInstance().saveEnabled = false;
         WorldData.getInstance().handleRunCompletion();
         this.scene.scene.get("MoonlightScene").refresh();
         this.scene.scene.get("MoonlightScene").enableLeveling();
@@ -584,14 +584,18 @@ export class RegionView {
 
         this.offlineLabel = this.scene.add.bitmapText(this.x + 660, h, "courier20", "Offline Time: " + WorldData.instance.time.getOfflineTimeString());
         h += 25;
-        this.speed0xButton = new TextButton(this.scene, this.x + 760, h, 30, 20, "0x")
+        this.speed0xButton = new TextButton(this.scene, this.x + 690, h, 30, 20, "0x")
             .onClickHandler(() => { this._setTimeScale(0); });
-        this.speed1xButton = new TextButton(this.scene, this.x + 795, h, 30, 20, "1x")
+        this.speed1xButton = new TextButton(this.scene, this.x + 725, h, 30, 20, "1x")
             .onClickHandler(() => { this._setTimeScale(1); });
-        this.speed2xButton = new TextButton(this.scene, this.x + 830, h, 30, 20, "2x")
+        this.speed2xButton = new TextButton(this.scene, this.x + 760, h, 30, 20, "2x")
             .onClickHandler(() => { this._setTimeScale(2); });
-        this.speed5xButton = new TextButton(this.scene, this.x + 865, h, 30, 20, "5x")
+        this.speed5xButton = new TextButton(this.scene, this.x + 795, h, 30, 20, "5x")
             .onClickHandler(() => { this._setTimeScale(5); });
+        this.speed10xButton = new TextButton(this.scene, this.x + 830, h, 30, 20, "10x")
+            .onClickHandler(() => { this._setTimeScale(5, 2); });
+        this.speed25xButton = new TextButton(this.scene, this.x + 865, h, 30, 20, "25x")
+            .onClickHandler(() => { this._setTimeScale(5, 5); });
         switch (WorldData.getInstance().time.timescale) {
             case 0:
                 this.speed0xButton.setTextColor(Phaser.Display.Color.GetColor(255, 255, 0));
@@ -603,7 +607,13 @@ export class RegionView {
                 this.speed2xButton.setTextColor(Phaser.Display.Color.GetColor(255, 255, 0));
                 break;
             case 5:
-                this.speed5xButton.setTextColor(Phaser.Display.Color.GetColor(255, 255, 0));
+                if (WorldData.getInstance().time.fskip == 1) {
+                    this.speed5xButton.setTextColor(Phaser.Display.Color.GetColor(255, 255, 0));
+                } else if (WorldData.getInstance().time.fskip == 2) {
+                    this.speed10xButton.setTextColor(Phaser.Display.Color.GetColor(255, 255, 0));
+                } else {
+                    this.speed25xButton.setTextColor(Phaser.Display.Color.GetColor(255, 255, 0));
+                }
                 break;
         }
         h += 30;
@@ -686,8 +696,8 @@ export class RegionView {
             this.autoUpgradeLabel, this.autoUpgradeButton, this.exploreLabel, this.exploreProgressBar, this.regionStats);
     }
 
-    _setTimeScale(value) {
-        WorldData.instance.time.setTimeScale(value);
+    _setTimeScale(value, fskip = 1) {
+        WorldData.instance.time.setTimeScale(value, fskip);
         this.speed0xButton.setTextColor(Phaser.Display.Color.GetColor(255, 255, 255));
         this.speed1xButton.setTextColor(Phaser.Display.Color.GetColor(255, 255, 255));
         this.speed2xButton.setTextColor(Phaser.Display.Color.GetColor(255, 255, 255));
@@ -703,7 +713,13 @@ export class RegionView {
                 this.speed2xButton.setTextColor(Phaser.Display.Color.GetColor(255, 255, 0));
                 break;
             case 5:
-                this.speed5xButton.setTextColor(Phaser.Display.Color.GetColor(255, 255, 0));
+                if (WorldData.getInstance().time.fskip == 1) {
+                    this.speed5xButton.setTextColor(Phaser.Display.Color.GetColor(255, 255, 0));
+                } else if (WorldData.getInstance().time.fskip == 2) {
+                    this.speed10xButton.setTextColor(Phaser.Display.Color.GetColor(255, 255, 0));
+                } else {
+                    this.speed25xButton.setTextColor(Phaser.Display.Color.GetColor(255, 255, 0));
+                }
                 break;
         }
     }
@@ -724,8 +740,11 @@ export class RegionView {
             }
         }
 
-        if (Phaser.Input.Keyboard.JustUp(this.upgradeKey) && this.hoveredTile[0] !== -1) {
+        // console.log([this.hoveredTile, this.lastTileHotkeyed]);
+        if (this.upgradeKey.isDown && this.hoveredTile[0] !== -1 &&
+            (this.lastTileHotkeyed[0] != this.hoveredTile[0] || this.lastTileHotkeyed[1] != this.hoveredTile[1])) {
             this._tileActionHandler("upgrade", { tile: this.region.map[this.hoveredTile[1]][this.hoveredTile[0]] });
+            this.lastTileHotkeyed = this.hoveredTile;
         } else if (Phaser.Input.Keyboard.JustUp(this.exploreKey) && this.hoveredTile[0] !== -1) {
             this._tileActionHandler("explore", { tile: this.region.map[this.hoveredTile[1]][this.hoveredTile[0]] });
         } else if (this.houseKey.isDown && this.hoveredTile[0] !== -1) {

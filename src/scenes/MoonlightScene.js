@@ -85,6 +85,7 @@ export class MoonlightScene extends SceneUIBase {
         } else {
             this.starshardContainer.refreshView();
         }
+        this._removeChallengeWindow();
         this.challengeBtn.setVisible(ProgressionStore.getInstance().persistentUnlocks.challenges);
         this.challengePointIcon.setVisible(ProgressionStore.getInstance().persistentUnlocks.challenges);
         this.challengePointLabel.setText(MoonlightData.getInstance().challengePoints + "");

@@ -101,7 +101,7 @@ export class ProgressionStore {
                     count: 100,
                     text: "You have so many resources your not sure what to do with them. Maybe its time to try your " +
                         "hand at making some new gear? You've strapped enough garbage around your broken sword that " +
-                        "it's more of a club now then anyhting. You don't have a forge or tools, but it can't be harder " +
+                        "it's more of a club now then anything. You don't have a forge or tools, but it can't be harder " +
                         "than upgrading your gear."
                 },
                 {
