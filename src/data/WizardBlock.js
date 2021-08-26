@@ -71,21 +71,21 @@ export class WizardBlock extends AdventurerBlock {
 
     MaxHealth() {
         var end = this.Endurance();
-        var ret = (this.statBonuses.health * this._getScale(end)) + end * this.player.classStatics.HP_PER_ENDURANCE;
+        var ret = (this.statBonuses.health * this._getScale(end, this.statBonuses.health)) + end * this.player.classStatics.HP_PER_ENDURANCE;
         ret += end * this.player.getTalentLevel("wizend") * 0.75;
         ret += ret * this.player.runeBonuses.healthPercent;
         return Math.floor(Math.max(1, ret));
     }
     Hit() {
         var dex = this.Dexterity();
-        var ret = this.stats.hit + (this.statBonuses.hit * this._getScale(dex)) + dex * this.player.classStatics.HIT_PER_DEXTERITY;
+        var ret = this.stats.hit + (this.statBonuses.hit * this._getScale(dex, this.statBonuses.hit)) + dex * this.player.classStatics.HIT_PER_DEXTERITY;
         ret += dex * this.player.getTalentLevel("wizdex");
         ret += ret * this.player.runeBonuses.hitPercent;
         return Math.floor(Math.max(1, ret));
     }
     Evasion() {
         var agi = this.Agility();
-        var ret = this.stats.evasion + (this.statBonuses.evasion * this._getScale(agi)) + agi * this.player.classStatics.EVA_PER_AGILITY;
+        var ret = this.stats.evasion + (this.statBonuses.evasion * this._getScale(agi, this.statBonuses.evasion)) + agi * this.player.classStatics.EVA_PER_AGILITY;
         ret += agi * this.player.getTalentLevel("wizagi");
         ret += ret * this.player.runeBonuses.evaPercent;
         if (this.hasteAttacks > 0) {
@@ -95,7 +95,7 @@ export class WizardBlock extends AdventurerBlock {
     }
     Toughness() {
         var end = this.Endurance();
-        var ret = this.stats.critResistance + (this.statBonuses.critResistance * this._getScale(end)) +
+        var ret = this.stats.critResistance + (this.statBonuses.critResistance * this._getScale(end, this.statBonuses.critResistance)) +
             end * this.player.classStatics.CRITRESISTANCE_PER_ENDURANCE;
         if (this.shieldValue > 0) {
             ret += ret * this.player.getTalentLevel('shell') * 0.15;
@@ -104,7 +104,7 @@ export class WizardBlock extends AdventurerBlock {
     }
     Aim() {
         var acc = this.Accuracy();
-        var ret = this.stats.spellPower + (this.statBonuses.spellPower * this._getScale(acc)) +
+        var ret = this.stats.spellPower + (this.statBonuses.spellPower * this._getScale(acc, this.statBonuses.spellPower)) +
             acc * this.player.classStatics.SPELL_POWER_PER_POWER * (1 + this.player.getTalentLevel('first') * 0.01) *
             (1 + this.player.getTalentLevel('second') * 0.01) * (1 + this.player.getTalentLevel('third') * 0.01) *
             (1 + this.player.getTalentLevel('fourth') * 0.01) * (1 + this.player.getTalentLevel('fifth') * 0.01) *
@@ -132,14 +132,14 @@ export class WizardBlock extends AdventurerBlock {
     }
     HealthRegen() {
         var rec = this.Recovery();
-        var ret = (this.statBonuses.healthRegen * this._getScale(rec)) + rec * this.player.classStatics.REGEN_PER_RECOVERY;
+        var ret = (this.statBonuses.healthRegen * this._getScale(rec, this.statBonuses.healthRegen)) + rec * this.player.classStatics.REGEN_PER_RECOVERY;
         ret += ret * this.player.runeBonuses.regenPercent;
         return Math.floor(ret * 10) / 10;
     }
     Armor() {
         var def = this.Defense();
         var ret = def * this.player.classStatics.ARMOR_PER_WARD + this.statBonuses.armor * (1 + this.player.runeBonuses.armorPercent) *
-            this._getScale(def);
+            this._getScale(def, this.statBonuses.armor);
         return Math.floor(ret - this.corrosion);
     }
     Shield() {

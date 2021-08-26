@@ -23,13 +23,10 @@ export class CombatManager {
         this.activeTile = undefined;
         this.creatureHealthCallback = undefined;
         this.creatureAttackCallback = undefined;
-        this.rewardCallback = undefined;
-        this.playerDefeatCallback = undefined;
         this.exploreCallback = undefined;
         this.combatCallback = undefined;
-        this.invasionEndCallback = undefined;
+        this.combatEndCallback = undefined;
         this.animationChangedCallback = undefined;
-        this.fromAutoExplore = false;
         this.totalKills = 0;
         this.poisonTimer = 0;
     }
@@ -42,20 +39,14 @@ export class CombatManager {
             case "onCreatureAttackChanged":
                 this.creatureAttackCallback = callback;
                 break;
-            case "onReward":
-                this.rewardCallback = callback;
-                break;
-            case "onPlayerDefeat":
-                this.playerDefeatCallback = callback;
-                break;
             case "onExplore":
                 this.exploreCallback = callback;
                 break;
             case "onCombatStart":
                 this.combatCallback = callback;
                 break;
-            case "onInvasionEnd":
-                this.invasionEndCallback = callback;
+            case "onCombatEnd":
+                this.combatEndCallback = callback;
                 break;
             case "onAnimationChanged":
                 this.animationChangedCallback = callback;
@@ -118,8 +109,7 @@ export class CombatManager {
         }
     }
 
-    initFightWithCreatures(fromAutoExplore, monsterList) {
-        this.fromAutoExplore = fromAutoExplore;
+    initFightWithCreatures(monsterList) {
         this.combatActive = true;
         this.monsters = monsterList;
         for (var i = 0; i < this.monsters.length; i++) {
@@ -140,8 +130,7 @@ export class CombatManager {
         }
     }
 
-    initFight(fromAutoExplore) {
-        this.fromAutoExplore = fromAutoExplore;
+    initFight() {
         this.combatActive = true;
         this.monsters = this.activeTile.generateMonsters();
         for (var i = 0; i < this.monsters.length; i++) {
@@ -198,22 +187,25 @@ export class CombatManager {
         this.totalKills += this.monsters.length;
 
         for (var i = 0; i < this.monsters.length; i++) {
-            rewards.gold += 1 + (Math.max(1, this.monsters[i].level) / 14) + MoonlightData.getInstance().moonperks.gold.level * 0.25;
             rewards.shade += this.monsters[i].xpReward + player.runeBonuses.shadeFlat;
             rewards.motes += this.monsters[i].motes;
             if (Math.random() < player.runeBonuses.moteChance) {
-                rewards.motes += 1;
+                rewards.motes += 1 * (1 + StarData.getInstance().perks.bounty.level * 0.5);
             }
             // calculating bonus drops here
             var lvl = player.getTalentLevel("bounty");
             var numRewards = 1 + (lvl / 10) + ((lvl % 10) / 10 > Math.random() ? 1 : 0);
             var baseLvl = this.activeTile.parent.regionLevel * DynamicSettings.getInstance().regionDifficultyIncrease;
+            var dropMulti = (1 + (this.monsters[i].level - baseLvl) * 0.20) + (this.activeTile.parent.regionLevel * 0.1);
+            dropMulti = dropMulti * (1 + StarData.getInstance().perks.bounty.level * 0.5);
             for (var t = 0; t < numRewards; t++) {
                 var idx = this._getDropIndex();
-                var dropMulti = (1 + (this.monsters[i].level - baseLvl) * 0.20) + (this.activeTile.parent.regionLevel * 0.1);
-                dropMulti = dropMulti * (1 + StarData.getInstance().perks.bounty.level * 0.5);
-                rewards.resource[idx] += Math.max(0, this.monsters[i].dropBase * dropMulti) + player.runeBonuses.lootFlat;
+                rewards.resource[idx] += Math.max(0, (this.monsters[i].dropBase + player.runeBonuses.lootFlat) *
+                    dropMulti * (1 + player.runeBonuses.resourceMulti));
             }
+            rewards.gold += (this.monsters[i].dropBase / 2 + Math.max(0, this.monsters[i].level / 12) +
+                MoonlightData.getInstance().moonperks.gold.level * 0.25 +
+                player.runeBonuses.goldFlat) * dropMulti;
             rewards.friendship += this.activeTile.getFriendshipReward();
         }
         if (player.getTalentLevel('bundle') > 0) {
@@ -223,8 +215,10 @@ export class CombatManager {
                 rewards.resource[i] += townProd[i] * totalBundle;
             }
         }
-        rewards.gold = (rewards.gold * (this.activeTile.explored ? 1 : 3.5)) * this.activeTile.parent.townData.bountyMulti;
-        rewards.shade *= MoonlightData.getInstance().getShadowBonus() * this.activeTile.parent.townData.getFriendshipBonus();
+        rewards.gold = (rewards.gold * (this.activeTile.explored ? 1 : 4)) * this.activeTile.parent.townData.bountyMulti *
+            (1 + player.runeBonuses.goldMulti);
+        rewards.shade *= MoonlightData.getInstance().getShadowBonus() * this.activeTile.parent.townData.getFriendshipBonus() *
+            (1 + player.runeBonuses.shadeMulti);
         rewards.friendship *= (1 + player.runeBonuses.friendshipMulti) *
             (1 + MoonlightData.getInstance().challenges.outcast.completions * 0.1) *
             (1 + player.getTalentLevel('charisma') * 0.1);
@@ -239,21 +233,9 @@ export class CombatManager {
                     "will be super impressed if you bring this dumb stone back and call it that.\n\n" +
                     "Oh, you can probably try putting it on your weapon if you really wanted to. It's up to you.");
             }
-            if (MoonlightData.getInstance().challenges.invasion.completions > 0 &&
-                MoonlightData.getInstance().challenges.invasion.completions < 5 && this.fromAutoExplore === true) {
-                rewards.motes += (1 + MoonlightData.getInstance().moonperks.heartofdarkness.level) *
-                    WorldData.getInstance().invasionReward * 0.25;
-            } else {
-                rewards.motes += (1 + MoonlightData.getInstance().moonperks.heartofdarkness.level) *
-                    WorldData.getInstance().invasionReward;
-            }
-            this.activeTile.invasionFights -= 1;
-            if (this.activeTile.invasionFights <= 0) {
-                this.activeTile.parent.endSighting(this.activeTile.x, this.activeTile.y);
-                if (this.invasionEndCallback !== undefined) {
-                    this.invasionEndCallback();
-                }
-            }
+            rewards.motes += (1 + MoonlightData.getInstance().moonperks.heartofdarkness.level) *
+                WorldData.getInstance().invasionReward *
+                (1 + MoonlightData.getInstance().challenges.invasion.completions * 0.05);
         }
 
         rewards.motes *= (1 + RitualData.getInstance().activePerks.offerings * 0.2);
@@ -261,9 +243,7 @@ export class CombatManager {
             rewards.resource[i] *= (1 + RitualData.getInstance().activePerks.offerings * 0.2);
         }
 
-        if (this.rewardCallback !== undefined) {
-            this.rewardCallback(rewards);
-        }
+        return rewards;
     }
 
     update(delta) {
@@ -343,23 +323,26 @@ export class CombatManager {
             }
 
             if (this._monstersAlive() === false) {
-                this._handleRewards();
-                player.statBlock.encounterCounter -= 1;
+                var rewards = this._handleRewards();
+                if (this.combatEndCallback !== undefined) {
+                    this.combatEndCallback(rewards);
+                }
+                return;
             }
-
-            if (player.statBlock.currentHealth <= 0 && this.playerDefeatCallback !== undefined) {
-                player.statBlock.currentHealth = 0;
+            if (player.statBlock.currentHealth <= 0) {
                 this.combatActive = false;
-                this.playerDefeatCallback();
+                if (this.combatEndCallback !== undefined) {
+                    this.combatEndCallback();
+                }
             }
         } else {
             this.fightCooldown -= delta;
-            var exploreResult = this.activeTile.explore(delta);
+            this.activeTile.explore(delta);
             if (this.exploreCallback !== undefined) {
-                this.exploreCallback(this.activeTile, exploreResult);
+                this.exploreCallback(this.activeTile);
             }
             if (this.fightCooldown <= 0) {
-                this.initFight(this.fromAutoExplore);
+                this.initFight();
             }
         }
     }

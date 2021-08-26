@@ -102,6 +102,7 @@ export class TileSelectWindow {
                         }
                         if (ProgressionStore.getInstance().persistentUnlocks.dungeons === true) {
                             bld.push('dojo');
+                            bld.push('garrison');
                         }
                     }
                     if (region.townData.getTavernLevel() > 0) {

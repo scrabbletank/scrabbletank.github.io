@@ -30,6 +30,8 @@ import { FadingNumberLabel } from "../ui/FadingNumberLabel";
 import { StarData } from "../data/StarData";
 import { MyrahScene } from "./MyrahScene";
 import { RitualData } from "../data/RitualData";
+import { StatsWindow } from "../ui/StatsWindow";
+import { HighlightElementGroup } from "../ui/HighlightElementGroup";
 
 const BUY_FLAT = [[1, 10, 100, 1000], ["1", "10", "100", "1K"]];
 const BUY_PERCENT = [[0.1, 0.25, 0.5, 1], ["10%", "25%", "50%", "MAX"]];
@@ -61,6 +63,8 @@ export class GameScene extends SceneUIBase {
         this.showTimeThisRun = false;
         this.shiftModifier = false;
         this.buyBtnIdx = 0;
+        this.resourceChanges = [0, 0, 0, 0, 0, 0];
+        this.resourcesDirty = false;
         //try loading save data if it exists
         this.loadGame();
     }
@@ -77,6 +81,7 @@ export class GameScene extends SceneUIBase {
         this.load.spritesheet("runeicons", "./../../assets/icons/runeicons.png", { frameWidth: 16, frameHeight: 16 });
         this.load.spritesheet("enemyicons", "./../../assets/enemy/enemyicons.png", { frameWidth: 16, frameHeight: 16 });
         this.load.spritesheet("staricons", "./../../assets/icons/staricons.png", { frameWidth: 16, frameHeight: 16 });
+        this.load.spritesheet("runemap", "./../../assets/icons/runemap.png", { frameWidth: 444, frameHeight: 444 });
         this.load.image("title", "./../../assets/title.png");
     }
 
@@ -157,6 +162,13 @@ export class GameScene extends SceneUIBase {
             .onClickHandler(() => { this.resourceTierSelected = 6; this._updateResources(); }));
         this.resourceTierButtons.push(new TextButton(this, 20, 170, 16, 16, "8")
             .onClickHandler(() => { this.resourceTierSelected = 7; this._updateResources(); }));
+        this.resourceTabGroup = new HighlightElementGroup(Phaser.Display.Color.GetColor(255, 255, 0), Phaser.Display.Color.GetColor(0, 0, 0),
+            Phaser.Display.Color.GetColor(0, 0, 0), Phaser.Display.Color.GetColor(255, 255, 255));
+        for (var i = 0; i < this.resourceTierButtons.length; i++) {
+            this.resourceTabGroup.addElement(this.resourceTierButtons[i]);
+        }
+        this.resourceTabGroup._updateHighlights(0);
+
         this.resourceIcons = [];
         this.resourceIcons.push(new TooltipImage(this, 20, 170, 16, 16, { sprite: "icons", tile: 32 },
             "Wood. Found in forests and wodes, duh."));
@@ -175,12 +187,18 @@ export class GameScene extends SceneUIBase {
         this.resourceIcons.push(new TooltipImage(this, 20, 170, 16, 16, { sprite: "icons", tile: 39 },
             "Motes of Darkness. Fuse these onto weapons to improve their power."));
         this.resourceIncLabels = [];
-        this.resourceIncLabels.push(new FadingNumberLabel(this, 100, 170, 1200, Phaser.Display.Color.GetColor(80, 200, 80), "courier16", 16));
-        this.resourceIncLabels.push(new FadingNumberLabel(this, 100, 170, 1200, Phaser.Display.Color.GetColor(80, 200, 80), "courier16", 16));
-        this.resourceIncLabels.push(new FadingNumberLabel(this, 100, 170, 1200, Phaser.Display.Color.GetColor(80, 200, 80), "courier16", 16));
-        this.resourceIncLabels.push(new FadingNumberLabel(this, 100, 170, 1200, Phaser.Display.Color.GetColor(80, 200, 80), "courier16", 16));
-        this.resourceIncLabels.push(new FadingNumberLabel(this, 100, 170, 1200, Phaser.Display.Color.GetColor(80, 200, 80), "courier16", 16));
-        this.resourceIncLabels.push(new FadingNumberLabel(this, 100, 170, 1200, Phaser.Display.Color.GetColor(80, 200, 80), "courier16", 16));
+        this.resourceIncLabels.push(new FadingNumberLabel(this, 100, 170, 2500,
+            Phaser.Display.Color.GetColor(80, 200, 80), Phaser.Display.Color.GetColor(200, 0, 0), "courier16", 16));
+        this.resourceIncLabels.push(new FadingNumberLabel(this, 100, 170, 2500,
+            Phaser.Display.Color.GetColor(80, 200, 80), Phaser.Display.Color.GetColor(200, 0, 0), "courier16", 16));
+        this.resourceIncLabels.push(new FadingNumberLabel(this, 100, 170, 2500,
+            Phaser.Display.Color.GetColor(80, 200, 80), Phaser.Display.Color.GetColor(200, 0, 0), "courier16", 16));
+        this.resourceIncLabels.push(new FadingNumberLabel(this, 100, 170, 2500,
+            Phaser.Display.Color.GetColor(80, 200, 80), Phaser.Display.Color.GetColor(200, 0, 0), "courier16", 16));
+        this.resourceIncLabels.push(new FadingNumberLabel(this, 100, 170, 2500,
+            Phaser.Display.Color.GetColor(80, 200, 80), Phaser.Display.Color.GetColor(200, 0, 0), "courier16", 16));
+        this.resourceIncLabels.push(new FadingNumberLabel(this, 100, 170, 2500,
+            Phaser.Display.Color.GetColor(80, 200, 80), Phaser.Display.Color.GetColor(200, 0, 0), "courier16", 16));
 
 
         this.buyButtons = [];
@@ -193,6 +211,12 @@ export class GameScene extends SceneUIBase {
             .onClickHandler(() => { this._setBuyAmount(2); }));
         this.buyButtons.push(new TextButton(this, 125, 780, 40, 18, "x1K")
             .onClickHandler(() => { this._setBuyAmount(3); }));
+        this.buyGroup = new HighlightElementGroup(Phaser.Display.Color.GetColor(255, 255, 0), Phaser.Display.Color.GetColor(0, 0, 0),
+            Phaser.Display.Color.GetColor(0, 0, 0), Phaser.Display.Color.GetColor(255, 255, 255));
+        this.buyGroup.addElement(this.buyButtons[0]);
+        this.buyGroup.addElement(this.buyButtons[1]);
+        this.buyGroup.addElement(this.buyButtons[2]);
+        this.buyGroup.addElement(this.buyButtons[3]);
 
         this.infuseLabel = this.add.bitmapText(10, 10, "courier20", "Infuse");
         this.shadeLabel = this.add.bitmapText(20, 10, "courier16", "Shade: " + this.player.shade);
@@ -227,20 +251,34 @@ export class GameScene extends SceneUIBase {
             .onClickHandler(() => { this.scene.bringToTop("TownScene"); this.scene.bringToTop("DarkWorld"); });
         this.worldButton = new TextButton(this, 962, 60, 122, 20, "World")
             .onClickHandler(() => { this.scene.bringToTop("WorldScene"); this.scene.bringToTop("DarkWorld"); });
+        this.tabGroup = new HighlightElementGroup(Phaser.Display.Color.GetColor(255, 255, 0), Phaser.Display.Color.GetColor(0, 0, 0),
+            Phaser.Display.Color.GetColor(0, 0, 0), Phaser.Display.Color.GetColor(255, 255, 255));
+        this.tabGroup.addElement(this.loreButton);
+        this.tabGroup.addElement(this.gearButton);
+        this.tabGroup.addElement(this.talentButton);
+        this.tabGroup.addElement(this.regionButton);
+        this.tabGroup.addElement(this.combatButton);
+        this.tabGroup.addElement(this.townButton);
+        this.tabGroup.addElement(this.worldButton);
+        this.tabGroup._updateHighlights(0);
+
         this.worldTimeBacking = this.add.rectangle(500, 81, 300, 19, Phaser.Display.Color.GetColor(0, 0, 0))
             .setOrigin(0, 0).setInteractive()
             .on("pointerover", () => { this.showTimeThisRun = true; })
             .on("pointerout", () => { this.showTimeThisRun = false; });
         this.worldTimeLabel = this.add.bitmapText(650, 80, "courier20", "").setOrigin(0.5, 0);
-        this.moonlightButton = new ImageButton(this, 965, 12, 32, 32, { sprite: "moonicons", tile: 12 })
+        this.moonlightButton = new ImageButton(this, 925, 12, 32, 32, { sprite: "moonicons", tile: 12 })
             .onClickHandler(() => { this.scene.bringToTop("MoonlightScene"); });
 
         this.exportDialog = undefined;
         this.guideWindow = undefined;
-        this.optionsButton = new ImageButton(this, 1005, 12, 32, 32, { sprite: "icons", tile: 55 })
+        this.statsWindow = undefined;
+        this.optionsButton = new ImageButton(this, 965, 12, 32, 32, { sprite: "icons", tile: 55 })
             .onClickHandler(() => { this._openExportDialog(); });
-        this.guideButton = new ImageButton(this, 1045, 12, 32, 32, { sprite: "icons", tile: 54 })
+        this.guideButton = new ImageButton(this, 1005, 12, 32, 32, { sprite: "icons", tile: 54 })
             .onClickHandler(() => { this._openGuideWindow(); });
+        this.statsButton = new ImageButton(this, 1045, 12, 32, 32, { sprite: "icons2", tile: 27 })
+            .onClickHandler(() => { this._openStatsWindow(); });
 
         this.gearButton.setVisible(this.progression.unlocks.gearTab);
         this.regionButton.setVisible(this.progression.unlocks.exploreTab);
@@ -251,7 +289,9 @@ export class GameScene extends SceneUIBase {
         } else {
             this.talentButton.setVisible(false);
         }
-        this.worldButton.setVisible(this.progression.unlocks.worldTab);
+        this.worldButton.setVisible(ProgressionStore.getInstance().unlocks.worldTab === true ||
+            ProgressionStore.getInstance().persistentUnlocks.rituals === true ||
+            ProgressionStore.getInstance().persistentUnlocks.dungeons === true);
         this.moonlightButton.setVisible(this.progression.totalCounts.timesGated > 0);
 
         this.registry.set('setTooltip', (x, y, w, h, txt) => { this._setTooltip(x, y, w, h, txt); });
@@ -261,7 +301,6 @@ export class GameScene extends SceneUIBase {
         this.regionScene.registerEvent("onTileClick", (t, ae) => { this._handleTileClick(t, ae); });
 
         this.combatScene = new CombatScene([200, 100], "CombatScene");
-        this.combatScene.registerEvent("onReward", (a) => { this._onRewardCallback(a); });
 
         this.loreScene = new LoreScene([200, 100], "LoreScene");
         this.gearScene = new GearScene([200, 100], "GearScene");
@@ -331,10 +370,7 @@ export class GameScene extends SceneUIBase {
             }
         }
         this._updateInfuseCosts();
-        for (var i = 0; i < this.buyButtons.length; i++) {
-            this.buyButtons[i].setTextColor(Phaser.Display.Color.GetColor(255, 255, 255));
-        }
-        this.buyButtons[idx].setTextColor(Phaser.Display.Color.GetColor(255, 255, 0));
+        this.buyGroup._updateHighlights(idx);
     }
 
     _updateInfuseCosts() {
@@ -429,8 +465,6 @@ export class GameScene extends SceneUIBase {
                 this._updateResources();
                 break;
             default:
-                this.worldButton.setVisible(ProgressionStore.getInstance().unlocks.worldTab === true ||
-                    ProgressionStore.getInstance().persistentUnlocks.rituals === true);
                 this.worldScene.refreshButtons();
                 break;
         }
@@ -513,9 +547,10 @@ export class GameScene extends SceneUIBase {
             return;
         }
         if (tier === this.resourceTierSelected) {
+            this.resourcesDirty = true;
             for (var i = 0; i < res.length; i++) {
-                if (res[i] > 0) {
-                    this.resourceIncLabels[i].setValue(Math.floor(res[i]));
+                if (res[i] !== 0) {
+                    this.resourceChanges[i] += res[i];
                 }
             }
         }
@@ -620,7 +655,7 @@ export class GameScene extends SceneUIBase {
                 this.scene.bringToTop("CombatScene");
                 this.scene.bringToTop("DarkWorld");
             }
-            this.combatScene.initFight(tile, fromAutoExplore);
+            this.combatScene.initFight(tile);
         }
     }
 
@@ -650,26 +685,6 @@ export class GameScene extends SceneUIBase {
         this.player.increaseStat(stat, amount);
     }
 
-    _onRewardCallback(rewards) {
-        if (this.progression.unlocks.craftingUI === true) {
-            GearData.getInstance().tiersAvailable = Math.min(DynamicSettings.getInstance().maxGearTier,
-                Math.max(GearData.getInstance().tiersAvailable, rewards.regionLevel + 1));
-            this.gearScene._updateTierButtons();
-        }
-        this.player.addShade(rewards.shade);
-        this.player.addResource(rewards.resource, rewards.tier);
-        this.player.addMote(rewards.motes);
-        this._updateShade();
-        this.progression.registerMonsterKill();
-        this.progression.registerShadeGain(rewards.shade);
-        this.progression.registerResourceGain(rewards.resource);
-        if (this.progression.unlocks.townTab === true) {
-            this.player.addGold(rewards.gold);
-            WorldData.getInstance().getRegion(rewards.regionLevel).townData.addFriendship(rewards.friendship);
-            this.townScene._updateStatus();
-        }
-    }
-
     _openExportDialog() {
         this._closeExportDialog();
         this.exportDialog = new OptionsDialog(this, 485, 120);
@@ -690,6 +705,17 @@ export class GameScene extends SceneUIBase {
         if (this.guideWindow !== undefined) {
             this.guideWindow.destroy();
             this.guideWindow = undefined;
+        }
+    }
+    _openStatsWindow() {
+        this._closeStatsWindow();
+        this.statsWindow = new StatsWindow(this, 175, 100);
+        this.statsWindow.onCloseHandler(() => { this._closeStatsWindow(); });
+    }
+    _closeStatsWindow() {
+        if (this.statsWindow !== undefined) {
+            this.statsWindow.destroy();
+            this.statsWindow = undefined;
         }
     }
 
@@ -726,11 +752,20 @@ export class GameScene extends SceneUIBase {
         this.combatButton.setVisible(this.progression.unlocks.combatTab);
         this.townButton.setVisible(WorldData.instance.getCurrentRegion().townData.townExplored);
         this.talentButton.setVisible(this.progression.unlocks.talentsTab);
-        this.worldButton.setVisible(this.progression.unlocks.worldTab);
+        this.worldButton.setVisible(ProgressionStore.getInstance().unlocks.worldTab === true ||
+            ProgressionStore.getInstance().persistentUnlocks.rituals === true ||
+            ProgressionStore.getInstance().persistentUnlocks.dungeons === true);
         this.moonlightButton.setVisible(this.progression.totalCounts.timesGated > 0);
         this._layoutStats();
         this._updateInfuseCosts();
         this.gearShowTimer = 2000;
+
+        if (ProgressionStore.getInstance().persistentUnlocks.autoExplore === true) {
+            this.gearShowTimer = 0;
+            this.player.equip(gear.getGearByName("Broken Sword"));
+            this.player.equip(gear.getGearByName("Old Leathers"));
+            this.player.equip(gear.getGearByName("Barrel Lid"));
+        }
 
         this.loreScene.rebirth();
         this.gearScene.rebirth();
@@ -764,7 +799,9 @@ export class GameScene extends SceneUIBase {
         this.combatButton.setVisible(this.progression.unlocks.combatTab);
         this.townButton.setVisible(WorldData.instance.getCurrentRegion().townData.townExplored);
         this.talentButton.setVisible(this.progression.unlocks.talentsTab);
-        this.worldButton.setVisible(this.progression.unlocks.worldTab);
+        this.worldButton.setVisible(ProgressionStore.getInstance().unlocks.worldTab === true ||
+            ProgressionStore.getInstance().persistentUnlocks.rituals === true ||
+            ProgressionStore.getInstance().persistentUnlocks.dungeons === true);
         this.moonlightButton.setVisible(this.progression.totalCounts.timesGated > 0);
         this._layoutStats();
         this._updateInfuseCosts();
@@ -786,7 +823,7 @@ export class GameScene extends SceneUIBase {
         this.worldData.time.setFrameDelta(Math.min(500, lastFrameTime));
         this.lastFrame = time;
         var fDelta = this.worldData.time.frameDelta;
-        
+
         for (var i = 0; i < this.worldData.time.fskip; i++) {
             this.worldData.update(fDelta);
             this.player.statBlock.tickRegen(fDelta, this.combatScene.isInCombat());
@@ -805,6 +842,15 @@ export class GameScene extends SceneUIBase {
             }
         }
 
+        if (this.resourcesDirty === true) {
+            for (var i = 0; i < this.resourceChanges.length; i++) {
+                if (this.resourceChanges[i] !== 0) {
+                    this.resourceIncLabels[i].setValue(Math.round(this.resourceChanges[i]));
+                }
+            }
+            this.resourceChanges = [0, 0, 0, 0, 0, 0];
+            this.resourcesDirty = false;
+        }
         for (var i = 0; i < this.resourceIncLabels.length; i++) {
             this.resourceIncLabels[i].update(this.worldData.time.delta);
         }

@@ -4,6 +4,7 @@ import { MoonlightData } from "./MoonlightData";
 var RuneWords = {
     Tyr: {
         dropRate: 30,
+        transmutes: ["Vel", "Eid", "Ryn"],
         getBonus: (level) => {
             return {
                 weaponPercent: 0.04 * level
@@ -23,6 +24,7 @@ var RuneWords = {
     },
     Vel: {
         dropRate: 30,
+        transmutes: ["El", "Tyr", "Run"],
         getBonus: (level) => {
             return {
                 evaPercent: 0.04 * level
@@ -31,6 +33,7 @@ var RuneWords = {
     },
     El: {
         dropRate: 30,
+        transmutes: ["Vel", "Ley", "Rath"],
         getBonus: (level) => {
             return {
                 hitPercent: 0.04 * level
@@ -50,6 +53,7 @@ var RuneWords = {
     },
     Ley: {
         dropRate: 30,
+        transmutes: ["El", "Kor", "Eld"],
         getBonus: (level) => {
             return {
                 regenPercent: 0.04 * level
@@ -69,6 +73,7 @@ var RuneWords = {
     },
     Kor: {
         dropRate: 30,
+        transmutes: ["Ley", "Ber", "Chel"],
         getBonus: (level) => {
             return {
                 armorPercent: 0.05 * level
@@ -77,6 +82,7 @@ var RuneWords = {
     },
     Sok: {
         dropRate: 30,
+        transmutes: ["Ber", "Eid", "Myr"],
         getBonus: (level) => {
             return {
                 critPercent: 0.05 * level
@@ -96,6 +102,7 @@ var RuneWords = {
     },
     Ber: {
         dropRate: 30,
+        transmutes: ["Kor", "Sok", "Mal"],
         getBonus: (level) => {
             return {
                 healthPercent: 0.03 * level
@@ -116,8 +123,8 @@ var RuneWords = {
             Kor: {
                 getBonus: (level) => {
                     return {
-                        healthPercent: 0.1 * level,
-                        critChance: 0.03 * level
+                        healthPercent: 0.12 * level,
+                        critChance: 0.04 * level
                     };
                 }
             }
@@ -138,6 +145,7 @@ var RuneWords = {
     },
     Eid: {
         dropRate: 30,
+        transmutes: ["Sok", "Tyr", "Gith"],
         getBonus: (level) => {
             return {
                 exploreSpeed: 0.15 * level
@@ -146,13 +154,14 @@ var RuneWords = {
         Eld: {
             getBonus: (level) => {
                 return {
-                    friendshipMulti: level
+                    friendshipMulti: 0.4 * level
                 };
             }
         }
     },
     Ryn: {
         dropRate: 15,
+        transmutes: ["Run", "Gith", "Tak"],
         getBonus: (level) => {
             return {
                 critChance: 0.04 * level
@@ -161,9 +170,10 @@ var RuneWords = {
     },
     Eld: {
         dropRate: 15,
+        transmutes: ["Rath", "Chel", "Urd"],
         getBonus: (level) => {
             return {
-                lootFlat: level
+                lootFlat: 0.5 * level
             };
         },
         Rath: {
@@ -183,6 +193,7 @@ var RuneWords = {
     },
     Rath: {
         dropRate: 15,
+        transmutes: ["Eld", "Run", "Lem"],
         getBonus: (level) => {
             return {
                 shadeFlat: level * (10 + (10 * level)) / 2
@@ -191,6 +202,7 @@ var RuneWords = {
     },
     Run: {
         dropRate: 15,
+        transmutes: ["Rath", "Ryn", "Est"],
         getBonus: (level) => {
             return {
                 baseAttackSpeed: 0.05 * level
@@ -199,6 +211,7 @@ var RuneWords = {
     },
     Chel: {
         dropRate: 15,
+        transmutes: ["Eld", "Mal", "Lah"],
         getBonus: (level) => {
             return {
                 dexToStr: 0.01 * level
@@ -223,6 +236,7 @@ var RuneWords = {
     },
     Mal: {
         dropRate: 15,
+        transmutes: ["Chel", "Myr", "Quil"],
         getBonus: (level) => {
             return {
                 endToRec: 0.01 * level
@@ -245,6 +259,7 @@ var RuneWords = {
     },
     Myr: {
         dropRate: 15,
+        transmutes: ["Mal", "Gith", "Zel"],
         getBonus: (level) => {
             return {
                 agiToDef: 0.01 * level
@@ -260,6 +275,7 @@ var RuneWords = {
     },
     Tak: {
         dropRate: 50,
+        transmutes: ["Est", "Gol", "Tyr"],
         getBonus: (level) => {
             return {
                 strFlat: Math.pow(level, 2) * 25
@@ -268,6 +284,7 @@ var RuneWords = {
     },
     Est: {
         dropRate: 50,
+        transmutes: ["Lem", "Tak", "Vel"],
         getBonus: (level) => {
             return {
                 dexFlat: Math.pow(level, 2) * 25
@@ -276,6 +293,7 @@ var RuneWords = {
     },
     Lem: {
         dropRate: 50,
+        transmutes: ["Urd", "Est", "El"],
         getBonus: (level) => {
             return {
                 agiFlat: Math.pow(level, 2) * 25
@@ -295,6 +313,7 @@ var RuneWords = {
     },
     Urd: {
         dropRate: 50,
+        transmutes: ["Lah", "Lem", "Ley"],
         getBonus: (level) => {
             return {
                 endFlat: Math.pow(level, 2) * 25
@@ -303,6 +322,7 @@ var RuneWords = {
     },
     Lah: {
         dropRate: 50,
+        transmutes: ["Urd", "Quil", "Kor"],
         getBonus: (level) => {
             return {
                 defFlat: Math.pow(level, 2) * 25
@@ -322,6 +342,7 @@ var RuneWords = {
     },
     Quil: {
         dropRate: 50,
+        transmutes: ["Lah", "Zel", "Ber"],
         getBonus: (level) => {
             return {
                 recFlat: Math.pow(level, 2) * 25
@@ -339,6 +360,7 @@ var RuneWords = {
     },
     Zel: {
         dropRate: 50,
+        transmutes: ["Quil", "Gol", "Sok"],
         getBonus: (level) => {
             return {
                 accFlat: Math.pow(level, 2) * 25
@@ -351,6 +373,46 @@ var RuneWords = {
                         chromaTalent: 2 * level,
                         defToShield: level / 10
                     };
+                }
+            }
+        }
+    },
+    Gol: {
+        dropRate: 50,
+        transmutes: ["Zel", "Tak", "Eid"],
+        getBonus: (level) => {
+            return {
+                goldFlat: 0.5 * level
+            };
+        },
+        Rath: {
+            Ley: {
+                getBonus: (level) => {
+                    return {
+                        goldMulti: level * 0.1,
+                        resourceMulti: level * 0.1,
+                        shadeMulti: level * 0.02
+                    };
+                }
+            }
+        }
+    },
+    Gith: {
+        dropRate: 15,
+        transmutes: ["Ryn", "Myr", "Gol"],
+        getBonus: (level) => {
+            return {
+                gearScaling: level * 0.01
+            };
+        },
+        Sok: {
+            Mal: {
+                Myr: {
+                    getBonus: (level) => {
+                        return {
+                            baseTalents: level
+                        };
+                    }
                 }
             }
         }
@@ -404,8 +466,23 @@ export class RuneRegistry {
                 return { sprite: "runeicons", tile: 21 };
             case "Myr":
                 return { sprite: "runeicons", tile: 22 };
+            case "Gol":
+                return { sprite: "runeicons", tile: 24 };
+            case "Gith":
+                return { sprite: "runeicons", tile: 25 };
         }
         return { sprite: "runeicons", tile: 0 };
+    }
+
+    static getRuneTransmutes(word) {
+        return RuneWords[word].transmutes;
+    }
+
+    static getTransmutedRune(rune, index) {
+        if (RuneWords[rune.word] !== undefined) {
+            return { word: RuneWords[rune.word].transmutes[index], level: rune.level };
+        }
+        return rune;
     }
 
     static getBonusForRune(rune) {

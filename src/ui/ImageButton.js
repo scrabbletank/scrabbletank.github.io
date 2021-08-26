@@ -1,5 +1,5 @@
 export class ImageButton {
-    constructor(sceneContext, x, y, width, height, texture, depth=0) {
+    constructor(sceneContext, x, y, width, height, texture, depth = 0) {
         this.backgroundRect = sceneContext.add.rectangle(x, y, width, height, 0x000000).setOrigin(0, 0).setDepth(depth);
         this.backgroundRect.isStroked = true;
         this.backgroundRect.strokeColor = Phaser.Display.Color.GetColor(255, 255, 255);
@@ -20,6 +20,10 @@ export class ImageButton {
     setVisible(visible) {
         this.backgroundRect.setVisible(visible);
         this.img.setVisible(visible);
+    }
+
+    setTexture(texture) {
+        this.img.setTexture(texture.sprite, texture.tile);
     }
 
     setEnable(enabled) {

@@ -33,7 +33,7 @@ export class TownData {
         return ret;
     }
     static calcFriendshipToLevel(level) {
-        var scalePower = Statics.FRIENDSHIP_POWER - (0.015 * MoonlightData.getInstance().challenges.outcast.completions);
+        var scalePower = Statics.FRIENDSHIP_POWER - (0.01 * MoonlightData.getInstance().challenges.outcast.completions);
         return Statics.FRIENDSHIP_BASE + Math.floor(Math.pow(level * Statics.FRIENDSHIP_FLAT, scalePower) /
             Statics.FRIENDSHIP_FLAT) * Statics.FRIENDSHIP_FLAT;
     }
@@ -66,12 +66,9 @@ export class TownData {
         this.friendshipToNext = 25;
         this.tilesExplored = 0;
         this.nightLabourActive = false;
+        this.autoTownUpgrade = DynamicSettings.getInstance().autoTownUpgradeDefault;
 
         // dungeon variables
-        this.villagerPower = PlayerData.getInstance().baseVillagerPower;
-        this.villagerHealth = PlayerData.getInstance().baseVillagerHealth;
-        this.villagerPowerMulti = 1;
-        this.villagerHealthMulti = 1;
         this.dungeons = [];
 
         this.buildings = {
@@ -102,7 +99,7 @@ export class TownData {
 
         this.upgrades = {
             reinforcedhouses: {
-                name: "Reinforced Houses", level: 0, maxLevel: 5, requires: [],
+                name: "Reinforced Houses", level: 0, maxLevel: 10, requires: [],
                 goldCosts: [75, 75, 40], resources: [[0, 0, 0], [0, 0, 0], [20, 20, 10], [0, 0, 0], [40, 40, 20], [0, 0, 0]]
             },
             banking: {
@@ -149,10 +146,10 @@ export class TownData {
                 this.exploreMulti += 0.1;
                 break;
             case "Barracks":
-                this.villagerPowerMulti += 0.2;
+                WorldData.getInstance().powerMulti += 0.05;
                 break;
             case "Armory":
-                this.villagerHealthMulti += 0.2;
+                WorldData.getInstance().healthMulti += 0.05;
                 break;
         }
     }
@@ -162,7 +159,8 @@ export class TownData {
     }
     getTownIncome() {
         return (Math.floor(this.currentPopulation) * this.baseIncome + this.buildingIncome) *
-            this.getEconomyMulti() / (1 + RitualData.getInstance().activePerks.apathy * 0.5);
+            this.getEconomyMulti() / (1 + RitualData.getInstance().activePerks.apathy * 0.5) *
+            WorldData.getInstance().getArmyTaxMulti();
     }
     getGoldCap() {
         var exploreBonus = MoonlightData.getInstance().moonperks.crownlands.level * 2 * this.tilesExplored;
@@ -170,7 +168,8 @@ export class TownData {
             this.getEconomyMulti();
     }
     getProductionMulti() {
-        var nightLabourBonus = this.nightLabourActive === true ? (1 + 0.1 * MoonlightData.getInstance().moonperks.nightlabour.level) : 1;
+        var nightLabourBonus = this.nightLabourActive === false ? 1 :
+            (1 + 0.001 * MoonlightData.getInstance().moonperks.nightlabour.level * this.currentPopulation);
         var multi = this.productionMulti *
             (1 + this.friendshipLevel * 0.01 * MoonlightData.getInstance().moonperks.motivatedlabor.level) *
             nightLabourBonus * DynamicSettings.getInstance().productionMulti * this.dungeonProdMulti *
@@ -190,19 +189,6 @@ export class TownData {
     getMaxPopulation() { return this.maxPopulation * (1 + RitualData.getInstance().activePerks.hatchlings * 0.05); }
     getMarketLevel() { return this.upgrades.market.level; }
     getTavernLevel() { return this.upgrades.tavern.level; }
-    getVillagerPower() {
-        return Math.round(this.villagerPower * this.villagerPowerMulti *
-            (1 + MoonlightData.getInstance().moonperks.devotion.level * 0.25) *
-            (1 + RitualData.getInstance().activePerks.culttowns * 0.25) /
-            (1 + RitualData.getInstance().activePerks.apathy * 0.5));
-    }
-    getVillagerHealth() {
-        return Math.round(this.villagerHealth * this.villagerHealthMulti *
-            (1 + MoonlightData.getInstance().moonperks.devotion.level * 0.25) *
-            (1 + RitualData.getInstance().activePerks.culttowns * 0.25) /
-            (1 + RitualData.getInstance().activePerks.apathy * 0.5));
-    }
-    getArmySize() { return Math.ceil(this.currentPopulation * 0.1); }
 
     setMaxPopulation(pop) {
         this.maxPopulation = pop;
@@ -388,10 +374,49 @@ export class TownData {
         PlayerData.getInstance().addShade(this.currentPopulation * 0.75 *
             MoonlightData.getInstance().moonperks.shadow3.level * MoonlightData.getInstance().getShadowBonus() *
             this.getProductionMulti());
+        if (this.nightLabourActive === true) {
+            var cost = MoonlightData.getInstance().moonperks.nightlabour.level * 0.5 * this.currentPopulation;
+            if (PlayerData.getInstance().gold >= cost) {
+                PlayerData.getInstance().addGold(-cost);
+            } else {
+                this.nightLabourActive = false;
+            }
+        }
+        if (this.autoTownUpgrade === true) {
+            var player = new PlayerData();
+            for (const prop in this.buildings) {
+                var gold = TownData.getTechGoldCost(this.buildings[prop], this.tier);
+                var resCost = TownData.getTechResourceCost(this.buildings[prop], this.tier);
+                var resTier = Math.min(7, this.resourceTier);
+                if (player.gold >= gold && Common.canCraft(resCost, player.resources[resTier]) === true &&
+                    this.friendshipLevel >= this.buildings[prop].level) {
+                    player.addGold(-gold);
+                    player.spendResource(resCost, resTier);
+                    this.increaseTechLevel(this.buildings[prop]);
+                }
+            }
+            for (const prop in this.upgrades) {
+                if (this.upgrades[prop].level < this.upgrades[prop].maxLevel || this.upgrades[prop].maxLevel === -1) {
+                    var gold = TownData.getTechGoldCost(this.upgrades[prop], this.tier);
+                    var resCost = TownData.getTechResourceCost(this.upgrades[prop], this.tier);
+                    var resTier = Math.min(7, this.resourceTier);
+                    if (player.gold >= gold && Common.canCraft(resCost, player.resources[resTier]) === true &&
+                        this.friendshipLevel >= this.upgrades[prop].level) {
+                        player.addGold(-gold);
+                        player.spendResource(resCost, resTier);
+                        this.increaseTechLevel(this.upgrades[prop]);
+                    }
+                }
+            }
+        }
     }
 
     endOfWeek(region) {
         if (this.townExplored === true) {
+            if (WorldData.getInstance().getArmySize() < WorldData.getInstance().getArmySizeMax()) {
+                WorldData.getInstance().addSoldiers(1);
+                this.currentPopulation -= 1;
+            }
             if (this.currentPopulation > this.getMaxPopulation()) {
                 this.currentPopulation = Math.max(this.getMaxPopulation(), this.currentPopulation * 0.9);
             } else {
@@ -409,20 +434,6 @@ export class TownData {
                     this.paidProdMulti = 1;
                 }
                 PlayerData.getInstance().addGold(-bldCost);
-            }
-        }
-        if (DynamicSettings.getInstance().autoTownUpgrade === true) {
-            var player = new PlayerData();
-            for (const prop in this.buildings) {
-                var gold = TownData.getTechGoldCost(this.buildings[prop], this.tier);
-                var resCost = TownData.getTechResourceCost(this.buildings[prop], this.tier);
-                var resTier = Math.min(7, this.resourceTier);
-                if (player.gold >= gold && Common.canCraft(resCost, player.resources[resTier]) === true &&
-                    this.friendshipLevel >= this.buildings[prop].level) {
-                    player.addGold(-gold);
-                    player.spendResource(resCost, resTier);
-                    this.increaseTechLevel(this.buildings[prop]);
-                }
             }
         }
     }
@@ -460,13 +471,11 @@ export class TownData {
             frl: this.friendshipLevel,
             alc: this.alchemyEnabled,
             tl: this.tilesExplored,
-            vp: this.villagerPower,
-            vpm: this.villagerPowerMulti,
-            vh: this.villagerHealth,
-            vhm: this.villagerHealthMulti,
             dpm: this.dungeonProdMulti,
             dem: this.dungeonEconMulti,
-            ppm: this.paidProdMulti
+            ppm: this.paidProdMulti,
+            nl: this.nightLabourActive,
+            au: this.autoTownUpgrade
         }
 
         return saveObj;
@@ -487,14 +496,12 @@ export class TownData {
         this.friendshipLevel = saveObj.frl;
         this.alchemyEnabled = saveObj.alc;
         this.tilesExplored = saveObj.tl ? saveObj.tl : 0;
-        this.villagerPower = saveObj.vp ? saveObj.vp : 1;
-        this.villagerPowerMulti = saveObj.vpm ? saveObj.vpm : 1;
-        this.villagerHealth = saveObj.vh ? saveObj.vh : 10;
-        this.villagerHealthMulti = saveObj.vhm ? saveObj.vhm : 1;
         this.dungeonProdMulti = saveObj.dpm ? saveObj.dpm : 1;
         this.dungeonEconMulti = saveObj.dem ? saveObj.dem : 1;
         this.paidProdMulti = saveObj.ppm ? saveObj.ppm : 1;
         this.resourceTier = saveObj.rt ? saveObj.rt : this.tier - 1;
+        this.nightLabourActive = saveObj.nl ? saveObj.nl : false;
+        this.autoTownUpgrade = saveObj.au ? saveObj.au : DynamicSettings.getInstance().autoTownUpgradeDefault;
         this.friendshipToNext = TownData.calcFriendshipToLevel(this.friendshipLevel);
         for (var i = 0; i < saveObj.bld.length; i++) {
             if (this.buildings[saveObj.bld[i][0]] !== undefined) {

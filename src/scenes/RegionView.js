@@ -7,6 +7,7 @@ import { RegionRegistry } from "../data/RegionRegistry";
 import { Statics } from "../data/Statics";
 import { WorldData } from "../data/WorldData";
 import { FloatingTooltip } from "../ui/FloatingTooltip";
+import { HighlightElementGroup } from "../ui/HighlightElementGroup";
 import { MyrahTileDialog } from "../ui/MyrahTileDialog";
 import { ProgressBar } from "../ui/ProgressBar";
 import { RebirthDialog } from "../ui/RebirthDialog";
@@ -55,6 +56,7 @@ export class RegionView {
         this.destroyKey = undefined;
         this.docksKey = undefined;
         this.dojoKey = undefined;
+        this.garrisonKey = undefined;
         this.watchtowerKey = undefined;
         this.hoveredTile = [-1, -1];
         this.regionTiles = [];
@@ -177,25 +179,8 @@ export class RegionView {
     }
 
     _exploreTown(x, y) {
-        if (ProgressionStore.getInstance().unlocks.townTab === false) {
-            ProgressionStore.getInstance().registerFeatureUnlocked(Statics.UNLOCK_TOWN_TAB,
-                "You've finally made it to the town you saw in the distance, the only square not covered in this " +
-                "horrible fog. As you approach the gate a voice calls to you from the wall.\n\n" +
-                "\"Oh hey, you must be the new hero we've heard about, give me a minute to open the gate.\"\n\n" +
-                "Hero? You woke up naked and alone in the wilderness. Come to think of it, it's amazing you're even " +
-                "still alive. You're still contemplating your existence when the door opens.\n\n" +
-                "\"So hero, you don't mind if I call you hero do you? Just makes things easier. Anyway we have a house " +
-                "laid out for you, don't expect much. The Forge has seen better days and the guilds have all been abandoned " +
-                "but I'm sure you'll see to that, Mr. Hero.\"\n\nYou begin to ask what all this hero nonsense is about " +
-                "when they speak up again.\n\n \"Oh that reminds me, we don't have much, but we can pay you for every one " +
-                "of those monsters you kill. Don't try to lie about how many you've beat, we can tell. Oh, and we'll pay " +
-                "you more when you're clearing new land for us. What were you trying to ask?\"\n\nYou say it was nothing " +
-                "and ask them to lead the way. You don't know about this hero stuff, but money is money. Besides you were " +
-                "already fighting this monsters anyway, might as well make money while you do it.");
-        }
-        this.region.map[y][x].amountExplored = this.region.map[y][x].explorationNeeded;
-        this.region.exploreTile(x, y);
-        this.scene.scene.get("DarkWorld").townButton.setVisible(true);
+        this.region.map[y][x].explore(1000);
+        // this.scene.scene.get("DarkWorld").townButton.setVisible(true);
     }
 
     _handleTileClick(x, y) {
@@ -305,40 +290,6 @@ export class RegionView {
         }
     }
 
-    _onExploredCallback(tile, tier) {
-        var activeRegion = WorldData.getInstance().regionList[tier];
-        if (tile.y === 0) {
-            //setup new world types
-            if (ProgressionStore.getInstance().unlocks.worldTab === false) {
-                ProgressionStore.getInstance().registerFeatureUnlocked(Statics.UNLOCK_WORLD_TAB,
-                    "You did it, you've reached the edge of the world. This is all there is...\n\n" +
-                    "Oh wait, it looks like there's a trail over there leading to a new region! there's " +
-                    "a whole world out there. I was wondering what that last tab was going to be.");
-            }
-
-            if (WorldData.instance.regionList.length - 1 === tier && WorldData.instance.nextRegions.length === 0 &&
-                (WorldData.instance.regionList.length < 10 || ProgressionStore.getInstance().persistentUnlocks.starshards === true)) {
-                WorldData.instance.generateRegionChoices();
-                this.scene.scene.get("WorldScene").refresh();
-            }
-        }
-        if (tile.explored === false) {
-            if (tile.hasRune === true) {
-                this.scene.scene.get("DarkWorld").notifyGear();
-                if (ProgressionStore.getInstance().unlocks.runes === false) {
-                    ProgressionStore.getInstance().registerFeatureUnlocked(Statics.UNLOCK_RUNES_UI,
-                        "You found an interesting rock in that last tile and shoved it into your pack, probably due to your crippling need " +
-                        "to hoard things like some RPG character. The rock was glowing so it would probably make a neat good luck charm if you " +
-                        "shoved it into the holes on your gear.");
-                }
-            }
-            activeRegion.exploreTile(tile.x, tile.y);
-            ProgressionStore.getInstance().registerTileExplored();
-
-            this.triggerAutoExplore(tile, tier);
-        }
-    }
-
     _updateTile(tile) {
         this.scene.scene.get("TownScene").refresh();
         var clr = toPhaserColor(tile.color);
@@ -404,6 +355,12 @@ export class RegionView {
 
     triggerAutoExplore(tile, tier) {
         var activeRegion = WorldData.getInstance().regionList[tier];
+        if (DynamicSettings.getInstance().autoInvade !== -1 && activeRegion.invasions.length > 0 &&
+            activeRegion.invasionStrength >= DynamicSettings.getInstance().autoInvade) {
+            var pos = activeRegion.invasions[0];
+            this._exploreTile(activeRegion.map[pos[0]][pos[1]], true);
+            return;
+        }
         if (DynamicSettings.getInstance().autoExplore === true) {
             var pos = activeRegion.nextWeakestTile(DynamicSettings.getInstance().autoInvade);
             if (pos[0] !== -1) {
@@ -437,9 +394,7 @@ export class RegionView {
 
     create() {
         //add handlers
-        this.scene.scene.get("CombatScene").registerEvent("onExplore", (a, t) => { this._onExploredCallback(a, t); });
         this.region.onTileChanged((x) => { this._updateTile(x); });
-        this.region.onSighting((x) => { this.scene.scene.get("DarkWorld").notifyRegion(); });
         WorldData.getInstance().onRegionChanged(() => { this.changeRegion(); });
 
         //hotkeys
@@ -455,6 +410,7 @@ export class RegionView {
         this.destroyKey = this.scene.input.keyboard.addKey(Phaser.Input.Keyboard.KeyCodes.D);
         this.docksKey = this.scene.input.keyboard.addKey(Phaser.Input.Keyboard.KeyCodes.O);
         this.dojoKey = this.scene.input.keyboard.addKey(Phaser.Input.Keyboard.KeyCodes.J);
+        this.garrisonKey = this.scene.input.keyboard.addKey(Phaser.Input.Keyboard.KeyCodes.G);
         this.watchtowerKey = this.scene.input.keyboard.addKey(Phaser.Input.Keyboard.KeyCodes.C);
         this.woodKey = this.scene.input.keyboard.addKey(Phaser.Input.Keyboard.KeyCodes.ONE);
         this.leatherKey = this.scene.input.keyboard.addKey(Phaser.Input.Keyboard.KeyCodes.TWO);
@@ -477,7 +433,6 @@ export class RegionView {
         this.region.removeHandlers();
         this.region = WorldData.instance.getCurrentRegion();
         this.region.onTileChanged((x) => { this._updateTile(x); });
-        this.region.onSighting((x) => { this.scene.scene.get("DarkWorld").notifyRegion(); });
         this.offsetX = 360 - this.region.width * WIDTH / 2;
         this.offsetY = 370 - this.region.height * HEIGHT / 2;
 
@@ -496,15 +451,33 @@ export class RegionView {
             this.autoExploreButton.setTextColor(Phaser.Display.Color.GetColor(175, 0, 140));
         }
     }
-    _toggleAutoInvade() {
-        DynamicSettings.getInstance().autoInvade = !DynamicSettings.getInstance().autoInvade;
-        if (DynamicSettings.getInstance().autoInvade === true) {
-            this.autoInvadeButton.setText("ON");
-            this.autoInvadeButton.setTextColor(Phaser.Display.Color.GetColor(255, 255, 255));
-        } else {
-            this.autoInvadeButton.setText("OFF");
-            this.autoInvadeButton.setTextColor(Phaser.Display.Color.GetColor(175, 0, 140));
+    _updateAutoInvade() {
+        switch (DynamicSettings.getInstance().autoInvade) {
+            case -1:
+                this.autoInvadeButton.setText("OFF");
+                this.autoInvadeButton.setTextColor(Phaser.Display.Color.GetColor(175, 0, 140));
+                break;
+            case 0:
+                this.autoInvadeButton.setText("ALL");
+                this.autoInvadeButton.setTextColor(Phaser.Display.Color.GetColor(255, 255, 255));
+                break;
+            case 1:
+                this.autoInvadeButton.setText("1+");
+                this.autoInvadeButton.setTextColor(Phaser.Display.Color.GetColor(255, 255, 255));
+                break;
+            case 2:
+                this.autoInvadeButton.setText("2+");
+                this.autoInvadeButton.setTextColor(Phaser.Display.Color.GetColor(255, 255, 255));
+                break;
+            case 3:
+                this.autoInvadeButton.setText("3+");
+                this.autoInvadeButton.setTextColor(Phaser.Display.Color.GetColor(255, 255, 255));
+                break;
         }
+    }
+    _toggleAutoInvade() {
+        DynamicSettings.getInstance().toggleAutoInvade();
+        this._updateAutoInvade();
     }
     _toggleAutoUpgrade() {
         this.region.autoUpgrade = !this.region.autoUpgrade;
@@ -570,16 +543,24 @@ export class RegionView {
 
         if (WorldData.getInstance().regionList.length > 1) {
             this.detailsContainer.push(this.scene.add.bitmapText(this.x + 660, h, "courier20", "Regions:"));
+            this.regionTabGroup = new HighlightElementGroup(Phaser.Display.Color.GetColor(255, 255, 0), Phaser.Display.Color.GetColor(0, 0, 0),
+                Phaser.Display.Color.GetColor(0, 0, 0), Phaser.Display.Color.GetColor(255, 255, 255));
             for (var i = 0; i < WorldData.getInstance().regionList.length; i++) {
                 var x = this.x + 660 + (i % 10) * 24;
                 var y = h + 25 + Math.floor(i / 10) * 20;
-                this.detailsContainer.push(this._setupRegionButton(i, x, y));
+                var btn = this._setupRegionButton(i, x, y);
+                this.detailsContainer.push(btn);
+                this.regionTabGroup.addElement(btn);
             }
+            this.regionTabGroup._updateHighlights(WorldData.getInstance().currentRegion);
         }
         h += 55 + Math.floor(WorldData.getInstance().regionList.length / 10) * 20;
 
-        this.invasionLabel = this.scene.add.bitmapText(this.x + 660, h, "courier20", "Invasion: 0%", 20, 1);
-        this.invasionLabel.setTint(Phaser.Display.Color.GetColor(255, 255, 255));
+        this.invasionBar = new ProgressBar(this.scene, this.x + 660, h, 160, 20,
+            Phaser.Display.Color.GetColor(255, 128, 255), Phaser.Display.Color.GetColor(32, 32, 64), "Invasion Strength");
+        this.invasionBar.setTextColor(Phaser.Display.Color.GetColor(255, 255, 255));
+        this.invasionBar.setFillPercent(this.region.invasionCounter / this.region.invasionCounterMax, "Invasion Strength");
+        this.invasionLabel = this.scene.add.bitmapText(this.x + 825, h + 2, "courier16", "Lv " + this.region.invasionStrength);
         h += 25;
 
         this.offlineLabel = this.scene.add.bitmapText(this.x + 660, h, "courier20", "Offline Time: " + WorldData.instance.time.getOfflineTimeString());
@@ -596,23 +577,31 @@ export class RegionView {
             .onClickHandler(() => { this._setTimeScale(5, 2); });
         this.speed25xButton = new TextButton(this.scene, this.x + 865, h, 30, 20, "25x")
             .onClickHandler(() => { this._setTimeScale(5, 5); });
+        this.speedTabGroup = new HighlightElementGroup(Phaser.Display.Color.GetColor(255, 255, 0), Phaser.Display.Color.GetColor(0, 0, 0),
+            Phaser.Display.Color.GetColor(0, 0, 0), Phaser.Display.Color.GetColor(255, 255, 255));
+        this.speedTabGroup.addElement(this.speed0xButton);
+        this.speedTabGroup.addElement(this.speed1xButton);
+        this.speedTabGroup.addElement(this.speed2xButton);
+        this.speedTabGroup.addElement(this.speed5xButton);
+        this.speedTabGroup.addElement(this.speed10xButton);
+        this.speedTabGroup.addElement(this.speed25xButton);
         switch (WorldData.getInstance().time.timescale) {
             case 0:
-                this.speed0xButton.setTextColor(Phaser.Display.Color.GetColor(255, 255, 0));
+                this.speedTabGroup._updateHighlights(0);
                 break;
             case 1:
-                this.speed1xButton.setTextColor(Phaser.Display.Color.GetColor(255, 255, 0));
+                this.speedTabGroup._updateHighlights(1);
                 break;
             case 2:
-                this.speed2xButton.setTextColor(Phaser.Display.Color.GetColor(255, 255, 0));
+                this.speedTabGroup._updateHighlights(2);
                 break;
             case 5:
                 if (WorldData.getInstance().time.fskip == 1) {
-                    this.speed5xButton.setTextColor(Phaser.Display.Color.GetColor(255, 255, 0));
+                    this.speedTabGroup._updateHighlights(3);
                 } else if (WorldData.getInstance().time.fskip == 2) {
-                    this.speed10xButton.setTextColor(Phaser.Display.Color.GetColor(255, 255, 0));
+                    this.speedTabGroup._updateHighlights(4);
                 } else {
-                    this.speed25xButton.setTextColor(Phaser.Display.Color.GetColor(255, 255, 0));
+                    this.speedTabGroup._updateHighlights(5);
                 }
                 break;
         }
@@ -626,11 +615,11 @@ export class RegionView {
             Phaser.Display.Color.GetColor(255, 255, 255) : Phaser.Display.Color.GetColor(175, 0, 140));
         h += 30;
         this.autoInvadeLabel = this.scene.add.bitmapText(this.x + 660, h, "courier20", "Auto Invade:");
-        this.autoInvadeButton = new TextButton(this.scene, this.x + 795, h, 40, 20,
-            DynamicSettings.getInstance().autoInvade === true ? "ON" : "OFF")
+        this.autoInvadeButton = new TextButton(this.scene, this.x + 795, h, 40, 20, "OFF")
             .onClickHandler(() => { this._toggleAutoInvade() });
         this.autoInvadeButton.setTextColor(DynamicSettings.getInstance().autoInvade === true ?
             Phaser.Display.Color.GetColor(255, 255, 255) : Phaser.Display.Color.GetColor(175, 0, 140));
+        this._updateAutoInvade();
         h += 30;
         this.autoUpgradeLabel = this.scene.add.bitmapText(this.x + 660, h, "courier20", "Auto Upgrade:");
         this.autoUpgradeButton = new TextButton(this.scene, this.x + 795, h, 40, 20,
@@ -655,16 +644,23 @@ export class RegionView {
                 .onClickHandler(() => { this._changeBlueprintHandler(3) });
             this.bp5Btn = new TextButton(this.scene, this.x + 860, h, 35, 20, "BP5")
                 .onClickHandler(() => { this._changeBlueprintHandler(4) });
-            // thanks, I'll be here all week
-            var switchHack = [this.noBPBtn, this.bp1Btn, this.bp2Btn, this.bp3Btn, this.bp4Btn, this.bp5Btn];
-            switchHack[this.region.blueprint + 1].setTextColor(Phaser.Display.Color.GetColor(255, 255, 0));
+            this.bpTabGroup = new HighlightElementGroup(Phaser.Display.Color.GetColor(255, 255, 0), Phaser.Display.Color.GetColor(0, 0, 0),
+                Phaser.Display.Color.GetColor(0, 0, 0), Phaser.Display.Color.GetColor(255, 255, 255));
+            this.bpTabGroup.addElement(this.noBPBtn);
+            this.bpTabGroup.addElement(this.bp1Btn);
+            this.bpTabGroup.addElement(this.bp2Btn);
+            this.bpTabGroup.addElement(this.bp3Btn);
+            this.bpTabGroup.addElement(this.bp4Btn);
+            this.bpTabGroup.addElement(this.bp5Btn);
+            this.bpTabGroup._updateHighlights(this.region.blueprint + 1);
+
             this.detailsContainer.push(this.blueprintLabel, this.noBPBtn, this.bp1Btn, this.bp2Btn, this.bp3Btn, this.bp4Btn, this.bp5Btn);
         }
 
         this.autoExploreLabel.setVisible(ProgressionStore.getInstance().persistentUnlocks.autoExplore);
         this.autoExploreButton.setVisible(ProgressionStore.getInstance().persistentUnlocks.autoExplore);
-        this.autoInvadeLabel.setVisible(MoonlightData.getInstance().challenges.invasion.completions > 0);
-        this.autoInvadeButton.setVisible(MoonlightData.getInstance().challenges.invasion.completions > 0);
+        this.autoInvadeLabel.setVisible(ProgressionStore.getInstance().persistentUnlocks.autoExplore);
+        this.autoInvadeButton.setVisible(ProgressionStore.getInstance().persistentUnlocks.autoExplore);
         this.autoUpgradeLabel.setVisible(MoonlightData.getInstance().challenges.outcast.completions > 0);
         this.autoUpgradeButton.setVisible(MoonlightData.getInstance().challenges.outcast.completions > 0);
 
@@ -691,7 +687,7 @@ export class RegionView {
         this.regionStats = this.scene.add.bitmapText(this.x + 660, h, "courier20", txt);
         this.regionStats.setVisible(this.region.townData.townExplored === true);
 
-        this.detailsContainer.push(this.invasionLabel, this.offlineLabel, this.speed0xButton, this.speed1xButton, this.speed2xButton,
+        this.detailsContainer.push(this.invasionBar, this.invasionLabel, this.offlineLabel, this.speed0xButton, this.speed1xButton, this.speed2xButton,
             this.speed5xButton, this.speed10xButton, this.speed25xButton, this.autoExploreLabel, this.autoExploreButton,
             this.autoInvadeLabel, this.autoInvadeButton, this.autoUpgradeLabel, this.autoUpgradeButton, this.exploreLabel,
             this.exploreProgressBar, this.regionStats);
@@ -699,45 +695,17 @@ export class RegionView {
 
     _setTimeScale(value, fskip = 1) {
         WorldData.instance.time.setTimeScale(value, fskip);
-        this.speed0xButton.setTextColor(Phaser.Display.Color.GetColor(255, 255, 255));
-        this.speed1xButton.setTextColor(Phaser.Display.Color.GetColor(255, 255, 255));
-        this.speed2xButton.setTextColor(Phaser.Display.Color.GetColor(255, 255, 255));
-        this.speed5xButton.setTextColor(Phaser.Display.Color.GetColor(255, 255, 255));
-        this.speed10xButton.setTextColor(Phaser.Display.Color.GetColor(255, 255, 255));
-        this.speed25xButton.setTextColor(Phaser.Display.Color.GetColor(255, 255, 255));
-        switch (value) {
-            case 0:
-                this.speed0xButton.setTextColor(Phaser.Display.Color.GetColor(255, 255, 0));
-                break;
-            case 1:
-                this.speed1xButton.setTextColor(Phaser.Display.Color.GetColor(255, 255, 0));
-                break;
-            case 2:
-                this.speed2xButton.setTextColor(Phaser.Display.Color.GetColor(255, 255, 0));
-                break;
-            case 5:
-                if (WorldData.getInstance().time.fskip == 1) {
-                    this.speed5xButton.setTextColor(Phaser.Display.Color.GetColor(255, 255, 0));
-                } else if (WorldData.getInstance().time.fskip == 2) {
-                    this.speed10xButton.setTextColor(Phaser.Display.Color.GetColor(255, 255, 0));
-                } else {
-                    this.speed25xButton.setTextColor(Phaser.Display.Color.GetColor(255, 255, 0));
-                }
-                break;
-        }
     }
 
     update(__time, delta) {
         this.offlineLabel.setText("Offline Time: " + WorldData.instance.time.getOfflineTimeString());
-        var invasionPercent = this.region.invasionCounter / Statics.INVASION_THRESHOLD;
-        this.invasionLabel.setText("Invasion: " + Math.floor(invasionPercent * 100) + "%");
-        this.invasionLabel.setTint(Common.colorLerp(Phaser.Display.Color.GetColor(255, 255, 255),
-            Phaser.Display.Color.GetColor(255, 0, 255), invasionPercent));
+        this.invasionBar.setFillPercent(this.region.invasionCounter / this.region.invasionCounterMax, "Invasion Strength");
+        this.invasionLabel.setText("Lv " + this.region.invasionStrength);
         this.sightingVal = (this.sightingVal + delta) % 2000;
         var lerp = Math.sin((this.sightingVal / 2000) * Math.PI * 2) * 0.5 + 0.5;
-        if (this.region.sightings.length > 0) {
-            for (var i = 0; i < this.region.sightings.length; i++) {
-                var s = this.region.sightings[i];
+        if (this.region.invasions.length > 0) {
+            for (var i = 0; i < this.region.invasions.length; i++) {
+                var s = this.region.invasions[i];
                 var clr = toPhaserColor(this.region.map[s[0]][s[1]].color);
                 this.tileElements[s[0]][s[1]].rect.fillColor = Common.colorLerp(clr, Phaser.Display.Color.GetColor(255, 0, 255), lerp);
             }
@@ -748,7 +716,10 @@ export class RegionView {
             (this.lastTileHotkeyed[0] != this.hoveredTile[0] || this.lastTileHotkeyed[1] != this.hoveredTile[1])) {
             this._tileActionHandler("upgrade", { tile: this.region.map[this.hoveredTile[1]][this.hoveredTile[0]] });
             this.lastTileHotkeyed = this.hoveredTile;
-        } else if (Phaser.Input.Keyboard.JustUp(this.exploreKey) && this.hoveredTile[0] !== -1) {
+        } else if (this.upgradeKey.isDown === false) {
+            this.lastTileHotkeyed = [-1, -1];
+        }
+        if (Phaser.Input.Keyboard.JustUp(this.exploreKey) && this.hoveredTile[0] !== -1) {
             this._tileActionHandler("explore", { tile: this.region.map[this.hoveredTile[1]][this.hoveredTile[0]] });
         } else if (this.houseKey.isDown && this.hoveredTile[0] !== -1) {
             this._tileActionHandler("build", {
@@ -824,6 +795,11 @@ export class RegionView {
             this._tileActionHandler("build", {
                 tile: this.region.map[this.hoveredTile[1]][this.hoveredTile[0]],
                 building: BuildingRegistry.getBuildingByName('dojo')
+            });
+        } else if (this.garrisonKey.isDown && this.hoveredTile[0] !== -1) {
+            this._tileActionHandler("build", {
+                tile: this.region.map[this.hoveredTile[1]][this.hoveredTile[0]],
+                building: BuildingRegistry.getBuildingByName('garrison')
             });
         } else if (this.watchtowerKey.isDown && this.hoveredTile[0] !== -1) {
             this._tileActionHandler("build", {

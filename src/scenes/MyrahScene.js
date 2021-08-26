@@ -38,7 +38,7 @@ export class MyrahScene extends SceneUIBase {
             .registerEvent("onCreatureHealthChanged", (x, i) => { this._monsterHealthCallback(x, i); })
             .registerEvent("onCreatureAttackChanged", (x, i) => { this._monsterAttackCooldownCallback(x, i); })
             .registerEvent("onReward", (x, y) => { this._rewardCallback(x, y); })
-            .registerEvent("onPlayerDefeat", () => { this._playerDefeatCallback(); })
+            .registerEvent("onCombatEnd", (x) => { this._onCombatEndCallback(x); })
             .registerEvent("onCombatStart", (x) => { this._onCombatCallback(x); })
     }
 
@@ -92,24 +92,24 @@ export class MyrahScene extends SceneUIBase {
             Math.floor(attackCooldown / this.combatManager.monsters[idx].attackSpeed * 100) + "%");
     }
 
-    _rewardCallback(__rewards) {
-        if (this.myrahDefeats === 0) {
-            var tile = this.combatManager.activeTile;
-            this.myrahDefeats += 1;
-            var creatures = [CreatureRegistry.GetCreatureByName("myrah2", tile.difficulty, tile.parent.regionLevel)];
-
-            for (var t = 0; t < tile.parent.traits.length; t++) {
-                creatures[0].addTrait(tile.parent.traits[t].type, tile.parent.traits[t].level);
-            }
-            creatures[0].applyTraits();
-            this.combatManager.initFightWithCreatures(false, creatures);
+    _onCombatEndCallback(rewards) {
+        if (rewards === undefined) {
+            this._setSceneState(STATE_FAILURE);
         } else {
-            this._setSceneState(STATE_REWARDS);
+            if (this.myrahDefeats === 0) {
+                var tile = this.combatManager.activeTile;
+                this.myrahDefeats += 1;
+                var creatures = [CreatureRegistry.GetCreatureByName("myrah2", tile.difficulty, tile.parent.regionLevel)];
+    
+                for (var t = 0; t < tile.parent.traits.length; t++) {
+                    creatures[0].addTrait(tile.parent.traits[t].type, tile.parent.traits[t].level);
+                }
+                creatures[0].applyTraits();
+                this.combatManager.initFightWithCreatures(false, creatures);
+            } else {
+                this._setSceneState(STATE_REWARDS);
+            }
         }
-    }
-
-    _playerDefeatCallback() {
-        this._setSceneState(STATE_FAILURE);
     }
 
     _updatePlayerBlock() {

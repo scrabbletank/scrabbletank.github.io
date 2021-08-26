@@ -13,13 +13,13 @@ export class RuneUpgradeWindow {
         this.x = x;
         this.y = y;
         this.hoveredElement = -1;
-        this.backRect = sceneContext.add.rectangle(x, y, 700, 500, Phaser.Display.Color.GetColor(0, 0, 0))
+        this.backRect = sceneContext.add.rectangle(x, y, 700, 550, Phaser.Display.Color.GetColor(0, 0, 0))
             .setInteractive()
             .setOrigin(0, 0).setDepth(999);
         this.backRect.isStroked = true;
         this.backRect.strokeColor = Phaser.Display.Color.GetColor(128, 128, 128);
         this.backRect.lineWidth = 2;
-        this.separator = sceneContext.add.rectangle(x + 250, y, 2, 500,
+        this.separator = sceneContext.add.rectangle(x + 250, y, 2, 550,
             Phaser.Display.Color.GetColor(128, 128, 128)).setOrigin(0, 0).setDepth(999);
 
         this.upgradeTitle = sceneContext.add.bitmapText(x + 5, y + 5, "courier20", "UPGRADE").setOrigin(0, 0).setDepth(999);
@@ -37,38 +37,46 @@ export class RuneUpgradeWindow {
 
         this.upgradeBtn = new TextButton(this.scene, this.x + 20, this.y + 315, 120, 20, "Upgrade", 999);
         this.upgradeBtn.onClickHandler(() => { this._upgradeRune(); });
-        this.rerollBtn = new TextButton(this.scene, this.x + 20, this.y + 390, 120, 20, "Reroll", 999);
-        this.rerollBtn.onClickHandler(() => { this._rerollRune(); });
-        this.shatterBtn = new TextButton(this.scene, this.x + 20, this.y + 465, 120, 20, "Shatter", 999);
+        this.shatterBtn = new TextButton(this.scene, this.x + 20, this.y + 515, 120, 20, "Shatter", 999);
         this.shatterBtn.onClickHandler(() => { this._shatterRune(); });
+        this.transmute1Btn = new ImageButton(this.scene, this.x + 30, this.y + 385, 48, 48,
+            RuneRegistry.getRuneTexture("Tyr"), 999);
+        this.transmute1Btn.onClickHandler(() => { this._transmuteRune(0); });
+        this.transmute2Btn = new ImageButton(this.scene, this.x + 100, this.y + 385, 48, 48,
+            RuneRegistry.getRuneTexture("Empty"), 999);
+        this.transmute2Btn.onClickHandler(() => { this._transmuteRune(1); });
+        this.transmute3Btn = new ImageButton(this.scene, this.x + 170, this.y + 385, 48, 48,
+            RuneRegistry.getRuneTexture("Empty"), 999);
+        this.transmute3Btn.onClickHandler(() => { this._transmuteRune(2); });
         this.upgradeTxt = this.scene.add.bitmapText(this.x + 125, this.y + 275, "courier16",
             "Empower this rune with\nMotes of Darkness").setOrigin(0.5, 0).setDepth(999);
         this.upgradeTxt.setCenterAlign();
         this.rerollTxt = this.scene.add.bitmapText(this.x + 125, this.y + 345, "courier16",
             "Use Motes to Reforge this\nRune into a different Rune.").setOrigin(0.5, 0).setDepth(999);
         this.rerollTxt.setCenterAlign();
-        this.shatterTxt = this.scene.add.bitmapText(this.x + 125, this.y + 420, "courier16",
+        this.shatterTxt = this.scene.add.bitmapText(this.x + 125, this.y + 470, "courier16",
             "Shatter this rune for\nMotes of Darkness.").setOrigin(0.5, 0).setDepth(999);
         this.shatterTxt.setCenterAlign();
         this.upgradeCost = this.scene.add.bitmapText(this.x + 205, this.y + 316, "courier16", "").setOrigin(1, 0).setDepth(999);
-        this.rerollCost = this.scene.add.bitmapText(this.x + 205, this.y + 391, "courier16", "").setOrigin(1, 0).setDepth(999);
-        this.shatterCost = this.scene.add.bitmapText(this.x + 205, this.y + 466, "courier16", "").setOrigin(1, 0).setDepth(999);
+        this.rerollCost = this.scene.add.bitmapText(this.x + 130, this.y + 441, "courier16", "").setOrigin(1, 0).setDepth(999);
+        this.shatterCost = this.scene.add.bitmapText(this.x + 205, this.y + 516, "courier16", "").setOrigin(1, 0).setDepth(999);
         this.upgradeIcon = this.scene.add.image(x + 220, y + 325, "icons", 39).setDepth(999);
         this.upgradeIcon.displayWidth = 20;
         this.upgradeIcon.displayHeight = 20;
-        this.rerollIcon = this.scene.add.image(x + 220, y + 400, "icons", 39).setDepth(999);
+        this.rerollIcon = this.scene.add.image(x + 145, y + 450, "icons", 39).setDepth(999);
         this.rerollIcon.displayWidth = 20;
         this.rerollIcon.displayHeight = 20;
-        this.shatterIcon = this.scene.add.image(x + 220, y + 475, "icons", 39).setDepth(999);
+        this.shatterIcon = this.scene.add.image(x + 220, y + 525, "icons", 39).setDepth(999);
         this.shatterIcon.displayWidth = 20;
         this.shatterIcon.displayHeight = 20;
         this.upgradeUI = [
-            this.upgradeTxt, this.upgradeBtn, this.rerollTxt, this.rerollBtn,
+            this.upgradeTxt, this.upgradeBtn, this.rerollTxt,
             this.upgradeCost, this.rerollCost, this.upgradeIcon, this.rerollIcon,
-            this.shatterTxt, this.shatterBtn, this.shatterCost, this.shatterIcon
+            this.shatterTxt, this.shatterBtn, this.shatterCost, this.shatterIcon,
+            this.transmute1Btn, this.transmute2Btn, this.transmute3Btn
         ];
 
-        this.cancelBtn = new TextButton(this.scene, this.x + 575, this.y + 475, 120, 20, "Cancel", 999);
+        this.cancelBtn = new TextButton(this.scene, this.x + 575, this.y + 525, 120, 20, "Cancel", 999);
 
         this.shatterKey = this.scene.input.keyboard.addKey(Phaser.Input.Keyboard.KeyCodes.S);
 
@@ -167,6 +175,11 @@ export class RuneUpgradeWindow {
         }
         this.runeText.push(this.scene.add.bitmapText(this.x + 20, this.y + 120, "courier16", txt).setDepth(999));
 
+        var transmutes = RuneRegistry.getRuneTransmutes(rune.word);
+        this.transmute1Btn.setTexture(RuneRegistry.getRuneTexture(transmutes[0]));
+        this.transmute2Btn.setTexture(RuneRegistry.getRuneTexture(transmutes[1]));
+        this.transmute3Btn.setTexture(RuneRegistry.getRuneTexture(transmutes[2]));
+
         var cost = RuneRegistry.getUpgradeCost(rune);
         this.upgradeCost.setText(Common.numberString(cost));
         this.rerollCost.setText(Common.numberString(Math.floor(cost / 2)));
@@ -186,12 +199,12 @@ export class RuneUpgradeWindow {
             this._selectRune(this.selectedRune);
         }
     }
-    _rerollRune() {
+    _transmuteRune(index) {
         var rune = PlayerData.getInstance().runes[this.selectedRune];
         var cost = Math.floor(RuneRegistry.getUpgradeCost(rune) / 2);
         if (PlayerData.getInstance().motes >= cost) {
             PlayerData.getInstance().addMote(-cost);
-            var newRune = RuneRegistry.getRandomRuneAtLevel(rune.level);
+            var newRune = RuneRegistry.getTransmutedRune(rune, index);
             PlayerData.getInstance().runes[this.selectedRune] = newRune;
             this._switchPage(this.page);
         }

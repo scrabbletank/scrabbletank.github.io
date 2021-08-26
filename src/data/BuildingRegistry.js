@@ -51,6 +51,9 @@ export class BuildingRegistry {
             case "dojo":
                 return new Building("Dojo", "dojo", 1, BuildingTypes.ECON, { sprite: "bldicons", tile: 54, w: 32, h: 32 },
                     [30, 0, 20, 20, 0, 10], 125, 5);
+            case "garrison":
+                return new Building("Garrison", "garrison", 1, BuildingTypes.ECON, { sprite: "bldicons", tile: 53, w: 32, h: 32 },
+                    [50, 0, 20, 0, 50, 0], 150, 5);
         }
     }
 }
