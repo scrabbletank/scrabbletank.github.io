@@ -135,9 +135,9 @@ export class MoonlightData {
                     name: "Crown Lands", level: 0, maxLevel: -1, requires: ["discovery"], cost: [60, 45, 1.3],
                     texture: { sprite: "moonicons", tile: 18 }
                 },
-                mysticcauldron: {
-                    name: "Mystic Cauldron", level: 0, maxLevel: -1, requires: ["moonwine"], cost: [75, 60, 1.4],
-                    texture: { sprite: "moonicons", tile: 23 }
+                construction: {
+                    name: "Inspired Construction", level: 0, maxLevel: -1, requires: ["moonwine"], cost: [75, 100, 1.4],
+                    texture: { sprite: "moonicons", tile: 36 }
                 },
                 shadow3: {
                     name: "Shadow's Harvest", level: 0, maxLevel: -1, requires: ["shadow2"], cost: [150, 100, 1.3],

@@ -96,9 +96,8 @@ export class TooltipRegistry {
                 return "Your screams of terror while fighting the monsters has charmed the villagers. Gain " +
                     (lvl * 10) + "% + (10%) more friendship from killing monsters.";
             case "Town Guard":
-                return "Motivate the elderly to throw their bodies at enemy invasions! When the invasion counter reaches 100% you have a " +
-                    (lvl * 0.5) + "% + (0.5%) chance per defense to not be invaded! You'll still lose population, but that's a sacrifice " +
-                    "you're willing to make.";
+                return "Motivate the elderly to throw their bodies at enemy invasions! Invasions take " +
+                    (lvl * 10) + "% + (10%) longer to increase in strength.";
             // WIZARD TALENTS
             case "Cantrip":
                 return "Only one spell will cast per attack. Every attack you deal " + (20 + lvl * 9) + "% + (9%) of your spellpower in magic damage.";
@@ -187,9 +186,9 @@ export class TooltipRegistry {
             case "Map Making":
                 return "Instead of wandering aimlessly, get some villagers to make some maps. Increases exploration speed by 10%.";
             case "Barracks":
-                return "Build a place for your villagers to practice fighting and show off how much they can lift. Increases Villager Power by 20% per level.";
+                return "Build a place for your villagers to practice fighting and show off how much they can lift. Increases Villager Power by 5% per level.";
             case "Armory":
-                return "You found that if you give the villagers some scraps from the forge they die less. Increases Villager Health by 20% per level.";
+                return "You found that if you give the villagers some scraps from the forge they die less. Increases Villager Health by 5% per level.";
         }
         return tech.name + ": Missing Tooltip";
     }
@@ -260,7 +259,7 @@ export class TooltipRegistry {
             case "Shadow's Gold":
                 return "Monsters drop " + (moonlight.level * 0.25) + " + (0.25) more gold.";
             case "Discovery":
-                return "Gain " + (moonlight.level * 10) + " + (10) friendship each time you fully explore a tile.";
+                return "Gain " + (moonlight.level * 30) + " + (30) friendship each time you fully explore a tile.";
             case "Shadow's Chosen":
                 return "Monsters base shade reward increased by " + (moonlight.level * 2) + " + (2). This is added before other multipliers, " +
                     "such as Shadow's Blessing or monster level.";
@@ -274,8 +273,8 @@ export class TooltipRegistry {
                 return "Production is increased by " + (moonlight.level) + "% + (1%) per friendship level.";
             case "Crown Lands":
                 return "Each explored tile increases your base gold cap by " + (moonlight.level * 2) + " + (2).";
-            case "Mystic Cauldron":
-                return "Alchemy Labs create " + (moonlight.level * 10) + "% + (10%) more resources from the same inputs.";
+            case "Inspired Construction":
+                return "Watch Towers and Warehouses bonuses are increased by " + (moonlight.level * 10) + "% + (10%).";
             case "Shadow's Harvest":
                 return "Each day you gain " + (moonlight.level) * 0.75 + " + (0.75) shade per villager. This bonus is increased by Shadow's Blessing and town production.";
             case "Shadow Wolf Charm":
@@ -293,8 +292,8 @@ export class TooltipRegistry {
             case "Nightmare Pendant":
                 return "Unlocks the Nightmare Pendant trinket which grants Accuracy, Crit Chance and Aim. Available up to tier " + (moonlight.level) + " + (1)";
             case "Night Labour":
-                return "Unlocks Night Labour for Towns. When active, villagers gold income is reduced by 50% while all production is increased by " +
-                    (moonlight.level * 10) + "% + (10%).";
+                return "Unlocks Night Labour for Towns. When active each villager is paid " + (moonlight.level / 2) +
+                    "g  + (0.5g) per day and increases production by " + (moonlight.level / 10) + "% + (0.1%).";
             case "Devotion":
                 return "Increases Villager Power and Health by " + (moonlight.level * 10) + "% + (10%).";
             case "Ninjas":
@@ -374,15 +373,13 @@ export class TooltipRegistry {
                     "Fastest Time: " + new WorldTime(challenge.fastestTime).getTimespanText();
             case "Invasion":
                 return "Invasions, everyones favourite feature! I made the invasion timer reaaal small so you can enjoy it to the fullest. " +
-                    "Oh, also invasion monsters have +" + (5 + 5 * completions) + " levels, and if you lose a tile to an invasion it's " +
-                    "difficulty increases by the same amount.\n\n" +
-                    "Restrictions: Reach Gate " + (1 + completions) + ".\n\n" +
-                    "On First Completion: Auto explore auto fights invasions,\n" +
-                    "                     giving 25% motes.\n" +
-                    "On Every Completion: Invasions take 25% longer to destroy\n" +
-                    "                     a tile.\n" +
-                    "                     +3 Challenge Points\n" +
-                    "On Final Completion: Auto explore gives 100% motes.\n\n" +
+                    "Oh, also invasion monsters have +" + (5 + 5 * completions) + " levels.\n\n" +
+                    "Restrictions: Invasions spawn faster and spread quicker\n" +
+                    "              Reach Gate " + (1 + completions) + ".\n\n" +
+                    "On Every Completion: Invasions take 20% longer to\n" +
+                    "                     increase in strength.\n" +
+                    "                     Invasions give 5% more motes.\n" +
+                    "                     +3 Challenge Points\n\n" +
                     "Completions: " + challenge.completions + "/" + challenge.maxCompletions + "\n" +
                     "Fastest Time: " + new WorldTime(challenge.fastestTime).getTimespanText();
             case "Talentless":
@@ -692,6 +689,18 @@ export class TooltipRegistry {
                 return sign + value + " Chromatic Codex Talent";
             case "defToShield":
                 return sign + Math.round(value * 100) + "% " + TooltipRegistry.defenseName + " to Shield";
+            case "goldFlat":
+                return sign + value + " Gold per Kill";
+            case "goldMulti":
+                return sign + Math.round(value * 100) + "% Gold Drops";
+            case "resourceMulti":
+                return sign + Math.round(value * 100) + "% Resource Drops";
+            case "shadeMulti":
+                return sign + Math.round(value * 100) + "% Shade per Kill";
+            case "gearScaling":
+                return sign + Math.round(value * 100) + "% Gear Stat Scaling";
+            case "baseTalents":
+                return sign + value + " Base Stat Talents";
         }
         return "";
     }
@@ -770,7 +779,7 @@ export class TooltipRegistry {
             case Statics.DUNGEON.GOLD:
                 return "A 'Dragons Horde' worth of gold, or " + Common.numberString(reward.amount) + " pieces.";
             case Statics.DUNGEON.GEAR_LEVELS:
-                return "Your not really sure how, but get " + Common.numberString(reward.amount) + " levels to your equiped gear.";
+                return "Your not really sure how, but get " + Common.numberString(reward.amount) + " levels to your equipped gear.";
             case Statics.DUNGEON.RUNES:
                 return "The monsters were guarding " + Common.numberString(reward.amount) + " random Runes. Nice!";
             case Statics.DUNGEON.WOOD:

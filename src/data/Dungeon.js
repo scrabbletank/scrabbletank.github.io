@@ -59,12 +59,12 @@ export class Dungeon {
                         this.rewards.push({ type: num, amount: 28 });
                         break;
                     case Statics.DUNGEON.SHADE:
-                        var shade = Math.floor((1600 + MoonlightData.getInstance().moonperks.shadow2.level * 75) * (1 + (this.level / 4)) *
+                        var shade = Math.floor((4000 + MoonlightData.getInstance().moonperks.shadow2.level * 200) * (1 + (this.level / 4)) *
                             MoonlightData.getInstance().getShadowBonus() * (1 + StarData.getInstance().perks.mists.level * 0.25));
                         this.rewards.push({ type: num, amount: shade });
                         break;
                     case Statics.DUNGEON.MOTES:
-                        var motes = (1 + MoonlightData.getInstance().moonperks.heartofdarkness.level) * 40;
+                        var motes = (1 + MoonlightData.getInstance().moonperks.heartofdarkness.level) * 50 * (1 + (this.level / 5));
                         this.rewards.push({ type: num, amount: motes });
                         break;
                     case Statics.DUNGEON.GOLD:
@@ -153,7 +153,7 @@ export class Dungeon {
                         this.rewards.push({ type: num, amount: shards });
                         break;
                     case Statics.DUNGEON.RITUAL_POINTS:
-                        this.rewards.push({ type: num, amount: Math.floor(1 + (this.tier / 2)) });
+                        this.rewards.push({ type: num, amount: Math.floor(1 + (this.regionLevel / 4)) });
                         break;
                 }
             }

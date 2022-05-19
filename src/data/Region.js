@@ -36,7 +36,6 @@ export class TileData {
         this.difficulty = 0;
         this.amountExplored = 0;
         this.isInvaded = false;
-        this.invasionPower = 0;
         this.invasionFights = 0;
         this.building = undefined;
         this.defense = 0;
@@ -54,10 +53,12 @@ export class TileData {
         this.yields = [];
         this.roadDist = -1;
         this.roadBonus = 0;
+        this.towerBonus = 1;
         this.roadBuildable = false;
         this.dockBuildable = false;
         this.houseBuildable = false;
         this.roadConnected = false;
+        this.canInvade = true;
         this.parent = undefined;
     }
 
@@ -69,7 +70,6 @@ export class TileData {
             rn: this.regName,
             ae: this.amountExplored,
             in: this.isInvaded,
-            ip: this.invasionPower,
             if: this.invasionFights,
             bld: this.building === undefined ? "" : this.building.save(),
             def: this.defense,
@@ -90,7 +90,6 @@ export class TileData {
         tile.difficulty = saveObj.dif;
         tile.amountExplored = saveObj.ae;
         tile.isInvaded = saveObj.in;
-        tile.invasionPower = saveObj.ip;
         tile.invasionFights = saveObj.if;
         tile.building = saveObj.bld === "" ? undefined : Building.loadFromFile(saveObj.bld, ver);
         tile.defense = saveObj.def;
@@ -117,34 +116,18 @@ export class TileData {
         this.parent = region;
     }
 
-    sighting() {
+    invade() {
         this.isInvaded = true;
-        this.invasionPower = 0;
-        this.invasionFights = 5;
-    }
-
-    invade(destroy = true) {
-        if (DynamicSettings.getInstance().invasionsIncreaseDifficulty === true) {
-            this.difficulty += DynamicSettings.getInstance().invasionLevelBonus;
-        }
-        this.isInvaded = false;
-        this.invasionPower = 0;
-        this.amountExplored = 0;
         this.invasionFights = 0;
-        if (destroy === true) {
-            this.explored = false;
-            this.revealed = true;
-        }
     }
 
-    getInvasionMulti() { return Math.min(5, Math.floor(Math.max(0, Math.log2(this.invasionPower / Statics.SIGHTING_DIVIDER)))); }
     getFriendshipReward() {
-        return 1 + 0.05 * (this.difficulty - (this.parent.regionLevel * DynamicSettings.getInstance().regionDifficultyIncrease));
+        return 2 + 0.1 * (this.difficulty - (this.parent.regionLevel * DynamicSettings.getInstance().regionDifficultyIncrease));
     }
 
     explore(delta) {
         if (this.explored === true) {
-            return false;
+            return;
         }
         var exploreMulti = PlayerData.getInstance().getExploreMulti() *
             DynamicSettings.getInstance().exploreSpeed *
@@ -152,17 +135,8 @@ export class TileData {
         exploreMulti = exploreMulti / this.exploreSpeed;
         this.amountExplored += delta * exploreMulti;
 
-        if (this.amountExplored >= this.explorationNeeded && this.explored === false) {
-            return true;
-        }
-
-        return false;
-    }
-    incInvasionPower(baseline) {
-        if (this.getInvasionMulti() < 5) {
-            var def = baseline + this.defense;
-            var powerMulti = Math.max(0.1, 1 + (this.difficulty - def) * 0.1);
-            this.invasionPower += Statics.TIME_PER_DAY * powerMulti;
+        if (this.amountExplored >= this.explorationNeeded) {
+            this.parent.exploreTile(this.x, this.y);
         }
     }
 
@@ -170,10 +144,9 @@ export class TileData {
         var enemyList = [];
         if (this.isInvaded === true) {
             var bonusDif = DynamicSettings.getInstance().invasionLevelBonus +
-                RitualData.getInstance().activePerks.callofthevoid;
-            var bossDif = this.difficulty + this.getInvasionMulti();
+                RitualData.getInstance().activePerks.callofthevoid + this.parent.invasionStrength;
             enemyList.push(CreatureRegistry.GetCreatureByName(this.enemies[Common.randint(0, this.enemies.length)],
-                bossDif + bonusDif, this.parent.regionLevel));
+                this.difficulty + bonusDif, this.parent.regionLevel));
             enemyList.push(CreatureRegistry.GetCreatureByName(this.enemies[Common.randint(0, this.enemies.length)],
                 this.difficulty - 1 + bonusDif, this.parent.regionLevel));
             enemyList.push(CreatureRegistry.GetCreatureByName(this.enemies[Common.randint(0, this.enemies.length)],
@@ -219,7 +192,6 @@ export class Region {
     constructor(width = 8, height = 8, regionLevel, regionType, traits, ignoreGen = false) {
         //non-save variables
         this.tileChangedHandler = undefined;
-        this.sightingHandler = undefined;
         this.resourcesPerDay = [0, 0, 0, 0, 0, 0];
         this.taverns = [];
         this.roads = [];
@@ -236,6 +208,7 @@ export class Region {
         this.autoUpgrade = false;
         this.blueprint = -1;
         this.starshardsPerTile = 1;
+        this.garrisonRefreshRate = 0;
 
         if (ignoreGen === true) {
             return true;
@@ -247,9 +220,11 @@ export class Region {
         this.resourceTier = Math.min(7, this.regionLevel + DynamicSettings.getInstance().minResourceTier);
         this.townData = new TownData(regionLevel + 1, this.resourceTier);
         this.tilesExplored = 0;
-        this.sightings = [];
-        this.sightingsDelay = 0;
+        this.invasionTimer = 3;
+        this.invasionStrength = 0;
         this.invasionCounter = 0;
+        this.invasionCounterMax = 100;
+        this.invasions = [];
         this.worldHeight = 350;
         this.type = regionType;
         this.map = []
@@ -298,9 +273,11 @@ export class Region {
             td: this.townData.save(),
             te: this.tilesExplored,
             map: tileSave,
-            sight: this.sightings,
-            sd: this.sightingsDelay,
-            ic: this.invasionCounter,
+            inv: this.invasions,
+            it: this.invasionTimer,
+            is: this.invasionStrength,
+            ic2: this.invasionCounter,
+            icm: this.invasionCounterMax,
             wh: this.worldHeight,
             type: this.type,
             tr: this.traits,
@@ -323,9 +300,6 @@ export class Region {
         region.townData = new TownData(1, 0);
         region.townData.load(saveObj.td);
         region.tilesExplored = saveObj.te;
-        region.sightings = saveObj.sight;
-        region.sightingsDelay = saveObj.sd;
-        region.invasionCounter = saveObj.ic;
         region.worldHeight = saveObj.wh;
         region.type = saveObj.type;
         region.traits = saveObj.tr;
@@ -334,6 +308,11 @@ export class Region {
         region.blueprint = saveObj.bp === undefined ? -1 : saveObj.bp;
         region.resourceTier = saveObj.rt === undefined ? Math.min(7, region.regionLevel) : saveObj.rt;
         region.starshardsPerTile = saveObj.sst === undefined ? 1 : saveObj.sst;
+        region.invasionStrength = saveObj.is === undefined ? 0 : saveObj.is;
+        region.invasionCounter = saveObj.ic2 === undefined ? 0 : saveObj.ic2;
+        region.invasionCounterMax = saveObj.icm === undefined ? 100 : saveObj.icm;
+        region.invasions = saveObj.inv === undefined ? [] : saveObj.inv;
+        region.invasionTimer = saveObj.it === undefined ? 3 : saveObj.it;
         region.map = []
         for (var i = 0; i < saveObj.map.length; i++) {
             var row = [];
@@ -648,10 +627,6 @@ export class Region {
     }
     removeHandlers() {
         this.tileChangedHandler = undefined;
-        this.sightingHandler = undefined;
-    }
-    onSighting(callback) {
-        this.sightingHandler = callback;
     }
     _onTileChanged(tile) {
         if (this.tileChangedHandler !== undefined) {
@@ -689,8 +664,14 @@ export class Region {
             this.tilesExplored += 1;
             this.townData.setTilesExplored(this.tilesExplored);
             this.map[y][x].explored = true;
-            this.townData.addFriendship(10 * MoonlightData.getInstance().moonperks.discovery.level);
+            this.townData.addFriendship(30 * MoonlightData.getInstance().moonperks.discovery.level);
             if (this.map[y][x].hasRune === true) {
+                if (ProgressionStore.getInstance().unlocks.runes === false) {
+                    ProgressionStore.getInstance().registerFeatureUnlocked(Statics.UNLOCK_RUNES_UI,
+                        "You found an interesting rock in that last tile and shoved it into your pack, probably due to your crippling need " +
+                        "to hoard things like some RPG character. The rock was glowing so it would probably make a neat good luck charm if you " +
+                        "shoved it into the holes on your gear.");
+                }
                 this.map[y][x].hasRune = false;
                 var runeLvl = Math.floor(this.regionLevel / 2) + 1 +
                     Math.floor(MoonlightData.getInstance().moonperks.runelands.level / 5);
@@ -699,12 +680,42 @@ export class Region {
             }
             if (this.map[y][x].name === "Town") {
                 this.townData.townExplored = true;
+                if (ProgressionStore.getInstance().unlocks.townTab === false) {
+                    ProgressionStore.getInstance().registerFeatureUnlocked(Statics.UNLOCK_TOWN_TAB,
+                        "You've finally made it to the town you saw in the distance, the only square not covered in this " +
+                        "horrible fog. As you approach the gate a voice calls to you from the wall.\n\n" +
+                        "\"Oh hey, you must be the new hero we've heard about, give me a minute to open the gate.\"\n\n" +
+                        "Hero? You woke up naked and alone in the wilderness. Come to think of it, it's amazing you're even " +
+                        "still alive. You're still contemplating your existence when the door opens.\n\n" +
+                        "\"So hero, you don't mind if I call you hero do you? Just makes things easier. Anyway we have a house " +
+                        "laid out for you, don't expect much. The Forge has seen better days and the guilds have all been abandoned " +
+                        "but I'm sure you'll see to that, Mr. Hero.\"\n\nYou begin to ask what all this hero nonsense is about " +
+                        "when they speak up again.\n\n \"Oh that reminds me, we don't have much, but we can pay you for every one " +
+                        "of those monsters you kill. Don't try to lie about how many you've beat, we can tell. Oh, and we'll pay " +
+                        "you more when you're clearing new land for us. What were you trying to ask?\"\n\nYou say it was nothing " +
+                        "and ask them to lead the way. You don't know about this hero stuff, but money is money. Besides you were " +
+                        "already fighting this monsters anyway, might as well make money while you do it.");
+                }
             }
             if (this.tilesExplored >= 5 && WorldData.getInstance().invasionRegion < this.regionLevel) {
                 WorldData.getInstance().increaseInvasionPower();
             }
             if (this.tilesExplored >= 10) {
                 this.townData.researchEnabled = true;
+            }
+
+            if (y === 0) {
+                if (ProgressionStore.getInstance().unlocks.worldTab === false) {
+                    ProgressionStore.getInstance().registerFeatureUnlocked(Statics.UNLOCK_WORLD_TAB,
+                        "You did it, you've reached the edge of the world. This is all there is...\n\n" +
+                        "Oh wait, it looks like there's a trail over there leading to a new region! there's " +
+                        "a whole world out there. I was wondering what that last tab was going to be.");
+                }
+
+                if (WorldData.getInstance().regionList.length - 1 === this.regionLevel && WorldData.getInstance().nextRegions.length === 0 &&
+                    (WorldData.getInstance().regionList.length < 10 || ProgressionStore.getInstance().persistentUnlocks.starshards === true)) {
+                    WorldData.getInstance().generateRegionChoices();
+                }
             }
             if (y > 0) {
                 this.map[y - 1][x].revealed = true;
@@ -752,6 +763,7 @@ export class Region {
                 ProgressionStore.getInstance().persistentUnlocks.rituals = true;
                 ProgressionStore.getInstance().registerLore("cultists2");
             }
+            ProgressionStore.getInstance().registerTileExplored();
         }
         if (this.regionLevel > 0 && this.regionLevel <= 8 && WorldData.getInstance().getRegion(this.regionLevel - 1).townData.alchemyEnabled === false) {
             WorldData.getInstance().getRegion(this.regionLevel - 1).townData.alchemyEnabled = true;
@@ -765,36 +777,37 @@ export class Region {
         return this.map[y][x];
     }
 
-    _invade() {
-        this.invasionCounter = 0;
-        var tile = this.sightings[Common.randint(0, this.sightings.length)];
-        if (Math.random() <= tile.defense * PlayerData.getInstance().getTalentLevel('townguard') * 0.005) {
-            this.map[tile[0]][tile[1]].invade(false);
-            this.townData.currentPopulation = this.townData.currentPopulation * Statics.POP_MULTI_AFTER_INVASION;
-        } else {
-            this.map[tile[0]][tile[1]].invade();
-            if (this.map[tile[0]][tile[1]].building != undefined) {
-                this.destroyBuilding(tile[1], tile[0]);
-            }
-            this.townData.currentPopulation = this.townData.currentPopulation * Statics.POP_MULTI_AFTER_INVASION;
-            this.tilesExplored -= 1;
-            this.townData.setTilesExplored(this.tilesExplored);
+    _expandInvasion(tile, invasionList) {
+        if (tile[0] - 1 >= 0 && this.map[tile[0] - 1][tile[1]].isInvaded === false &&
+            this.map[tile[0] - 1][tile[1]].canInvade === true &&
+            this.map[tile[0] - 1][tile[1]].explored === true) {
+            invasionList.push([tile[0] - 1, tile[1]]);
         }
-        this.endSighting(tile[1], tile[0]);
+        if (tile[0] + 1 < this.height && this.map[tile[0] + 1][tile[1]].isInvaded === false &&
+            this.map[tile[0] + 1][tile[1]].canInvade === true &&
+            this.map[tile[0] + 1][tile[1]].explored === true) {
+            invasionList.push([tile[0] + 1, tile[1]]);
+        }
+        if (tile[1] - 1 >= 0 && this.map[tile[0]][tile[1] - 1].isInvaded === false &&
+            this.map[tile[0]][tile[1] - 1].canInvade === true &&
+            this.map[tile[0]][tile[1] - 1].explored === true) {
+            invasionList.push([tile[0], tile[1] - 1]);
+        }
+        if (tile[1] + 1 < this.width && this.map[tile[0]][tile[1] + 1].isInvaded === false &&
+            this.map[tile[0]][tile[1] + 1].canInvade === true &&
+            this.map[tile[0]][tile[1] + 1].explored === true) {
+            invasionList.push([tile[0], tile[1] + 1]);
+        }
+        return invasionList;
     }
 
-    _addSighting() {
-        var baseTimer = Math.max(DynamicSettings.getInstance().invasionTimer -
-            RitualData.getInstance().activePerks.callofthevoid * 2, 5);
-        var a = Math.min(baseTimer * (1 + this.sightings.length * Statics.SIGHTING_MULTI_PER_SIGHTING),
-            Statics.MAX_SIGHTING_SECONDS);
-        var b = Math.min(a * 2, Statics.MAX_SIGHTING_SECONDS);
-        this.sightingsDelay = Common.randint(a, b) * 1000;
+    _startInvasion() {
+        this.invasionTimer = DynamicSettings.getInstance().expandTimer;
         var invadeList = [];
         for (var y = 1; y < this.height - 1; y++) {
             for (var x = 1; x < this.width - 1; x++) {
                 if (this.map[y][x].explored === false || this.map[y][x].name === "Town" || this.map[y][x].name === "Mystic Gate" ||
-                    this.map[y][x].isInvaded === true) {
+                    this.map[y][x].isInvaded === true || this.map[y][x].canInvade === false) {
                     continue;
                 }
                 var canInvade = false;
@@ -815,20 +828,23 @@ export class Region {
             return;
         }
         var tile = invadeList[Common.randint(0, invadeList.length)];
-        this.sightings.push(tile);
-        this.map[tile[0]][tile[1]].sighting();
-        if (this.sightingHandler !== undefined) {
-            this.sightingHandler();
-        }
+        this.invasions = [tile];
+        this.map[tile[0]][tile[1]].invade();
     }
 
-    endSighting(x, y) {
+    clearInvadedTile(x, y) {
         this.map[y][x].isInvaded = false;
-        this.map[y][x].invasionPower = 0;
-        this.invasionCounter = Math.max(0, this.invasionCounter - Statics.INVASION_REDUCTION_FROM_SIGHTING);
-
-        this.sightings = this.sightings.filter(s => this.map[s[0]][s[1]].isInvaded === true);
+        this.invasions = this.invasions.filter(s => this.map[s[0]][s[1]].isInvaded === true);
+        this.invasionCounter = Math.max(0,
+            this.invasionCounter - Statics.INVASION_STRENGTH_REDUCTION * this.invasionStrength);
         this._onTileChanged(this.map[y][x]);
+        if (this.invasions.length == 0) {
+            this.invasionStrength = 0;
+            this.invasionCounter = 0;
+            this.invasionCounterMax = 100;
+            this.invasionTimer = DynamicSettings.getInstance().invasionTimer;
+        }
+        this._calculateTileBonuses();
     }
 
     _canDock(x, y) {
@@ -956,13 +972,16 @@ export class Region {
         this.alchemyGain = 0;
         this.exchangePower = 0;
         this.villagerStatGain = [0, 0];
+        this.garrisonRefreshRate = 0;
         for (var i = 0; i < this.height; i++) {
             for (var t = 0; t < this.width; t++) {
                 this.map[i][t].roadDist = -1;
                 this.map[i][t].roadBonus = 0;
+                this.map[i][t].towerBonus = 1;
                 this.map[i][t].roadBuildable = false;
                 this.map[i][t].houseBuildable = false;
                 this.map[i][t].roadConnected = false;
+                this.map[i][t].canInvade = true;
             }
         }
         //calculate road connectedness
@@ -1006,8 +1025,27 @@ export class Region {
         this.map[ty - 1][tx].roadBuildable = true;
         this.map[ty + 1][tx].roadBuildable = true;
 
+        //calculate tower bonuses
+        for (var i = 0; i < this.towers.length; i++) {
+            var tx = this.towers[i][1];
+            var ty = this.towers[i][0];
+            for (var y = ty - 2; y < ty + 3; y++) {
+                for (var x = tx - 2; x < tx + 3; x++) {
+                    if (Math.abs(x - tx) + Math.abs(y - ty) <= 2 &&
+                        this._getMapProp(x, y, 'towerBonus', undefined) !== undefined) {
+                        this.map[y][x].towerBonus += this.map[ty][tx].building.tier *
+                            (0.02 * (1 + MoonlightData.getInstance().moonperks.construction.level * 0.1));
+                        this.map[y][x].canInvade = false;
+                    }
+                }
+            }
+        }
+
         //get house population
         for (var i = 0; i < this.houses.length; i++) {
+            if (this._getMapProp(this.houses[i][1], this.houses[i][0], 'isInvaded', false) === true) {
+                continue;
+            }
             if (this.map[this.houses[i][0]][this.houses[i][1]].houseBuildable === true) {
                 maxPop += Math.floor((5 + MoonlightData.getInstance().moonperks.urbanization.level) *
                     (1 + StarData.getInstance().perks.estate.level * 0.5) *
@@ -1022,16 +1060,24 @@ export class Region {
             points.push({ x: this.markets[i][1], y: this.markets[i][0] });
         }
         for (var i = 1; i < this.markets.length; i++) {
-            if (this.map[this.markets[i][0]][this.markets[i][1]].roadBuildable === true) {
+            if (this._getMapProp(this.markets[i][1], this.markets[i][0], 'isInvaded', false) === true) {
+                continue;
+            }
+            var tile = this.map[this.markets[i][0]][this.markets[i][1]];
+            if (tile.roadBuildable === true) {
                 var max = 5 + MoonlightData.getInstance().moonperks.nightmarket.level;
-                var tier = this.map[this.markets[i][0]][this.markets[i][1]].building.tier;
+                var tier = tile.building.tier;
                 var closest = Common.nearestPointInList(this.markets[i][1], this.markets[i][0], points, true);
-                econBonus += Math.max(0, Math.min(max, (closest[1] / Statics.TRADE_HOUSE_MAX_DISTANCE) * max)) * tier / 100;
+                econBonus += Math.max(0, Math.min(max, (closest[1] / Statics.TRADE_HOUSE_MAX_DISTANCE) * max)) *
+                    (tile.building.tier / 100) * tile.towerBonus;
                 this.exchangePower += exchange[tier];
             }
         }
         //get tavern bonuses
         for (var i = 0; i < this.taverns.length; i++) {
+            if (this._getMapProp(this.taverns[i][1], this.taverns[i][0], 'isInvaded', false) === true) {
+                continue;
+            }
             var maxDist = 1 + MoonlightData.getInstance().moonperks.moonwine.level;
             var bonus = 0;
             var tier = this.map[this.taverns[i][0]][this.taverns[i][1]].building.tier;
@@ -1045,11 +1091,15 @@ export class Region {
                     }
                 }
             }
-            econBonus += bonus * tier;
+            econBonus += bonus * tier * this.map[this.taverns[i][0]][this.taverns[i][1]].towerBonus;
         }
         //warehouses add to road bonus for all adjacent buildings
         for (var i = 0; i < this.warehouses.length; i++) {
-            var bonus = this.map[this.warehouses[i][0]][this.warehouses[i][1]].building.tier * 0.20;
+            if (this._getMapProp(this.warehouses[i][1], this.warehouses[i][0], 'isInvaded', false) === true) {
+                continue;
+            }
+            var bonus = this.map[this.warehouses[i][0]][this.warehouses[i][1]].building.tier *
+                (0.2 * (1 + MoonlightData.getInstance().moonperks.construction.level * 0.1));
             for (var y = Math.max(0, this.warehouses[i][0] - 1); y < Math.min(this.height, this.warehouses[i][0] + 2); y++) {
                 for (var x = Math.max(0, this.warehouses[i][1] - 1); x < Math.min(this.width, this.warehouses[i][1] + 2); x++) {
                     this.map[y][x].roadBonus += bonus;
@@ -1060,6 +1110,9 @@ export class Region {
         //calculate production bonuses of some prod buildings
         var dockBonus = [1, 1.25, 1.5, 1.75, 2];
         for (var i = 0; i < this.productionBuildings.length; i++) {
+            if (this._getMapProp(this.productionBuildings[i][1], this.productionBuildings[i][0], 'isInvaded', false) === true) {
+                continue;
+            }
             var tile = this.map[this.productionBuildings[i][0]][this.productionBuildings[i][1]];
             switch (tile.building.name) {
                 case "Docks":
@@ -1092,9 +1145,12 @@ export class Region {
         var drain = [1, 5, 13, 33, 77];
         var gain = [0.05, 0.3, 0.9, 3, 8];
         for (var i = 0; i < this.productionBuildings.length; i++) {
+            if (this._getMapProp(this.productionBuildings[i][1], this.productionBuildings[i][0], 'isInvaded', false) === true) {
+                continue;
+            }
             var tile = this.map[this.productionBuildings[i][0]][this.productionBuildings[i][1]];
             var prodBonus = (1 + (tile.defense * MoonlightData.getInstance().moonperks.moonlightworkers.level * 0.01)) *
-                this._getBuildingEfficiency(tile.x, tile.y) * tile.roadBonus;
+                this._getBuildingEfficiency(tile.x, tile.y) * tile.roadBonus * tile.towerBonus;
             switch (tile.building.name) {
                 case "Lumberyard":
                     this.resourcesPerDay[Statics.RESOURCE_WOOD] += tile.building.tier * tile.yields[0] * prodBonus;
@@ -1116,7 +1172,7 @@ export class Region {
                     break;
                 case "Docks":
                     var dockEff = this._getDockEfficiency(tile.x, tile.y);
-                    this.townData.buildingIncome += Statics.DOCK_BASE_ECON * tile.building.tier * dockEff;
+                    this.townData.buildingIncome += Statics.DOCK_BASE_ECON * tile.building.tier * dockEff * tile.towerBonus;
                     break;
                 case "Alchemy Lab":
                     this.alchemyDrain += drain[tile.building.tier - 1];
@@ -1125,9 +1181,12 @@ export class Region {
                 case "Dojo":
                     if (tile.houseBuildable === true) {
                         var moonBonus = (1 + MoonlightData.getInstance().moonperks.ninja.level * 0.25);
-                        this.villagerStatGain[0] += tile.building.tier * 0.05 * moonBonus;
-                        this.villagerStatGain[1] += tile.building.tier * 0.5 * moonBonus;
+                        this.villagerStatGain[0] += tile.building.tier * 0.02 * moonBonus * tile.towerBonus;
+                        this.villagerStatGain[1] += tile.building.tier * 0.2 * moonBonus * tile.towerBonus;
                     }
+                    break;
+                case "Garrison":
+                    this.garrisonRefreshRate += 1;
                     break;
             }
         }
@@ -1176,6 +1235,8 @@ export class Region {
                 return yieldSum > 0 && this.townData.getTavernLevel() > 0;
             case "Dojo":
                 return yieldSum > 0 && tile.houseBuildable && ProgressionStore.getInstance().persistentUnlocks.dungeons === true;
+            case "Garrison":
+                return yieldSum > 0 && tile.houseBuildable && ProgressionStore.getInstance().persistentUnlocks.dungeons === true;
         }
     }
     _canUpgrade(tile) {
@@ -1212,13 +1273,6 @@ export class Region {
                 break;
             case "Watch Tower":
                 this.towers.push([tile.y, tile.x]);
-                for (var y = Math.max(0, tile.y - 2); y < Math.min(this.height, tile.y + 3); y++) {
-                    for (var x = Math.max(0, tile.x - 2); x < Math.min(this.width, tile.x + 3); x++) {
-                        if (Math.abs(x - tile.x) + Math.abs(y - tile.y) <= 2) {
-                            this.map[y][x].defense += 2 * tile.building.tier;
-                        }
-                    }
-                }
                 break;
             case "Market":
                 this.markets.push([tile.y, tile.x]);
@@ -1235,6 +1289,10 @@ export class Region {
                 break;
             case "Warehouse":
                 this.warehouses.push([tile.y, tile.x]);
+                break;
+            case "Garrison":
+                this.productionBuildings.push([tile.y, tile.x]);
+                WorldData.getInstance().garrisonBonus += tile.building.tier * 2;
                 break;
         }
     }
@@ -1255,13 +1313,6 @@ export class Region {
                 break;
             case "Watch Tower":
                 this.towers = this.towers.filter(p => p[1] !== tile.x || p[0] !== tile.y);
-                for (var y = Math.max(0, tile.y - 2); y < Math.min(this.height, tile.y + 3); y++) {
-                    for (var x = Math.max(0, tile.x - 2); x < Math.min(this.width, tile.x + 3); x++) {
-                        if (Math.abs(x - tile.x) + Math.abs(y - tile.y) <= 2) {
-                            this.map[y][x].defense -= 2 * tile.building.tier;
-                        }
-                    }
-                }
                 break;
             case "Market":
                 this.markets = this.markets.filter(p => p[1] !== tile.x || p[0] !== tile.y);
@@ -1277,6 +1328,10 @@ export class Region {
                 break;
             case "Warehouse":
                 this.warehouses = this.warehouses.filter(p => p[1] !== tile.x || p[0] !== tile.y);
+                break;
+            case "Garrison":
+                this.productionBuildings = this.productionBuildings.filter(p => p[1] !== tile.x || p[0] !== tile.y);
+                WorldData.getInstance().garrisonBonus -= tile.building.tier * 2;
                 break;
         }
     }
@@ -1314,11 +1369,7 @@ export class Region {
         return this.productionBuildings.length;
     }
 
-    nextWeakestTile(autoInvasion) {
-        if (autoInvasion === true && this.sightings.length > 0) {
-            // sightings are stored (y,x) while this function expects (x,y)
-            return [this.sightings[0][1], this.sightings[0][0]];
-        }
+    nextWeakestTile() {
         if (DynamicSettings.getInstance().autoExploreOptions === Statics.AUTOEXPLORE_WEAKEST) {
             return this._findWeakestTile();
         } else if (DynamicSettings.getInstance().autoExploreOptions === Statics.AUTOEXPLORE_STRONGEST) {
@@ -1402,13 +1453,12 @@ export class Region {
         // If there are not enough resources to drain, production is scaled proportionally across all alchemy labs
         if (this.alchemyDrain > 0) {
             var resource = [];
-            var moonlightBonus = 1 + (MoonlightData.getInstance().moonperks.mysticcauldron.level * 0.1);
             for (var i = 0; i < player.resources[this.resourceTier].length; i++) {
                 resource.push(Math.min(this.alchemyDrain, player.resources[this.resourceTier][i]));
             }
             player.spendResource(resource, this.resourceTier);
             for (var i = 0; i < player.resources[this.resourceTier].length; i++) {
-                resource[i] = (resource[i] / this.alchemyDrain) * this.alchemyGain * moonlightBonus;
+                resource[i] = (resource[i] / this.alchemyDrain) * this.alchemyGain;
             }
             player.addResource(resource, Math.min(this.resourceTier + 1, 7));
         }
@@ -1434,22 +1484,47 @@ export class Region {
             }
         }
 
-        if (this.tilesExplored >= 11 && this.regionLevel === WorldData.getInstance().invasionRegion) {
-            this.sightingsDelay -= Statics.TIME_PER_DAY;
-            if (this.sightingsDelay <= 0) {
-                this._addSighting();
+        if (this.invasions.length > 0) {
+            var challengeMulti = 1 / (1 + MoonlightData.getInstance().challenges.invasion.completions * 0.2);
+            for (var i = 0; i < this.invasions.length; i++) {
+                var defMulti = Math.sqrt(this.map[this.invasions[i][0]][this.invasions[i][1]].difficulty + 1) /
+                    Math.sqrt(this.map[this.invasions[i][0]][this.invasions[i][1]].defense + 1);
+                this.invasionCounter += Statics.INVASION_STRENGTH_PER_TILE * defMulti * challengeMulti *
+                    (1 / (1 + PlayerData.getInstance().getTalentLevel("townguard") * 0.1));
             }
-        }
-        for (var i = 0; i < this.sightings.length; i++) {
-            var s = this.sightings[i];
-            //TODO Add ramping strength from land/building
-            this.map[s[0]][s[1]].incInvasionPower(this.regionLevel * DynamicSettings.getInstance().regionDifficultyIncrease);
-            this.invasionCounter += this.map[s[0]][s[1]].getInvasionMulti() *
-                (1 / (1 + MoonlightData.getInstance().challenges.invasion.completions * 0.25));
-        }
-
-        if (this.invasionCounter > Statics.INVASION_THRESHOLD) {
-            this._invade();
+            this.invasionCounter += this.invasions.length * Statics.INVASION_STRENGTH_PER_TILE;
+            if (this.invasionCounter > this.invasionCounterMax) {
+                this.invasionStrength += 1;
+                this.invasionCounter -= this.invasionCounterMax;
+                this.invasionCounterMax = this.invasionCounterMax * Statics.INVASION_STRENGTH_MULTI;
+            }
+            this.invasionTimer -= 1;
+            if (this.invasionTimer <= 0) {
+                var newInvasions = [];
+                for (var i = 0; i < this.invasions.length; i++) {
+                    newInvasions = this._expandInvasion(this.invasions[i], newInvasions);
+                }
+                for (var i = 0; i < newInvasions.length; i++) {
+                    if (this.invasions.length >= this.tilesExplored * 0.75) {
+                        break;
+                    }
+                    if (this.map[newInvasions[i][0]][newInvasions[i][1]].isInvaded === false &&
+                        this.map[newInvasions[i][0]][newInvasions[i][1]].regName != "town" &&
+                        this.map[newInvasions[i][0]][newInvasions[i][1]].regName != "mysticgate") {
+                        this.map[newInvasions[i][0]][newInvasions[i][1]].invade();
+                        this.invasions.push(newInvasions[i]);
+                    }
+                }
+                this.invasionTimer = this.invasions.length * DynamicSettings.getInstance().expandTimer;
+                this._calculateTileBonuses();
+            }
+        } else {
+            if (this.tilesExplored >= 11 && this.regionLevel === WorldData.getInstance().invasionRegion) {
+                this.invasionTimer -= 1;
+                if (this.invasionTimer <= 0) {
+                    this._startInvasion();
+                }
+            }
         }
 
         if (this.autoUpgrade === true) {
@@ -1464,19 +1539,8 @@ export class Region {
     }
 
     updateWeek() {
-        if (this.townData.areDungeonsComplete() === true) {
-            var regionList = WorldData.getInstance().regionList;
-            for (var i = this.regionLevel + 1; i < regionList.length; i++) {
-                if (regionList[i].townData.areDungeonsComplete() === false) {
-                    regionList[i].townData.villagerPower += this.villagerStatGain[0] * 0.2;
-                    regionList[i].townData.villagerHealth += this.villagerStatGain[1] * 0.2;
-                    break;
-                }
-            }
-        } else {
-            this.townData.villagerPower += this.villagerStatGain[0];
-            this.townData.villagerHealth += this.villagerStatGain[1];
-        }
+        WorldData.getInstance().addVillagerStats(this.villagerStatGain[0], this.villagerStatGain[1]);
+        WorldData.getInstance().addSoldiers(this.garrisonRefreshRate);
         if (this.blueprint !== -1 && this.width === 11 && this.height === 13) {
             var bp = PlayerData.getInstance().blueprints[this.blueprint];
             for (var y = 0; y < bp.map.length; y++) {

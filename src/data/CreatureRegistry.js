@@ -712,31 +712,31 @@ creatureDefs['cultist'] = {
 dungeonDefs['goblin'] = {
     name: "Goblin Horde",
     powerScale: 0.9,
-    healthScale: 1,
+    healthScale: 0.9,
     icon: { sprite: "enemyicons", tile: 12 }
 };
 dungeonDefs['wolf'] = {
     name: "Wolf Pack",
-    powerScale: 1.2,
+    powerScale: 1.1,
     healthScale: 0.8,
     icon: { sprite: "enemyicons", tile: 2 }
 };
 dungeonDefs['lizard'] = {
     name: "Lizard Hunting Party",
-    powerScale: 1.2,
-    healthScale: 1.1,
+    powerScale: 1.15,
+    healthScale: 1.05,
     icon: { sprite: "enemyicons", tile: 13 }
 };
 dungeonDefs['guardian'] = {
     name: "Crypt Guardians",
-    powerScale: 1.1,
-    healthScale: 1.4,
+    powerScale: 1.0,
+    healthScale: 1.3,
     icon: { sprite: "enemyicons", tile: 9 }
 };
 dungeonDefs['slime'] = {
     name: "Gelatinous Cube",
-    powerScale: 0.925,
-    healthScale: 1.5,
+    powerScale: 0.9,
+    healthScale: 1.4,
     icon: { sprite: "enemyicons", tile: 0 }
 };
 dungeonDefs['drake'] = {
@@ -747,14 +747,14 @@ dungeonDefs['drake'] = {
 };
 dungeonDefs['shadow'] = {
     name: "Nameless Shadow",
-    powerScale: 1.3,
+    powerScale: 1.25,
     healthScale: 0.9,
     icon: { sprite: "enemyicons", tile: 9 }
 };
 dungeonDefs['void'] = {
     name: "Crystaline Void",
     powerScale: 0.95,
-    healthScale: 1.5,
+    healthScale: 1.4,
     icon: { sprite: "enemyicons", tile: 9 }
 };
 // used only for player

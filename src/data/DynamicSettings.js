@@ -25,19 +25,20 @@ export class DynamicSettings {
             this.productionBuildingCost = 0;
             this.spendFriendship = false;
             this.friendshipToProduction = false;
-            this.invasionTimer = Statics.MIN_SIGHTING_SECONDS;
+            this.invasionTimer = Statics.DAYS_BETWEEN_INVASIONS;
+            this.expandTimer = Statics.DAYS_BETWEEN_EXPANSION;
             this.invasionLevelBonus = 0;
-            this.invasionsIncreaseDifficulty = false;
             this.minResourceTier = 0 + StarData.getInstance().perks.worldsmith.level;
 
             // game settings
             this.openCombatOnExplore = true;
             this.autoExploreWeakestFirst = true;
             this.autoExploreRegions = true;
-            this.autoTownUpgrade = false;
+            this.autoTownUpgradeDefault = false;
             this.autoGearUpgrade = false;
             this.autoExplore = false;
-            this.autoInvade = false;
+            this.autoInvade = -1;
+            this.autoExploreOptions = Statics.AUTOEXPLORE_WEAKEST;
 
             //programmatic settings
             this.saveEnabled = true;
@@ -53,6 +54,13 @@ export class DynamicSettings {
             return new DynamicSettings();
         }
         return DynamicSettings.instance;
+    }
+
+    toggleAutoInvade() {
+        this.autoInvade += 1;
+        if (this.autoInvade > 3) {
+            this.autoInvade = -1;
+        }
     }
 
     reset() {
@@ -75,9 +83,9 @@ export class DynamicSettings {
         this.productionBuildingCost = 0;
         this.spendFriendship = false;
         this.friendshipToProduction = false;
-        this.invasionTimer = Statics.MIN_SIGHTING_SECONDS;
+        this.invasionTimer = Statics.DAYS_BETWEEN_INVASIONS;
+        this.expandTimer = Statics.DAYS_BETWEEN_EXPANSION;
         this.invasionLevelBonus = 0;
-        this.invasionsIncreaseDifficulty = false;
         this.minResourceTier = 0 + StarData.getInstance().perks.worldsmith.level;
 
         this.saveEnabled = true;
@@ -103,9 +111,9 @@ export class DynamicSettings {
                 break;
             case "Invasion":
                 this.minGateRegion = 0 + challenge.completions;
-                this.invasionTimer = 30 - 4 * challenge.completions;
+                this.invasionTimer = 5 - 1 * challenge.completions;
+                this.expandTimer = 2 - 0.2 * challenge.completions;
                 this.invasionLevelBonus = 5 + 5 * challenge.completions;
-                this.invasionsIncreaseDifficulty = true;
                 break;
             case "Lazy Townsfolk":
                 this.minGateRegion = 2 + challenge.completions;
@@ -167,17 +175,17 @@ export class DynamicSettings {
             pbc: this.productionBuildingCost,
             sf: this.spendFriendship,
             ftp: this.friendshipToProduction,
-            it: this.invasionTimer,
+            it2: this.invasionTimer,
+            et: this.expandTimer,
             ilb: this.invasionLevelBonus,
-            iid: this.invasionsIncreaseDifficulty,
             sce: this.openCombatOnExplore,
             saeo: this.autoExploreOptions,
             mnrt: this.minResourceTier,
             aer: this.autoExploreRegions,
-            atu: this.autoTownUpgrade,
+            atu: this.autoTownUpgradeDefault,
             agu: this.autoGearUpgrade,
             ae: this.autoExplore,
-            ai: this.autoInvade
+            ai2: this.autoInvade
         }
 
         return saveObj;
@@ -200,7 +208,8 @@ export class DynamicSettings {
         this.productionMulti = saveObj.pm !== undefined ? saveObj.pm : 1;
         this.spendFriendship = saveObj.sf !== undefined ? saveObj.sf : false;
         this.friendshipToProduction = saveObj.ftp !== undefined ? saveObj.ftp : false;
-        this.invasionTimer = saveObj.it !== undefined ? saveObj.it : Statics.MIN_SIGHTING_SECONDS;
+        this.invasionTimer = saveObj.it2 !== undefined ? saveObj.it2 : Statics.DAYS_BETWEEN_INVASIONS;
+        this.expandTimer = saveObj.et !== undefined ? saveObj.et : Statics.DAYS_BETWEEN_EXPANSION;
         this.invasionLevelBonus = saveObj.ilb !== undefined ? saveObj.ilb : 0;
         this.invasionsIncreaseDifficulty = saveObj.iid !== undefined ? saveObj.iid : false;
         this.openCombatOnExplore = saveObj.sce !== undefined ? saveObj.sce : true;
@@ -209,9 +218,9 @@ export class DynamicSettings {
         this.productionBuildingCost = saveObj.pbc !== undefined ? saveObj.pbc : 0;
         this.autoExploreRegions = saveObj.aer !== undefined ? saveObj.aer : true;
         this.econMulti = saveObj.em !== undefined ? saveObj.em : 1;
-        this.autoTownUpgrade = saveObj.atu !== undefined ? saveObj.atu : false;
+        this.autoTownUpgradeDefault = saveObj.atu !== undefined ? saveObj.atu : false;
         this.autoGearUpgrade = saveObj.agu !== undefined ? saveObj.agu : false;
         this.autoExplore = saveObj.ae !== undefined ? saveObj.ae : false;
-        this.autoInvade = saveObj.ai !== undefined ? saveObj.ai : false;
+        this.autoInvade = saveObj.ai2 !== undefined ? saveObj.ai2 : false;
     }
 }
