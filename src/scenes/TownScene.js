@@ -14,6 +14,7 @@ import { ProgressionStore } from "../data/ProgressionStore";
 import { DungeonManager } from "../data/DungeonManager";
 import { DungeonBlockDisplay } from "../ui/DungeonBlockDisplay";
 import { CreatureRegistry } from "../data/CreatureRegistry";
+import { HighlightElementGroup } from "../ui/HighlightElementGroup";
 
 export class TownScene extends SceneUIBase {
     constructor(position, name) {
@@ -39,9 +40,8 @@ export class TownScene extends SceneUIBase {
     }
 
     _startDungeon(dungeon) {
-        var region = WorldData.getInstance().getRegion(dungeon.regionLevel);
-        var villagerBlock = CreatureRegistry.GetDungeonCreatureByName('villager', region.townData.getVillagerPower(),
-            region.townData.getVillagerHealth(), region.townData.getArmySize());
+        var villagerBlock = CreatureRegistry.GetDungeonCreatureByName('villager', WorldData.getInstance().getVillagerPower(),
+            WorldData.getInstance().getVillagerHealth(), WorldData.getInstance().getArmySize());
         this.dungeonManager.exploreDungeon(dungeon, villagerBlock);
         this._setupActiveDungeonRooms(dungeon);
         this._refreshTechs();
@@ -54,8 +54,7 @@ export class TownScene extends SceneUIBase {
 
     _onPlayerDeath() {
         this.dungeonManager.endDungeon();
-        var region = WorldData.getInstance().getRegion(this.dungeonManager.activeDungeon.regionLevel);
-        region.townData.killPopulation(this.dungeonManager.villagerBlock.armySize);
+        WorldData.getInstance().killSoldiers();
         this._updateStatus();
         this._refreshTechs();
     }
@@ -98,8 +97,7 @@ export class TownScene extends SceneUIBase {
         dungeon.completedRooms += 1;
         if (dungeon.completedRooms === dungeon.maxRooms) {
             this.dungeonManager.endDungeon();
-            WorldData.getInstance().getRegion(dungeon.regionLevel).townData.killPopulation(this.dungeonManager.villagerBlock.armySize -
-                this.dungeonManager.villagerBlock.ArmySize());
+            WorldData.getInstance().armySize = this.dungeonManager.villagerBlock.ArmySize();
         } else if (dungeon.completedRooms % 5 === 0) {
             var shade = dungeon.level * 250 * MoonlightData.getInstance().getShadowBonus();
             var motes = dungeon.tier * 10 * (1 + MoonlightData.getInstance().moonperks.heartofdarkness.level);
@@ -140,7 +138,7 @@ export class TownScene extends SceneUIBase {
         this.townNameLabel = this.add.bitmapText(this.relativeX(10), this.relativeY(100), "courier20", "Town");
         this.regionNameLabel = this.add.bitmapText(this.relativeX(10), this.relativeY(120), "courier16", "Region ");
         this.statsLabel = this.add.bitmapText(this.relativeX(15), this.relativeY(140), "courier16", "");
-        this.nightLabourBtn = new TextButton(this, this.relativeX(15), this.relativeY(140), 220, 20, "Turn On Night Labour")
+        this.nightLabourBtn = new TextButton(this, this.relativeX(15), this.relativeY(140), 220, 20, "Night Labour: OFF")
             .onClickHandler(() => { this._toggleNightLabour(); });
         this.nightLabourBtn.setVisible(false);
         this.townUpgradeBtn = new TextButton(this, this.relativeX(15), this.relativeY(140), 220, 20, "Auto Upgrade: OFF")
@@ -154,6 +152,12 @@ export class TownScene extends SceneUIBase {
         this.dungeonsBtn = new TextButton(this, this.relativeX(500), this.relativeY(10), 120, 20, "Dungeons")
             .onClickHandler(() => { this._selectTab(2); });
         this.dungeonsBtn.setVisible(WorldData.getInstance().getCurrentRegion().townData.dungeons.length > 0);
+        this.tabGroup = new HighlightElementGroup(Phaser.Display.Color.GetColor(255, 255, 0), Phaser.Display.Color.GetColor(0, 0, 0),
+            Phaser.Display.Color.GetColor(0, 0, 0), Phaser.Display.Color.GetColor(255, 255, 255));
+        this.tabGroup.addElement(this.buildingBtn);
+        this.tabGroup.addElement(this.upgradesBtn);
+        this.tabGroup.addElement(this.dungeonsBtn);
+        this.tabGroup._updateHighlights(0);
 
         this.regionSelectElements = [];
 
@@ -163,9 +167,11 @@ export class TownScene extends SceneUIBase {
         this.dungeonIcons.push(new TooltipImage(this, this.relativeX(15), this.relativeY(50), 16, 16,
             { sprite: "icons", tile: 24 }, "Power. How much damage each villager can deal."));
         this.dungeonIcons.push(new TooltipImage(this, this.relativeX(15), this.relativeY(70), 16, 16,
-            { sprite: "icons", tile: 26 }, "Health. How much damage each villager can take before dying"));
+            { sprite: "icons", tile: 26 }, "Health. How much damage each villager can take before dying."));
         this.dungeonIcons.push(new TooltipImage(this, this.relativeX(15), this.relativeY(90), 16, 16,
-            { sprite: "icons", tile: 60 }, "Army Size. How many villagers you can spare in a dungeon, equal to 10% of your current population."));
+            { sprite: "icons", tile: 60 }, "Army Size. Each town gives 5 to your army size, increased by garrisons."));
+        this.dungeonIcons.push(new TooltipImage(this, this.relativeX(15), this.relativeY(110), 16, 16,
+            { sprite: "icons", tile: 38 }, "Tax Malus. Each soldier in your army added by garrisons increases your global tax malus. All tax income is reduced by this number."));
         this.dungeonLabels = [];
         for (var i = 0; i < this.dungeonIcons.length; i++) {
             this.dungeonIcons[i].setVisible(false);
@@ -175,11 +181,9 @@ export class TownScene extends SceneUIBase {
         this.dungeonBlockDisplays.push(new DungeonBlockDisplay(this, this.relativeX(580), this.relativeY(430), true));
         this.activeDungeonRooms = [];
         this.dungeonsCompleteLabel = this.add.bitmapText(this.relativeX(550), this.relativeY(430), "courier20",
-            "With the Dungeons defeated, your brave villagers travel\n" +
-            "the lands teaching others to fight. Your Dojo's now \n" +
-            "give 20% of their production to the next region that\n" +
-            "hasn't conquered their Dungeons.", 20, 1).setOrigin(0.5, 0);
-        this.dungeonsCompleteLabel.setVisible(false);
+            "This land is now safe from the threat of the Dungeons.\n" +
+            "Who knows who would have found that loot if you didn't send\n" +
+            "wave after wave of villagers after it?", 20, 1).setOrigin(0.5, 0);
 
         this._updateStatus();
         this._refreshTechs();
@@ -231,16 +235,17 @@ export class TownScene extends SceneUIBase {
         var region = WorldData.instance.getCurrentRegion();
         region.townData.toggleNightLabour();
         if (region.townData.nightLabourActive === true) {
-            this.nightLabourBtn.setText("Turn Off Night Labour");
+            this.nightLabourBtn.setText("Night Labour: ON");
         } else {
-            this.nightLabourBtn.setText("Turn On Night Labour");
+            this.nightLabourBtn.setText("Night Labour: OFF");
         }
         this._updateStatus();
     }
 
     _toggleAutoUpgrade() {
-        DynamicSettings.getInstance().autoTownUpgrade = DynamicSettings.getInstance().autoTownUpgrade === true ? false : true;
-        if (DynamicSettings.getInstance().autoTownUpgrade === true) {
+        var region = WorldData.instance.getCurrentRegion();
+        region.townData.autoTownUpgrade = region.townData.autoTownUpgrade === true ? false : true;
+        if (region.townData.autoTownUpgrade === true) {
             this.townUpgradeBtn.setText("Auto Upgrade: ON");
         } else {
             this.townUpgradeBtn.setText("Auto Upgrade: OFF");
@@ -257,29 +262,38 @@ export class TownScene extends SceneUIBase {
         var region = WorldData.getInstance().getCurrentRegion();
         var player = new PlayerData();
         var prodBonus = region.townData.getProductionMulti();
-        var govBonus = (1 + player.getTalentLevel("governance") * 0.04);
 
         for (var i = 0; i < this.regionSelectElements.length; i++) {
             this.regionSelectElements[i].destroy();
         }
         if (WorldData.getInstance().regionList.length > 1) {
             this.regionSelectElements = [this.add.bitmapText(this.relativeX(10), this.relativeY(10), "courier20", "Town:")];
+            this.regionTabGroup = new HighlightElementGroup(Phaser.Display.Color.GetColor(255, 255, 0), Phaser.Display.Color.GetColor(0, 0, 0),
+                Phaser.Display.Color.GetColor(0, 0, 0), Phaser.Display.Color.GetColor(255, 255, 255));
             for (var i = 0; i < WorldData.getInstance().regionList.length; i++) {
                 var x = this.relativeX(10 + (i % 8) * 27);
                 var y = this.relativeY(30 + Math.floor(i / 8) * 20);
-                this.regionSelectElements.push(this._setupRegionButton(i, x, y));
+                var btn = this._setupRegionButton(i, x, y);
+                this.regionSelectElements.push(btn);
+                this.regionTabGroup.addElement(btn);
             }
+            this.regionTabGroup._updateHighlights(WorldData.getInstance().currentRegion);
         }
 
+        var nightLabourCost = 3.5 * region.townData.currentPopulation * MoonlightData.getInstance().moonperks.nightlabour.level *
+            (region.townData.nightLabourActive === true ? 1 : 0);
 
-        var txt = "Population: " + Math.round(region.townData.currentPopulation) + "/" + Math.floor(region.townData.getMaxPopulation()) + "\n" +
-            "Tax Income: " + Math.round(region.townData.getTownIncome()) + "g/week\n" +
+        var txt = "Population: " + Common.numberString(Math.round(region.townData.currentPopulation)) +
+            "/" + Common.numberString(Math.floor(region.townData.getMaxPopulation())) + "\n" +
+            "Tax Income: " + Common.numberString(Math.round(region.townData.getTownIncome() - nightLabourCost)) + "g/week\n" +
             "T" + region.townData.tier + " Crafting Cost: " + (Math.round(player.getCraftingCosts(region.townData.tier - 1) * 10000) / 100) + "%\n" +
-            "Economy: " + Math.round(region.townData.getEconomyMulti() * 100 * govBonus) + "%\n" +
-            "Production: " + Math.round(prodBonus * 100) + "%\n" +
-            "Bounty Gold: " + Math.round(region.townData.bountyMulti * 100) + "%\n" +
-            "Friendship: " + Math.floor(region.townData.friendship) + "/" + region.townData.friendshipToNext + "\n" +
-            "Friendship\nLevel: " + region.townData.friendshipLevel + " (+" + Math.round((region.townData.getFriendshipBonus() - 1) * 100) + "% Shade)\n" +
+            "Economy: " + Common.numberString(Math.round(region.townData.getEconomyMulti() * 100)) + "%\n" +
+            "Production: " + Common.numberString(Math.round(prodBonus * 100)) + "%\n" +
+            "Bounty Gold: " + Common.numberString(Math.round(region.townData.bountyMulti * 100)) + "%\n" +
+            "Friendship: " + Common.numberString(Math.floor(region.townData.friendship)) +
+            "/" + Common.numberString(region.townData.friendshipToNext) + "\n" +
+            "Friendship\nLevel: " + region.townData.friendshipLevel + " (+" +
+            Common.numberString(Math.round((region.townData.getFriendshipBonus() - 1) * 100)) + "% Shade)\n" +
             "Daily Production:\n";
 
         var resources = region._getResourcesPerDay();
@@ -289,6 +303,11 @@ export class TownScene extends SceneUIBase {
             } else {
                 txt += " " + Statics.RESOURCE_NAMES[i] + ": " + (Math.floor(resources[i] * 100) / 100) + "\n";
             }
+        }
+        if (MoonlightData.getInstance().moonperks.shadow3.level > 0) {
+            var shadow = region.townData.currentPopulation * 0.75 * MoonlightData.getInstance().moonperks.shadow3.level *
+                MoonlightData.getInstance().getShadowBonus() * region.townData.getProductionMulti();
+            txt += "Shade: " + Common.numberString(Math.round(shadow)) + "\n";
         }
         if (region.alchemyDrain > 0) {
             txt += "  Alchemy Drain: " + region.alchemyDrain + "\n" +
@@ -308,15 +327,24 @@ export class TownScene extends SceneUIBase {
             this.dungeonLabels = [];
             this.dungeonIcons[0].setPosition(this.relativeX(10), this.relativeY(h));
             this.dungeonLabels.push(this.add.bitmapText(this.relativeX(30), this.relativeY(h), "courier16",
-                Common.numberString(region.townData.getVillagerPower())));
+                Common.numberString(WorldData.getInstance().getVillagerPower())));
             h += 20;
             this.dungeonIcons[1].setPosition(this.relativeX(10), this.relativeY(h));
             this.dungeonLabels.push(this.add.bitmapText(this.relativeX(30), this.relativeY(h), "courier16",
-                Common.numberString(region.townData.getVillagerHealth())));
+                Common.numberString(WorldData.getInstance().getVillagerHealth())));
             h += 20;
             this.dungeonIcons[2].setPosition(this.relativeX(10), this.relativeY(h));
             this.dungeonLabels.push(this.add.bitmapText(this.relativeX(30), this.relativeY(h), "courier16",
-                Common.numberString(region.townData.getArmySize())));
+                Common.numberString(WorldData.getInstance().getArmySize()) + "/" +
+                Common.numberString(WorldData.getInstance().getArmySizeMax())));
+            h += 20;
+            var tax = 1 - WorldData.getInstance().getArmyTaxMulti();
+            this.dungeonIcons[3].setPosition(this.relativeX(10), this.relativeY(h));
+            this.dungeonLabels.push(this.add.bitmapText(this.relativeX(30), this.relativeY(h), "courier16",
+                (Math.round(tax * 1000) / 10) + "%"));
+            if (tax > 0) {
+                this.dungeonLabels[this.dungeonLabels.length - 1].setTint(Phaser.Display.Color.GetColor(255, 40, 40));
+            }
             h += 30;
         }
 
@@ -325,9 +353,9 @@ export class TownScene extends SceneUIBase {
             h += 30;
             this.nightLabourBtn.setVisible(true);
             if (region.townData.nightLabourActive === true) {
-                this.nightLabourBtn.setText("Turn Off Night Labour");
+                this.nightLabourBtn.setText("Night Labour: ON");
             } else {
-                this.nightLabourBtn.setText("Turn On Night Labour");
+                this.nightLabourBtn.setText("Night Labour: OFF");
             }
         }
 
@@ -335,7 +363,7 @@ export class TownScene extends SceneUIBase {
             this.townUpgradeBtn.setPosition(this.relativeX(15), this.relativeY(h));
             h += 30;
             this.townUpgradeBtn.setVisible(true);
-            if (DynamicSettings.getInstance().autoTownUpgrade === true) {
+            if (region.townData.autoTownUpgrade === true) {
                 this.townUpgradeBtn.setText("Auto Upgrade: ON");
             } else {
                 this.townUpgradeBtn.setText("Auto Upgrade: OFF");

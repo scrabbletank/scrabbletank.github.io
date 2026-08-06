@@ -122,7 +122,7 @@ export class GearRuneWindow {
 
     _slotRune(idx) {
         if (this.selectedRune !== -1) {
-            if (PlayerData.getInstance().isEquipedItem(this.gear)) {
+            if (PlayerData.getInstance().isEquippedItem(this.gear)) {
                 PlayerData.getInstance().unequip(this.gear.slotType);
                 this.gear.addRune(PlayerData.getInstance().runes[this.selectedRune], idx);
                 PlayerData.getInstance().equip(this.gear);

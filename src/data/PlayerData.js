@@ -260,7 +260,13 @@ export class PlayerData {
             agilityScaling: 0,
             charismaTalent: 0,
             chromaTalent: 0,
-            defToShield: 0
+            defToShield: 0,
+            goldFlat: 0,
+            goldMulti: 0,
+            resourceMulti: 0,
+            shadeMulti: 0,
+            gearScaling: 0,
+            baseTalents: 0
         }
 
         this.dungeonBonus = {
@@ -643,33 +649,40 @@ export class PlayerData {
         switch (name) {
             case "str":
             case "wizstr":
+                return this.talents[name].level + this.runeBonuses.strTalents + this.runeBonuses.baseTalents;
             case "cleave":
             case "stun":
                 return this.talents[name].level + this.runeBonuses.strTalents;
             case "dex":
             case "wizdex":
+                return this.talents[name].level + this.runeBonuses.dexTalents + this.runeBonuses.baseTalents;
             case "hit":
             case "followthrough":
                 return this.talents[name].level + this.runeBonuses.dexTalents;
             case "agi":
             case "wizagi":
+                return this.talents[name].level + this.runeBonuses.agiTalents + this.runeBonuses.baseTalents;
             case "evasion":
             case "dodge":
                 return this.talents[name].level + this.runeBonuses.agiTalents;
             case "end":
             case "wizend":
+                return this.talents[name].level + this.runeBonuses.endTalents + this.runeBonuses.baseTalents;
             case "resilient":
             case "magicresist":
                 return this.talents[name].level + this.runeBonuses.endTalents;
             case "rec":
+                return this.talents[name].level + this.runeBonuses.recTalents + this.runeBonuses.baseTalents;
             case "quickrecovery":
             case "secondwind":
                 return this.talents[name].level + this.runeBonuses.recTalents;
             case "def":
+                return this.talents[name].level + this.runeBonuses.defTalents + this.runeBonuses.baseTalents;
             case "block":
             case "parry":
                 return this.talents[name].level + this.runeBonuses.defTalents;
             case "acc":
+                return this.talents[name].level + this.runeBonuses.accTalents + this.runeBonuses.baseTalents;
             case "crit":
             case "serration":
                 return this.talents[name].level + this.runeBonuses.accTalents;
@@ -750,10 +763,12 @@ export class PlayerData {
         this._onResourcesChanged(list, 0, tier);
     }
     spendResource(list, tier) {
+        var spentList = [0, 0, 0, 0, 0, 0];
         for (var i = 0; i < list.length; i++) {
             this.resources[tier][i] = Math.max(0, this.resources[tier][i] - list[i]);
+            spentList[i] -= list[i];
         }
-        this._onResourcesChanged([0, 0, 0, 0, 0, 0], 0, tier);
+        this._onResourcesChanged(spentList, 0, tier);
     }
     addGold(amount) {
         var worldData = new WorldData();
@@ -800,7 +815,7 @@ export class PlayerData {
         this._onStatChanged();
     }
 
-    isEquipedItem(gear) {
+    isEquippedItem(gear) {
         switch (gear.slotType) {
             case Statics.GEAR_WEAPON:
                 return this.weapon !== undefined && gear.name === this.weapon.name;

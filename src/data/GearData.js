@@ -75,7 +75,7 @@ export class GearData {
             return;
         }
         player.spendResource(cost[0], cost[1]);
-        if (player.isEquipedItem(gear)) {
+        if (player.isEquippedItem(gear)) {
             player.unequip(gear.slotType);
             gear.bringToLevel(gear.level + 1);
             player.equip(gear);
@@ -91,7 +91,7 @@ export class GearData {
 
     fuseGear(gear, motes) {
         var player = PlayerData.getInstance();
-        if (player.isEquipedItem(gear)) {
+        if (player.isEquippedItem(gear)) {
             player.unequip(gear.slotType);
             gear.fuseMotes(motes);
             player.equip(gear);

@@ -12,6 +12,7 @@ import { RuneUpgradeWindow } from "../ui/RuneUpgradeWindow";
 import { WorldData } from "../data/WorldData";
 import { Common } from "../utils/Common";
 import { DynamicSettings } from "../data/DynamicSettings";
+import { HighlightElementGroup } from "../ui/HighlightElementGroup";
 
 const BUY_FLAT = [1, 10, 100, 1000];
 const BUY_PERCENT = [0.1, 0.25, 0.5, 1];
@@ -41,8 +42,8 @@ export class GearScene extends SceneUIBase {
         this.runeBtn.onClickHandler(() => { this._onRuneUpgradeHandler(); });
         this.runeBtn.setVisible(ProgressionStore.getInstance().unlocks.runes);
         var tx = 290;
-        this.equipedBtn = new TextButton(this, this.relativeX(tx), this.relativeY(10), 30, 20, "E");
-        this.equipedBtn.onClickHandler(() => { this._changeFilter(-2); });
+        this.equippedBtn = new TextButton(this, this.relativeX(tx), this.relativeY(10), 30, 20, "E");
+        this.equippedBtn.onClickHandler(() => { this._changeFilter(-2); });
         tx += 30;
         this.allBtn = new TextButton(this, this.relativeX(tx), this.relativeY(10), 50, 20, "All");
         this.allBtn.onClickHandler(() => { this._changeFilter(-1); });
@@ -73,6 +74,20 @@ export class GearScene extends SceneUIBase {
         tx += 30;
         this.tier8Btn = new TextButton(this, this.relativeX(tx), this.relativeY(10), 30, 20, "T8");
         this.tier8Btn.onClickHandler(() => { this._changeFilter(8); });
+        this.tabGroup = new HighlightElementGroup(Phaser.Display.Color.GetColor(255, 255, 0), Phaser.Display.Color.GetColor(0, 0, 0),
+            Phaser.Display.Color.GetColor(0, 0, 0), Phaser.Display.Color.GetColor(255, 255, 255));
+        this.tabGroup.addElement(this.equippedBtn);
+        this.tabGroup.addElement(this.allBtn);
+        this.tabGroup.addElement(this.tier0Btn);
+        this.tabGroup.addElement(this.tier1Btn);
+        this.tabGroup.addElement(this.tier2Btn);
+        this.tabGroup.addElement(this.tier3Btn);
+        this.tabGroup.addElement(this.tier4Btn);
+        this.tabGroup.addElement(this.tier5Btn);
+        this.tabGroup.addElement(this.tier6Btn);
+        this.tabGroup.addElement(this.tier7Btn);
+        this.tabGroup.addElement(this.tier8Btn);
+        this.tabGroup._updateHighlights(1);
 
         this.prevPageBtn = new TextButton(this, this.relativeX(850), this.relativeY(10), 20, 20, "<")
             .onClickHandler(() => { this._prevPage(); });
@@ -166,7 +181,7 @@ export class GearScene extends SceneUIBase {
         this.gearList = [];
         this.page = 0;
         for (var i = 0; i < gearData.gear.length; i++) {
-            if (filter === -2 && PlayerData.getInstance().isEquipedItem(gearData.gear[i])) {
+            if (filter === -2 && PlayerData.getInstance().isEquippedItem(gearData.gear[i])) {
                 this.gearList.push(gearData.gear[i]);
             }
             else if ((filter === -1 || filter === gearData.gear[i].tier) && gearData.gear[i].tier <= gearData.tiersAvailable) {

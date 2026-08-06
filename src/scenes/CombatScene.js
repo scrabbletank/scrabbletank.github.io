@@ -12,6 +12,7 @@ import { PlayerData } from "../data/PlayerData";
 import { MoonlightData } from "../data/MoonlightData";
 import { Statics } from "../data/Statics";
 import { DynamicSettings } from "../data/DynamicSettings";
+import { GearData } from "../data/GearData";
 
 //width 800x600
 
@@ -20,8 +21,6 @@ export class CombatScene extends SceneUIBase {
         super(position, name);
 
         this.player = PlayerData.getInstance();
-        this.onRewardHandlers = [];
-        this.onExploreHandlers = [];
         this.regionTier = 0;
         this.restartAfterRegen = false;
 
@@ -34,10 +33,9 @@ export class CombatScene extends SceneUIBase {
             .registerEvent("onAnimationChanged", (i, anim) => { this._setupAnim(i, anim); })
             .registerEvent("onCreatureHealthChanged", (x, i) => { this._monsterHealthCallback(x, i); })
             .registerEvent("onCreatureAttackChanged", (x, i) => { this._monsterAttackCooldownCallback(x, i); })
-            .registerEvent("onReward", (x, y) => { this._rewardCallback(x, y); })
-            .registerEvent("onPlayerDefeat", () => { this._playerDefeatCallback(); })
-            .registerEvent("onExplore", (x, y) => { this._exploreCallback(x, y); })
+            .registerEvent("onExplore", (x) => { this._exploreCallback(x); })
             .registerEvent("onCombatStart", (x) => { this._onCombatCallback(x); })
+            .registerEvent("onCombatEnd", (x) => { this._onCombatEndCallback(x); })
             .registerEvent('onInvasionEnd', () => { this._onInvasionEndCallback(); });
     }
 
@@ -82,38 +80,45 @@ export class CombatScene extends SceneUIBase {
             Math.floor(attackCooldown / this.combatManager.monsters[idx].attackSpeed * 100) + "%");
     }
 
-    _rewardCallback(rewards) {
+    _onCombatEndCallback(rewards) {
         this._hideEnemyDisplays();
         this.restButton.setVisible(true);
-        this.restButton.setText("Rest");
+        if (rewards === undefined) {
+            this.restartAfterRegen = true;
+            this.progression.registerDeath(1);
+            this.restButton.setText("Explore");
+        } else {
+            this.restButton.setText("Rest");
+            if (this.progression.unlocks.craftingUI === true) {
+                GearData.getInstance().tiersAvailable = Math.min(DynamicSettings.getInstance().maxGearTier,
+                    Math.max(GearData.getInstance().tiersAvailable, rewards.regionLevel + 1));
+                this.scene.get("GearScene")._updateTierButtons();
+            }
+            this.player.addShade(rewards.shade);
+            this.player.addResource(rewards.resource, rewards.tier);
+            this.player.addMote(rewards.motes);
+            this.progression.registerMonsterKill();
+            this.progression.registerShadeGain(rewards.shade);
+            this.progression.registerResourceGain(rewards.resource);
+            if (this.progression.unlocks.townTab === true) {
+                this.player.addGold(rewards.gold);
+                WorldData.getInstance().getRegion(rewards.regionLevel).townData.addFriendship(rewards.friendship);
+                this.scene.get("TownScene")._updateStatus();
+            }
 
-        if (DynamicSettings.getInstance().autoExploreOptions === Statics.AUTOEXPLORE_HOLD &&
-            DynamicSettings.getInstance().autoInvade === true && this.combatManager.activeTile.isInvaded === false) {
-            this.scene.get("RegionScene").triggerAutoExplore(this.combatManager.activeTile,
-                this.combatManager.activeTile.parent.regionLevel);
+            var tile = this.combatManager.activeTile;
+
+            if (tile.isInvaded === true) {
+                tile.invasionFights += 1;
+                if (tile.invasionFights >= 2 + tile.parent.invasionStrength) {
+                    tile.parent.clearInvadedTile(tile.x, tile.y);
+                }
+            }
         }
-
-        for (var i = 0; i < this.onRewardHandlers.length; i++) {
-            this.onRewardHandlers[i](rewards);
-        }
-    }
-
-    _playerDefeatCallback() {
-        this.restartAfterRegen = true;
-        this._hideEnemyDisplays();
-        this.progression.registerDeath(1);
-        this.restButton.setVisible(true);
-        this.restButton.setText("Explore");
     }
 
     _updatePlayerBlock() {
         this.playerDisplay.initWithCreature(this.player.statBlock);
-    }
-
-    _onExplore(tile) {
-        for (var i = 0; i < this.onExploreHandlers.length; i++) {
-            this.onExploreHandlers[i](tile, this.regionTier);
-        }
     }
     _hideEnemyDisplays() {
         for (var i = 0; i < this.monsterDisplays.length; i++) {
@@ -163,15 +168,7 @@ export class CombatScene extends SceneUIBase {
         }
     }
 
-    registerEvent(event, callback) {
-        if (event === "onReward") {
-            this.onRewardHandlers.push(callback);
-        } else if (event === "onExplore") {
-            this.onExploreHandlers.push(callback);
-        }
-    }
-
-    initFight(tile, fromAutoExplore) {
+    initFight(tile) {
         const letters = ['A', 'B', 'C', 'D', 'E', 'F', 'G', 'H', 'I', 'J', 'K', 'L', 'M', 'N', 'O', 'P', 'Q'];
         const tileName = letters[tile.y] + "" + (tile.x + 1) + " - " + tile.name;
         if (tile.amountExplored >= tile.explorationNeeded) {
@@ -182,9 +179,10 @@ export class CombatScene extends SceneUIBase {
                 tileName + ": " + Math.floor(tile.amountExplored / tile.explorationNeeded * 100) + "%");
         }
         this.invasionCounter.setVisible(tile.isInvaded);
-        this.invasionCounter.setText("Invaders: " + (tile.invasionFights * 3));
+        var invaders = 3 * (2 + tile.parent.invasionStrength - tile.invasionFights);
+        this.invasionCounter.setText("Invaders: " + invaders);
         this.combatManager.setTile(tile);
-        this.combatManager.initFight(fromAutoExplore);
+        this.combatManager.initFight();
         this.regionTier = tile.parent.regionLevel;
     }
 
@@ -251,18 +249,19 @@ export class CombatScene extends SceneUIBase {
         }
     }
 
-    _exploreCallback(tile, exploreFinished) {
+    _exploreCallback(tile) {
         const letters = ['A', 'B', 'C', 'D', 'E', 'F', 'G', 'H', 'I', 'J', 'K', 'L', 'M', 'N', 'O', 'P', 'Q'];
         const tileName = letters[tile.y] + "" + (tile.x + 1) + " - " + tile.name;
-        if (tile.amountExplored >= tile.explorationNeeded) {
+        if (tile.explored) {
             this.explorationBar.setFillPercent(tile.amountExplored / tile.explorationNeeded,
                 tileName + ": Explored");
         } else {
             this.explorationBar.setFillPercent(tile.amountExplored / tile.explorationNeeded,
                 tileName + ": " + Math.floor(tile.amountExplored / tile.explorationNeeded * 100) + "%");
         }
-        if (exploreFinished === true) {
-            this._onExplore(tile);
+
+        if (tile.explored === true && tile.isInvaded === false) {
+            this.scene.get("RegionScene").triggerAutoExplore(tile, tile.parent.regionLevel);
         }
     }
 
@@ -277,7 +276,9 @@ export class CombatScene extends SceneUIBase {
             }
         }
         this.invasionCounter.setVisible(this.combatManager.activeTile.isInvaded);
-        this.invasionCounter.setText("Invaders: " + (this.combatManager.activeTile.invasionFights * 3));
+        var invaders = 3 * (2 + this.combatManager.activeTile.parent.invasionStrength -
+            this.combatManager.activeTile.invasionFights);
+        this.invasionCounter.setText("Invaders: " + invaders);
         this.restButton.setVisible(false);
         this.playerDisplay.initWithCreature(this.player.statBlock);
     }
@@ -296,7 +297,7 @@ export class CombatScene extends SceneUIBase {
         for (var i = 0; i < WorldData.getInstance().time.fskip; i++) {
             this._updateAnimations(fDelta);
             this.combatManager.update(fDelta);
-    
+
             if (this.restartAfterRegen === true && this.combatManager.combatActive === false &&
                 this.player.statBlock.currentHealth >= this.player.statBlock.MaxHealth() &&
                 DynamicSettings.getInstance().autoExplore === true) {

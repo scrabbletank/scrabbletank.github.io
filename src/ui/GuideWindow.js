@@ -57,12 +57,20 @@ export class GuideWindow {
             new TextButton(scene, x + 5, by, 120, 20, "Buildings").onClickHandler(() => { this._setGuide(9); }) :
             new TextButton(scene, x + 5, by, 120, 20, "???");
         by += 22;
+        this.blueprintsBtn = MoonlightData.getInstance().challenges.buildings.completions > 0 ?
+            new TextButton(scene, x + 5, by, 120, 20, "Blueprints").onClickHandler(() => { this._setGuide(18); }) :
+            new TextButton(scene, x + 5, by, 120, 20, "???");
+        by += 22;
         this.moteBtn = ProgressionStore.getInstance().unlocks.motes === true ?
             new TextButton(scene, x + 5, by, 120, 20, "Motes").onClickHandler(() => { this._setGuide(10); }) :
             new TextButton(scene, x + 5, by, 120, 20, "???");
         by += 22;
         this.runeBtn = ProgressionStore.getInstance().unlocks.runes === true ?
             new TextButton(scene, x + 5, by, 120, 20, "Runes").onClickHandler(() => { this._setGuide(11); }) :
+            new TextButton(scene, x + 5, by, 120, 20, "???");
+        by += 22;
+        this.rune2Btn = ProgressionStore.getInstance().unlocks.runes === true ?
+            new TextButton(scene, x + 5, by, 120, 20, "Rune Map").onClickHandler(() => { this._setGuide(17); }) :
             new TextButton(scene, x + 5, by, 120, 20, "???");
         by += 22;
         this.automationBtn = ProgressionStore.getInstance().persistentUnlocks.autoExplore === true ?
@@ -86,7 +94,7 @@ export class GuideWindow {
             new TextButton(scene, x + 5, by, 120, 20, "???");
         this.btns = [this.hotkeyBtn, this.gearBtn, this.exploreBtn, this.combatBtn, this.townBtn, this.talentsBtn, this.worldBtn, this.infuseBtn,
         this.resourceBtn, this.craftingBtn, this.buildingsBtn, this.moteBtn, this.runeBtn, this.challengeBtn, this.automationBtn,
-        this.dungeonBtn, this.starshardBtn, this.ritualBtn];
+        this.dungeonBtn, this.starshardBtn, this.ritualBtn, this.blueprintsBtn, this.rune2Btn];
         this.guideTexts = [];
         this.closeButton = new TextButton(scene, x + 630, y + 620, 110, 20, "Back");
     }
@@ -110,6 +118,8 @@ export class GuideWindow {
                     "* 'W' to build a warehouse\n" +
                     "* 'A' to build a alchemy lab\n" +
                     "* 'J' to build a dojo\n" +
+                    "* 'C' to build a watch tower\n" +
+                    "* 'G' to build a garrison\n" +
                     "* 'D' to destroy a building\n" +
                     "* 'P' to build a production building matching the tile (eg: Mountains build mines)\n" +
                     "* '1' - '6' to build a specific production building (Wood -> Leather - > Metal -> Fiber - > Stone -> Crystal)\n" +
@@ -137,13 +147,15 @@ export class GuideWindow {
                 this.guideTexts.push(this.scene.add.bitmapText(this.x + 150, this.y + 70, "courier16", Common.processText(helptxt, 72)));
                 this.guideTexts.push(this.scene.add.bitmapText(this.x + 150, this.y + 250, "courier20", "Invasions"));
                 var helptxt = "After exploring a few tiles the monsters are going to want to take back the land. Every so often the " +
-                    "region tab will light up, meaning the monsters are invading a tile. Tiles being invaded flash purple, and if " +
-                    "you leave it long enough multiple tiles can be invaded at the same time. Once the invasion counter reachs 100% " +
-                    "the monsters will destroy a random invaded tile, removing the building, killing villagers, and covering it in mist forcing you " +
-                    "to explore it again. More useful tips:\n\n" +
-                    "* The longer a tile is flashing the faster it builds up the invasion counter.\n" +
-                    "* Remove invasions by fighting off the invaders. Killing all invaders reduces the invasion counter by 10%.\n" +
-                    "* While invasions show up randomly, each flashing tile doubles the time before the next one shows up."
+                    "monsters will start an invasion. Invaded tiles flash purple and disables any building present. The invasion will " +
+                    "occasionally spread to nearby tiles, disabling those buildings as well. Every day the invasion builds in strength " +
+                    "based on the number of tiles invaded. Once the Invasion Strength bar fills its level increases, increasing the level " +
+                    "of invasion monsters and increasing the number of fights needed to clear a tile. Building Watch Towers prevents " +
+                    "invasions from spreading, but doesn't prevent invasions from spawning. After clearing all invaded tiles Invasion " +
+                    "Strength is reset to 0 and the invasion ends.\n\n" +
+                    "* Invaders drop Motes of Darkness, a rare resource needed to enhance gear.\n" +
+                    "* Remove invasions by fighting off the invaders. Killing all invaders reduces the Invasion Strength bar.\n" +
+                    "* Invasions spread slower the larger the invasion."
                 this.guideTexts.push(this.scene.add.bitmapText(this.x + 150, this.y + 280, "courier16", Common.processText(helptxt, 72)));
                 break;
             case 2:
@@ -287,7 +299,7 @@ export class GuideWindow {
                 py += 80;
                 if (ProgressionStore.getInstance().persistentUnlocks.autoGear === true) {
                     this.guideTexts.push(this.scene.add.bitmapText(this.x + 150, this.y + py, "courier20", "Auto Upgrade Gear"));
-                    helptxt = "At the end of every week this will try to upgrade your equiped gear one level.";
+                    helptxt = "At the end of every week this will try to upgrade your equipped gear one level.";
                     this.guideTexts.push(this.scene.add.bitmapText(this.x + 150, this.y + py + 25, "courier16", Common.processText(helptxt, 72)));
                     py += 60;
                 }
@@ -315,13 +327,16 @@ export class GuideWindow {
                 break;
             case 14:
                 this.guideTexts.push(this.scene.add.bitmapText(this.x + 150, this.y + 45, "courier20", "Dungeons"));
-                var helptxt = "Don't know what to do with your villagers when your pop capped? Throw them into these meat grinders " +
+                var helptxt = "Don't know what to do with your villagers? Throw them into these meat grinders " +
                     "full of loot! You can find 3 dungeons in each region by exploring tiles, each giving different loot and rewards. " +
-                    "Dungeons are completed by sending Villager Hordes in to fight the swarms of monsters inside. Towns have Villager " +
-                    "Power and Health, which is how much damage they deal and how much damage they can take before dying, and Army Size, " +
-                    "which is 10% of your current population. When fighting in dungeons your Horde's power and health is multiplied " +
-                    "by your army size. When your horde or the monsters take damage their army size decreases and they get weaker. Villagers " +
-                    "that die in the dungeons reduce your towns population, so be careful! or not, up to you.\n\n" +
+                    "Dungeons can only be completed by sending in your armies to combat the hordes of monsters that infest them. Don't have an army? " +
+                    "You do now! Each town, regardless of population, can supply up to 5 villagers to fight for you. You can build Garrisons to " +
+                    "increase this limit, however each soldier above the cap reduces your tax income across all regions. Building Dojos increases your " +
+                    "soldiers strength at the end of each week.\n\n" +
+                    "Your army has 3 stats: Power, Health, and Army Size. Power is how much damage each soldier deals with attacks, Health is how much " +
+                    "damage they can take, and Army Size is how large of an army you can sustain. If your army takes more damage than a soldiers health, " +
+                    "that soldier dies and your army size decreases, lowering your total damage. If all your soldiers die you will need to wait for " +
+                    "towns to replenish your soldiers. Each Town and Garrison trains 1 soldier each week.\n\n" +
                     "Each dungeon room, except for the elites and bosses, take 5 fights to clear and give rewards once complete. The small " +
                     "rooms give a bunch of a random resource, mini bosses give shade and motes, and bosses give you 3 options to choose from. " +
                     "Each boss has a different pool of rewards:\n\n" +
@@ -359,6 +374,25 @@ export class GuideWindow {
                     "Rituals are multiplicative with each other. For example if you have two rituals that give a 25% bonus to moonlight, " +
                     "it's calculated as 1.25 x 1.25 = 1.56x increase to moonlight. All rituals (except Empowerment) last for the next " +
                     "rebirth. They work in challenges too!";
+                this.guideTexts.push(this.scene.add.bitmapText(this.x + 150, this.y + 70, "courier16", Common.processText(helptxt, 72)));
+                break;
+            case 17:
+                this.guideTexts.push(this.scene.add.bitmapText(this.x + 150, this.y + 45, "courier20", "Rune Transmutation Map"));
+                var helptxt = "What does it all mean, basil?";
+                this.guideTexts.push(this.scene.add.bitmapText(this.x + 150, this.y + 70, "courier16", Common.processText(helptxt, 72)));
+                this.guideTexts.push(this.scene.add.image(this.x + 430, this.y + 335, "runemap", 0).setOrigin(0.5))
+                break;
+            case 18:
+                this.guideTexts.push(this.scene.add.bitmapText(this.x + 150, this.y + 45, "courier20", "Blueprints"));
+                var helptxt = "You can finally tell the villagers to build their own damn buildings. There's a new 'Blueprint' " +
+                    "button in the region tab. From there you can choose any of your blueprint slots and create a blueprint for your " +
+                    "villagers to follow. You can place any building anywhere in the blueprint, but the villagers will only build it " +
+                    "if it's valid. They won't build unconnected roads, for example. Oh yeah, the mine icon is used as a placeholder " +
+                    "for all production buildings. When you place a mine the villagers will try to build the highest yield production " +
+                    "building on that tile.\n\n" +
+                    "On the region screen you can choose a blueprint to follow. At the end of each week the villagers will try to " +
+                    "build as many buildings as they can, although they're pretty stupid so that usually ends up being only a handful " +
+                    "of buildings. They'll get there eventually.";
                 this.guideTexts.push(this.scene.add.bitmapText(this.x + 150, this.y + 70, "courier16", Common.processText(helptxt, 72)));
                 break;
         }

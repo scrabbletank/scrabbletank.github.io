@@ -18,6 +18,7 @@ const BLD_TO_TEXTURE = {
     market: { sprite: "bldicons", tile: 8, w: 32, h: 32 },
     alchemy: { sprite: "bldicons", tile: 51, w: 32, h: 32 },
     dojo: { sprite: "bldicons", tile: 54, w: 32, h: 32 },
+    garrison: { sprite: "bldicons", tile: 53, w: 32, h: 32 },
     warehouse: { sprite: "bldicons", tile: 52, w: 32, h: 32 },
     none: { sprite: "icons", tile: 23, w: 32, h: 32 }
 }
@@ -160,6 +161,7 @@ export class BlueprintView {
         var bld = ["road", "prod", "house", "watchtower", "tavern", "market", "alchemy"];
         if (ProgressionStore.getInstance().persistentUnlocks.dungeons === true) {
             bld.push("dojo");
+            bld.push("garrison");
         }
         if (MoonlightData.getInstance().challenges.buildings.completions > 0) {
             bld.push("warehouse");

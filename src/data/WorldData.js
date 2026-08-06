@@ -22,11 +22,18 @@ export class WorldData {
             this.time.registerEvent("onDayEnd", () => { this.updateDay(); });
             this.time.registerEvent("onWeekEnd", () => { this.updateWeek(); });
             this.onRegionChangedHandlers = [];
+            this.onWorldChangedHandlers = [];
             this.invasionPower = 1;
             this.invasionReward = 1;
             this.invasionRegion = 0;
             this.invasionPowerHandlers = [];
             this.starshardsEarned = 0;
+            this.villagerPower = PlayerData.getInstance().baseVillagerPower;
+            this.powerMulti = 1;
+            this.villagerHealth = PlayerData.getInstance().baseVillagerHealth;
+            this.healthMulti = 1;
+            this.garrisonBonus = 0;
+            this.armySize = 0;
 
             WorldData.instance = this;
         }
@@ -64,10 +71,18 @@ export class WorldData {
     onRegionChanged(callback) {
         this.onRegionChangedHandlers.push(callback);
     }
+    onWorldChanged(callback) {
+        this.onWorldChangedHandlers.push(callback);
+    }
 
     _onRegionChangedHandler() {
         for (var i = 0; i < this.onRegionChangedHandlers.length; i++) {
             this.onRegionChangedHandlers[i]();
+        }
+    }
+    _onWorldChangedHandler() {
+        for (var i = 0; i < this.onWorldChangedHandlers.length; i++) {
+            this.onWorldChangedHandlers[i]();
         }
     }
 
@@ -97,6 +112,40 @@ export class WorldData {
     }
     getInvasionReward() {
         return 1 + (this.invasionReward - 1) * (1 + StarData.getInstance().perks.invasionrewards.level * 0.5);
+    }
+    getVillagerPower() {
+        return Math.round(this.villagerPower * this.powerMulti *
+            (1 + MoonlightData.getInstance().moonperks.devotion.level * 0.1) *
+            (1 + RitualData.getInstance().activePerks.culttowns * 0.25) /
+            (1 + RitualData.getInstance().activePerks.apathy * 0.5));
+    }
+    getVillagerHealth() {
+        return Math.round(this.villagerHealth * this.healthMulti *
+            (1 + MoonlightData.getInstance().moonperks.devotion.level * 0.1) *
+            (1 + RitualData.getInstance().activePerks.culttowns * 0.25) /
+            (1 + RitualData.getInstance().activePerks.apathy * 0.5));
+    }
+    getArmyTaxMulti() {
+        if (this.regionList.length * 5 > this.armySize) {
+            return 1;
+        }
+        return Math.pow(Statics.ARMY_TAX_POWER, this.armySize - this.regionList.length * 5);
+    }
+    getArmySizeMax() {
+        return this.regionList.length * 5 + this.garrisonBonus;
+    }
+    getArmySize() {
+        return this.armySize;
+    }
+    addVillagerStats(pow, hp) {
+        this.villagerPower += pow;
+        this.villagerHealth += hp;
+    }
+    killSoldiers() {
+        this.armySize = 0;
+    }
+    addSoldiers(val) {
+        this.armySize = Math.min(this.getArmySizeMax(), this.armySize + val);
     }
 
     _randomizeTraits(count) {
@@ -144,6 +193,7 @@ export class WorldData {
             });
             choices.splice(choice, 1);
         }
+        this._onWorldChangedHandler();
     }
 
     _onInvasionPowerChanged() {
@@ -265,6 +315,9 @@ export class WorldData {
         for (var i = 0; i < this.regionList.length; i++) {
             this.regionList[i].updateDay();
         }
+        if (this.armySize > this.getArmySizeMax()) {
+            this.armySize = this.getArmySizeMax();
+        }
     }
 
     updateWeek() {
@@ -287,7 +340,13 @@ export class WorldData {
             ip: this.invasionPower,
             ir: this.invasionReward,
             ire: this.invasionRegion,
-            sse: this.starshardsEarned
+            sse: this.starshardsEarned,
+            vp: this.villagerPower,
+            pm: this.powerMulti,
+            vh: this.villagerHealth,
+            hm: this.healthMulti,
+            gb: this.garrisonBonus,
+            as: this.armySize
         }
 
         return saveObj;
@@ -307,7 +366,12 @@ export class WorldData {
         this.invasionPower = saveObj.ip === undefined ? Math.pow(Statics.INVASION_POWER_MULTI, this.regionList.length - 1) : saveObj.ip;
         this.invasionReward = saveObj.ir === undefined ? Math.pow(Statics.INVASION_REWARD_MULTI, this.regionList.length - 1) : saveObj.ir;
         this.invasionRegion = saveObj.ire === undefined ? this.regionList.length - 1 : saveObj.ire;
-        this.starshardsEarned = saveObj.sse === undefined ? 0 : saveObj.sse;
+        this.villagerPower = saveObj.vp === undefined ? 1 : saveObj.vp;
+        this.powerMulti = saveObj.pm === undefined ? 1 : saveObj.pm;
+        this.villagerHealth = saveObj.vh === undefined ? 10 : saveObj.vh;
+        this.healthMulti = saveObj.hm === undefined ? 1 : saveObj.hm;
+        this.garrisonBonus = saveObj.gb === undefined ? 0 : saveObj.gb;
+        this.armySize = saveObj.as === undefined ? 0 : saveObj.as;
         if (this.nextRegions.length > 0 && this.nextRegions.length !== 3) {
             this.generateRegionChoices();
         }

@@ -15,6 +15,7 @@ export class WorldView {
         this.elements = [];
 
         WorldData.getInstance().registerEvent('invasionPowerChanged', () => { this._onInvasionPowerChanged(); });
+        WorldData.getInstance().onWorldChanged(() => { this._refreshRegions(); });
         PlayerData.getInstance().registerEvent("onTalentChanged", () => { this._onInvasionPowerChanged(); });
     }
 
